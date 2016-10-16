@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html id="ao3t-options">
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="lib/jquery-3.1.1.min.js"></script>
+    <!-- @if BROWSER='Edge' -->
+    <script type="text/javascript" src="ao3_t_edge.js"></script>
+    <!-- @endif -->
+    <script type="text/javascript" src="ao3_t_options.js"></script>
+    <style>
+        form {
+            border: 1px solid black;
+            margin: 5px;
+        }
+        
+        span.errors {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="login">
+        <h3>User login</h3>
+        <p><label>Username:</label> <input type="text" name="username" /> <span class="errors"></span></p>
+        <p><label>Password:</label> <input type="password" name="password" /> <span class="errors"></span></p>
+        <p><input type="submit" /> <span class="errors"></span></p>
+    </form>
+    <form id="create">
+        <p><label>Username:</label> <input type="text" name="username" /> <span class="errors"></span></p>
+        <p><label>Password:</label> <input type="password" name="password" /> <span class="errors"></span></p>
+        <p><label>Password (verify):</label> <input type="password" name="verify" /> <span class="errors"></span></p>
+        <p><label>Email Address (optional):</label> <input type="email" name="email" /> <span class="errors"></span></p>
+        <p><input type="submit" /> </p>
+    </form>
+    <form id="errors">
+        <input type="checkbox" value="Show background error messages" />
+        <ul class="errors"></ul>
+    </form>
+</body>
+
+</html>

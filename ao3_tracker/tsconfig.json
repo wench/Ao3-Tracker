@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "allowJs": false,
+        "target": "es5",
+        "module": "none",
+        "noImplicitAny": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "strictNullChecks": true,
+        "sourceMap": true,
+        "outDir": "./build",
+        "typeRoots": ["./typings"]
+    },
+    "includes": ["./*.ts"]
+}
