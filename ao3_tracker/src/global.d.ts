@@ -2,6 +2,7 @@
 
 declare function escape(str : string) : string;
 declare function unescape(str : string) : string;
+interface DirectoryEntry { }
 
 type FormErrorList = { [key:string]:string; };
 
@@ -51,6 +52,11 @@ interface UserLoginMessage {
 }
 type UserLoginMessageResponse = FormErrorList;
 
-type MessageType = GetWorkChaptersMessage|SetWorkChaptersMessage|UserCreateMessage|UserLoginMessage;
+interface DoSyncMessage {
+    type: 'DO_SYNC';
+}
+type SetDoSyncMessageResponse = boolean;
+
+type MessageType = GetWorkChaptersMessage|SetWorkChaptersMessage|UserCreateMessage|UserLoginMessage|DoSyncMessage;
 
 
