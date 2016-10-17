@@ -59,13 +59,14 @@ enum SyncState {
     Ready = 1,
     Delayed = 2
 }
-var serversync: SyncState = SyncState.Syncing;
-var last_sync = 0;
-var no_sync_until = 0;
-var url_base = "https://wenchy.net/ao3track/api";
-//var url_base = "http://localhost:56991/api";
+let serversync: SyncState = SyncState.Syncing;
+let last_sync = 0;
+let no_sync_until = 0;
+let timeout_id = 0;
+let url_base = "https://wenchy.net/ao3track/api";
+//let url_base = "http://localhost:56991/api";
 
-var authorization = {
+let authorization = {
     username: "",
     credential: "",
     toBase64: function () {
@@ -73,7 +74,7 @@ var authorization = {
     }
 };
 /*
-var messages = {
+let messages = {
     list: [],
     add: function(msg) {}
 };
@@ -83,10 +84,19 @@ var messages = {
 let onSyncFromServer: Array<() => void> = [];
 
 function do_onSyncFromServer() {
-    for (var i = 0; i < onSyncFromServer.length; i++) {
+    for (let i = 0; i < onSyncFromServer.length; i++) {
         onSyncFromServer[i]();
     }
     onSyncFromServer = [];
+}
+
+function delayedsync(timeout: number): void {
+    if (serversync === SyncState.Delayed && timeout_id !== 0) {
+        clearTimeout(timeout_id);
+    }
+    no_sync_until = Date.now() + timeout;
+    serversync = SyncState.Delayed;
+    timeout_id = setTimeout(() => { timeout_id = 0; dosync(); }, timeout);
 }
 
 // dosync will fetch all values form the server newer than our last sync time, flush out everything in unsynced to the server, run all onSyncFromServer functions 
@@ -102,13 +112,12 @@ function dosync() {
     if (now < no_sync_until) {
         if (serversync !== SyncState.Delayed) {
             serversync = SyncState.Delayed;
-            setTimeout(dosync, no_sync_until - now);
+            timeout_id = setTimeout(() => { timeout_id = 0; dosync(); }, no_sync_until - now);
         }
         return;
     }
-    else {
-        no_sync_until = now + 5 * 60 * 1000;
-    }
+
+    no_sync_until = now + 5 * 60 * 1000;
 
     serversync = SyncState.Syncing; // set to syncing!
 
@@ -152,9 +161,9 @@ function dosync() {
 
             // Write back to server if needed
             if (Object.keys(unsynced).length > 0) {
-                var current = unsynced;
+                let current = unsynced;
                 unsynced = {};
-                var time = last_sync;
+                let time = last_sync;
                 for (let key in current) {
                     if (current[key].timestamp > time) {
                         time = current[key].timestamp;
@@ -258,7 +267,7 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
     switch (request.type) {
         case 'GET':
             {
-                var getResponse = function () {
+                let getResponse = function () {
                     let r: { [key: number]: IWorkChapter; } = {};
                     for (let id of request.data) {
                         if (id in storage) {
@@ -279,7 +288,8 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
             {
                 let time = Date.now();
                 let newitems: { [key: number]: IWorkChapterTS; } = {};
-                for (var id in request.data) {
+                let do_delayed = false;
+                for (let id in request.data) {
                     if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
                         newitems[id] = storage[id] = new WorkChapter(
                             request.data[id].number,
@@ -287,12 +297,22 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
                             request.data[id].location,
                             time
                         );
+                        if (request.data[id].location === null || request.data[id].location === 0) {
+                            do_delayed = true;
+                        }
                         unsynced[id] = storage[id];
                     }
                 }
                 if (Object.keys(newitems).length) {
                     chrome.storage.local.set(newitems);
-                    if (serversync === SyncState.Ready) { dosync(); }
+                    if (serversync === SyncState.Ready || serversync === SyncState.Delayed) {
+                        if (do_delayed) {
+                            delayedsync(20 * 1000);
+                        }
+                        else {
+                            dosync();
+                        }
+                    }
                 }
             }
             return false;
