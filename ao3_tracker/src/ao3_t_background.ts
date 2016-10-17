@@ -81,47 +81,67 @@ let messages = {
 */
 
 
-let onSyncFromServer: Array<() => void> = [];
+let onSyncFromServer: Array<(success: boolean) => void> = [];
 
-function do_onSyncFromServer() {
+function do_onSyncFromServer(success: boolean) {
     for (let i = 0; i < onSyncFromServer.length; i++) {
-        onSyncFromServer[i]();
+        onSyncFromServer[i](success);
     }
     onSyncFromServer = [];
 }
 
 function delayedsync(timeout: number): void {
-    if (serversync === SyncState.Delayed && timeout_id !== 0) {
+    console.log("delayedsync: timeout = %i", timeout);
+    let now = Date.now();
+    if (timeout_id !== 0) {
+        console.log("delayedsync: existing pending sync in %i", no_sync_until - now);
+        // If the pending sync is going to happen before timeout would elapse, just let it happen
+        if (no_sync_until <= now + timeout) { return; }
         clearTimeout(timeout_id);
+        timeout_id = 0;
     }
-    no_sync_until = Date.now() + timeout;
+    console.log("delayedsync: setting up timeout callback");
+    no_sync_until = now + timeout;
     serversync = SyncState.Delayed;
-    timeout_id = setTimeout(() => { timeout_id = 0; dosync(); }, timeout);
+    timeout_id = setTimeout(() => { 
+        console.log("delayedsync: timeout elapsed");
+        timeout_id = 0; 
+        dosync(true); 
+    }, timeout);
 }
 
 // dosync will fetch all values form the server newer than our last sync time, flush out everything in unsynced to the server, run all onSyncFromServer functions 
-function dosync() {
+function dosync(force?: boolean) {
+    console.log("dosync: starting sync. force = %s", force);
+
     if (authorization.username === null || authorization.username === "" || authorization.credential === null || authorization.credential === "") {
         serversync = SyncState.Disabled;
-        do_onSyncFromServer();
+        do_onSyncFromServer(false);
+        console.warn("dosync: FAILED. No credentials");
         return;
     }
 
     // Enforce 5 minutes gap between server sync. Don't want to hammer the server while scrolling through a fic  
     let now = Date.now();
-    if (now < no_sync_until) {
+    if (!force && now < no_sync_until && onSyncFromServer.length === 0) {
+        console.log("dosync: have to wait %i for timeout", no_sync_until - now);
         if (serversync !== SyncState.Delayed) {
             serversync = SyncState.Delayed;
-            timeout_id = setTimeout(() => { timeout_id = 0; dosync(); }, no_sync_until - now);
+            timeout_id = setTimeout(() => { timeout_id = 0; dosync(true); }, no_sync_until - now);
         }
         return;
     }
 
+    if (timeout_id !== 0) {
+        clearTimeout(timeout_id);
+        timeout_id = 0;
+    }
     no_sync_until = now + 5 * 60 * 1000;
 
     serversync = SyncState.Syncing; // set to syncing!
 
     // Attempt to sync from server!
+    console.log("dosync: sending GET request");
     jQuery.ajax({
         url: url_base + "/Values?after=" + last_sync,
         crossDomain: true,
@@ -129,10 +149,13 @@ function dosync() {
         headers: { 'Authorization': "Ao3track " + authorization.toBase64() },
         dataType: "json",
         error: function (jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+            console.error("dosync: FAILED %s", textStatus);
             serversync = SyncState.Disabled;
-            do_onSyncFromServer();
+            do_onSyncFromServer(false);
         },
         success: function (items: { [key: number]: IWorkChapterTS; }, textStatus: string, jqXHR: JQueryXHR) {
+            console.log("dosync: SUCCESS. %i items", Object.keys(items).length);
+
             let newitems: { [key: number]: IWorkChapterTS; } = {};
             for (let key in items) {
                 // Highest time value of incoming item is our new sync time
@@ -157,9 +180,10 @@ function dosync() {
             // Write back the new values to local storage!
             chrome.storage.local.set(newitems);
 
-            do_onSyncFromServer();
+            do_onSyncFromServer(true);
 
             // Write back to server if needed
+            console.log("dosync: %i unsynced items to POST back", Object.keys(unsynced).length);
             if (Object.keys(unsynced).length > 0) {
                 let current = unsynced;
                 unsynced = {};
@@ -170,6 +194,7 @@ function dosync() {
                     }
                 }
                 serversync = SyncState.Syncing;
+                console.log("dosync: sending POST request");
                 jQuery.ajax({
                     url: url_base + "/Values",
                     crossDomain: true,
@@ -179,16 +204,18 @@ function dosync() {
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify(current),
                     error: function (jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+                        console.error("dosync: FAILED %s", textStatus);
                         serversync = SyncState.Disabled;
                         chrome.storage.local.set({ 'last_sync': 0 });
                         last_sync = 0;
-                        do_onSyncFromServer();
+                        do_onSyncFromServer(false);
                     },
                     success: function (items: { [key: number]: IWorkChapterTS; }, textStatu: string, jqXHR: JQueryXHR) {
+                        console.log("dosync: SUCCESS. %i conflicted items", Object.keys(items).length);
                         if (Object.keys(items).length > 0) {
                             chrome.storage.local.set({ 'last_sync': 0 });
                             last_sync = 0;
-                            dosync();
+                            dosync(true);
                             return;
                         }
                         if (time > last_sync) {
@@ -196,10 +223,10 @@ function dosync() {
                             chrome.storage.local.set({ 'last_sync': time });
                         }
 
-                        if (Object.keys(unsynced).length > 0) { dosync(); }
+                        if (Object.keys(unsynced).length > 0) { dosync(true); }
                         else {
                             serversync = SyncState.Ready;
-                            do_onSyncFromServer();
+                            do_onSyncFromServer(true);
                         }
                     }
                 });
@@ -291,15 +318,17 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
                 let do_delayed = false;
                 for (let id in request.data) {
                     if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
+                        // Do a delayed since if we finished a chapter, or started a new one 
+                        if (request.data[id].location === null || request.data[id].location === 0 || (id in storage && request.data[id].chapterid !== storage[id].chapterid)) {
+                            do_delayed = true;
+                        }
                         newitems[id] = storage[id] = new WorkChapter(
                             request.data[id].number,
                             request.data[id].chapterid,
                             request.data[id].location,
                             time
                         );
-                        if (request.data[id].location === null || request.data[id].location === 0) {
-                            do_delayed = true;
-                        }
+
                         unsynced[id] = storage[id];
                     }
                 }
@@ -316,6 +345,19 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
                 }
             }
             return false;
+
+        case 'DO_SYNC':
+            {
+                if (serversync === SyncState.Disabled) {
+                    sendResponse(false);
+                    return false;
+                }
+                else {
+                    onSyncFromServer.push(function () { sendResponse(true); });
+                    if (serversync !== SyncState.Syncing) { dosync(true); }
+                }
+            }
+            return true;
 
         case 'USER_CREATE':
             {
@@ -340,7 +382,7 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
                             last_sync = 0; // force a full resync
                             chrome.storage.local.set({ 'authorization': authorization, 'last_sync': 0 });
                             serversync = SyncState.Syncing;
-                            dosync();
+                            dosync(true);
                             sendResponse({});
                         } else if (typeof response === "object" && Object.keys(response).length > 0) {
                             sendResponse(response);
@@ -375,7 +417,7 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
                             last_sync = 0; // force a full resync
                             chrome.storage.local.set({ 'authorization': authorization, 'last_sync': 0 });
                             serversync = SyncState.Syncing;
-                            dosync();
+                            dosync(true);
                             sendResponse({});
                         } else if (typeof response === "object" && Object.keys(response).length > 0) {
                             sendResponse(response);
