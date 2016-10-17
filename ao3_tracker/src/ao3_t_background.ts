@@ -103,10 +103,11 @@ function delayedsync(timeout: number): void {
     console.log("delayedsync: setting up timeout callback");
     no_sync_until = now + timeout;
     serversync = SyncState.Delayed;
-    timeout_id = setTimeout(() => { 
+    timeout_id = setTimeout(() => {
         console.log("delayedsync: timeout elapsed");
-        timeout_id = 0; 
-        dosync(true); 
+        clearTimeout(timeout_id);
+        timeout_id = 0;
+        dosync(true);
     }, timeout);
 }
 
@@ -125,10 +126,7 @@ function dosync(force?: boolean) {
     let now = Date.now();
     if (!force && now < no_sync_until && onSyncFromServer.length === 0) {
         console.log("dosync: have to wait %i for timeout", no_sync_until - now);
-        if (serversync !== SyncState.Delayed) {
-            serversync = SyncState.Delayed;
-            timeout_id = setTimeout(() => { timeout_id = 0; dosync(true); }, no_sync_until - now);
-        }
+        delayedsync(no_sync_until - now);
         return;
     }
 
