@@ -1,12 +1,17 @@
+// Add swipe left support for Microsoft Edge to to to next page
 var $next = $('.chapter.next > a').first();
-if ($next.length) { $('<link rel="next"></link>').attr('href', $next.attr('href')).appendTo('head'); }
+if ($next.length > 0) { $('<link rel="next"></link>').attr('href', $next.attr('href')).appendTo('head'); }
 
+const LOC_PARA_MULTIPLIER = 1000000000;
+const LOC_PARA_BOTTOM = 500000000;
+const LOC_PARA_FRAC_MULTIPLER = 479001600;
 
 let works: number[] = [];
 let $works: JQuery;
 
 let regex_work_url = /^\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
 let work_chapter = window.location.pathname.match(regex_work_url);
+let scroll_to_content: ((workid: number, workchap: IWorkChapter) => void) | null = null;
 if (work_chapter && work_chapter.length === 3) {
     let workid = parseInt(work_chapter[1]);
     let $chapter = $('#chapters .chapter[id]');
@@ -49,7 +54,7 @@ if (work_chapter && work_chapter.length === 3) {
 
     let $feedback_actions = $('#feedback > .actions');
 
-    let updateLocation = function () {
+    let updateLocation = () => {
         let workchapter: IWorkChapter | null = null;
 
         // Find which $userstuff is at the centre of the screen
@@ -57,7 +62,7 @@ if (work_chapter && work_chapter.length === 3) {
         let centre = window.innerHeight / 2;
 
         // Feedback actions block is above the bottom of the screen? Declare the chapters read
-        var fsbcr = $feedback_actions[0].getBoundingClientRect(); 
+        var fsbcr = $feedback_actions[0].getBoundingClientRect();
         if (fsbcr.top < window.innerHeight) {
             let data: { num: number, id: number } = $chapter_text.last().data('ao3t');
             workchapter = {
@@ -93,10 +98,12 @@ if (work_chapter && work_chapter.length === 3) {
                             let p_rect = elem.getBoundingClientRect();
                             if (p_rect.top <= centre) {
                                 if (p_rect.bottom <= centre) {
-                                    loc = index * 1000000000 + 999999999;
+                                    loc = index * LOC_PARA_MULTIPLIER + LOC_PARA_BOTTOM;
                                 }
                                 else {
-                                    loc = index * 1000000000;
+                                    let frac = (centre - p_rect.top) * LOC_PARA_FRAC_MULTIPLER / p_rect.height;
+
+                                    loc = index * LOC_PARA_MULTIPLIER + Math.floor(frac);
                                 }
                             }
                             else {
@@ -126,12 +133,66 @@ if (work_chapter && work_chapter.length === 3) {
         chrome.runtime.sendMessage(setmsg);
     };
 
+    scroll_to_content = (wid: number, workchap: IWorkChapter) => {
+        if (wid !== workid) {
+            return;
+        }
+
+        $chapter_text.each(function (index, elem) {
+            let $e = $(elem);
+            let data: { num: number, id: number } = $e.data('ao3t');
+
+            if (data.id !== workchap.chapterid) {
+                return true;
+            }
+
+            let centre = window.innerHeight / 2;
+
+            // First chapter on the page
+            if (index === 0 && workchap.location === 0) {
+                console.log("Should scroll to: %i page top", workchap.number);
+                window.scrollTo(0, 0);
+                return false;
+            }
+            // Last chapter on page
+            else if (index === ($chapter_text.length - 1) && workchap.location === null) {
+                console.log("Should scroll to: %i page bottom", workchap.number);
+                $feedback_actions[0].scrollIntoView(false);
+                return false;
+            }
+
+            let paragraph: number;
+            let $children = $e.children();
+            if (workchap.location === null || (paragraph = Math.floor(workchap.location / LOC_PARA_MULTIPLIER)) >= $children.length) {
+                // Scroll to bottom of the element
+                console.log("Should scroll to: %i p end", workchap.number);
+                window.scrollTo(0, $e.position().top + $e.height() - centre);
+                return false;
+            }
+
+            let offset = workchap.location % LOC_PARA_MULTIPLIER;
+            console.log("Should scroll to: %i p %i c %i", workchap.number, paragraph, offset);
+
+            let $child = $children.eq(paragraph);
+
+            if (offset >= LOC_PARA_BOTTOM) {
+                window.scrollTo(0, $child.position().top - centre);
+                return false;
+            }
+
+            window.scrollTo(0, $child.position().top + $child.height()*offset/LOC_PARA_FRAC_MULTIPLER - centre);
+
+            return false;
+        });
+    };
+
     updateLocation();
-    setInterval(updateLocation,1000);
+    $(window).scroll(updateLocation);
 
     works.push(workid);
-    $works = $('.chapters-show .work .work.meta, .works-show .work.meta');
+    $works = $('.chapters-show .work .work.meta, .works-show .work.meta').first();
 } else {
+    // Might be a listing page with blurbs
     let regex_work = /^work_(\d+)$/;
     $works = $('.work.blurb[id]');
     $works.each(function (index, elem) {
@@ -147,7 +208,8 @@ let getmsg: GetWorkChaptersMessage = { type: "GET", data: works };
 chrome.runtime.sendMessage(getmsg, function (it: GetWorkChaptersMessageResponse) {
     let regex_chapter_count = /^(\d+)\//;
     for (let i = 0; i < $works.length && i < works.length; i++) {
-        if (works[i] in it && "number" in it[works[i]] && "chapterid" in it[works[i]]) {
+        if (works[i] in it) {
+            if (scroll_to_content) { scroll_to_content(works[i], it[works[i]]); }
             let $work = $($works[i]);
             $work.find(".stats .lastchapters").remove();
 
