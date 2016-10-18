@@ -20,7 +20,7 @@ gulp.task('scripts', function() {
     return gulp.src('src/**/*.ts')
         .pipe(sourcemaps.init())
         .pipe(ts(tsOptions))
-        .pipe(sourcemaps.write('maps', { includeContent:  false,  sourceRoot: "file:///" + __dirname + '/src' }))
+        .pipe(sourcemaps.write('maps'))
         .pipe(gulp.dest('build/chrome'))
         .pipe(gulp.dest('build/edge'));
 });
@@ -29,7 +29,7 @@ gulp.task('styles', function() {
     return gulp.src('src/**/*.less')
         .pipe(sourcemaps.init())
         .pipe(less())
-        .pipe(sourcemaps.write('maps', { includeContent:  false,  sourceRoot: "file:///" + __dirname + '/src' }))
+        .pipe(sourcemaps.write('maps'))
         .pipe(gulp.dest('build/edge'))
         .pipe(gulp.dest('build/chrome'));
 });
