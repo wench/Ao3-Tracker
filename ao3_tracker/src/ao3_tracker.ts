@@ -166,7 +166,8 @@ if (work_chapter && work_chapter.length === 3) {
             if (workchap.location === null || (paragraph = Math.floor(workchap.location / LOC_PARA_MULTIPLIER)) >= $children.length) {
                 // Scroll to bottom of the element
                 console.log("Should scroll to: %i p end", workchap.number);
-                window.scrollTo(0, $e.position().top + $e.height() - centre);
+                let rect = elem.getBoundingClientRect();                
+                window.scrollTo(0, rect.bottom + window.scrollY - centre);
                 return false;
             }
 
@@ -174,13 +175,15 @@ if (work_chapter && work_chapter.length === 3) {
             console.log("Should scroll to: %i p %i c %i", workchap.number, paragraph, offset);
 
             let $child = $children.eq(paragraph);
+            let child = $child[0];
+            let p_rect = child.getBoundingClientRect();                
 
             if (offset >= LOC_PARA_BOTTOM) {
-                window.scrollTo(0, $child.position().top - centre);
+                window.scrollTo(0, p_rect.bottom + window.scrollY - centre);
                 return false;
             }
 
-            window.scrollTo(0, $child.position().top + $child.height()*offset/LOC_PARA_FRAC_MULTIPLER - centre);
+            window.scrollTo(0, p_rect.top + p_rect.height*offset/LOC_PARA_FRAC_MULTIPLER + window.scrollY - centre);
 
             return false;
         });
