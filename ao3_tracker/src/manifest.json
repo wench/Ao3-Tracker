@@ -18,6 +18,9 @@
             //@endif
             "ao3_tracker.js"
         ],
+        "css" : [
+            "ao3t_tracker.css"
+        ],
         "matches": ["*://archiveofourown.org/*"]
     }],
     "options_page": "options.html",

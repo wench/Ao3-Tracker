@@ -11,9 +11,10 @@ let $works: JQuery;
 
 let regex_work_url = /^\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
 let work_chapter = window.location.pathname.match(regex_work_url);
-let scroll_to_content: ((workid: number, workchap: IWorkChapter) => void) | null = null;
+let scroll_to_location: ((workchap: IWorkChapter) => void) | null = null;
+let workid = 0;
 if (work_chapter && work_chapter.length === 3) {
-    let workid = parseInt(work_chapter[1]);
+    workid = parseInt(work_chapter[1]);
     let $chapter = $('#chapters .chapter[id]');
     let $chapter_text: JQuery;
 
@@ -133,10 +134,7 @@ if (work_chapter && work_chapter.length === 3) {
         chrome.runtime.sendMessage(setmsg);
     };
 
-    scroll_to_content = (wid: number, workchap: IWorkChapter) => {
-        if (wid !== workid) {
-            return;
-        }
+    scroll_to_location = (workchap: IWorkChapter) => {
 
         $chapter_text.each(function (index, elem) {
             let $e = $(elem);
@@ -207,19 +205,45 @@ if (work_chapter && work_chapter.length === 3) {
     });
 }
 
+let $actions = $('<div class=" actions" id="ao3t-actions"a></div>').appendTo("#outer");
+let $actions_ul = $('<ul></ul>').appendTo($actions);
+let $sync_now = $('<li><a href="#" name="ao3t-sync-now">Sync Now</a></li>').appendTo($actions_ul);
+let $goto_last_location = $('<li><a href="#" name="ao3t-last-loc">Jump to previous</a></li>');
+
+$sync_now.click((eventObject) => {
+    eventObject.preventDefault();
+    eventObject.stopImmediatePropagation();
+
+    let syncmsg : DoSyncMessage = { type: "DO_SYNC" };
+    chrome.runtime.sendMessage(syncmsg, function (result : boolean) {
+    });        
+});
+
+$goto_last_location.click((eventObject) => {
+    eventObject.preventDefault();
+    eventObject.stopImmediatePropagation();
+    
+    if (scroll_to_location) {
+        scroll_to_location($goto_last_location.data("ao3t-workchap"));
+    }    
+});
+
 let getmsg: GetWorkChaptersMessage = { type: "GET", data: works };
 chrome.runtime.sendMessage(getmsg, function (it: GetWorkChaptersMessageResponse) {
     let regex_chapter_count = /^(\d+)\//;
     for (let i = 0; i < $works.length && i < works.length; i++) {
         if (works[i] in it) {
-            if (scroll_to_content) { scroll_to_content(works[i], it[works[i]]); }
+            let workchap = it[works[i]];
+            if (scroll_to_location && works[i] === workid) {                
+                 $goto_last_location.data("ao3t-workchap",workchap).appendTo($actions_ul); 
+            }
             let $work = $($works[i]);
             $work.find(".stats .lastchapters").remove();
 
             let $chapters = $work.find(".stats dd.chapters");
-            let str_id = it[works[i]].chapterid.toString();
-            let str_num = it[works[i]].number.toString();
-            let chapter_path = '/works/' + works[i] + (it[works[i]].chapterid ? '/chapters/' + str_id : '');
+            let str_id = workchap.chapterid.toString();
+            let str_num = workchap.number.toString();
+            let chapter_path = '/works/' + works[i] + (workchap.chapterid ? '/chapters/' + str_id : '');
             $chapters.after('<dt class="ao3-track-last">Last:</dt>', '<dd class="ao3-track-last"><a href="' + chapter_path + '">' + str_num + '</a></dd>');
 
             let $blurb_heading = $work.find('.header h4.heading');
@@ -228,8 +252,8 @@ chrome.runtime.sendMessage(getmsg, function (it: GetWorkChaptersMessageResponse)
                 if (chapters_text === null) { continue; }
 
                 let chapter_count = parseInt(chapters_text[1]);
-                let chapters_finished = it[works[i]].number;
-                if (it[works[i]].location !== null) { chapters_finished--; }
+                let chapters_finished = workchap.number;
+                if (workchap.location !== null) { chapters_finished--; }
 
                 if (chapter_count > chapters_finished) {
                     let unread = chapter_count - chapters_finished;
