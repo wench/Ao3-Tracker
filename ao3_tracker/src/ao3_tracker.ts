@@ -188,7 +188,8 @@ if (work_chapter && work_chapter.length === 3) {
     };
 
     updateLocation();
-    $(window).scroll(updateLocation);
+    // $(window).scroll(updateLocation); 
+    setInterval(5000,updateLocation);
 
     works.push(workid);
     $works = $('.chapters-show .work .work.meta, .works-show .work.meta').first();
