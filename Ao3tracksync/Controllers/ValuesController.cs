@@ -48,11 +48,23 @@ namespace Ao3tracksync.Controllers
             public long timestamp { get; set; }
         };
 
-        // OPTIONS api/values
+        #region GET api/User/Init
+        [AllowAnonymous, HttpGet, Route("Login")]
+        public void Init()
+        {
+            using (var ctx = new Models.Ao3TrackEntities())
+            {
+
+            }
+        }
+        #endregion
+
+        #region api/values
         [AllowAnonymous, CrossSiteOptions]
         public void Options()
         {
         }
+        #endregion
 
         // GET api/values
         public IDictionary<long, WorkChapter> Get()
