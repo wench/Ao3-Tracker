@@ -16,6 +16,7 @@
             //@if BROWSER='Edge'
             "ao3_t_edge.js",
             //@endif
+            "ao3_t_browser.js",
             "ao3_tracker.js"
         ],
         "css" : [

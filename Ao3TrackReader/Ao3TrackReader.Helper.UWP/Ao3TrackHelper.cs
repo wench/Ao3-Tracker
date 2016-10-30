@@ -31,6 +31,11 @@ namespace Ao3TrackReader.Helper
 
         void EnableJumpToLastLocation(bool enable);
 
+        bool canGoBack { get; }
+        bool canGoForward { get; }
+        double leftOffset { get; set; }
+        double opacity { get; set; }
+
     }
 
     [AllowForWeb]
@@ -90,5 +95,10 @@ namespace Ao3TrackReader.Helper
                 handler.SetWorkChapters(works);
             });
         }
+
+        public bool canGoBack { get { return handler.canGoBack; } }
+        public bool canGoForward { get { return handler.canGoForward; } }
+        public double leftOffset { get { return handler.leftOffset; } set { handler.leftOffset = value; } }
+        public double opacity {  get { return handler.opacity; } set { handler.opacity = value; } }
     }
 }

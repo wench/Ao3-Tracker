@@ -26,6 +26,24 @@ namespace Ao3Track {
         chrome.runtime.sendMessage(req, callback);
     }
 
+    export function SetNextPage(uri : string) {
+        let $e =  jQuery('head link[rel=next]');
+        if ($e.length > 0) {
+            $e.attr('href', uri);
+        }
+        else {
+            jQuery('<link rel="next"></link>').attr('href', uri).appendTo('head');
+        }
+    }
+    export function SetPrevPage(uri : string) {
+        let $e =  jQuery('head link[rel=prev]');
+        if ($e.length > 0) {
+            $e.attr('href', uri);
+        }
+        else {
+            jQuery('<link rel="prev"></link>').attr('href', uri).appendTo('head');
+        }
+    }
     
     let $actions = $('<div class=" actions" id="ao3t-actions"a></div>').appendTo("#outer");
     let $actions_ul = $('<ul></ul>').appendTo($actions);

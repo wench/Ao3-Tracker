@@ -7,6 +7,8 @@ using Ao3TrackReader.Helper;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Xamarin.Forms.Platform.UWP;
+using Windows.UI.Core;
+using Windows.UI.Xaml.Media;
 
 namespace Ao3TrackReader
 {
@@ -45,6 +47,12 @@ namespace Ao3TrackReader
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper);
         }
 
+        private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
+        {
+            leftOffset = 0;
+            opacity = 1.0;
+        }
+
         private async void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
             // Inject JS script
@@ -61,7 +69,7 @@ namespace Ao3TrackReader
 
             WebView.NavigationStarting += WebView_NavigationStarting;
             WebView.DOMContentLoaded += WebView_DOMContentLoaded;
-
+            WebView.ContentLoading += WebView_ContentLoading;
 
             return WebView.ToView();
         }
@@ -72,12 +80,12 @@ namespace Ao3TrackReader
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Bottom,
-                ClosedDisplayMode = AppBarClosedDisplayMode.Minimal,
+                ClosedDisplayMode = AppBarClosedDisplayMode.Compact,
                 OverflowButtonVisibility = CommandBarOverflowButtonVisibility.Visible
-            };            
+            };
         }
 
-        private AppBarButton CreateAppBarButton(string label, IconElement icon, bool enabled, Action clicked )
+        private AppBarButton CreateAppBarButton(string label, IconElement icon, bool enabled, Action clicked)
         {
 
             var button = new AppBarButton
@@ -94,6 +102,65 @@ namespace Ao3TrackReader
         void Navigate(string uri)
         {
             WebView.Navigate(new Uri(uri));
+        }
+
+        async Task<T> DoCallbackAsync<T>(Func<T> function) where T: new()
+        {
+            T result = new T();
+            await WebView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+            {
+                result = function();
+            });
+            return result;
+        }
+
+        Task DoCallbackAsync(Action function)
+        {
+            return WebView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+            {
+                function();
+            }).AsTask();
+        }
+
+        public bool canGoBack { get { return DoCallbackAsync(() => WebView.CanGoBack).Result; } }
+
+        public bool canGoForward { get { return DoCallbackAsync(() => WebView.CanGoForward).Result; } }
+
+        public double leftOffset
+        {
+            get
+            {
+                return DoCallbackAsync(() => {
+                    TranslateTransform v = WebView.RenderTransform as TranslateTransform;
+                    return v?.X ?? 0.0;
+                }).Result;
+            }
+            set
+            {
+                DoCallbackAsync(() =>
+                {
+                    if (value == 0.0)
+                    {
+                        WebView.RenderTransform = null;
+                    }
+                    else
+                    {
+                        WebView.RenderTransform = new TranslateTransform { X = value, Y = 0.0 };
+                    }
+                });
+            }
+        }
+
+        public double opacity
+        {
+            get
+            {
+                return DoCallbackAsync(() => WebView.Opacity).Result;
+            }
+            set
+            {
+                DoCallbackAsync(() => { WebView.Opacity = value; });
+            }
         }
     }
 }

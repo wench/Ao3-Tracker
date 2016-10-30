@@ -1,9 +1,12 @@
 namespace Ao3Track {
     const $ = jQuery;
 
-    // Add swipe left support for Microsoft Edge to to to next page
-    var $next = $('.chapter.next > a').first();
-    if ($next.length > 0) { $('<link rel="next"></link>').attr('href', $next.attr('href')).appendTo('head'); }
+    // Enable swipe left to go to next page
+    let $next = $('head link[rel=next], .chapter.next > a, .pagination > .next > a');
+    if ($next.length > 0) { SetNextPage($next.attr('href')); }
+
+    let $prev = $('.head link[rel=prev], chapter.previous > a, .pagination > .previous > a');
+    if ($prev.length > 0) { SetPrevPage($next.attr('href')); }
 
     const LOC_PARA_MULTIPLIER = 1000000000;
     const LOC_PARA_BOTTOM = 500000000;

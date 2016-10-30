@@ -44,4 +44,9 @@ declare namespace Ao3TrackHelper {
     let onjumptolastlocationevent : ((pagejump : boolean)=>void) | null;
     
     function enableJumpToLastLocation(enable : boolean) : void; 
+
+    var canGoBack :boolean;
+    var canGoForward :boolean;
+    var leftOffset: number;
+    var opacity : number;
 }
