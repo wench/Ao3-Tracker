@@ -19,7 +19,7 @@ namespace Ao3tracksync.Models
         public long chapterid { get; set; }
         public long number { get; set; }
         public long timestamp { get; set; }
-        public Nullable<long> location { get; set; }
+        public long? location { get; set; }
     
         public virtual User User { get; set; }
     }
