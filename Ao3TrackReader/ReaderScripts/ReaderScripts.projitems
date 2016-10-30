@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>26067d02-2bf4-4693-8f63-0be84faa6dca</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ReaderScripts</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)build\reader\ao3_tracker.js">
+			<Link>Assets\ao3_tracker.js</Link>
+		</Content>
+    <Content Include="$(MSBuildThisFileDirectory)build\reader\ao3_t_reader.js">
+			<Link>Assets\ao3_t_reader.js</Link>
+		</Content>
+  </ItemGroup>
+</Project>
