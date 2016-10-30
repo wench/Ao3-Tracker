@@ -17,7 +17,7 @@ var tsOptions = {
 };
 
 gulp.task('scripts', function() {
-    return gulp.src('src/**/*.ts')
+    return gulp.src('src/*.ts')
         .pipe(sourcemaps.init())
         .pipe(ts(tsOptions))
         .pipe(sourcemaps.write('maps'))
@@ -25,8 +25,28 @@ gulp.task('scripts', function() {
         .pipe(gulp.dest('build/edge'));
 });
 
+var uwp_scripts = [
+    'src/global.d.ts',
+    'src/ao3_tracker.ts',
+    'src/extras/reader/uwp/ao3_t_reader.ts'
+];
+
+gulp.task('reader:scripts', function() {
+    return gulp.src(uwp_scripts)
+        .pipe(ts(tsOptions))
+        .pipe(gulp.dest('build/reader/uwp'));
+});
+
+gulp.task('reader:styles', function() {
+    return gulp.src('src/*.less')
+        .pipe(less())
+        .pipe(gulp.dest('build/reader/uwp'));
+});
+
+gulp.task('reader', ['reader:scripts', 'reader:styles']);
+
 gulp.task('styles', function() {
-    return gulp.src('src/**/*.less')
+    return gulp.src('src/*.less')
         .pipe(sourcemaps.init())
         .pipe(less())
         .pipe(sourcemaps.write('maps'))
@@ -35,18 +55,18 @@ gulp.task('styles', function() {
 });
 
 gulp.task('images', function() {
-    return gulp.src('src/**/*.png')
+    return gulp.src('src/*.png')
         .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
         .pipe(gulp.dest('build/edge'))
         .pipe(gulp.dest('build/chrome'));
 });
 
 gulp.task('pages', function() {
-    var edge = gulp.src('src/**/*.html')
+    var edge = gulp.src('src/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' } }))
         .pipe(gulp.dest('build/edge'));
 
-    var chrome = gulp.src('src/**/*.html')
+    var chrome = gulp.src('src/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Chrome' } }))
         .pipe(gulp.dest('build/chrome'));
 
@@ -70,11 +90,11 @@ gulp.task('libs', function() {
 });
 
 gulp.task('json', function() {
-    var edge = gulp.src('src/**/*.json')
+    var edge = gulp.src('src/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' }, extension: 'js' }))
         .pipe(gulp.dest('build/edge'));
 
-    var chrome = gulp.src('src/**/*.json')
+    var chrome = gulp.src('src/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Chrome' }, extension: 'js' }))
         .pipe(gulp.dest('build/chrome'));
 
@@ -92,4 +112,4 @@ gulp.task('watch', ['default'], function() {
 });
 
 
-gulp.task('default', ['scripts', 'styles', 'images', 'pages', 'json', 'extras', 'libs']);
+gulp.task('default', ['scripts', 'styles', 'images', 'pages', 'json', 'extras', 'libs', 'reader']);

@@ -19,7 +19,7 @@
             "ao3_tracker.js"
         ],
         "css" : [
-            "ao3t_tracker.css"
+            "ao3_tracker.css"
         ],
         "matches": ["*://archiveofourown.org/*"]
     }],

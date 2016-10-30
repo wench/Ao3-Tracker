@@ -1,4 +1,4 @@
-/// <reference path="../typings/index.d.ts" />
+/// <reference path="../typings/globals/jquery/index.d.ts" />
 
 declare function escape(str : string) : string;
 declare function unescape(str : string) : string;

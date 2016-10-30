@@ -1,3 +1,5 @@
+(function() {
+
 // Convert a UTF16 string to UTF8 (expect trouble if the input isn't valid utf16)
 function utf16_to_utf8(s: string): string {
     return unescape(encodeURIComponent(s));
@@ -429,3 +431,5 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
     };
     return false;
 });
+
+})();
