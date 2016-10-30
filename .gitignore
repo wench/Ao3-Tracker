@@ -355,3 +355,5 @@ __pycache__/
 
 build/
 typings/
+
+nppBackup/
