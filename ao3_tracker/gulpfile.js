@@ -31,19 +31,20 @@ var uwp_scripts = [
     'src/extras/reader/uwp/ao3_t_reader.ts'
 ];
 
-gulp.task('reader:scripts', function() {
+gulp.task('reader:uwp:scripts', function() {
     return gulp.src(uwp_scripts)
         .pipe(ts(tsOptions))
         .pipe(gulp.dest('build/reader/uwp'));
 });
 
-gulp.task('reader:styles', function() {
+gulp.task('reader:uwp:styles', function() {
     return gulp.src('src/*.less')
         .pipe(less())
         .pipe(gulp.dest('build/reader/uwp'));
 });
 
-gulp.task('reader', ['reader:scripts', 'reader:styles']);
+gulp.task('reader:uwp', ['reader:uwp:scripts', 'reader:uwp:styles']);
+gulp.task('reader', ['reader:uwp']);
 
 gulp.task('styles', function() {
     return gulp.src('src/*.less')
