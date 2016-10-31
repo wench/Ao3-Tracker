@@ -45,6 +45,7 @@ namespace Ao3TrackReader
             EnableJumpToLastLocation(false);
             helper = new Ao3TrackHelper(this);
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper);
+            Title = "Loading...";
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
@@ -55,6 +56,8 @@ namespace Ao3TrackReader
 
         private async void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
+            var t = WebView.DocumentTitle;
+            Title = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length-21) : t;
             // Inject JS script
             await WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject });
         }

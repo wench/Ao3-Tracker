@@ -8,6 +8,8 @@ using Ao3TrackReader.Helper;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.Platform.UWP;
+using SymbolIcon = Windows.UI.Xaml.Controls.SymbolIcon;
+using Symbol = Windows.UI.Xaml.Controls.Symbol;
 #endif
 
 
@@ -29,15 +31,25 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             wv.VerticalOptions = LayoutOptions.FillAndExpand;
             wv.HorizontalOptions = LayoutOptions.FillAndExpand;
-            layout.Children.Add(wv);
             Navigate("https://archiveofourown.com/");
 
 
             var commandBar = CreateCommandBar();
 #if WINDOWS_UWP
-            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new Windows.UI.Xaml.Controls.SymbolIcon(Windows.UI.Xaml.Controls.Symbol.ShowBcc), false, this.OnJumpClicked));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Bookmarks", new SymbolIcon(Symbol.Bookmarks), true, () => { }));
+            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));            
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), true, () => { if (WebView.CanGoBack) WebView.GoBack(); }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), true, () => { if (WebView.CanGoForward) WebView.GoForward(); }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom In", new SymbolIcon(Symbol.ZoomIn), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom Out", new SymbolIcon(Symbol.ZoomOut), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, () => { }));
 #else
 #endif
+            layout.Children.Add(wv);
             layout.Children.Add(commandBar);
 
             /*
