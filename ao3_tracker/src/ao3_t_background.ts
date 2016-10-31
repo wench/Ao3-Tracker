@@ -156,6 +156,12 @@ function dosync(force?: boolean) {
         success: function (items: { [key: number]: IWorkChapterTS; }, textStatus: string, jqXHR: JQueryXHR) {
             console.log("dosync: SUCCESS. %i items", Object.keys(items).length);
 
+            // Need to implement special handling for item[0]
+            // any local state from before item[0].timestamp needs to get replaced with the new state 
+            // from the server. item[0]'s precence also indicates that all items have been sent
+            // special handling for unsyned items with timestamp older than item[0].timestamp
+            // but newer than storage[0] timestamp 
+
             let newitems: { [key: number]: IWorkChapterTS; } = {};
             for (let key in items) {
                 // Highest time value of incoming item is our new sync time

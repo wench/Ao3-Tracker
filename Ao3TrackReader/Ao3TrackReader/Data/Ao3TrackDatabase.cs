@@ -6,13 +6,12 @@ using SQLite;
 
 namespace Ao3TrackReader
 {
-	public class Ao3TrackDatabase 
-	{
-		static object locker = new object ();   
+	public class Ao3TrackDatabase
+    {
+        static object locker = new object ();   
 
 		SQLiteConnection database;
-
-		string DatabasePath {
+        string DatabasePath {
 			get { 
 				var sqliteFilename = "Ao3TrackSQLite.db3";
 				#if __IOS__
@@ -41,12 +40,13 @@ namespace Ao3TrackReader
 		/// </param>
 		public Ao3TrackDatabase()
 		{
-			database = new SQLiteConnection (DatabasePath);
-			// create the tables
-			database.CreateTable<Work>();
-		}
+            database = new SQLiteConnection (DatabasePath);
+            // create the tables
+            database.CreateTable<Work>();
+            database.CreateTable<Variable>();
+        }
 
-		public IEnumerable<Work> GetItems ()
+        public IEnumerable<Work> GetItems ()
 		{
 			lock (locker) {
 				return (from i in database.Table<Work>() select i);
@@ -124,6 +124,29 @@ namespace Ao3TrackReader
 				return database.Delete<Work>(id);
 			}
 		}
-	}
-}
 
+        public string GetVariable(string name)
+        {
+            lock (locker)
+            {
+                return (from x in database.Table<Variable>() where x.name == name select x.name).FirstOrDefault();
+            }
+        }
+
+        public void SaveVariable(string name, string value)
+        {
+            lock (locker)
+            {
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    database.Update(new Variable { name = name, value = value });
+                }
+                else
+                {
+                    database.Insert(new Variable { name = name, value = value });
+                }
+            }
+        }
+    }
+}
