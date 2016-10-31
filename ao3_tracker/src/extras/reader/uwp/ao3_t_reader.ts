@@ -47,6 +47,16 @@ namespace Ao3Track {
         Ao3TrackHelper.enableJumpToLastLocation(true);
     }
 
+    // Font size up/down support 
+    let updatefontsize = () => {
+        let inner = document.getElementById("inner");
+        if (inner) {
+            inner.style.fontSize = Ao3TrackHelper.fontSize.toString() + "%";
+        } 
+    };
+    Ao3TrackHelper.onalterfontsizeevent = updatefontsize; 
+    updatefontsize();
+
     // Nonsense to allow for swiping back and foward between pages 
 
     function removeTouchEvents() {

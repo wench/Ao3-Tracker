@@ -32,7 +32,6 @@ namespace Ao3TrackReader
         })();";
 
         WebView WebView { get; set; }
-        AppBarButton jumpButton { get; set; }
 
         void EnableInjection()
         {
@@ -43,7 +42,6 @@ namespace Ao3TrackReader
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
         {
             EnableJumpToLastLocation(false);
-            helper = new Ao3TrackHelper(this);
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper);
             Title = "Loading...";
         }
@@ -73,6 +71,8 @@ namespace Ao3TrackReader
             WebView.NavigationStarting += WebView_NavigationStarting;
             WebView.DOMContentLoaded += WebView_DOMContentLoaded;
             WebView.ContentLoading += WebView_ContentLoading;
+
+            helper = new Ao3TrackHelper(this);
 
             return WebView.ToView();
         }

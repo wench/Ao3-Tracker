@@ -10,6 +10,7 @@ using Ao3TrackReader.Helper;
 using Xamarin.Forms.Platform.UWP;
 using SymbolIcon = Windows.UI.Xaml.Controls.SymbolIcon;
 using Symbol = Windows.UI.Xaml.Controls.Symbol;
+using AppBarButton = Windows.UI.Xaml.Controls.AppBarButton;
 #endif
 
 
@@ -17,12 +18,19 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : ContentPage, IEventHandler
     {
+#if WINDOWS_UWP
+        AppBarButton jumpButton { get; set; }
+        AppBarButton incFontSizeButton { get; set; }
+        AppBarButton decFontSizeButton { get; set; }
+#endif
+
         public WebViewPage()
         {
             Title = "Ao3Track Reader";
             NavigationPage.SetHasNavigationBar(this, true);
 
-            var layout = new StackLayout {
+            var layout = new StackLayout
+            {
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Spacing = 0
@@ -36,17 +44,24 @@ namespace Ao3TrackReader
 
             var commandBar = CreateCommandBar();
 #if WINDOWS_UWP
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Bookmarks", new SymbolIcon(Symbol.Bookmarks), true, () => { }));
-            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));            
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), true, () => { if (WebView.CanGoBack) WebView.GoBack(); }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), true, () => { if (WebView.CanGoForward) WebView.GoForward(); }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
+            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Bookmarks", new SymbolIcon(Symbol.Bookmarks), true, () => { }));
+            commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () => helper.FontSize += 10));
+            commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () => helper.FontSize -= 10));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom In", new SymbolIcon(Symbol.ZoomIn), true, () => { }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom Out", new SymbolIcon(Symbol.ZoomOut), true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, () => { }));
+
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Close Page", new SymbolIcon(Symbol.Clear), true, () => { }));
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", new SymbolIcon(Symbol.Font), true, () => helper.FontSize = 100));
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, SettingsButton_Clicked));
+
+            // retore font size!
+            helper.AlterFontSizeEvent += Helper_AlterFontSizeEvent;
+            helper.FontSize = 100;
 #else
 #endif
             layout.Children.Add(wv);
@@ -64,6 +79,15 @@ namespace Ao3TrackReader
             */
             Content = layout;
 
+        }
+
+        private void Helper_AlterFontSizeEvent(object sender, object e)
+        {
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                decFontSizeButton.IsEnabled = helper.FontSize > helper.FontSizeMin;
+                incFontSizeButton.IsEnabled = helper.FontSize < helper.FontSizeMax;
+            });
         }
 
         static object locker = new object();
@@ -121,5 +145,11 @@ namespace Ao3TrackReader
             });
         }
 
+        public async void SettingsButton_Clicked()
+        {
+            var settingsPage = new SettingsPage();
+
+            await Navigation.PushModalAsync(settingsPage);
+        }
     }
 }

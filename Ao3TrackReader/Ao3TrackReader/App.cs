@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ao3TrackReader.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,16 @@ namespace Ao3TrackReader
             {
                 database = database ?? new Ao3TrackDatabase();
                 return database;
+            }
+        }
+
+        static SyncedStorage storage;
+        public static SyncedStorage Storage
+        {
+            get
+            {
+                storage = storage ?? new SyncedStorage();
+                return storage;
             }
         }
 

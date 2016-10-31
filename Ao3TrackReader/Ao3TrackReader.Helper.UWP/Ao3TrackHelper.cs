@@ -48,8 +48,10 @@ namespace Ao3TrackReader.Helper
 
         public void JumpToLastLocation(bool pagejump)
         {
-            var jumpevent = JumpToLastLocationEvent;
-            jumpevent?.Invoke(this, pagejump);
+            Task<object>.Run(() =>
+            {
+                JumpToLastLocationEvent?.Invoke(this, pagejump);
+            });
         }
 
         public void EnableJumpToLastLocation(bool enable)
@@ -100,5 +102,29 @@ namespace Ao3TrackReader.Helper
         public bool canGoForward { get { return handler.canGoForward; } }
         public double leftOffset { get { return handler.leftOffset; } set { handler.leftOffset = value; } }
         public double opacity {  get { return handler.opacity; } set { handler.opacity = value; } }
+
+        public event EventHandler<object> AlterFontSizeEvent;
+        private int font_size = 100;
+        public int FontSizeMax { get { return 300; } }
+        public int FontSizeMin { get { return 10; } }
+        public int FontSize
+        {
+            get
+            {
+                return font_size;
+            }
+            set
+            {
+                font_size = value;
+                if (font_size < FontSizeMin) font_size = FontSizeMin;
+                else if (font_size > FontSizeMax) font_size = FontSizeMax;
+                Task<object>.Run(() =>
+                {
+                    AlterFontSizeEvent?.Invoke(this, null);
+                });
+            }
+        }
+
+
     }
 }

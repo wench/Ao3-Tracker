@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data\SyncedStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SettingsPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
   </ItemGroup>
   <ItemGroup>
