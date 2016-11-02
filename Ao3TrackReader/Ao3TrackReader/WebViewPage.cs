@@ -23,6 +23,8 @@ namespace Ao3TrackReader
         AppBarButton incFontSizeButton { get; set; }
         AppBarButton decFontSizeButton { get; set; }
 #endif
+        Label PrevPageIndicator;
+        Label NextPageIndicator;
 
         public WebViewPage()
         {
@@ -37,8 +39,8 @@ namespace Ao3TrackReader
             };
 
             var wv = CreateWebView();
-            wv.VerticalOptions = LayoutOptions.FillAndExpand;
-            wv.HorizontalOptions = LayoutOptions.FillAndExpand;
+            AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
             Navigate("https://archiveofourown.com/");
 
 
@@ -64,7 +66,23 @@ namespace Ao3TrackReader
             helper.FontSize = 100;
 #else
 #endif
-            layout.Children.Add(wv);
+            NextPageIndicator = new Label { Text = "Next Page", Rotation = 90, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
+            AbsoluteLayout.SetLayoutBounds(NextPageIndicator, new Rectangle(.98, .5, 100, 100));
+            AbsoluteLayout.SetLayoutFlags(NextPageIndicator, AbsoluteLayoutFlags.PositionProportional);
+
+            PrevPageIndicator = new Label { Text = "Previous Page", Rotation = 270, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
+            AbsoluteLayout.SetLayoutBounds(PrevPageIndicator, new Rectangle(.02, .5, 100, 100));
+            AbsoluteLayout.SetLayoutFlags(PrevPageIndicator, AbsoluteLayoutFlags.PositionProportional);
+
+            layout.Children.Add(new AbsoluteLayout {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Children = {
+                        wv,
+                        PrevPageIndicator,
+                        NextPageIndicator
+                    }
+            });
             layout.Children.Add(commandBar);
 
             /*
@@ -151,5 +169,29 @@ namespace Ao3TrackReader
 
             await Navigation.PushModalAsync(settingsPage);
         }
+
+        public bool showPrevPageIndicator
+        {
+            get { return PrevPageIndicator.IsVisible; }
+            set
+            {
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    PrevPageIndicator.IsVisible = value;
+                });
+            }
+        }
+        public bool showNextPageIndicator
+        {
+            get { return NextPageIndicator.IsVisible; }
+            set
+            {
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    NextPageIndicator.IsVisible = value;
+                });
+            }
+        }
+
     }
 }

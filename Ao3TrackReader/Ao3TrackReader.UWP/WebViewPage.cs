@@ -44,6 +44,9 @@ namespace Ao3TrackReader
             EnableJumpToLastLocation(false);
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper);
             Title = "Loading...";
+            showPrevPageIndicator = false;
+            showNextPageIndicator = false;
+
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)

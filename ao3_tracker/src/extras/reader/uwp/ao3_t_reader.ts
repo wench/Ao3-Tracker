@@ -61,13 +61,22 @@ namespace Ao3Track {
 
     function removeTouchEvents() {
         Ao3TrackHelper.leftOffset = 0.0;
-        Ao3TrackHelper.opacity = 1.0;
+        //Ao3TrackHelper.opacity = 1.0;
+        Ao3TrackHelper.showPrevPageIndicator = false;
+        Ao3TrackHelper.showNextPageIndicator = false;
         document.removeEventListener("touchmove", touchMoveHandler);
         document.removeEventListener("touchend", touchEndHandler);
         document.removeEventListener("touchcancel", touchCancelHandler);
     }
-    let forward: boolean;
+    let canforward = false;
+    let canbackward = false;
     let startTouchX : number = 0;
+    let startTouchY : number = 0;
+    const startLimit = window.innerWidth;
+    const endThreshold = window.innerWidth/6;
+    const maxSlide = window.innerWidth;
+    const minThreshold = endThreshold/4;
+    const yLimit = window.innerHeight/8; 
     function touchStartHandler(event: TouchEvent) {
         let touch = event.touches.item(0);
         if (event.touches.length > 1 || !touch) {
@@ -75,16 +84,19 @@ namespace Ao3Track {
             return;
         }
         startTouchX = touch.screenX / document.documentElement.msContentZoomFactor;
-        let startLimit = window.innerWidth/4;
+        startTouchY = touch.screenY / document.documentElement.msContentZoomFactor;
+        
+        canforward = false;
+        canbackward = false;
         if (Ao3TrackHelper.canGoBack && startTouchX < startLimit) {
             // going backwards....
-            forward = false;
+            canbackward = true;
         }
-        else if ((Ao3TrackHelper.canGoForward || (nextPage && nextPage !== '')) && startTouchX >= (window.innerWidth - startLimit)) {
+        if ((Ao3TrackHelper.canGoForward || (nextPage && nextPage !== '')) && startTouchX >= (window.innerWidth - startLimit)) {
             // Going forwards
-            forward = true;
+            canforward = true;
         }
-        else {
+        if (!canbackward && !canforward) {
             removeTouchEvents();
             return;
         }
@@ -93,6 +105,7 @@ namespace Ao3Track {
         document.addEventListener("touchcancel", touchCancelHandler);
     }
     let lastTouchX : number = 0;
+    let lastTouchY : number = 0;
     function touchMoveHandler(event: TouchEvent) {
         let touch = event.touches.item(0);
         if (event.touches.length > 1 || !touch) {
@@ -100,21 +113,51 @@ namespace Ao3Track {
             return;
         }
         lastTouchX = touch.screenX / document.documentElement.msContentZoomFactor;
+        lastTouchY = touch.screenY / document.documentElement.msContentZoomFactor;
+
         let offset = lastTouchX - startTouchX;
-        if (offset < -window.innerWidth / 2) {
-            offset = -window.innerWidth / 2;
+        let offsetY = Math.abs(lastTouchY - startTouchY);
+
+        // Too much y movement? Disable this entirely 
+        if (offsetY >= yLimit*2) {
+            removeTouchEvents();
+            return;
         }
-        else if (offset > window.innerWidth / 2) {
-            offset = window.innerWidth / 2;
-        }
-        if ((forward && offset > 0.0) || (!forward && offset < 0.0)) {
+
+        if ((!canbackward && offset > 0.0) || (!canforward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) || 
+            (offsetY >= yLimit)) {
             offset = 0.0;
         }
+        else if (offset < -maxSlide) {
+            offset = -maxSlide;
+        }
+        else if (offset > maxSlide) {
+            offset = maxSlide;
+        }
+
+        // css class handling
+        if (canforward && offset < -endThreshold && offsetY < yLimit) {
+            Ao3TrackHelper.showNextPageIndicator = true;
+        }
+        else {
+            Ao3TrackHelper.showNextPageIndicator = false;
+        }
+
+        if (canbackward && offset >= endThreshold && offsetY < yLimit) {
+            Ao3TrackHelper.showPrevPageIndicator = true;
+        }
+        else {
+            Ao3TrackHelper.showPrevPageIndicator = false;
+        }
+        
         Ao3TrackHelper.leftOffset = offset;
-        Ao3TrackHelper.opacity = (window.innerWidth - Math.abs(offset)) / window.innerWidth;
+        //Ao3TrackHelper.opacity = (window.innerWidth - Math.abs(offset)) / window.innerWidth;
     }
     function touchEndHandler(event: TouchEvent) {
-        if (forward && lastTouchX < window.innerWidth / 2) {
+        let offset = lastTouchX - startTouchX;
+        let offsetY = Math.abs(lastTouchY - startTouchY);
+        
+        if (canforward && offset < -endThreshold && offsetY < yLimit) {
             if (Ao3TrackHelper.canGoForward) {
                 window.history.forward();
             }
@@ -122,10 +165,10 @@ namespace Ao3Track {
                 window.location.href = nextPage;
             }
         }
-        else if (!forward && lastTouchX >= window.innerWidth / 2) {
+        else if (canbackward && offset >= endThreshold && offsetY < yLimit) {
             window.history.back();
         }
-        else {
+        else {        
             removeTouchEvents();
         }
     }

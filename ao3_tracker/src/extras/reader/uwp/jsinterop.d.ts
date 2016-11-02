@@ -49,6 +49,8 @@ declare namespace Ao3TrackHelper {
     var canGoForward :boolean;
     var leftOffset: number;
     var opacity : number;
+    var showPrevPageIndicator : boolean;
+    var showNextPageIndicator : boolean;
 
     let onalterfontsizeevent : ((ev: any)=>void) | null;
     let fontSize: number;

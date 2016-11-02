@@ -35,7 +35,9 @@ namespace Ao3TrackReader.Helper
         bool canGoForward { get; }
         double leftOffset { get; set; }
         double opacity { get; set; }
-
+        bool showPrevPageIndicator { get; set; }
+        bool showNextPageIndicator { get; set; }
+   
     }
 
     [AllowForWeb]
@@ -125,6 +127,17 @@ namespace Ao3TrackReader.Helper
             }
         }
 
+
+        public bool showPrevPageIndicator
+        {
+            get { return handler.showPrevPageIndicator;  }
+            set { handler.showPrevPageIndicator = value; }
+        }
+        public bool showNextPageIndicator
+        {
+            get { return handler.showNextPageIndicator; }
+            set { handler.showNextPageIndicator = value; }
+        }
 
     }
 }
