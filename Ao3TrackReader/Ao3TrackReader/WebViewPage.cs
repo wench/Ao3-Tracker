@@ -110,37 +110,21 @@ namespace Ao3TrackReader
 
         static object locker = new object();
 
-        public IDictionary<long, IWorkChapter> GetWorkChapters(long[] works)
+#if WINDOWS_UWP
+        public Windows.Foundation.IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync(long[] works)
         {
-            // Get locals
-            IDictionary<long, IWorkChapter> result = new Dictionary<long, IWorkChapter>();
-
-            // Make this behave like the Web Extension. 
-            // If syncing wait till it's finished
-
-            foreach (var item in App.Database.GetItems(works))
-            {
-                result[item.id] = new WorkChapter { number = item.number, chapterid = item.chapterid, location = item.location };
-            }
-
-            return result;
+            return App.Storage.getWorkChaptersAsync(works).AsAsyncOperation();
         }
+#else
+        public Windows.Foundation.IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync(long[] works)
+        {
+            return App.Storage.getWorkChaptersAsync(works);
+        }
+#endif
 
         public void SetWorkChapters(IDictionary<long, IWorkChapter> works)
         {
-            long now = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000;
-
-            // Set Locals
-            List<Work> items = new List<Work>(works.Count);
-            foreach (var work in works)
-            {
-                items.Add(new Ao3TrackReader.Work { id = work.Key, chapterid = work.Value.chapterid, number = work.Value.number, location = work.Value.location, timestamp = now });
-            }
-
-            var changes = App.Database.SaveItems(items);
-
-            // Send changes to server
-
+            App.Storage.setWorkChapters(works);
         }
 
         public void OnJumpClicked()

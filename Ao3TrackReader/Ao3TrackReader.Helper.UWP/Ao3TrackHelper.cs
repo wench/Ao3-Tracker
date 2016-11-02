@@ -25,7 +25,7 @@ namespace Ao3TrackReader.Helper
 
     public interface IEventHandler
     {
-        IDictionary<long, IWorkChapter> GetWorkChapters([ReadOnlyArray] long[] works);
+        IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
 
         void SetWorkChapters(IDictionary<long, IWorkChapter> works);
 
@@ -71,9 +71,9 @@ namespace Ao3TrackReader.Helper
 
         public IAsyncOperation<object> GetWorkChaptersAsync([ReadOnlyArray] long[] works)
         {
-            return Task<object>.Run(() =>
+            return Task.Run(async () =>
             {
-                return handler.GetWorkChapters(works) as object;
+                return (object) await handler.GetWorkChaptersAsync(works);
             }).AsAsyncOperation();           
         }
 

@@ -347,35 +347,40 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        public void getWorkChapters(ICollection<long> works, Action<IDictionary<long, IWorkChapter>> callback)
+        public Task<IDictionary<long, IWorkChapter>> getWorkChaptersAsync(ICollection<long> works)
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
+                ManualResetEventSlim handle = null;
+                IDictionary<long, IWorkChapter> r = new Dictionary<long, IWorkChapter>(works.Count);
+
+                EventHandler<bool> sendResponse = (sender, success) =>
+                {
+                    foreach (long w in works)
+                    {
+                        Work work;
+                        if (storage.TryGetValue(w, out work))
+                        {
+                            r[w] = work;
+                        }
+                    }
+                    if (handle != null) handle.Set();
+                };
                 lock (locker)
                 {
-                    EventHandler<bool> sendResponse = (sender, success) =>
-                    {
-                        var r = new Dictionary<long, IWorkChapter>(works.Count);
-                        foreach (long w in works)
-                        {
-                            Work work;
-                            if (storage.TryGetValue(w, out work))
-                            {
-                                r[w] = work;
-                            }
-                            callback(r);
-                        }
-                    };
                     if (serversync == SyncState.Syncing)
                     {
+                        handle = new ManualResetEventSlim();
                         SyncFromServerEvent += sendResponse;
                     }
                     else
                     {
                         sendResponse(this, true);
                     }
-
                 }
+                if (handle != null) handle.Wait();
+                return r;
+
             });
         }
 
@@ -395,7 +400,7 @@ namespace Ao3TrackReader.Data
                         if (!storage.TryGetValue(work.Key, out old) || old.IsNewer(work.Value))
                         {
                             // Do a delayed since if we finished a chapter, or started a new one 
-                            if (work.Value.location == null || work.Value.location == 0 || (old != null && work.Value.number > old.number))
+                            if (old == null || work.Value.location == null || work.Value.location == 0 || (old != null && work.Value.number > old.number))
                             {
                                 do_delayed = true;
                             }
