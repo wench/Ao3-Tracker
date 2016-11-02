@@ -129,7 +129,16 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                return (from x in database.Table<Variable>() where x.name == name select x.name).FirstOrDefault();
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    return row.value;
+                }
+                else
+                {
+                    return null;
+
+                }
             }
         }
 
