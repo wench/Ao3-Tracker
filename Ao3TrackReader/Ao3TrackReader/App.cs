@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 
 using Xamarin.Forms;
@@ -11,6 +12,7 @@ namespace Ao3TrackReader
     public class App : Application
     {
         static Ao3TrackDatabase database;
+
         public static Ao3TrackDatabase Database
         {
             get
@@ -28,6 +30,22 @@ namespace Ao3TrackReader
                 storage = storage ?? new SyncedStorage();
                 return storage;
             }
+        }
+
+        static readonly HttpClient httpClient;
+        public static HttpClient HttpClient
+        {
+            get
+            {
+                return httpClient;
+            }
+        }
+
+
+
+        static App()
+        {
+            httpClient = new HttpClient();
         }
 
         public App()

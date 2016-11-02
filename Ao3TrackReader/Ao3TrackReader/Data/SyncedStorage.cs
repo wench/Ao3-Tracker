@@ -14,8 +14,6 @@ namespace Ao3TrackReader.Data
     {
         static object locker = new object();
 
-        HttpClient client;
-
         Dictionary<long, Work> storage;
         Dictionary<long, Work> unsynced;
 
@@ -48,7 +46,6 @@ namespace Ao3TrackReader.Data
 
         public SyncedStorage()
         {
-            client = new HttpClient();
             storage = new Dictionary<long, Work>();
             unsynced = new Dictionary<long, Work>();
 
