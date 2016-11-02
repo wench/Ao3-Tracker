@@ -325,7 +325,7 @@ chrome.runtime.onMessage.addListener(function (request: MessageType, sender: chr
                 for (let id in request.data) {
                     if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
                         // Do a delayed since if we finished a chapter, or started a new one 
-                        if (request.data[id].location === null || request.data[id].location === 0 || (id in storage && request.data[id].chapterid !== storage[id].chapterid)) {
+                        if (!(id in storage) || request.data[id].location === null || request.data[id].location === 0 || (id in storage && request.data[id].chapterid !== storage[id].chapterid)) {
                             do_delayed = true;
                         }
                         newitems[id] = storage[id] = new WorkChapter(
