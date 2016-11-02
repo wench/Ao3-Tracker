@@ -11,45 +11,33 @@ namespace Ao3TrackReader
 {
     public class App : Application
     {
-        static Ao3TrackDatabase database;
-
         public static Ao3TrackDatabase Database
         {
-            get
-            {
-                database = database ?? new Ao3TrackDatabase();
-                return database;
-            }
+            get; private set;
         }
 
-        static SyncedStorage storage;
         public static SyncedStorage Storage
         {
-            get
-            {
-                storage = storage ?? new SyncedStorage();
-                return storage;
-            }
+            get; private set;
         }
 
-        static readonly HttpClient httpClient;
         public static HttpClient HttpClient
         {
-            get
-            {
-                return httpClient;
-            }
+            get; private set;
         }
 
 
 
         static App()
         {
-            httpClient = new HttpClient();
         }
 
         public App()
         {
+            Database = new Ao3TrackDatabase();
+            HttpClient = new HttpClient();
+            Storage = new SyncedStorage();
+
             // The root page of your application
             MainPage = new NavigationPage(new WebViewPage());
         }
