@@ -23,32 +23,48 @@ namespace Ao3TrackReader.Helper
         public long? location { get; set; }
     }
 
+    public delegate void MainThreadAction();
+    public delegate object MainThreadFunc();
+
     public interface IEventHandler
     {
+        [DefaultOverload]
+        object DoOnMainThread(MainThreadFunc function);
+        void DoOnMainThread(MainThreadAction function);
+
         IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
-
         void SetWorkChapters(IDictionary<long, IWorkChapter> works);
-
-        void EnableJumpToLastLocation(bool enable);
-
+        bool JumpToLastLocationEnabled { get; set; }
         bool canGoBack { get; }
         bool canGoForward { get; }
         double leftOffset { get; set; }
         double opacity { get; set; }
         bool showPrevPageIndicator { get; set; }
         bool showNextPageIndicator { get; set; }
-   
+        string[] scriptsToInject { get; }
+        string[] cssToInject { get; }
+        int FontSizeMax { get; }
+        int FontSizeMin { get; }
+        int FontSize { get; set; }
+        double realWidth { get; }
+        double realHeight { get; }
     }
 
     [AllowForWeb]
     public sealed class Ao3TrackHelper
     {
         IEventHandler handler;
-        private CoreDispatcher m_dispatcher;
+        public Ao3TrackHelper(IEventHandler handler)
+        {
+            this.handler = handler;
+        }
+
+        public string[] scriptsToInject { get { return handler.scriptsToInject; } }
+        public string[] cssToInject { get { return handler.cssToInject; } }
+
 
         public event EventHandler<bool> JumpToLastLocationEvent;
-
-        public void JumpToLastLocation(bool pagejump)
+        public void OnJumpToLastLocation(bool pagejump)
         {
             Task<object>.Run(() =>
             {
@@ -56,20 +72,16 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public void EnableJumpToLastLocation(bool enable)
+        public event EventHandler<object> AlterFontSizeEvent;
+        public void OnAlterFontSizeEvent()
         {
-            handler.EnableJumpToLastLocation(enable);
+            Task<object>.Run(() =>
+            {
+                AlterFontSizeEvent?.Invoke(this, null);
+            });
         }
 
-        public Ao3TrackHelper(IEventHandler handler)
-        {
-            var window = Windows.UI.Core.CoreWindow.GetForCurrentThread();
-            m_dispatcher = window.Dispatcher;
-
-            this.handler = handler;
-        }
-
-        public IAsyncOperation<object> GetWorkChaptersAsync([ReadOnlyArray] long[] works)
+        public IAsyncOperation<object> getWorkChaptersAsync([ReadOnlyArray] long[] works)
         {
             return Task.Run(async () =>
             {
@@ -92,7 +104,7 @@ namespace Ao3TrackReader.Helper
 
         }
 
-        public void SetWorkChapters(IDictionary<long, IWorkChapter> works)
+        public void setWorkChapters(IDictionary<long, IWorkChapter> works)
         {
             Task.Run(() => 
             {
@@ -100,43 +112,46 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public bool canGoBack { get { return handler.canGoBack; } }
-        public bool canGoForward { get { return handler.canGoForward; } }
-        public double leftOffset { get { return handler.leftOffset; } set { handler.leftOffset = value; } }
-        public double opacity {  get { return handler.opacity; } set { handler.opacity = value; } }
-
-        public event EventHandler<object> AlterFontSizeEvent;
-        private int font_size = 100;
-        public int FontSizeMax { get { return 300; } }
-        public int FontSizeMin { get { return 10; } }
-        public int FontSize
+        public bool jumpToLastLocationEnabled
         {
-            get
-            {
-                return font_size;
-            }
-            set
-            {
-                font_size = value;
-                if (font_size < FontSizeMin) font_size = FontSizeMin;
-                else if (font_size > FontSizeMax) font_size = FontSizeMax;
-                Task<object>.Run(() =>
-                {
-                    AlterFontSizeEvent?.Invoke(this, null);
-                });
-            }
+            get { return (bool) handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
+            set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
+        }
+        public bool canGoBack {
+            get { return (bool)handler.DoOnMainThread(() => handler.canGoBack); }
+        }
+        public bool canGoForward {
+            get { return (bool) handler.DoOnMainThread(() => handler.canGoForward); }
+        }
+        public double leftOffset {
+            get { return (double) handler.DoOnMainThread(() => handler.leftOffset); }
+            set { handler.DoOnMainThread(() => handler.leftOffset = value); }
+        }
+        public double opacity {
+            get { return (double) handler.DoOnMainThread(() => handler.opacity); }
+            set { handler.DoOnMainThread(() => handler.opacity = value); }
+        }
+        public int fontSizeMax { get { return handler.FontSizeMax; } }
+        public int fontSizeMin { get { return handler.FontSizeMin; } }
+        public int fontSize {
+            get { return (int) handler.DoOnMainThread(() => handler.FontSize); }
+            set { handler.DoOnMainThread(() => handler.FontSize = value); }
+        }
+        public bool showPrevPageIndicator {
+            get { return (bool) handler.DoOnMainThread(() => handler.showPrevPageIndicator );  }
+            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value ); } }
+        public bool showNextPageIndicator {
+            get { return (bool) handler.DoOnMainThread(() => handler.showNextPageIndicator); }
+            set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
 
+        public double realWidth {
+            get { return (double)handler.DoOnMainThread(() => handler.realWidth); }
 
-        public bool showPrevPageIndicator
-        {
-            get { return handler.showPrevPageIndicator;  }
-            set { handler.showPrevPageIndicator = value; }
         }
-        public bool showNextPageIndicator
+        public double realHeight
         {
-            get { return handler.showNextPageIndicator; }
-            set { handler.showNextPageIndicator = value; }
+            get { return (double)handler.DoOnMainThread(() => handler.realHeight); }
         }
 
     }

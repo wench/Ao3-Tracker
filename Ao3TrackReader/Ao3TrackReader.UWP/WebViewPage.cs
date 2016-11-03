@@ -9,6 +9,7 @@ using Windows.UI.Xaml.Controls;
 using Xamarin.Forms.Platform.UWP;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
+using System.Threading;
 
 namespace Ao3TrackReader
 {
@@ -16,56 +17,36 @@ namespace Ao3TrackReader
     {
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];
-            ['ms-appx-web:///Content/ao3_t_reader.js', 'ms-appx-web:///Content/ao3_tracker.js'].forEach(function(uri){            
-                var script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = uri;
-                head.appendChild(script);
-            });
-            ['ms-appx-web:///Content/ao3_tracker.css'].forEach(function(uri){            
+            for (var i = 0; i< Ao3TrackHelper.cssToInject.length; i++) {                    
                 var link = document.createElement('link');
                 link.type = 'text/css';
                 link.rel = 'stylesheet';
-                link.href = uri;
+                link.href = Ao3TrackHelper.cssToInject[i];
                 head.appendChild(link);
-            });
+            }
+            for (var i = 0; i< Ao3TrackHelper.scriptsToInject.length; i++) {                    
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = Ao3TrackHelper.scriptsToInject[i];
+                head.appendChild(script);
+            }
         })();";
 
+        public string[] scriptsToInject
+        {
+            get { return new[] { "ms-appx-web:///Content/ao3_t_reader.js", "ms-appx-web:///Content/ao3_tracker.js" }; }
+        }
+        public string[] cssToInject
+        {
+            get { return new[] { "ms-appx-web:///Content/ao3_tracker.css" }; }
+
+        }
+
         WebView WebView { get; set; }
-
-        void EnableInjection()
-        {
-        }
-
-        Ao3TrackHelper helper;
-
-        private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
-        {
-            EnableJumpToLastLocation(false);
-            WebView.AddWebAllowedObject("Ao3TrackHelper", helper);
-            Title = "Loading...";
-            showPrevPageIndicator = false;
-            showNextPageIndicator = false;
-
-        }
-
-        private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
-        {
-            leftOffset = 0;
-            opacity = 1.0;
-        }
-
-        private async void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
-        {
-            var t = WebView.DocumentTitle;
-            Title = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length-21) : t;
-            // Inject JS script
-            await WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject });
-        }
-
+        
         private Xamarin.Forms.View CreateWebView()
         {
-            WebView = new WebView(WebViewExecutionMode.SeparateThread)
+            WebView = new WebView()
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
@@ -74,8 +55,6 @@ namespace Ao3TrackReader
             WebView.NavigationStarting += WebView_NavigationStarting;
             WebView.DOMContentLoaded += WebView_DOMContentLoaded;
             WebView.ContentLoading += WebView_ContentLoading;
-
-            helper = new Ao3TrackHelper(this);
 
             return WebView.ToView();
         }
@@ -105,46 +84,50 @@ namespace Ao3TrackReader
 
         }
 
+        Ao3TrackHelper helper;
+
+        private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
+        {
+            jumpButton.IsEnabled = false;
+            Title = "Loading...";
+            WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
+        }
+
+        private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
+        {
+            PrevPageIndicator.IsVisible = false;
+            NextPageIndicator.IsVisible = false;
+            WebView.RenderTransform = null;
+            WebView.Opacity = 1;
+        }
+
+        private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
+        {
+            var t = WebView.DocumentTitle;
+            Title = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length - 21) : t;
+                // Inject JS script
+            Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();           
+        }
+
+
         void Navigate(string uri)
         {
             WebView.Navigate(new Uri(uri));
         }
 
-        async Task<T> DoCallbackAsync<T>(Func<T> function) where T: new()
-        {
-            T result = new T();
-            await WebView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
-            {
-                result = function();
-            });
-            return result;
-        }
+        public bool canGoBack { get { return WebView.CanGoBack; } }
 
-        Task DoCallbackAsync(Action function)
-        {
-            return WebView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
-            {
-                function();
-            }).AsTask();
-        }
-
-        public bool canGoBack { get { return DoCallbackAsync(() => WebView.CanGoBack).Result; } }
-
-        public bool canGoForward { get { return DoCallbackAsync(() => WebView.CanGoForward).Result; } }
+        public bool canGoForward { get { return WebView.CanGoForward; } }
 
         public double leftOffset
         {
             get
             {
-                return DoCallbackAsync(() => {
                     TranslateTransform v = WebView.RenderTransform as TranslateTransform;
                     return v?.X ?? 0.0;
-                }).Result;
             }
             set
             {
-                DoCallbackAsync(() =>
-                {
                     if (value == 0.0)
                     {
                         WebView.RenderTransform = null;
@@ -153,7 +136,6 @@ namespace Ao3TrackReader
                     {
                         WebView.RenderTransform = new TranslateTransform { X = value, Y = 0.0 };
                     }
-                });
             }
         }
 
@@ -161,12 +143,23 @@ namespace Ao3TrackReader
         {
             get
             {
-                return DoCallbackAsync(() => WebView.Opacity).Result;
+                return WebView.Opacity;
             }
             set
             {
-                DoCallbackAsync(() => { WebView.Opacity = value; });
+                WebView.Opacity = value;
             }
         }
+
+        public double realWidth
+        {
+            get { return WebView.ActualWidth; }
+
+        }
+        public double realHeight
+        {
+            get { return WebView.ActualHeight; }
+        }
+
     }
 }

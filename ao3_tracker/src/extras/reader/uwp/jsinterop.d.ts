@@ -54,4 +54,6 @@ declare namespace Ao3TrackHelper {
 
     let onalterfontsizeevent : ((ev: any)=>void) | null;
     let fontSize: number;
+    var realWidth: number; 
+    var realHeight: number; 
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Ao3TrackReader.Helper;
+using System.Threading;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.Platform.UWP;
@@ -22,6 +23,7 @@ namespace Ao3TrackReader
         AppBarButton jumpButton { get; set; }
         AppBarButton incFontSizeButton { get; set; }
         AppBarButton decFontSizeButton { get; set; }
+        public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
 #endif
         Label PrevPageIndicator;
         Label NextPageIndicator;
@@ -38,11 +40,7 @@ namespace Ao3TrackReader
                 Spacing = 0
             };
 
-            var wv = CreateWebView();
-            AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            Navigate("https://archiveofourown.com/");
-
+            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
 
             var commandBar = CreateCommandBar();
 #if WINDOWS_UWP
@@ -51,19 +49,18 @@ namespace Ao3TrackReader
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
             commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Bookmarks", new SymbolIcon(Symbol.Bookmarks), true, () => { }));
-            commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () => helper.FontSize += 10));
-            commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () => helper.FontSize -= 10));
+            commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () =>
+                FontSize += 10));
+            commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () =>
+                FontSize -= 10));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom In", new SymbolIcon(Symbol.ZoomIn), true, () => { }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom Out", new SymbolIcon(Symbol.ZoomOut), true, () => { }));
 
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Close Page", new SymbolIcon(Symbol.Clear), true, () => { }));
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", new SymbolIcon(Symbol.Font), true, () => helper.FontSize = 100));
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", new SymbolIcon(Symbol.Font), true, () => FontSize = 100));
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, SettingsButton_Clicked));
 
-            // retore font size!
-            helper.AlterFontSizeEvent += Helper_AlterFontSizeEvent;
-            helper.FontSize = 100;
 #else
 #endif
             NextPageIndicator = new Label { Text = "Next Page", Rotation = 90, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
@@ -74,7 +71,16 @@ namespace Ao3TrackReader
             AbsoluteLayout.SetLayoutBounds(PrevPageIndicator, new Rectangle(.02, .5, 100, 100));
             AbsoluteLayout.SetLayoutFlags(PrevPageIndicator, AbsoluteLayoutFlags.PositionProportional);
 
-            layout.Children.Add(new AbsoluteLayout {
+            var wv = CreateWebView();
+            AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
+            Navigate("https://archiveofourown.com/");
+
+            // retore font size!
+            FontSize = 100;
+
+            layout.Children.Add(new AbsoluteLayout
+            {
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Children = {
@@ -99,14 +105,24 @@ namespace Ao3TrackReader
 
         }
 
-        private void Helper_AlterFontSizeEvent(object sender, object e)
+        public int FontSizeMax { get { return 300; } }
+        public int FontSizeMin { get { return 10; } }
+        private int font_size = 100;
+        public int FontSize
         {
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            get { return font_size; }
+            set
             {
-                decFontSizeButton.IsEnabled = helper.FontSize > helper.FontSizeMin;
-                incFontSizeButton.IsEnabled = helper.FontSize < helper.FontSizeMax;
-            });
+                font_size = value;
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    decFontSizeButton.IsEnabled = FontSize > FontSizeMin;
+                    incFontSizeButton.IsEnabled = FontSize < FontSizeMax;
+                });
+                helper.OnAlterFontSizeEvent();
+            }
         }
+
 
         static object locker = new object();
 
@@ -122,6 +138,45 @@ namespace Ao3TrackReader
         }
 #endif
 
+        public object DoOnMainThread(MainThreadFunc function)
+        {
+
+            if (Dispatcher.HasThreadAccess)
+            {
+                return function();
+            }
+            else
+            { 
+                object result = null;
+                ManualResetEventSlim handle = new ManualResetEventSlim();
+
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    result = function();
+                    handle.Set();
+                });
+                handle.Wait();
+
+                return result;
+            }
+        }
+
+        public void DoOnMainThread(MainThreadAction function)
+        {            
+            if (Dispatcher.HasThreadAccess)
+            {
+                function();
+            }
+            else
+            { 
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    function();
+                });
+            }
+        }
+
+
         public void SetWorkChapters(IDictionary<long, IWorkChapter> works)
         {
             App.Storage.setWorkChapters(works);
@@ -131,20 +186,26 @@ namespace Ao3TrackReader
         {
             Task.Run(() =>
             {
-                helper?.JumpToLastLocation(false);
+                helper.OnJumpToLastLocation(false);
             });
         }
 
-        public void EnableJumpToLastLocation(bool enable)
+        public bool JumpToLastLocationEnabled
         {
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            set
             {
 #if WINDOWS_UWP
-                if (jumpButton != null) jumpButton.IsEnabled = enable;
-#else
-                
+                if (jumpButton != null) jumpButton.IsEnabled = value;
+#else                
 #endif
-            });
+            }
+            get
+            {
+#if WINDOWS_UWP
+                return jumpButton?.IsEnabled ?? false;
+#else
+#endif              
+            }
         }
 
         public async void SettingsButton_Clicked()
@@ -159,10 +220,7 @@ namespace Ao3TrackReader
             get { return PrevPageIndicator.IsVisible; }
             set
             {
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                {
-                    PrevPageIndicator.IsVisible = value;
-                });
+                PrevPageIndicator.IsVisible = value;
             }
         }
         public bool showNextPageIndicator
@@ -170,12 +228,8 @@ namespace Ao3TrackReader
             get { return NextPageIndicator.IsVisible; }
             set
             {
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                {
-                    NextPageIndicator.IsVisible = value;
-                });
+                NextPageIndicator.IsVisible = value;
             }
         }
-
     }
 }
