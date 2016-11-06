@@ -38,13 +38,13 @@ namespace Ao3Track {
     }
 
     export function DisableLastLocationJump() {
-        Ao3TrackHelper.enableJumpToLastLocation(false);
+        Ao3TrackHelper.jumpToLastLocationEnabled = false;
         Ao3TrackHelper.onjumptolastlocationevent = null;
     }
 
     export function EnableLastLocationJump(lastloc: IWorkChapter) {
         Ao3TrackHelper.onjumptolastlocationevent = (ev) => { Ao3Track.scrollToLocation(lastloc); }
-        Ao3TrackHelper.enableJumpToLastLocation(true);
+        Ao3TrackHelper.jumpToLastLocationEnabled = true;
     }
 
     // Font size up/down support 
