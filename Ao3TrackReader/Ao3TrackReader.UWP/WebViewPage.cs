@@ -55,8 +55,21 @@ namespace Ao3TrackReader
             WebView.NavigationStarting += WebView_NavigationStarting;
             WebView.DOMContentLoaded += WebView_DOMContentLoaded;
             WebView.ContentLoading += WebView_ContentLoading;
+            WebView.NewWindowRequested += WebView_NewWindowRequested;
 
             return WebView.ToView();
+        }
+
+        private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
+        {
+            if (args.Uri.Host == "archiveofourown.org" || args.Uri.Host == "www.archiveofourown.org") {
+                var uri = new UriBuilder(args.Uri);
+                if (uri.Scheme == "http")
+                    uri.Scheme = "https";
+                uri.Port = -1;
+                WebView.Navigate(uri.Uri);
+                args.Handled = true;
+            }
         }
 
         private CommandBar CreateCommandBar()
@@ -90,6 +103,20 @@ namespace Ao3TrackReader
         {
             jumpButton.IsEnabled = false;
             Title = "Loading...";
+
+            if (args.Uri.Host == "archiveofourown.org" || args.Uri.Host == "www.archiveofourown.org")
+            {
+                if (args.Uri.Scheme == "http") {
+                    var uri = new UriBuilder(args.Uri);
+                    uri.Scheme = "https";
+                    uri.Port = -1;
+                    args.Cancel = true;
+                    WebView.Navigate(uri.Uri);
+                    return;
+                }
+
+            }
+            if (urlEntry != null) urlEntry.Text = args.Uri.ToString();
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
         }
 
@@ -104,8 +131,12 @@ namespace Ao3TrackReader
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
             var t = WebView.DocumentTitle;
-            Title = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length - 21) : t;
-                // Inject JS script
+
+            t = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length - 21) : t;
+            t = t.EndsWith(" [Archive of Our Own]") ? t.Substring(0, t.Length - 21) : t;
+            Title = t;
+
+            // Inject JS script
             Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();           
         }
 

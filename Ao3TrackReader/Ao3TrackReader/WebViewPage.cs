@@ -27,11 +27,15 @@ namespace Ao3TrackReader
 #endif
         Label PrevPageIndicator;
         Label NextPageIndicator;
+        ListView readingList;
+        Entry urlEntry;
+        StackLayout urlFrame;
 
         public WebViewPage()
         {
             Title = "Ao3Track Reader";
             NavigationPage.SetHasNavigationBar(this, true);
+
 
             var layout = new StackLayout
             {
@@ -48,17 +52,40 @@ namespace Ao3TrackReader
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), true, () => { if (WebView.CanGoForward) WebView.GoForward(); }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
             commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Bookmarks", new SymbolIcon(Symbol.Bookmarks), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () =>
+            {
+                if (readingList.TranslationX < 180)
+                {
+                    readingList.Unfocus();
+                }
+                else
+                {
+                    readingList.TranslateTo(0, 0, 100, Easing.CubicIn);
+                    readingList.Focus();
+                }
+            }));
             commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () =>
                 FontSize += 10));
             commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () =>
                 FontSize -= 10));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom In", new SymbolIcon(Symbol.ZoomIn), true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Zoom Out", new SymbolIcon(Symbol.ZoomOut), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Url Bar", new SymbolIcon(Symbol.Rename), true, () =>
+            {
+                if (urlFrame.IsVisible)
+                {
+                    urlFrame.IsVisible = false;
+                    urlFrame.Unfocus();
+                }
+                else
+                {
+                    urlEntry.Text = WebView.Source.ToString();
+                    urlFrame.IsVisible = true;
+                    urlEntry.Focus();
+                }
+            }));
 
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Close Page", new SymbolIcon(Symbol.Clear), true, () => { }));
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", new SymbolIcon(Symbol.Font), true, () => FontSize = 100));
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, SettingsButton_Clicked));
 
 #else
@@ -79,6 +106,55 @@ namespace Ao3TrackReader
             // retore font size!
             FontSize = 100;
 
+            readingList = new ListView();
+            AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 360, 1));
+            AbsoluteLayout.SetLayoutFlags(readingList, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
+            readingList.ItemsSource = new string[] { "Home" };
+            readingList.BackgroundColor = Color.Black;
+            readingList.TranslationX = 360;
+            readingList.Unfocused += ReadingList_Unfocused;
+
+            urlFrame = new StackLayout
+            {
+                Orientation = StackOrientation.Horizontal,
+                VerticalOptions = LayoutOptions.End,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Spacing = 4
+            };
+            //AbsoluteLayout.SetLayoutBounds(urlFrame, new Rectangle(0, 1, 1, 44));
+            //AbsoluteLayout.SetLayoutFlags(urlFrame, AbsoluteLayoutFlags.WidthProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
+            urlEntry = new Entry
+            {
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.FillAndExpand
+            };
+            urlEntry.Completed += UrlButton_Clicked;
+            urlEntry.Keyboard = Keyboard.Url;
+
+            urlFrame.Children.Add(urlEntry);
+
+            var urlButton = new Button()
+            {
+                Text = "Go",
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.End
+            };
+            urlButton.Clicked += UrlButton_Clicked;
+
+            var urlCancel = new Button()
+            {
+                Text = "Close",
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.End
+            };
+            urlCancel.Clicked += UrlCancel_Clicked;
+
+            urlFrame.Children.Add(urlEntry);
+            urlFrame.Children.Add(urlButton);
+            urlFrame.Children.Add(urlCancel);
+            urlFrame.BackgroundColor = Color.Black;
+            urlFrame.IsVisible = false;
+
             layout.Children.Add(new AbsoluteLayout
             {
                 VerticalOptions = LayoutOptions.FillAndExpand,
@@ -86,9 +162,11 @@ namespace Ao3TrackReader
                 Children = {
                         wv,
                         PrevPageIndicator,
-                        NextPageIndicator
+                        NextPageIndicator,
+                        readingList,                        
                     }
             });
+            layout.Children.Add(urlFrame);
             layout.Children.Add(commandBar);
 
             /*
@@ -103,6 +181,45 @@ namespace Ao3TrackReader
             */
             Content = layout;
 
+        }
+
+        private void UrlCancel_Clicked(object sender, EventArgs e)
+        {
+            urlFrame.IsVisible = false;
+            urlFrame.Unfocus();
+        }
+
+        private async void UrlButton_Clicked(object sender, EventArgs e)
+        {
+            urlFrame.IsVisible = false;
+            urlFrame.Unfocus();
+            try
+            {
+                var uri = new UriBuilder(urlEntry.Text);
+                if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
+                {
+                    if (uri.Scheme == "http")
+                    {
+                        uri.Scheme = "https";
+                    }
+                    uri.Port = -1;
+                    WebView.Navigate(uri.Uri);
+                }
+                else
+                {
+                    await DisplayAlert("Url error", "Can only enter urls on archiveofourown.org", "Ok");
+                }
+            }
+            catch
+            {
+
+            }
+
+        }
+
+        private void ReadingList_Unfocused(object sender, FocusEventArgs e)
+        {
+            readingList.TranslateTo(360, 0, 100, Easing.CubicIn);
         }
 
         public int FontSizeMax { get { return 300; } }
