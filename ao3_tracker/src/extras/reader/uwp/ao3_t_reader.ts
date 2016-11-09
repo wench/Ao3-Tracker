@@ -80,7 +80,7 @@ namespace Ao3Track {
     const minThreshold = endThreshold / 4;
     const yLimit = window.innerHeight / 8;
     let zoomFactor = Ao3TrackHelper.realWidth / document.documentElement.clientWidth;
-    interface TouchEventSubset extends Event {
+    interface TouchEventSubset {
         touches: {
             length: number,
             item: (index: number) => { screenX: number, screenY: number }
@@ -103,34 +103,15 @@ namespace Ao3Track {
             touches: {
                 length: 1,
                 item: (index: number) => { return event; }
-            },
-            bubbles: false,
-            cancelBubble: false,
-            cancelable: false,
-            currentTarget: event.currentTarget,
-            defaultPrevented: false,
-            eventPhase: 0,
-            isTrusted: false,
-            returnValue: false,
-            srcElement: event.srcElement,
-            target: event.target,
-            timeStamp: 0,
-            type: "TouchEventSubset",
-            initEvent: () => { },
-            preventDefault: () => { },
-            stopImmediatePropagation: () => { },
-            stopPropagation: () => { },
-            AT_TARGET: 0,
-            BUBBLING_PHASE: 0,
-            CAPTURING_PHASE: 0
+            }
         };
 
-        touchStartHandler(te);
+        touchStartHandler(te as TouchEvent);
 
         window.addEventListener("pointermove", pointerMoveHandler);
         window.addEventListener("pointerup", pointerEndHandler);
     }
-    function touchStartHandler(event: TouchEvent | TouchEventSubset) {
+    function touchStartHandler(event: TouchEvent) {
         let touch = event.touches.item(0);
         if (event.touches.length > 1 || !touch) {
             removeTouchEvents();
@@ -178,31 +159,12 @@ namespace Ao3Track {
             touches: {
                 length: 1,
                 item: (index: number) => { return event; }
-            },
-            bubbles: false,
-            cancelBubble: false,
-            cancelable: false,
-            currentTarget: event.currentTarget,
-            defaultPrevented: false,
-            eventPhase: 0,
-            isTrusted: false,
-            returnValue: false,
-            srcElement: event.srcElement,
-            target: event.target,
-            timeStamp: 0,
-            type: "TouchEventSubset",
-            initEvent: () => { },
-            preventDefault: () => { },
-            stopImmediatePropagation: () => { },
-            stopPropagation: () => { },
-            AT_TARGET: 0,
-            BUBBLING_PHASE: 0,
-            CAPTURING_PHASE: 0
+            }
         };
 
-        touchMoveHandler(te);
+        touchMoveHandler(te as TouchEvent);
     }
-    function touchMoveHandler(event: TouchEvent | TouchEventSubset) {
+    function touchMoveHandler(event: TouchEvent) {
         let touch = event.touches.item(0);
         if (event.touches.length > 1 || !touch) {
             removeTouchEvents();
@@ -268,31 +230,12 @@ namespace Ao3Track {
             touches: {
                 length: 1,
                 item: (index: number) => { return event; }
-            },
-            bubbles: false,
-            cancelBubble: false,
-            cancelable: false,
-            currentTarget: event.currentTarget,
-            defaultPrevented: false,
-            eventPhase: 0,
-            isTrusted: false,
-            returnValue: false,
-            srcElement: event.srcElement,
-            target: event.target,
-            timeStamp: 0,
-            type: "TouchEventSubset",
-            initEvent: () => { },
-            preventDefault: () => { },
-            stopImmediatePropagation: () => { },
-            stopPropagation: () => { },
-            AT_TARGET: 0,
-            BUBBLING_PHASE: 0,
-            CAPTURING_PHASE: 0
+            }
         };
 
-        touchEndHandler(te);
+        touchEndHandler(te as TouchEvent);
     }
-    function touchEndHandler(event: TouchEvent | TouchEventSubset) {
+    function touchEndHandler(event: TouchEvent) {
         setImmediate(() => {
             let offset = lastTouchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);
@@ -348,4 +291,51 @@ namespace Ao3Track {
         setTouchState();
     });
     setTouchState();
+
+    function contextMenuHandler(ev: PointerEvent) {
+        for (let target = ev.target as Element; target !== document.body; target = target.parentElement) {
+            let a = target as HTMLAnchorElement;
+            if (target.tagName === "A" && a.href && a.href !== "") {
+                event.preventDefault();
+                event.stopPropagation();
+
+                Ao3TrackHelper.showContextMenu(ev.clientX, ev.clientY, [
+                    "Open", 
+                    "Open and Add", 
+                    "Add to Reading list", 
+                    "Copy Link"
+                ]).then((item) => {
+                    switch (item)
+                    {
+                        case "Open":
+                        {
+                            window.location.href = a.href;
+                        }
+                        break;
+
+                        case "Open and Add":
+                        {
+                            Ao3TrackHelper.addToReadingList(a.href);
+                            window.location.href = a.href;
+                        }
+                        break;
+                        
+                        case "Add to Reading list":
+                        {
+                            Ao3TrackHelper.addToReadingList(a.href);
+                        }
+                        break;
+
+                        case "Copy Link":
+                        {
+                            Ao3TrackHelper.copyToClipboard(a.href,"uri");
+                        }
+                        break;
+                    }
+                });
+                return;
+            }
+        }
+    }
+    document.body.addEventListener("contextmenu", contextMenuHandler);
 };

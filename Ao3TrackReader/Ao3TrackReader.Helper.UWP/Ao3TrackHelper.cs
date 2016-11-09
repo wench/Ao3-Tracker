@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.UI.Core;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Ao3TrackReader.Helper
 {
@@ -48,6 +49,9 @@ namespace Ao3TrackReader.Helper
         int FontSize { get; set; }
         double realWidth { get; }
         double realHeight { get; }
+
+        IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
+        void addToReadingList(string href);
     }
 
     [AllowForWeb]
@@ -85,8 +89,8 @@ namespace Ao3TrackReader.Helper
         {
             return Task.Run(async () =>
             {
-                return (object) await handler.GetWorkChaptersAsync(works);
-            }).AsAsyncOperation();           
+                return (object)await handler.GetWorkChaptersAsync(works);
+            }).AsAsyncOperation();
         }
 
         public IDictionary<long, IWorkChapter> createWorkChapterMap()
@@ -106,7 +110,7 @@ namespace Ao3TrackReader.Helper
 
         public void setWorkChapters(IDictionary<long, IWorkChapter> works)
         {
-            Task.Run(() => 
+            Task.Run(() =>
             {
                 handler.SetWorkChapters(works);
             });
@@ -114,34 +118,34 @@ namespace Ao3TrackReader.Helper
 
         public bool jumpToLastLocationEnabled
         {
-            get { return (bool) handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
+            get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
             set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
         }
         public bool canGoBack {
             get { return (bool)handler.DoOnMainThread(() => handler.canGoBack); }
         }
         public bool canGoForward {
-            get { return (bool) handler.DoOnMainThread(() => handler.canGoForward); }
+            get { return (bool)handler.DoOnMainThread(() => handler.canGoForward); }
         }
         public double leftOffset {
-            get { return (double) handler.DoOnMainThread(() => handler.leftOffset); }
+            get { return (double)handler.DoOnMainThread(() => handler.leftOffset); }
             set { handler.DoOnMainThread(() => handler.leftOffset = value); }
         }
         public double opacity {
-            get { return (double) handler.DoOnMainThread(() => handler.opacity); }
+            get { return (double)handler.DoOnMainThread(() => handler.opacity); }
             set { handler.DoOnMainThread(() => handler.opacity = value); }
         }
         public int fontSizeMax { get { return handler.FontSizeMax; } }
         public int fontSizeMin { get { return handler.FontSizeMin; } }
         public int fontSize {
-            get { return (int) handler.DoOnMainThread(() => handler.FontSize); }
+            get { return (int)handler.DoOnMainThread(() => handler.FontSize); }
             set { handler.DoOnMainThread(() => handler.FontSize = value); }
         }
         public bool showPrevPageIndicator {
-            get { return (bool) handler.DoOnMainThread(() => handler.showPrevPageIndicator );  }
-            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value ); } }
+            get { return (bool)handler.DoOnMainThread(() => handler.showPrevPageIndicator); }
+            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value); } }
         public bool showNextPageIndicator {
-            get { return (bool) handler.DoOnMainThread(() => handler.showNextPageIndicator); }
+            get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
 
@@ -154,5 +158,29 @@ namespace Ao3TrackReader.Helper
             get { return (double)handler.DoOnMainThread(() => handler.realHeight); }
         }
 
+        public IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
+        {
+            return handler.showContextMenu(x, y, menuItems);
+        }
+
+        public void addToReadingList(string href)
+        {
+            handler.addToReadingList(href);
+        }
+        public void copyToClipboard(string str, string type)
+        {
+            if (type == "text" || type == "uri")
+            {
+                var dp = new DataPackage();
+                dp.SetText(str);
+                Clipboard.SetContent(dp);
+            }
+            else if (type == "uri")
+            {
+                var dp = new DataPackage();
+                dp.SetWebLink(new Uri(str));
+                Clipboard.SetContent(dp);
+            }
+        }
     }
 }

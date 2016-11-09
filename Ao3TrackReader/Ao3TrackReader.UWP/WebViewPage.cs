@@ -192,5 +192,41 @@ namespace Ao3TrackReader
             get { return WebView.ActualHeight; }
         }
 
+
+        public Windows.Foundation.IAsyncOperation<string> showContextMenu(double x, double y, string[] menuItems)
+        {
+            string result = null;
+            RoutedEventHandler clicked = (sender, e) =>
+            {
+                var item = sender as MenuFlyoutItem;
+                result = item.Text;
+            };
+            MenuFlyout menu = new MenuFlyout();
+            for (int i = 0; i < menuItems.Length; i++) {
+                if (menuItems[i] == "-") {
+                    menu.Items.Add(new MenuFlyoutSeparator());
+                }
+                else
+                {
+                    var item = new MenuFlyoutItem { Text = menuItems[i] };
+                    item.Click += clicked;
+                    menu.Items.Add(item);
+                }
+            }
+
+            ManualResetEventSlim handle = new ManualResetEventSlim();
+            EventHandler<object> closed = (sender, e) =>
+            {
+                handle.Set();
+            };
+            menu.Closed += closed;
+
+            menu.ShowAt(WebView, new Windows.Foundation.Point(x, y));
+            return Task.Run(() => {
+                handle.Wait();
+                return result;
+            }).AsAsyncOperation();
+
+        }
     }
 }

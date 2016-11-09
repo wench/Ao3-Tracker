@@ -55,5 +55,9 @@ declare namespace Ao3TrackHelper {
     let onalterfontsizeevent : ((ev: any)=>void) | null;
     let fontSize: number;
     var realWidth: number; 
-    var realHeight: number; 
+    var realHeight: number;
+
+    function showContextMenu(x: number, y: number, menuItems: string[]) : WinJS.Promise<string|null>;
+    function addToReadingList(href: string) : void;
+    function copyToClipboard(str: string, type:string) : void; 
 }

@@ -29,7 +29,8 @@ namespace Ao3TrackReader
         Label NextPageIndicator;
         ListView readingList;
         Entry urlEntry;
-        StackLayout urlFrame;
+        StackLayout urlBar;
+        AbsoluteLayout modelPopup;
 
         public WebViewPage()
         {
@@ -37,7 +38,7 @@ namespace Ao3TrackReader
             NavigationPage.SetHasNavigationBar(this, true);
 
 
-            var layout = new StackLayout
+            var mainlayout = new StackLayout
             {
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -71,15 +72,15 @@ namespace Ao3TrackReader
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Url Bar", new SymbolIcon(Symbol.Rename), true, () =>
             {
-                if (urlFrame.IsVisible)
+                if (urlBar.IsVisible)
                 {
-                    urlFrame.IsVisible = false;
-                    urlFrame.Unfocus();
+                    urlBar.IsVisible = false;
+                    urlBar.Unfocus();
                 }
                 else
                 {
                     urlEntry.Text = WebView.Source.ToString();
-                    urlFrame.IsVisible = true;
+                    urlBar.IsVisible = true;
                     urlEntry.Focus();
                 }
             }));
@@ -114,7 +115,7 @@ namespace Ao3TrackReader
             readingList.TranslationX = 360;
             readingList.Unfocused += ReadingList_Unfocused;
 
-            urlFrame = new StackLayout
+            urlBar = new StackLayout
             {
                 Orientation = StackOrientation.Horizontal,
                 VerticalOptions = LayoutOptions.End,
@@ -131,7 +132,7 @@ namespace Ao3TrackReader
             urlEntry.Completed += UrlButton_Clicked;
             urlEntry.Keyboard = Keyboard.Url;
 
-            urlFrame.Children.Add(urlEntry);
+            urlBar.Children.Add(urlEntry);
 
             var urlButton = new Button()
             {
@@ -149,13 +150,13 @@ namespace Ao3TrackReader
             };
             urlCancel.Clicked += UrlCancel_Clicked;
 
-            urlFrame.Children.Add(urlEntry);
-            urlFrame.Children.Add(urlButton);
-            urlFrame.Children.Add(urlCancel);
-            urlFrame.BackgroundColor = Color.Black;
-            urlFrame.IsVisible = false;
+            urlBar.Children.Add(urlEntry);
+            urlBar.Children.Add(urlButton);
+            urlBar.Children.Add(urlCancel);
+            urlBar.BackgroundColor = Color.Black;
+            urlBar.IsVisible = false;
 
-            layout.Children.Add(new AbsoluteLayout
+            mainlayout.Children.Add(new AbsoluteLayout
             {
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -166,8 +167,8 @@ namespace Ao3TrackReader
                         readingList,                        
                     }
             });
-            layout.Children.Add(urlFrame);
-            layout.Children.Add(commandBar);
+            mainlayout.Children.Add(urlBar);
+            mainlayout.Children.Add(commandBar);
 
             /*
             ToolbarItem tbi = null;
@@ -179,20 +180,38 @@ namespace Ao3TrackReader
 
             ToolbarItems.Add(tbi);
             */
-            Content = layout;
+            AbsoluteLayout.SetLayoutBounds(mainlayout, new Rectangle(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(mainlayout, AbsoluteLayoutFlags.All);
 
+            modelPopup = new AbsoluteLayout();
+            AbsoluteLayout.SetLayoutBounds(modelPopup, new Rectangle(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(modelPopup, AbsoluteLayoutFlags.All);
+            //modelPopup.BackgroundColor = new Color(0, 0, 0, .5);
+
+            var outerlayout = new AbsoluteLayout
+            {
+                Children =
+                {
+                    mainlayout,
+                    modelPopup
+
+                }
+
+            };            
+
+            Content = outerlayout;
         }
 
         private void UrlCancel_Clicked(object sender, EventArgs e)
         {
-            urlFrame.IsVisible = false;
-            urlFrame.Unfocus();
+            urlBar.IsVisible = false;
+            urlBar.Unfocus();
         }
 
         private async void UrlButton_Clicked(object sender, EventArgs e)
         {
-            urlFrame.IsVisible = false;
-            urlFrame.Unfocus();
+            urlBar.IsVisible = false;
+            urlBar.Unfocus();
             try
             {
                 var uri = new UriBuilder(urlEntry.Text);
@@ -348,5 +367,11 @@ namespace Ao3TrackReader
                 NextPageIndicator.IsVisible = value;
             }
         }
+
+        public void addToReadingList(string href)
+        {
+
+        }
+
     }
 }
