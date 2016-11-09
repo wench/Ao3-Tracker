@@ -12,7 +12,7 @@ namespace Ao3TrackReader.Models
     // <ICON>  
 
 
-    public class Ao3PageViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    public class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging
 
     {
         public event PropertyChangedEventHandler PropertyChanged;

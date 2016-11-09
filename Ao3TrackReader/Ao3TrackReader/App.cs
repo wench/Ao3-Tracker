@@ -40,6 +40,8 @@ namespace Ao3TrackReader
 
             // The root page of your application
             MainPage = new NavigationPage(new WebViewPage());
+
+            //Data.Ao3SiteDataLookup.Lookup(new[] { @"http://archiveofourown.org/works/8398573" });
         }
 
         protected override void OnStart()
