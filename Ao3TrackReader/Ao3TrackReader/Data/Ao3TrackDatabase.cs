@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SQLite;
+using Ao3TrackReader.Models;
 
 namespace Ao3TrackReader
 {
@@ -44,6 +45,8 @@ namespace Ao3TrackReader
             // create the tables
             database.CreateTable<Work>();
             database.CreateTable<Variable>();
+            database.CreateTable<TagCache>();
+            database.CreateTable<LanguageCache>();
         }
 
         public IEnumerable<Work> GetItems ()
@@ -157,5 +160,121 @@ namespace Ao3TrackReader
                 }
             }
         }
+
+        public string GetTagForId(int id)
+        {
+            lock (locker)
+            {
+                var now = DateTime.UtcNow.Ticks;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
+                return row?.name;
+            }
+        }
+
+        public string GetTagMerger(string name)
+        {
+            lock (locker)
+            {
+                var now = DateTime.UtcNow.Ticks;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
+                return row?.merger;
+            }
+
+        }
+        public string GetTagCategory(string name)
+        {
+            lock (locker)
+            {
+                var now = DateTime.UtcNow.Ticks;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
+                return row?.category;
+            }
+
+        }
+
+        public void SetTagId(string name, int id)
+        {
+            lock (locker)
+            {
+                var expires = (DateTime.UtcNow + new TimeSpan(7, 0, 0, 0)).Ticks;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    row.id = id;
+                    row.expires = expires;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new TagCache { name = name, id = id, expires = expires });
+                }
+            }
+
+        }
+
+        public void SetTagMerger(string name, string merger)
+        {
+            lock (locker)
+            {
+                var expires = (DateTime.UtcNow + new TimeSpan(7, 0, 0, 0)).Ticks;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    row.merger = merger;
+                    row.expires = expires;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new TagCache { name = name, merger = merger, expires = expires });
+                }
+            }
+        }
+        public void SetTagCategory(string name, string category)
+        {
+            lock (locker)
+            {
+                var expires = (DateTime.UtcNow + new TimeSpan(7, 0, 0, 0)).Ticks;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    row.category = category;
+                    row.expires = expires;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new TagCache { name = name, category = category, expires = expires });
+                }
+            }
+        }
+
+        public string GetLanguage(int id)
+        {
+            lock (locker)
+            {
+                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.id == id);
+                return row?.name;
+            }
+        }
+
+        public void SetLanguage(string name, int id)
+        {
+            lock (locker)
+            {
+                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    row.id = id;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new LanguageCache { name = name, id = id });
+                }
+            }
+
+        }
+
     }
 }

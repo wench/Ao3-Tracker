@@ -17,12 +17,24 @@
     <Compile Include="$(MSBuildThisFileDirectory)GroupList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\LanguageCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\TagCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReadingListView.xaml.cs">
+      <DependentUpon>ReadingListView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)SettingsPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)GettingStarted.Xamarin" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)ReadingListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
