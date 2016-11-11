@@ -16,6 +16,6 @@ namespace Ao3TrackReader.Models
 
         public string category { get; set; }
 
-        public long expires { get; set; }
+        public DateTime expires { get; set; }
     }
 }

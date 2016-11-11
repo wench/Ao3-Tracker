@@ -121,6 +121,8 @@ namespace Ao3TrackReader.Data
 
     public class Ao3SiteDataLookup
     {
+        static string[] escTagStrings = { "*s*", "*a*", "*d*", "*q*", "*h*" };
+        static string[] usescTagStrings = { "/", "&", ".", "?", "#" };
         static Regex regexEscTag = new Regex(@"([/&.?#])");
         static Regex regexUnescTag = new Regex(@"(\*[sadqh])\*");
         static Regex regexTag = new Regex(@"^/tags/(?<TAGNAME>[^/&.?#,^<>{}`\\=]+)(/(?<TYPE>(works|bookmarks)?))?$", RegexOptions.ExplicitCapture);
@@ -132,23 +134,8 @@ namespace Ao3TrackReader.Data
         {
             return regexEscTag.Replace(tag, (match) =>
             {
-                switch (match.Value)
-                {
-                    case "/":
-                        return "*s*";
-
-                    case "&":
-                        return "*a*";
-
-                    case ".":
-                        return "*d*";
-
-                    case "?":
-                        return "*q*";
-
-                    case "#":
-                        return "*h*";
-                }
+                int i = Array.IndexOf(usescTagStrings, match.Value);
+                if (i != -1) return escTagStrings[i];
                 return "";
             });
         }
@@ -157,23 +144,8 @@ namespace Ao3TrackReader.Data
         {
             return regexUnescTag.Replace(tag, (match) =>
             {
-                switch (match.Value)
-                {
-                    case "*s*":
-                        return "/";
-
-                    case "*a*":
-                        return "&";
-
-                    case "*d*":
-                        return ".";
-
-                    case "*q*":
-                        return "?";
-
-                    case "*h*":
-                        return "#";
-                }
+                int i = Array.IndexOf(escTagStrings, match.Value);
+                if (i != -1) return usescTagStrings[i];
                 return "";
             });
         }
@@ -182,7 +154,7 @@ namespace Ao3TrackReader.Data
         {
             string tag = App.Database.GetTagForId(tagid);
             if (!string.IsNullOrEmpty(tag))
-                return UnescapeTag(tag);
+                return tag;
 
             tag = null;
             var uri = new Uri(@"https://archiveofourown.org/tags/feed/" + tagid.ToString());
@@ -227,20 +199,20 @@ namespace Ao3TrackReader.Data
                 }
             }
 
-            App.Database.SetTagId(EscapeTag(tag), tagid);
-            return UnescapeTag(tag);
+            if (tag != null) App.Database.SetTagId(tag, tagid);
+            return tag;
         }
 
         static async Task<string> LookupTag(string intag)
         {
-            intag = EscapeTag(intag);
-
+            intag = UnescapeTag(intag);
             string tag = App.Database.GetTagMerger(intag);
             if (!string.IsNullOrEmpty(tag))
             {
-                return UnescapeTag(tag);
+                return tag;
             }
             tag = intag;
+            intag = EscapeTag(intag);
 
             var uri = new Uri(@"https://archiveofourown.org/tags/" + intag);
 
@@ -288,7 +260,7 @@ namespace Ao3TrackReader.Data
                             {
                                 var newuri = new Uri(uri, href.Value);
                                 var m = regexTag.Match(newuri.LocalPath);
-                                if (m.Success) tag = m.Groups["TAGNAME"].Value;
+                                if (m.Success) tag = UnescapeTag(m.Groups["TAGNAME"].Value);
                                 break;
                             }
                         }
@@ -298,12 +270,12 @@ namespace Ao3TrackReader.Data
             }
 
             App.Database.SetTagMerger(intag, EscapeTag(tag));
-            return UnescapeTag(tag);
+            return tag;
         }
 
         static async Task<Ao3TagType> LookupTagCategory(string tag)
         {
-            tag = EscapeTag(tag);
+            tag = UnescapeTag(tag);
             await LookupTag(tag);
 
             string category = App.Database.GetTagCategory(tag);

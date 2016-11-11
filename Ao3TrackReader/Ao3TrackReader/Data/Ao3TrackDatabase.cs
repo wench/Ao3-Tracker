@@ -165,7 +165,7 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var now = DateTime.UtcNow.Ticks;
+                var now = DateTime.UtcNow;
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
                 return row?.name;
             }
@@ -175,7 +175,7 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var now = DateTime.UtcNow.Ticks;
+                var now = DateTime.UtcNow;
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
                 return row?.merger;
             }
@@ -185,7 +185,7 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var now = DateTime.UtcNow.Ticks;
+                var now = DateTime.UtcNow;
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
                 return row?.category;
             }
@@ -196,10 +196,12 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var expires = (DateTime.UtcNow + new TimeSpan(7, 0, 0, 0)).Ticks;
+                var now = DateTime.UtcNow;
+                var expires = now + new TimeSpan(7, 0, 0, 0);
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
                 if (row != null)
                 {
+                    if (row.expires <= now) row = new TagCache { name = name };
                     row.id = id;
                     row.expires = expires;
                     database.Update(row);
@@ -216,10 +218,12 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var expires = (DateTime.UtcNow + new TimeSpan(7, 0, 0, 0)).Ticks;
+                var now = DateTime.UtcNow;
+                var expires = now + new TimeSpan(7, 0, 0, 0);
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
                 if (row != null)
                 {
+                    if (row.expires <= now) row = new TagCache { name = name };
                     row.merger = merger;
                     row.expires = expires;
                     database.Update(row);
@@ -234,10 +238,12 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var expires = (DateTime.UtcNow + new TimeSpan(7, 0, 0, 0)).Ticks;
+                var now = DateTime.UtcNow;
+                var expires = now + new TimeSpan(7, 0, 0, 0);
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
                 if (row != null)
                 {
+                    if (row.expires <= now) row = new TagCache { name = name };
                     row.category = category;
                     row.expires = expires;
                     database.Update(row);
