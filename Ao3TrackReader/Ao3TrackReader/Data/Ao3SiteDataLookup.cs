@@ -432,6 +432,8 @@ namespace Ao3TrackReader.Data
 
         private static async Task FillModelFromWorkSummary(Uri baseuri, HtmlNode worknode, Ao3PageModel model)
         {
+            model.Details = new Ao3WorkDetails();
+
             // Gather all tags
             Dictionary<Ao3TagType, List<string>> tags = new Dictionary<Ao3TagType, List<string>>();
 
@@ -498,6 +500,39 @@ namespace Ao3TrackReader.Data
                 }
             }
 
+            HtmlNode headingnode = headernode?.ElementByClass("heading");
+            if (headingnode != null)
+            {
+                var links = headingnode.Elements("a");
+                Dictionary<string, string> authors = new Dictionary<string, string>(1);
+                Dictionary<string, string> recipiants = new Dictionary<string, string>();
+                if (links != null)
+                {
+                    var titlenode = links.FirstOrDefault();
+                    model.Title = titlenode?.InnerText;
+
+                    foreach (var n in links)
+                    {
+                        var href = n.Attributes["href"];
+                        var rel = n.Attributes["rel"];
+                        var uri = new Uri(baseuri, href.Value);
+
+                        if (rel?.Value == "author")
+                        {
+                            authors[uri.AbsoluteUri] = n.InnerText;
+                            continue;
+                        }
+
+                        if (href.Value.EndsWith("/gifts"))
+                        {
+                            recipiants[uri.AbsoluteUri] = n.InnerText;
+                        }
+                    }
+                }
+                if (authors.Count != 0) model.Details.Authors = authors;
+                if (recipiants.Count != 0) model.Details.Recipiants = recipiants;
+            }
+
             // Get requried tags
             HtmlNode requirednode = headernode?.ElementByClass("required-tags");
             Dictionary<Ao3RequiredTags, HtmlNode> required = new Dictionary<Ao3RequiredTags, HtmlNode>(4);
@@ -517,7 +552,8 @@ namespace Ao3TrackReader.Data
 
                 var classes = n.Value.GetClasses();
                 var search = n.Key.ToString() + "-";
-                var tag = Array.Find(classes, (val) => {
+                var tag = Array.Find(classes, (val) =>
+                {
                     return val.StartsWith(search, StringComparison.OrdinalIgnoreCase);
                 });
 
@@ -532,8 +568,8 @@ namespace Ao3TrackReader.Data
             model.Tags = tags;
 
             // Get primary tag... 
-            if (tags.ContainsKey(Ao3TagType.Relationships) && tags[Ao3TagType.Relationships].Count > 0) model.PrimaryTag = tags[Ao3TagType.Relationships][0];
-            else if (tags.ContainsKey(Ao3TagType.Fandoms) && tags[Ao3TagType.Fandoms].Count > 0) model.PrimaryTag = tags[Ao3TagType.Fandoms][0];
+            if (tags.ContainsKey(Ao3TagType.Relationships) && tags[Ao3TagType.Relationships].Count > 0) model.PrimaryTag = await LookupTag(tags[Ao3TagType.Relationships][0]);
+            else if (tags.ContainsKey(Ao3TagType.Fandoms) && tags[Ao3TagType.Fandoms].Count > 0) model.PrimaryTag = await LookupTag(tags[Ao3TagType.Fandoms][0]);
 
             if (model.PrimaryTag != null)
             {
@@ -543,14 +579,14 @@ namespace Ao3TrackReader.Data
             // Stats
 
             var stats = worknode.ElementByClass("dl", "stats");
-            model.Stats = new Ao3WorkStats();
 
-            model.Stats.LastUpdated = headernode?.ElementByClass("p", "datetime")?.InnerText?.Trim();
+            model.Details.LastUpdated = headernode?.ElementByClass("p", "datetime")?.InnerText?.Trim();
 
             model.Language = stats?.ElementByClass("dd", "language")?.InnerText?.Trim();
 
-            try { 
-                model.Stats.Words = int.Parse(stats?.ElementByClass("dd", "words")?.InnerText?.Replace(",",""));
+            try
+            {
+                model.Details.Words = int.Parse(stats?.ElementByClass("dd", "words")?.InnerText?.Replace(",", ""));
             }
             catch
             {
@@ -565,8 +601,8 @@ namespace Ao3TrackReader.Data
                     int? total;
                     if (chapters[1] == "?") total = null;
                     else total = int.Parse(chapters[1]);
-                    model.Stats.Chapters = new Tuple<int, int?>(int.Parse(chapters[0]), total);
-                    model.Complete = model.Stats.Chapters.Item1 == model.Stats.Chapters.Item2;
+                    model.Details.Chapters = new Tuple<int, int?>(int.Parse(chapters[0]), total);
+                    model.Complete = model.Details.Chapters.Item1 == model.Details.Chapters.Item2;
                 }
                 catch
                 {
@@ -576,7 +612,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Stats.Comments = int.Parse(stats?.ElementByClass("dd", "comments")?.InnerText);
+                model.Details.Collections = int.Parse(stats?.ElementByClass("dd", "collections")?.InnerText);
             }
             catch
             {
@@ -585,7 +621,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Stats.Kudos = int.Parse(stats?.ElementByClass("dd", "kudos")?.InnerText);
+                model.Details.Comments = int.Parse(stats?.ElementByClass("dd", "comments")?.InnerText);
             }
             catch
             {
@@ -594,7 +630,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Stats.Bookmarks = int.Parse(stats?.ElementByClass("dd", "bookmarks")?.InnerText);
+                model.Details.Kudos = int.Parse(stats?.ElementByClass("dd", "kudos")?.InnerText);
             }
             catch
             {
@@ -603,11 +639,51 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Stats.Hits = int.Parse(stats?.ElementByClass("dd", "hits")?.InnerText);
+                model.Details.Bookmarks = int.Parse(stats?.ElementByClass("dd", "bookmarks")?.InnerText);
             }
             catch
             {
 
+            }
+
+            try
+            {
+                model.Details.Hits = int.Parse(stats?.ElementByClass("dd", "hits")?.InnerText);
+            }
+            catch
+            {
+
+            }
+
+            // Series
+
+            var seriesnode = worknode.ElementByClass("ul", "series");
+            if (seriesnode != null)
+            {
+                Dictionary<string, Tuple<int, string>> series = new Dictionary<string, Tuple<int, string>>(1);
+                foreach (var n in seriesnode.Elements("li"))
+                {
+                    var link = n.Element("a");
+                    if (link == null || String.IsNullOrWhiteSpace(link.InnerText)) continue;
+
+                    var s = link.Attributes["href"]?.Value;
+                    if (String.IsNullOrWhiteSpace(s)) continue;
+                    var uri = new Uri(baseuri, s);
+
+                    var part = n.Element("strong")?.InnerText;
+                    if (String.IsNullOrWhiteSpace(part)) continue;
+
+                    try
+                    {
+                        series[uri.AbsoluteUri] = new Tuple<int, string>(int.Parse(part), link.InnerText);
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+                if (series.Count > 0) model.Details.Series = series;
             }
         }
 

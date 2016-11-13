@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using Xamarin.Forms;
 
 namespace Ao3TrackReader.Models
 {
@@ -16,7 +17,7 @@ namespace Ao3TrackReader.Models
 
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        public event PropertyChangingEventHandler PropertyChanging;
+        public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -25,48 +26,101 @@ namespace Ao3TrackReader.Models
 
         protected virtual void OnPropertyChanging(string propertyName)
         {
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+            PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangingEventArgs(propertyName));
         }
 
-        string title;
-        public string Title
+        public string Group { get; private set; }
+        public string Title { get; private set; }
+        public string Date { get; private set; }
+
+
+        private Uri imageRatingUri;
+        public ImageSource ImageRating { get { return new UriImageSource { Uri = imageRatingUri }; } }
+
+        private Uri imageWarningsUri;
+        public ImageSource ImageWarnings { get { return new UriImageSource { Uri = imageWarningsUri }; } }
+
+        private Uri imageCategoryUri;
+        public ImageSource ImageCategory { get { return new UriImageSource { Uri = imageCategoryUri }; } }
+
+        private Uri imageCompleteUri;
+        public ImageSource ImageComplete { get { return new UriImageSource { Uri = imageCompleteUri }; } }
+
+        List<string> detail;
+        public FormattedString Detail
         {
-            get { return title; }
-        }
-
-        string details;
-        public string Detail
-        {
-            get { return details; }
-        }
-
-        string group;
-        public string Group
-        {
-            get { return group; }
-        }
-
-        string uri;
-        public string Uri {
-            get { return uri; }
-            set {
-                OnPropertyChanging("Title");
-                OnPropertyChanging("Detail");
-                uri = value;
-                title = "Loading...";
-                details = uri;
-                OnPropertyChanged("Title");
-                OnPropertyChanged("Detail");
+            get
+            {
+                var fs = new FormattedString();
+                foreach (var s in detail) fs.Spans.Add(new Span { Text = s });
+                return fs;
             }
         }
+
+        public Uri Uri { get; private set; }
 
         Ao3PageModel baseData;
         public Ao3PageModel BaseData {
             get { return baseData; }
-            set { baseData = value;
+            set {
+                if (baseData == value) return;
+                baseData = value;
 
                 // Generate everything from Ao3PageModel 
+                string newGroup = value.PrimaryTag ?? "";
+                if (Group != newGroup)
+                {
+                    OnPropertyChanging("Group");
+                    Group = newGroup;
+                    OnPropertyChanged("Group");
+                }
 
+                Uri image;
+                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Rating)) != null || imageRatingUri != null)
+                {
+                    OnPropertyChanging("ImageRating");
+                    imageRatingUri = image;
+                    OnPropertyChanged("ImageRating");
+                }
+
+                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Warning)) != null || imageWarningsUri != null)
+                {
+                    OnPropertyChanging("ImageWarnings");
+                    imageWarningsUri = image;
+                    OnPropertyChanged("ImageWarnings");
+                }
+
+                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Category)) != null || imageCategoryUri != null)
+                {
+                    OnPropertyChanging("ImageCategory");
+                    imageCategoryUri = image;
+                    OnPropertyChanged("ImageCategory");
+                }
+
+                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Complete)) != null || imageCompleteUri != null)
+                {
+                    OnPropertyChanging("ImageComplete");
+                    imageCompleteUri = image;
+                    OnPropertyChanged("ImageComplete");
+                }
+
+                OnPropertyChanging("Uri");
+                Uri = value.Uri;
+                OnPropertyChanged("Uri");
+
+                OnPropertyChanging("Title");
+                Title = value.Title;
+                OnPropertyChanged("Title");
+
+                OnPropertyChanging("Date");
+                Date = value.Details?.LastUpdated;
+                OnPropertyChanged("Date");
+
+                OnPropertyChanging("Detail");
+                detail = new List<string> {
+                    value.Uri.AbsoluteUri
+                };
+                OnPropertyChanged("Detail");
             }
         }
 

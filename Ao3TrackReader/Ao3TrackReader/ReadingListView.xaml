@@ -1,36 +1,36 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Ao3TrackReader.ReadingListView"
-          HasUnevenRows="true">
-    <ListView.ItemTemplate>
-        <DataTemplate>
-            <ViewCell>
-                <StackLayout Orientation="Vertical">
-                    <StackLayout Orientation="Horizontal">
-                        <Grid ColumnSpacing="3" RowSpacing="3" Margin="3">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="25" />
-                                <RowDefinition Height="25" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="25" />
-                                <ColumnDefinition Width="25" />
-                            </Grid.ColumnDefinitions>
-                            <Image Source="{Binding imageRating}" Grid.Row="0" Grid.Column="0" />
-                            <Image Source="{Binding imageWarnings}" Grid.Row="1" Grid.Column="0" />
-                            <Image Source="{Binding imageCategory}" Grid.Row="0" Grid.Column="1" />
-                            <Image Source="{Binding imageComplete}" Grid.Row="1" Grid.Column="1" />
-                        </Grid>
-                        <StackLayout Orientation="Vertical">
-                            <StackLayout Orientation="Horizontal">
-                                <Label Text="{Binding title}" HorizontalOptions="StartAndExpand" />
-                                <Label Text="{Binding date}" HorizontalOptions="End" />
-                            </StackLayout>
-                            <Label Text="{Binding subtitle}" />
-                        </StackLayout>
-                    </StackLayout>
-                    <Label FormattedText="{Binding tags}" />
-                </StackLayout>
-            </ViewCell>
-        </DataTemplate>
-    </ListView.ItemTemplate>
+             HasUnevenRows="true">
+  <ListView.ItemTemplate>
+    <DataTemplate>
+      <ViewCell>
+        <StackLayout Orientation="Vertical">
+          <StackLayout Orientation="Horizontal">
+            <Grid ColumnSpacing="3" RowSpacing="3" Margin="3">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+              </Grid.RowDefinitions>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="25" />
+                <ColumnDefinition Width="25" />
+              </Grid.ColumnDefinitions>
+              <Image Source="{Binding ImageRating}" Grid.Row="0" Grid.Column="0" />
+              <Image Source="{Binding ImageWarnings}" Grid.Row="1" Grid.Column="0" />
+              <Image Source="{Binding ImageCategory}" Grid.Row="0" Grid.Column="1" />
+              <Image Source="{Binding ImageComplete}" Grid.Row="1" Grid.Column="1" />
+            </Grid>
+            <StackLayout Orientation="Vertical">
+              <StackLayout Orientation="Horizontal">
+                <Label Text="{Binding Title}" HorizontalOptions="StartAndExpand" />
+                <Label Text="{Binding Date}" HorizontalOptions="End" />
+              </StackLayout>
+              <Label Text="{Binding Subtitle}" />
+            </StackLayout>
+          </StackLayout>
+          <Label FormattedText="{Binding Detail}" />
+        </StackLayout>
+      </ViewCell>
+    </DataTemplate>
+  </ListView.ItemTemplate>
 </ListView>
