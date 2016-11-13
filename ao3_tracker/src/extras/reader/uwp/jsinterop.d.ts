@@ -45,8 +45,12 @@ declare namespace Ao3TrackHelper {
     
     var jumpToLastLocationEnabled : boolean; 
 
+    var nextPage : string;
+    var prevPage : string;
     var canGoBack :boolean;
     var canGoForward :boolean;
+    function goBack() : void;
+    function goForward() : void;    
     var leftOffset: number;
     var opacity : number;
     var showPrevPageIndicator : boolean;

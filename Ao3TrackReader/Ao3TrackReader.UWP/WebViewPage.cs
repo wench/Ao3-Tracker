@@ -118,6 +118,10 @@ namespace Ao3TrackReader
             }
             if (urlEntry != null) urlEntry.Text = args.Uri.ToString();
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
+            nextPage = null;
+            prevPage = null;
+            prevPageButton.IsEnabled = canGoBack;
+            nextPageButton.IsEnabled = canGoForward;
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
@@ -146,9 +150,69 @@ namespace Ao3TrackReader
             WebView.Navigate(new Uri(uri));
         }
 
-        public bool canGoBack { get { return WebView.CanGoBack; } }
+        private Uri nextPage;
+        public string NextPage
+        {
+            get
+            {
+                return nextPage?.AbsoluteUri;
+            }
+            set
+            {
+                nextPage = null;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    try
+                    {
+                        nextPage = new Uri(WebView.Source, value);
+                    }
+                    catch
+                    {
 
-        public bool canGoForward { get { return WebView.CanGoForward; } }
+                    }
+                }
+                nextPageButton.IsEnabled = canGoForward;
+            }
+        }
+        private Uri prevPage;
+        public string PrevPage
+        {
+            get
+            {
+                return prevPage?.AbsoluteUri;
+            }
+            set
+            {
+                prevPage = null;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    try
+                    {
+                        prevPage = new Uri(WebView.Source, value);
+                    }
+                    catch
+                    {
+                    }
+                }
+                prevPageButton.IsEnabled = canGoBack;
+            }
+        }
+
+        public bool canGoBack { get { return WebView.CanGoBack || prevPage != null; } }
+
+        public bool canGoForward { get { return WebView.CanGoForward || nextPage != null; } }
+
+        public void GoBack()
+        {
+            if (WebView.CanGoBack) WebView.GoBack();
+            else if (prevPage != null) WebView.Navigate(prevPage);
+        }
+        public void GoForward()
+        {
+            if (WebView.CanGoForward) WebView.GoForward();
+            else if (nextPage != null) WebView.Navigate(nextPage);
+
+        }
 
         public double leftOffset
         {

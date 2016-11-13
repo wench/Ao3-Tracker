@@ -27,14 +27,14 @@ namespace Ao3Track {
         Ao3TrackHelper.setWorkChapters(m);
     }
 
-    let nextPage: string | null = jQuery('head link[rel=next]').attr('href');
+    Ao3TrackHelper.nextPage = jQuery('head link[rel=next]').attr('href') || "";
     export function SetNextPage(uri: string) {
-        nextPage = uri;
+        Ao3TrackHelper.nextPage = uri;
     }
 
-    let prevPage: string | null = jQuery('head link[rel=prev]').attr('href');
+    Ao3TrackHelper.prevPage = jQuery('head link[rel=prev]').attr('href') || "";
     export function SetPrevPage(uri: string) {
-        prevPage = uri;
+        Ao3TrackHelper.prevPage = uri;
     }
 
     export function DisableLastLocationJump() {
@@ -79,7 +79,7 @@ namespace Ao3Track {
     const maxSlide = window.innerWidth;
     const minThreshold = endThreshold / 4;
     const yLimit = window.innerHeight / 8;
-    let zoomFactor = Ao3TrackHelper.realWidth / document.documentElement.clientWidth;
+    let zoomFactor = window.screen.availWidth * window.screen.deviceXDPI / (window.screen.logicalXDPI * window.innerWidth);
     interface TouchEventSubset {
         touches: {
             length: number,
@@ -127,7 +127,7 @@ namespace Ao3Track {
                 // going backwards....
                 canbackward = true;
             }
-            if ((Ao3TrackHelper.canGoForward || (nextPage && nextPage !== '')) && startTouchX >= (window.innerWidth - startLimit)) {
+            if (Ao3TrackHelper.canGoForward && startTouchX >= (window.innerWidth - startLimit)) {
                 // Going forwards
                 canforward = true;
             }
@@ -241,15 +241,10 @@ namespace Ao3Track {
             let offsetY = Math.abs(lastTouchY - startTouchY);
 
             if (canforward && offset < -endThreshold && offsetY < yLimit) {
-                if (Ao3TrackHelper.canGoForward) {
-                    window.history.forward();
-                }
-                else if (nextPage && nextPage !== '') {
-                    window.location.href = nextPage;
-                }
+                Ao3TrackHelper.goForward();
             }
             else if (canbackward && offset >= endThreshold && offsetY < yLimit) {
-                window.history.back();
+                Ao3TrackHelper.goBack();
             }
             else {
                 removeTouchEvents();
@@ -261,9 +256,12 @@ namespace Ao3Track {
     }
 
     function setTouchState() {
-        let zoomlimitmin: string = getComputedStyle(document.documentElement, '').msContentZoomLimitMin;
-        zoomFactor = document.documentElement.msContentZoomFactor * window.screen.deviceXDPI / window.screen.logicalXDPI;
-        if (zoomFactor > parseFloat(zoomlimitmin.slice(0, zoomlimitmin.indexOf('%'))) / 100.0) {
+        let styles = getComputedStyle(document.documentElement, '');
+
+        zoomFactor = window.screen.availWidth * window.screen.deviceXDPI / (window.screen.logicalXDPI * window.innerWidth);
+        
+        // If we can scroll horizontally, we disable swiping
+        if (styles.msScrollLimitXMax !== styles.msScrollLimitXMin) {
             document.documentElement.classList.remove("mw_ao3track_unzoomed");
             document.documentElement.classList.add("mw_ao3track_zoomed");
             removeTouchEvents();

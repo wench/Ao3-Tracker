@@ -23,6 +23,8 @@ namespace Ao3TrackReader
         AppBarButton jumpButton { get; set; }
         AppBarButton incFontSizeButton { get; set; }
         AppBarButton decFontSizeButton { get; set; }
+        AppBarButton nextPageButton { get; set; }
+        AppBarButton prevPageButton { get; set; }
         public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
 #endif
         Label PrevPageIndicator;
@@ -49,8 +51,8 @@ namespace Ao3TrackReader
 
             var commandBar = CreateCommandBar();
 #if WINDOWS_UWP
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), true, () => { if (WebView.CanGoBack) WebView.GoBack(); }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), true, () => { if (WebView.CanGoForward) WebView.GoForward(); }));
+            commandBar.PrimaryCommands.Add(prevPageButton = CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), false, () => { GoBack(); }));
+            commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), false, () => { GoForward(); }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
             commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () =>
@@ -85,7 +87,6 @@ namespace Ao3TrackReader
                 }
             }));
 
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Close Page", new SymbolIcon(Symbol.Clear), true, () => { }));
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", new SymbolIcon(Symbol.Font), true, () => FontSize = 100));
             commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, SettingsButton_Clicked));
 

@@ -36,8 +36,12 @@ namespace Ao3TrackReader.Helper
         IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
         void SetWorkChapters(IDictionary<long, IWorkChapter> works);
         bool JumpToLastLocationEnabled { get; set; }
+        string NextPage { get; set; }
+        string PrevPage { get; set; }
         bool canGoBack { get; }
         bool canGoForward { get; }
+        void GoBack();
+        void GoForward();
         double leftOffset { get; set; }
         double opacity { get; set; }
         bool showPrevPageIndicator { get; set; }
@@ -100,7 +104,8 @@ namespace Ao3TrackReader.Helper
 
         public IWorkChapter createWorkChapter(long number, long chapterid, long? location)
         {
-            return new WorkChapter {
+            return new WorkChapter
+            {
                 number = number,
                 chapterid = chapterid,
                 location = location
@@ -121,35 +126,57 @@ namespace Ao3TrackReader.Helper
             get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
             set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
         }
-        public bool canGoBack {
+        public string nextPage
+        {
+            get { return handler.NextPage; }
+            set { handler.DoOnMainThread(() => handler.NextPage = value); }
+        }
+        public string prevPage
+        {
+            get { return handler.PrevPage; }
+            set { handler.DoOnMainThread(() => handler.PrevPage = value); }
+        }
+
+        public bool canGoBack
+        {
             get { return (bool)handler.DoOnMainThread(() => handler.canGoBack); }
         }
-        public bool canGoForward {
+        public bool canGoForward
+        {
             get { return (bool)handler.DoOnMainThread(() => handler.canGoForward); }
         }
-        public double leftOffset {
+        public void goBack() { handler.DoOnMainThread(() => handler.GoBack()); }
+        public void goForward() { handler.DoOnMainThread(() => handler.GoForward()); }
+        public double leftOffset
+        {
             get { return (double)handler.DoOnMainThread(() => handler.leftOffset); }
             set { handler.DoOnMainThread(() => handler.leftOffset = value); }
         }
-        public double opacity {
+        public double opacity
+        {
             get { return (double)handler.DoOnMainThread(() => handler.opacity); }
             set { handler.DoOnMainThread(() => handler.opacity = value); }
         }
         public int fontSizeMax { get { return handler.FontSizeMax; } }
         public int fontSizeMin { get { return handler.FontSizeMin; } }
-        public int fontSize {
+        public int fontSize
+        {
             get { return (int)handler.DoOnMainThread(() => handler.FontSize); }
             set { handler.DoOnMainThread(() => handler.FontSize = value); }
         }
-        public bool showPrevPageIndicator {
+        public bool showPrevPageIndicator
+        {
             get { return (bool)handler.DoOnMainThread(() => handler.showPrevPageIndicator); }
-            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value); } }
-        public bool showNextPageIndicator {
+            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value); }
+        }
+        public bool showNextPageIndicator
+        {
             get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
 
-        public double realWidth {
+        public double realWidth
+        {
             get { return (double)handler.DoOnMainThread(() => handler.realWidth); }
 
         }
@@ -182,5 +209,6 @@ namespace Ao3TrackReader.Helper
                 Clipboard.SetContent(dp);
             }
         }
+
     }
 }
