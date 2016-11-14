@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using Xamarin.Forms;
+using System.Linq;
 
 namespace Ao3TrackReader.Models
 {
@@ -29,9 +30,14 @@ namespace Ao3TrackReader.Models
             PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangingEventArgs(propertyName));
         }
 
+        public Uri Uri { get; private set; }
+
         public string Group { get; private set; }
+        public string GroupType { get; private set; }
         public string Title { get; private set; }
         public string Date { get; private set; }
+        public string Subtitle { get; private set; }
+        public string Details { get; private set; }
 
 
         private Uri imageRatingUri;
@@ -46,18 +52,49 @@ namespace Ao3TrackReader.Models
         private Uri imageCompleteUri;
         public ImageSource ImageComplete { get { return new UriImageSource { Uri = imageCompleteUri }; } }
 
-        List<string> detail;
-        public FormattedString Detail
+        SortedDictionary<Ao3TagType,List<string>> tags;
+        public FormattedString Tags
         {
             get
             {
                 var fs = new FormattedString();
-                foreach (var s in detail) fs.Spans.Add(new Span { Text = s });
+
+                if (tags != null)
+                {
+                    foreach (var t in tags)
+                    {
+                        if (t.Key == Ao3TagType.Fandoms) continue;
+
+                        FontAttributes attribs = FontAttributes.None;
+                        Color color;
+                        if (t.Key == Ao3TagType.Warnings)
+                        {
+                            color = App.Colors["SystemBaseHighColor"];
+                            attribs = FontAttributes.Bold;
+                        }
+                        else if (t.Key == Ao3TagType.Relationships)
+                            color = App.Colors["SystemChromeAltLowColor"];
+                        else if (t.Key == Ao3TagType.Characters)
+                        {
+                            var c1 = App.Colors["SystemChromeAltLowColor"];
+                            var c2 = App.Colors["SystemChromeHighColor"];
+                            color = new Color((c1.R + c2.R) / 2, (c1.G + c2.G) / 2, (c1.B + c2.B) / 2);
+                        }
+                        else
+                            color = App.Colors["SystemChromeHighColor"];
+
+                        foreach (var tag in t.Value)
+                        {
+                            fs.Spans.Add(new Span { Text = tag.Replace(' ', '\xA0'), FontSize = 10, FontAttributes = attribs, ForegroundColor = color });
+                            fs.Spans.Add(new Span { Text = ",  ", FontSize = 10, FontAttributes = attribs, ForegroundColor = color });
+                        }
+                    }
+                    if (fs.Spans.Count > 1) fs.Spans.RemoveAt(fs.Spans.Count - 1);
+                }
                 return fs;
             }
         }
 
-        public Uri Uri { get; private set; }
 
         Ao3PageModel baseData;
         public Ao3PageModel BaseData {
@@ -75,29 +112,40 @@ namespace Ao3TrackReader.Models
                     OnPropertyChanged("Group");
                 }
 
+                if (!string.IsNullOrWhiteSpace(newGroup))
+                {
+                    string newgrouptype = value.PrimaryTagType.ToString().TrimEnd('s');
+                    if (newgrouptype != GroupType)
+                    {
+                        OnPropertyChanging("GroupType");
+                        GroupType = newgrouptype;
+                        OnPropertyChanged("GroupType");
+                    }
+                }
+
                 Uri image;
-                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Rating)) != null || imageRatingUri != null)
+                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Rating)) != null || imageRatingUri != null)
                 {
                     OnPropertyChanging("ImageRating");
                     imageRatingUri = image;
                     OnPropertyChanged("ImageRating");
                 }
 
-                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Warning)) != null || imageWarningsUri != null)
+                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Warnings)) != null || imageWarningsUri != null)
                 {
                     OnPropertyChanging("ImageWarnings");
                     imageWarningsUri = image;
                     OnPropertyChanged("ImageWarnings");
                 }
 
-                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Category)) != null || imageCategoryUri != null)
+                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Category)) != null || imageCategoryUri != null)
                 {
                     OnPropertyChanging("ImageCategory");
                     imageCategoryUri = image;
                     OnPropertyChanged("ImageCategory");
                 }
 
-                if ((image = value.GetRequiredTagsUri(Ao3RequiredTags.Complete)) != null || imageCompleteUri != null)
+                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Complete)) != null || imageCompleteUri != null)
                 {
                     OnPropertyChanging("ImageComplete");
                     imageCompleteUri = image;
@@ -109,18 +157,50 @@ namespace Ao3TrackReader.Models
                 OnPropertyChanged("Uri");
 
                 OnPropertyChanging("Title");
-                Title = value.Title;
+                Title = value.Title ?? "";
+                if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
+                {
+                    Title += " by " + string.Join(",  ", value.Details.Authors.Values);
+                }
+                if (value.Details?.Recipiants != null && value.Details.Recipiants.Count != 0)
+                {
+                    Title += " for " + string.Join(",  ", value.Details.Recipiants.Values);
+                }
+                Title = Title.Trim();
+                if (Title == "") Title = Uri.PathAndQuery;
                 OnPropertyChanged("Title");
 
                 OnPropertyChanging("Date");
-                Date = value.Details?.LastUpdated;
+                Date = value.Details?.LastUpdated ?? "";
                 OnPropertyChanged("Date");
 
-                OnPropertyChanging("Detail");
-                detail = new List<string> {
-                    value.Uri.AbsoluteUri
-                };
-                OnPropertyChanged("Detail");
+                OnPropertyChanging("Subtitle");
+                Subtitle = "";
+                if (value.Tags != null && value.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", value.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
+                OnPropertyChanged("Subtitle");
+
+                OnPropertyChanging("Details");
+                List<string> d = new List<string>();
+                if (!string.IsNullOrWhiteSpace(value.Language)) d.Add("Language: " + value.Language);
+                if (value.Details != null)
+                {
+                    if (value.Details.Words != null) d.Add("Words:\xA0" + value.Details.Words.ToString());
+                    if (value.Details.Chapters != null) d.Add("Chapters:\xA0" + value.Details.Chapters.Item1.ToString() + "/" + (value.Details.Chapters.Item2?.ToString() ?? "?"));
+                    if (value.Details.Collections != null) d.Add("Collections:\xA0" + value.Details.Collections.ToString());
+                    if (value.Details.Comments != null) d.Add("Comments:\xA0" + value.Details.Comments.ToString());
+                    if (value.Details.Kudos != null) d.Add("Kudos:\xA0" + value.Details.Kudos.ToString());
+                    if (value.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + value.Details.Bookmarks.ToString());
+                    if (value.Details.Hits != null) d.Add("Hits:\xA0" + value.Details.Hits.ToString());
+
+                }
+
+                Details = string.Join("   ", d);
+                if (!string.IsNullOrWhiteSpace(value.SearchQuery)) Details = ("Query: " + value.SearchQuery + "\n" + Details).Trim();
+                OnPropertyChanged("Details");
+
+                OnPropertyChanging("Tags");
+                tags = value.Tags;
+                OnPropertyChanged("Tags");
             }
         }
 

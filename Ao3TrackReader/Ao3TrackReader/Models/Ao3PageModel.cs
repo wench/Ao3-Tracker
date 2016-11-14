@@ -11,25 +11,26 @@ namespace Ao3TrackReader.Models
         Work,
         Tag, 
         Search,
+        Bookmarks,
         Unknown
     }
 
     public enum Ao3TagType
     {
-        Other = 0,
-        Rating,
         Warnings,
+        Rating,
         Category,
         Fandoms,
-        Characters,
         Relationships,
-        Freeforms
+        Characters,
+        Freeforms,
+        Other
     }
 
-    public enum Ao3RequiredTags
+    public enum Ao3RequiredTag
     {
         Rating,
-        Warning,
+        Warnings,
         Category,
         Complete
     }
@@ -55,19 +56,25 @@ namespace Ao3TrackReader.Models
         public Uri Uri { set; get; }
         public Ao3PageType Type { set; get; }
         public string PrimaryTag { set; get; }
+        public Ao3TagType PrimaryTagType { set; get; }
         public string Title;        
 
-        public Dictionary<Ao3TagType, List<string>> Tags { set; get; }
+        public SortedDictionary<Ao3TagType, List<string>> Tags { set; get; }
 
-        public Dictionary<Ao3RequiredTags, Tuple<string, string>> RequiredTags { get; set; }
-        public Uri GetRequiredTagsUri(Ao3RequiredTags tag) {
-            Tuple<string, string> rt;
-            if (RequiredTags == null || !RequiredTags.TryGetValue(tag, out rt))
-                return null;
+        public Dictionary<Ao3RequiredTag, Tuple<string, string>> RequiredTags { get; set; }
+        public Uri GetRequiredTagUri(Ao3RequiredTag tag) {
+            Tuple<string, string> rt = null;
+            if (RequiredTags == null || !RequiredTags.TryGetValue(tag, out rt) || rt == null)
+            {
+                if (tag == Ao3RequiredTag.Category) rt = new Tuple<string, string>("category-none", "None");
+                else if (tag == Ao3RequiredTag.Complete) rt = new Tuple<string, string>("category-none", "None");
+                else if (tag == Ao3RequiredTag.Rating) rt = new Tuple<string, string>("rating-notrated", "None");
+                else if (tag == Ao3RequiredTag.Warnings) rt = new Tuple<string, string>("warning-none", "None");
+            }
 
             return new Uri("https://archiveofourown.org/images/skins/iconsets/default_large/"+rt.Item1+".png");
         }
-        public string GetRequiredTagsText(Ao3RequiredTags tag)
+        public string GetRequiredTagText(Ao3RequiredTag tag)
         {
             Tuple<string, string> rt;
             if (RequiredTags == null || !RequiredTags.TryGetValue(tag, out rt))
@@ -77,8 +84,6 @@ namespace Ao3TrackReader.Models
         }
 
         public string Language { set; get; }
-
-        public bool Complete { set; get; }
 
         public Ao3WorkDetails Details { get; set; }
 

@@ -235,20 +235,6 @@ namespace Ao3TrackReader.Data
                 HtmlNode tagnode = main.ElementByClass("div", "tag");
                 if (tagnode != null)
                 {
-                    // Category
-                    foreach (var p in tagnode.Elements("p"))
-                    {
-                        if (p.InnerText != null)
-                        {
-                            var m = regexTagCategory.Match(p.InnerText);
-                            if (m.Success)
-                            {
-                                App.Database.SetTagCategory(intag, m.Groups["CATEGORY"].Value);
-                                break;
-                            }
-                        }
-                    }
-
                     // Merger?
                     HtmlNode mergernode = tagnode.ElementByClass("div", "merger");
                     if (mergernode != null)
@@ -265,11 +251,26 @@ namespace Ao3TrackReader.Data
                             }
                         }
                     }
+
+                    // Category
+                    foreach (var p in tagnode.Elements("p"))
+                    {
+                        if (p.InnerText != null)
+                        {
+                            var m = regexTagCategory.Match(p.InnerText);
+                            if (m.Success)
+                            {
+                                App.Database.SetTagCategory(intag, m.Groups["CATEGORY"].Value);
+                                if (tag != intag) App.Database.SetTagCategory(tag, m.Groups["CATEGORY"].Value);
+                                break;
+                            }
+                        }
+                    }
                 }
 
             }
 
-            App.Database.SetTagMerger(intag, EscapeTag(tag));
+            App.Database.SetTagMerger(intag, UnescapeTag(tag));
             return tag;
         }
 
@@ -345,35 +346,46 @@ namespace Ao3TrackReader.Data
             foreach (string url in urls)
             { 
                 tasks.Add(Task.Run(async () => {
-                    var uri = new UriBuilder(url);
+                    var uribuilder = new UriBuilder(url);
 
-                    if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
+                    if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
                     {
-                        if (uri.Scheme == "http")
+                        if (uribuilder.Scheme == "http")
                         {
-                            uri.Scheme = "https";
+                            uribuilder.Scheme = "https";
                         }
-                        uri.Port = -1;
+                        uribuilder.Port = -1;
                     }
                     else
                     {
                         return new KeyValuePair<string, Ao3PageModel>(url, null);
                     }
 
+                    Uri uri = uribuilder.Uri;
+
                     Ao3PageModel model = new Ao3PageModel
                     {
-                        Uri = uri.Uri
+                        Uri = uri
                     };
 
                     Match match = null;
 
-                    if (uri.Path == "/works" || uri.Path == "/works/search") // Work search and Advanced search
+                    if (uri.LocalPath == "/works") // Work search and Advanced search
                     {
                         model.Type = Ao3PageType.Search;
+                        model.Title = "Search";
 
-                        await FillModelFromSearchQuery(uri.Uri, model);
+                        await FillModelFromSearchQuery(uri, model);
                     }
-                    else if ((match = regexTag.Match(uri.Path)).Success)    // View tag
+                    if (uri.LocalPath == "/works/search") // Work search and Advanced search
+                    {
+                        model.Type = Ao3PageType.Search;
+                        model.Title = "Advanced Search";
+
+                        await FillModelFromSearchQuery(uri, model);
+
+                    }
+                    else if ((match = regexTag.Match(uri.LocalPath)).Success)    // View tag
                     {
                         model.Type = Ao3PageType.Tag;
 
@@ -383,12 +395,24 @@ namespace Ao3TrackReader.Data
                         if (sTYPE == "works")
                         {
                             model.Type = Ao3PageType.Search;
+                            model.Title = "Works";
+                        }
+                        else if (sTYPE == "bookmarks")
+                        {
+                            model.Type = Ao3PageType.Bookmarks;
+                            model.Title = "Bookmarks";
+                        }
+                        else
+                        {
+                            model.Type = Ao3PageType.Tag;
+                            model.Title = "Tag";
+
                         }
 
                         model.PrimaryTag = await LookupTag(sTAGNAME);
-
+                        model.PrimaryTagType = await LookupTagCategory(model.PrimaryTag);
                     }
-                    else if ((match = regexWork.Match(uri.Path)).Success)   // View Work
+                    else if ((match = regexWork.Match(uri.LocalPath)).Success)   // View Work
                     {
                         model.Type = Ao3PageType.Work;
 
@@ -417,6 +441,8 @@ namespace Ao3TrackReader.Data
                     else
                     {
                         model.Type = Ao3PageType.Unknown;
+                        if (uri.LocalPath == "/") model.Title = "Archive of Our Own Home Page";
+                        //model.Title = uri.ToString();
                     }
                     return new KeyValuePair<string, Ao3PageModel>(url, model);
                 }));
@@ -435,7 +461,7 @@ namespace Ao3TrackReader.Data
             model.Details = new Ao3WorkDetails();
 
             // Gather all tags
-            Dictionary<Ao3TagType, List<string>> tags = new Dictionary<Ao3TagType, List<string>>();
+            SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
 
             // Tags node
             HtmlNode tagsnode = worknode.ElementByClass("ul", "tags");
@@ -535,13 +561,13 @@ namespace Ao3TrackReader.Data
 
             // Get requried tags
             HtmlNode requirednode = headernode?.ElementByClass("required-tags");
-            Dictionary<Ao3RequiredTags, HtmlNode> required = new Dictionary<Ao3RequiredTags, HtmlNode>(4);
-            required[Ao3RequiredTags.Rating] = requirednode?.DescendantsByClass("span", "rating")?.FirstOrDefault();
-            required[Ao3RequiredTags.Warning] = requirednode?.DescendantsByClass("span", "warnings")?.FirstOrDefault();
-            required[Ao3RequiredTags.Category] = requirednode?.DescendantsByClass("span", "category")?.FirstOrDefault();
-            required[Ao3RequiredTags.Complete] = requirednode?.DescendantsByClass("span", "iswip")?.FirstOrDefault();
+            Dictionary<Ao3RequiredTag, HtmlNode> required = new Dictionary<Ao3RequiredTag, HtmlNode>(4);
+            required[Ao3RequiredTag.Rating] = requirednode?.DescendantsByClass("span", "rating")?.FirstOrDefault();
+            required[Ao3RequiredTag.Warnings] = requirednode?.DescendantsByClass("span", "warnings")?.FirstOrDefault();
+            required[Ao3RequiredTag.Category] = requirednode?.DescendantsByClass("span", "category")?.FirstOrDefault();
+            required[Ao3RequiredTag.Complete] = requirednode?.DescendantsByClass("span", "iswip")?.FirstOrDefault();
 
-            model.RequiredTags = new Dictionary<Ao3RequiredTags, Tuple<string, string>>(4);
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Tuple<string, string>>(4);
             foreach (var n in required)
             {
                 if (n.Value == null)
@@ -565,15 +591,23 @@ namespace Ao3TrackReader.Data
             }
 
             model.PrimaryTag = null;
-            model.Tags = tags;
 
             // Get primary tag... 
-            if (tags.ContainsKey(Ao3TagType.Relationships) && tags[Ao3TagType.Relationships].Count > 0) model.PrimaryTag = await LookupTag(tags[Ao3TagType.Relationships][0]);
-            else if (tags.ContainsKey(Ao3TagType.Fandoms) && tags[Ao3TagType.Fandoms].Count > 0) model.PrimaryTag = await LookupTag(tags[Ao3TagType.Fandoms][0]);
+            if (tags.ContainsKey(Ao3TagType.Relationships) && tags[Ao3TagType.Relationships].Count > 0)
+            {
+                model.PrimaryTag = await LookupTag(tags[Ao3TagType.Relationships][0]);
+                model.PrimaryTagType = Ao3TagType.Relationships;
+            }
+            else if (tags.ContainsKey(Ao3TagType.Fandoms) && tags[Ao3TagType.Fandoms].Count > 0)
+            {
+                model.PrimaryTag = await LookupTag(tags[Ao3TagType.Fandoms][0]);
+                model.PrimaryTagType = Ao3TagType.Fandoms;
+            }
 
             if (model.PrimaryTag != null)
             {
                 model.PrimaryTag = await LookupTag(model.PrimaryTag);
+                if (model.PrimaryTagType == Ao3TagType.Other) model.PrimaryTagType = await LookupTagCategory(model.PrimaryTag);
             }
 
             // Stats
@@ -602,7 +636,6 @@ namespace Ao3TrackReader.Data
                     if (chapters[1] == "?") total = null;
                     else total = int.Parse(chapters[1]);
                     model.Details.Chapters = new Tuple<int, int?>(int.Parse(chapters[0]), total);
-                    model.Complete = model.Details.Chapters.Item1 == model.Details.Chapters.Item2;
                 }
                 catch
                 {
@@ -705,7 +738,8 @@ namespace Ao3TrackReader.Data
             }
 
 
-            var tasks = new List<Task<KeyValuePair<Ao3TagType, string>>>();
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Tuple<string, string>>(4);
+            var tasks = new List<Task<KeyValuePair<Ao3TagType, Tuple<string,int>>>>();
 
             foreach (var i in Enum.GetValues(typeof(Ao3TagType)))
             {
@@ -720,7 +754,7 @@ namespace Ao3TrackReader.Data
 
                         tasks.Add(Task.Run(async () => {
                             string tag = await LookupTag(id);
-                            return new KeyValuePair<Ao3TagType, string>((Ao3TagType)i, tag);
+                            return new KeyValuePair<Ao3TagType, Tuple<string, int>>((Ao3TagType)i, new Tuple<string,int>(tag,id));
                         }));
                     }
                 }
@@ -732,7 +766,7 @@ namespace Ao3TrackReader.Data
                 {
                     tasks.Add(Task.Run(async () =>
                     {
-                        return new KeyValuePair<Ao3TagType, string>(await LookupTagCategory(tag), UnescapeTag(tag));
+                        return new KeyValuePair<Ao3TagType, Tuple<string, int>>(await LookupTagCategory(tag), new Tuple<string,int>(UnescapeTag(tag),0));
                     }));
                 }
 
@@ -746,7 +780,7 @@ namespace Ao3TrackReader.Data
                 {
                     tasks.Add(Task.Run(async () => {
                         model.Language = await LookupLanguage(id);
-                        return new KeyValuePair<Ao3TagType, string>(Ao3TagType.Other, null);
+                        return new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, null);
                     }));
                 }
             }
@@ -754,12 +788,14 @@ namespace Ao3TrackReader.Data
 
             if (query.ContainsKey("work_search[complete]"))
             {
-                int i;
-                bool b;
-                if (int.TryParse(query["work_search[complete]"][0], out i))
-                    model.Complete = i != 0;
-                else if (bool.TryParse(query["work_search[complete]"][0], out b))
-                    model.Complete = b;
+                int i = 0;
+                bool b = false;
+                if (int.TryParse(query["work_search[complete]"][0], out i) || bool.TryParse(query["work_search[complete]"][0], out b)) {
+                    if (i != 0 || b)
+                        model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("complete-yes", "Complete only");
+                    else
+                        model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("complete-no", "Complete and Incomplete");
+                }
             }
 
             if (query.ContainsKey("work_search[query]"))
@@ -770,23 +806,73 @@ namespace Ao3TrackReader.Data
             if (query.ContainsKey("tag_id"))
             {
                 model.PrimaryTag = await LookupTag(query["tag_id"][0]);
+                model.PrimaryTagType = await LookupTagCategory(model.PrimaryTag);
             }
 
-            Dictionary<Ao3TagType, List<string>> tags = model.Tags = new Dictionary<Ao3TagType, List<string>>();
-
             // Now deal with tags that we looked up
+            SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
+            Dictionary<string,int> idmap = new Dictionary<string,int>(tasks.Count);
             foreach (var t in await Task.WhenAll(tasks))
             {
-                if (string.IsNullOrEmpty(t.Value))
+                if (t.Value == null || string.IsNullOrEmpty(t.Value.Item1))
                     continue;
+
+                if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;
 
                 List<string> list;
                 if (!tags.TryGetValue(t.Key, out list))
                 {
                     tags[t.Key] = list = new List<string>();
                 }
-                list.Add(t.Value);
+                list.Add(t.Value.Item1);
+            }
+
+            // Generate required tags
+            List<string> req;
+            if (tags.TryGetValue(Ao3TagType.Warnings, out req))
+            {
+                int id = 0;
+                string sclass;
+                if (req.Count == 1 && idmap.TryGetValue(req[0],out id) && TagIdToReqClass.TryGetValue(id,out sclass))
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>(sclass, req[0]);
+                else
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>("warning-yes", string.Join(", ", req));
+            }
+            if (tags.TryGetValue(Ao3TagType.Category, out req))
+            {
+                int id = 0;
+                string sclass;
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>(sclass, req[0]);
+                else
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>("category-multi", string.Join(", ", req));
+            }
+            if (tags.TryGetValue(Ao3TagType.Rating, out req))
+            {
+                int id = 0;
+                string sclass;
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>(sclass, req[0]);
+                else
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>("rating-na", string.Join(", ", req));
             }
         }
+
+        static Dictionary<int, string> TagIdToReqClass = new Dictionary<int, string> {
+            { 14, "warning-choosenotto" },
+            { 16, "warning-no" },
+            { 10, "rating-general-audience"},
+            { 11, "rating-teen"},
+            { 12, "rating-mature"},
+            { 13, "rating-explicit"},
+            { 9, "rating-notrated"},
+            { 116, "category-femslash"},
+            { 22, "category-het"},
+            { 21, "category-gen"},
+            { 23, "category-slash"},
+            { 2246, "category-multi"},
+            { 24, "category-other"},
+        };
+
     }
 }

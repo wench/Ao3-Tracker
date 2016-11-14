@@ -29,7 +29,8 @@ namespace Ao3TrackReader
 #endif
         Label PrevPageIndicator;
         Label NextPageIndicator;
-        ListView readingList;
+        GroupList<Models.Ao3PageViewModel> readingListBacking;
+        ReadingListView readingList;
         Entry urlEntry;
         StackLayout urlBar;
         AbsoluteLayout modelPopup;
@@ -57,7 +58,7 @@ namespace Ao3TrackReader
             commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () =>
             {
-                if (readingList.TranslationX < 180)
+                if (readingList.TranslationX < 240)
                 {
                     readingList.Unfocus();
                 }
@@ -108,13 +109,34 @@ namespace Ao3TrackReader
             // retore font size!
             FontSize = 100;
 
-            readingList = new ListView();
-            AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 360, 1));
+            readingListBacking = new GroupList<Models.Ao3PageViewModel>();
+
+            readingList = new ReadingListView();
+            AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 480, 1));
             AbsoluteLayout.SetLayoutFlags(readingList, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
-            readingList.ItemsSource = new string[] { "Home" };
-            readingList.BackgroundColor = Color.Black;
-            readingList.TranslationX = 360;
+            readingList.ItemsSource = readingListBacking;
+            readingList.BackgroundColor = App.Colors["SystemAltMediumHighColor"];
+            readingList.TranslationX = 480;
             readingList.Unfocused += ReadingList_Unfocused;
+            readingList.ItemTapped += ReadingList_ItemTapped;
+
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                var models = await Data.Ao3SiteDataLookup.Lookup(new[] {
+                    "http://archiveofourown.org/"
+                    /*
+                    "http://archiveofourown.org/works/8398573",
+                    "http://archiveofourown.org/works?utf8=%E2%9C%93&work_search%5Bsort_column%5D=revised_at&work_search%5Brating_ids%5D%5B%5D=11&work_search%5Bwarning_ids%5D%5B%5D=16&work_search%5Bwarning_ids%5D%5B%5D=14&work_search%5Bcategory_ids%5D%5B%5D=116&work_search%5Bfandom_ids%5D%5B%5D=1635478&work_search%5Bcharacter_ids%5D%5B%5D=3553370&work_search%5Brelationship_ids%5D%5B%5D=4001273&work_search%5Brelationship_ids%5D%5B%5D=2499660&work_search%5Bfreeform_ids%5D%5B%5D=18154&work_search%5Bother_tag_names%5D=Clarke+Griffin%2COctavia+Blake&work_search%5Bquery%5D=-omega&work_search%5Blanguage_id%5D=1&work_search%5Bcomplete%5D=0&commit=Sort+and+Filter&tag_id=Clarke+Griffin*s*Lexa",
+                    "http://archiveofourown.org/works/8379496",
+                    "http://archiveofourown.org/works/8512471"*/
+                });
+
+                DoOnMainThread(() =>
+                {
+                    foreach (var m in models)
+                        readingListBacking.Add(new Models.Ao3PageViewModel { BaseData = m.Value });
+                });
+            });
 
             urlBar = new StackLayout
             {
@@ -165,7 +187,7 @@ namespace Ao3TrackReader
                         wv,
                         PrevPageIndicator,
                         NextPageIndicator,
-                        readingList,                        
+                        readingList,
                     }
             });
             mainlayout.Children.Add(urlBar);
@@ -198,9 +220,15 @@ namespace Ao3TrackReader
 
                 }
 
-            };            
+            };
 
             Content = outerlayout;
+        }
+
+        private void ReadingList_ItemTapped(object sender, ItemTappedEventArgs e)
+        {
+            var item = e.Item as Models.Ao3PageViewModel;
+            if (item != null) Navigate(item.Uri.AbsoluteUri);
         }
 
         private void UrlCancel_Clicked(object sender, EventArgs e)
@@ -239,7 +267,7 @@ namespace Ao3TrackReader
 
         private void ReadingList_Unfocused(object sender, FocusEventArgs e)
         {
-            readingList.TranslateTo(360, 0, 100, Easing.CubicIn);
+            readingList.TranslateTo(480, 0, 100, Easing.CubicIn);
         }
 
         public int FontSizeMax { get { return 300; } }
@@ -283,7 +311,7 @@ namespace Ao3TrackReader
                 return function();
             }
             else
-            { 
+            {
                 object result = null;
                 ManualResetEventSlim handle = new ManualResetEventSlim();
 
@@ -299,13 +327,13 @@ namespace Ao3TrackReader
         }
 
         public void DoOnMainThread(MainThreadAction function)
-        {            
+        {
             if (Dispatcher.HasThreadAccess)
             {
                 function();
             }
             else
-            { 
+            {
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     function();
@@ -371,8 +399,17 @@ namespace Ao3TrackReader
 
         public void addToReadingList(string href)
         {
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                var models = await Data.Ao3SiteDataLookup.Lookup(new[] { href });
+
+                DoOnMainThread(() =>
+                {
+                    foreach (var m in models)
+                        readingListBacking.Add(new Models.Ao3PageViewModel { BaseData = m.Value });
+                });
+            });
 
         }
-
     }
 }

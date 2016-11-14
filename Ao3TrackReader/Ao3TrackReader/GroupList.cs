@@ -11,9 +11,10 @@ namespace Ao3TrackReader
     public interface IGroupable
     {
         string Group { get; }
+        string GroupType { get; }
     }
 
-    public class GroupSubList<T> : ObservableCollection<T>
+    public class GroupSubList<T> : ObservableCollection<T>, INotifyPropertyChanged, INotifyPropertyChanging
     {
         public GroupSubList(string group)
         {
@@ -21,6 +22,24 @@ namespace Ao3TrackReader
         }
 
         public string Group { get; protected set; }
+        string grouptype;
+        public string GroupType
+        {
+            get { return grouptype; }
+            set
+            {
+                if (grouptype == value) return;
+                OnPropertyChanging(new PropertyChangingEventArgs("GroupType"));
+                grouptype = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("GroupType"));
+            }
+        }
+
+        public event PropertyChangingEventHandler PropertyChanging;
+        void OnPropertyChanging(PropertyChangingEventArgs args)
+        {
+            PropertyChanging?.Invoke(this, args);
+        }
     }
 
     public class GroupList<T> : ObservableCollection<GroupSubList<T>> where T : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging
@@ -44,7 +63,8 @@ namespace Ao3TrackReader
 
         private void AddToGroup(T item)
         {
-            string groupName = item.Group ?? "";
+            string groupName = item.Group;
+            if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
             GroupSubList<T> g = null;
 
             int i = 0;
@@ -55,17 +75,24 @@ namespace Ao3TrackReader
                     g = this[i];
                     break;
                 }
-                else if (c > 0)
+                else if (c > 0 && groupName != "<Other>")
                 {
                     break;
                 }
             }
             if (g == null)
             {
-                Insert(i, g = new GroupSubList<T>(groupName));
+                g = new GroupSubList<T>(groupName);
+                if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
+                g.Add(item);
+                Insert(i, g);
+            }
+            else
+            {
+                g.Add(item);
+                if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
             }
 
-            g.Add(item);
         }
 
         private void RemoveFromGroup(T item)
