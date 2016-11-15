@@ -435,6 +435,15 @@ namespace Ao3TrackReader.Data
 
                             var worknode = doc.GetElementbyId("work_" + sWORKID);
 
+                            model.Details = new Ao3WorkDetails();
+
+                            try { 
+                                model.Details.WorkId = long.Parse(sWORKID);
+                            }
+                            catch {
+
+                            }
+
                             await FillModelFromWorkSummary(wsuri, worknode, model);
                         }
                     }
@@ -458,8 +467,6 @@ namespace Ao3TrackReader.Data
 
         private static async Task FillModelFromWorkSummary(Uri baseuri, HtmlNode worknode, Ao3PageModel model)
         {
-            model.Details = new Ao3WorkDetails();
-
             // Gather all tags
             SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
 

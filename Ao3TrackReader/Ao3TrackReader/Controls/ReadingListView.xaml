@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ListView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Ao3TrackReader.ReadingListView"
-          xmlns:local="clr-namespace:Ao3TrackReader"
+<ListView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Ao3TrackReader.Controls.ReadingListView"
+          xmlns:local="clr-namespace:Ao3TrackReader.Controls"
              HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}">
   <ListView.ItemTemplate>
     <DataTemplate>
       <ViewCell>
-        <Grid ColumnSpacing="3" RowSpacing="3" Margin="3,3,16,6">
+        <Grid ColumnSpacing="3" RowSpacing="3">
           <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="25" />
@@ -16,20 +16,20 @@
             <ColumnDefinition Width="25" />
             <ColumnDefinition Width="25" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="72" />
+            <ColumnDefinition Width="80" />
           </Grid.ColumnDefinitions>
           <Image Source="{Binding ImageRating}" Grid.Row="0" Grid.Column="0" />
           <Image Source="{Binding ImageWarnings}" Grid.Row="1" Grid.Column="0" />
           <Image Source="{Binding ImageCategory}" Grid.Row="0" Grid.Column="1" />
           <Image Source="{Binding ImageComplete}" Grid.Row="1" Grid.Column="1" />
-          <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="3">
+          <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
             <Label Text="{Binding Title}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Start" />
             <Label Text="{Binding Subtitle}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Start"/>
           </StackLayout>
-          <Label Text="{Binding Date}" FontSize="12" Grid.Row="0" Grid.Column="3" />
-          <StackLayout Spacing="3" Margin="0" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4">
-            <Label FormattedText="{Binding Tags}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Start" />
-            <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Start" />
+          <Label Text="{Binding Date}" FontSize="12" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
+          <StackLayout Spacing="3" Margin="0" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,13,0">
+            <local:TextView TextTree="{Binding Tags}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="FillAndExpand"/>
+            <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="FillAndExpand" />
           </StackLayout>
         </Grid>
       </ViewCell>

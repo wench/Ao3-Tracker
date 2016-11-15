@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
-using Xamarin.Forms;
+using Color = Xamarin.Forms.Color;
+using ImageSource = Xamarin.Forms.ImageSource;
+using UriImageSource = Xamarin.Forms.UriImageSource;
 using System.Linq;
+using Ao3TrackReader.Controls;
 
 namespace Ao3TrackReader.Models
 {
@@ -52,12 +55,12 @@ namespace Ao3TrackReader.Models
         private Uri imageCompleteUri;
         public ImageSource ImageComplete { get { return new UriImageSource { Uri = imageCompleteUri }; } }
 
-        SortedDictionary<Ao3TagType,List<string>> tags;
-        public FormattedString Tags
+        SortedDictionary<Ao3TagType, List<string>> tags;
+        public TextTree Tags
         {
             get
             {
-                var fs = new FormattedString();
+                var fs = new Span();
 
                 if (tags != null)
                 {
@@ -65,31 +68,38 @@ namespace Ao3TrackReader.Models
                     {
                         if (t.Key == Ao3TagType.Fandoms) continue;
 
-                        FontAttributes attribs = FontAttributes.None;
-                        Color color;
+                        var s = new Span();
+
                         if (t.Key == Ao3TagType.Warnings)
                         {
-                            color = App.Colors["SystemBaseHighColor"];
-                            attribs = FontAttributes.Bold;
+                            s.Foreground = App.Colors["SystemBaseHighColor"];
+                            s.Bold = true;
                         }
                         else if (t.Key == Ao3TagType.Relationships)
-                            color = App.Colors["SystemChromeAltLowColor"];
+                            s.Foreground = App.Colors["SystemChromeAltLowColor"];
                         else if (t.Key == Ao3TagType.Characters)
                         {
                             var c1 = App.Colors["SystemChromeAltLowColor"];
                             var c2 = App.Colors["SystemChromeHighColor"];
-                            color = new Color((c1.R + c2.R) / 2, (c1.G + c2.G) / 2, (c1.B + c2.B) / 2);
+                            s.Foreground = new Color((c1.R + c2.R) / 2, (c1.G + c2.G) / 2, (c1.B + c2.B) / 2);
                         }
                         else
-                            color = App.Colors["SystemChromeHighColor"];
+                            s.Foreground = App.Colors["SystemChromeHighColor"];
 
                         foreach (var tag in t.Value)
                         {
-                            fs.Spans.Add(new Span { Text = tag.Replace(' ', '\xA0'), FontSize = 10, FontAttributes = attribs, ForegroundColor = color });
-                            fs.Spans.Add(new Span { Text = ",  ", FontSize = 10, FontAttributes = attribs, ForegroundColor = color });
+                            s.Nodes.Add(new TextNode { Text = tag.Replace(' ', '\xA0'), Underline = true });
+                            s.Nodes.Add(new TextNode { Text = ",  " });
                         }
+
+                        if (s.Nodes.Count != 0)
+                            fs.Nodes.Add(s);
                     }
-                    if (fs.Spans.Count > 1) fs.Spans.RemoveAt(fs.Spans.Count - 1);
+                }
+                if (fs.Nodes.Count != 0)
+                {
+                    var last = fs.Nodes[fs.Nodes.Count - 1] as Span;
+                    last.Nodes.RemoveAt(last.Nodes.Count - 1);
                 }
                 return fs;
             }
@@ -97,9 +107,11 @@ namespace Ao3TrackReader.Models
 
 
         Ao3PageModel baseData;
-        public Ao3PageModel BaseData {
+        public Ao3PageModel BaseData
+        {
             get { return baseData; }
-            set {
+            set
+            {
                 if (baseData == value) return;
                 baseData = value;
 
@@ -185,7 +197,26 @@ namespace Ao3TrackReader.Models
                 if (value.Details != null)
                 {
                     if (value.Details.Words != null) d.Add("Words:\xA0" + value.Details.Words.ToString());
-                    if (value.Details.Chapters != null) d.Add("Chapters:\xA0" + value.Details.Chapters.Item1.ToString() + "/" + (value.Details.Chapters.Item2?.ToString() ?? "?"));
+
+                    if (value.Details.Chapters != null)
+                    {
+                        string readstr = "";
+                        if (value.Details.WorkId != 0)
+                        {
+                            var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { value.Details.WorkId });
+                            tworkchaps.Wait();
+                            Helper.IWorkChapter workchap;
+                            if (tworkchaps.Result.TryGetValue(value.Details.WorkId, out workchap))
+                            {
+                                var chapters_finished = workchap.number;
+                                if (workchap.location != null) { chapters_finished--; }
+                                readstr = chapters_finished.ToString() + "/";
+                            }
+                        }
+
+                        d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item1.ToString() + "/" + (value.Details.Chapters.Item2?.ToString() ?? "?"));
+                    }
+
                     if (value.Details.Collections != null) d.Add("Collections:\xA0" + value.Details.Collections.ToString());
                     if (value.Details.Comments != null) d.Add("Comments:\xA0" + value.Details.Comments.ToString());
                     if (value.Details.Kudos != null) d.Add("Kudos:\xA0" + value.Details.Kudos.ToString());

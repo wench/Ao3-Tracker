@@ -37,6 +37,7 @@ namespace Ao3TrackReader.Models
 
     public class Ao3WorkDetails
     {
+        public long WorkId { get; set; }
         public IReadOnlyDictionary<string,string> Authors { get; set; }
         public IReadOnlyDictionary<string, string> Recipiants { get; set; }
         public IReadOnlyDictionary<string,Tuple<int,string>> Series { get; set; }

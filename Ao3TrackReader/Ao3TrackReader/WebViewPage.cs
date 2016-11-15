@@ -30,7 +30,7 @@ namespace Ao3TrackReader
         Label PrevPageIndicator;
         Label NextPageIndicator;
         GroupList<Models.Ao3PageViewModel> readingListBacking;
-        ReadingListView readingList;
+        Controls.ReadingListView readingList;
         Entry urlEntry;
         StackLayout urlBar;
         AbsoluteLayout modelPopup;
@@ -111,7 +111,7 @@ namespace Ao3TrackReader
 
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
 
-            readingList = new ReadingListView();
+            readingList = new Controls.ReadingListView();
             AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 480, 1));
             AbsoluteLayout.SetLayoutFlags(readingList, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
             readingList.ItemsSource = readingListBacking;

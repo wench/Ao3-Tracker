@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
-namespace Ao3TrackReader
+namespace Ao3TrackReader.Controls
 {
 	public partial class ReadingListView : ListView
 	{
