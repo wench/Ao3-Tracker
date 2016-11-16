@@ -8,11 +8,11 @@ using Ao3TrackReader.Models;
 namespace Ao3TrackReader
 {
 	public class Ao3TrackDatabase
-    {
-        static object locker = new object ();   
+	{
+		static object locker = new object ();   
 
 		SQLiteConnection database;
-        string DatabasePath {
+		string DatabasePath {
 			get { 
 				var sqliteFilename = "Ao3TrackSQLite.db3";
 				#if __IOS__
@@ -41,246 +41,254 @@ namespace Ao3TrackReader
 		/// </param>
 		public Ao3TrackDatabase()
 		{
-            database = new SQLiteConnection (DatabasePath);
-            // create the tables
-            database.CreateTable<Work>();
-            database.CreateTable<Variable>();
+			database = new SQLiteConnection (DatabasePath);
+			// create the tables
+			database.CreateTable<Work>();
+			database.CreateTable<Variable>();
+            var ti = database.GetTableInfo("TagCache");
+            if (ti != null && ti.Exists((ci) => ci.Name == "merger"))
+            {
+                database.DropTable<TagCache>();
+            }
             database.CreateTable<TagCache>();
             database.CreateTable<LanguageCache>();
+            database.CreateTable<ReadingList>();            
         }
 
-        public IEnumerable<Work> GetItems ()
+		public IEnumerable<Work> GetItems ()
 		{
 			lock (locker) {
 				return (from i in database.Table<Work>() select i);
 			}
 		}
 
-        public Work GetItem(long id)
-        {
-            lock (locker)
-            {
-                return database.Table<Work>().FirstOrDefault(x => x.id == id);
-            }
-        }
-
-        public IReadOnlyCollection<Work> GetItems(params long[] items)
-        {
-            return GetItems(items as IReadOnlyCollection<long>);
-        }
-
-        public IReadOnlyCollection<Work> GetItems(IReadOnlyCollection<long> items)
-        {
-            lock (locker)
-            {
-                Dictionary<long, Work> result = new Dictionary<long, Work>();
-
-                foreach (var item in items)
-                {
-                    var row = database.Table<Work>().FirstOrDefault(x => x.id == item);
-                    if (row != null)
-                    {
-                        result[item] = row;
-                    }
-                }
-
-                return result.Values;
-            }
-        }
-
-        public IReadOnlyCollection<Work> SaveItems (params Work[] items) 
+		public Work GetItem(long id)
 		{
-            return SaveItems(items as IReadOnlyCollection<Work>);
+			lock (locker)
+			{
+				return database.Table<Work>().FirstOrDefault(x => x.id == id);
+			}
+		}
 
-        }
+		public IReadOnlyCollection<Work> GetItems(params long[] items)
+		{
+			return GetItems(items as IReadOnlyCollection<long>);
+		}
 
-        public IReadOnlyCollection<Work> SaveItems(IReadOnlyCollection<Work> items)
-        {
-            lock (locker)
-            {
-                Dictionary<long,Work> newitems = new Dictionary<long, Work>();
+		public IReadOnlyCollection<Work> GetItems(IReadOnlyCollection<long> items)
+		{
+			lock (locker)
+			{
+				Dictionary<long, Work> result = new Dictionary<long, Work>();
 
-                foreach (var item in items) {
+				foreach (var item in items)
+				{
+					var row = database.Table<Work>().FirstOrDefault(x => x.id == item);
+					if (row != null)
+					{
+						result[item] = row;
+					}
+				}
 
-                    var row = database.Table<Work>().FirstOrDefault(x => x.id == item.id);
-                    if (row != null)
-                    {
-                        if (row.IsNewer(item)) { 
-                            database.Update(item);
-                            newitems[item.id] = item;
-                        }
-                    }
-                    else
-                    {
-                        database.Insert(item);
-                        newitems[item.id] = item;
-                    }
-                }
+				return result.Values;
+			}
+		}
 
-                return newitems.Values;
-            }
-        }
+		public IReadOnlyCollection<Work> SaveItems (params Work[] items) 
+		{
+			return SaveItems(items as IReadOnlyCollection<Work>);
 
-        public int DeleteItem(int id)
+		}
+
+		public IReadOnlyCollection<Work> SaveItems(IReadOnlyCollection<Work> items)
+		{
+			lock (locker)
+			{
+				Dictionary<long,Work> newitems = new Dictionary<long, Work>();
+
+				foreach (var item in items) {
+
+					var row = database.Table<Work>().FirstOrDefault(x => x.id == item.id);
+					if (row != null)
+					{
+						if (row.IsNewer(item)) { 
+							database.Update(item);
+							newitems[item.id] = item;
+						}
+					}
+					else
+					{
+						database.Insert(item);
+						newitems[item.id] = item;
+					}
+				}
+
+				return newitems.Values;
+			}
+		}
+
+		public int DeleteItem(int id)
 		{
 			lock (locker) {
 				return database.Delete<Work>(id);
 			}
 		}
 
-        public string GetVariable(string name)
+		public string GetVariable(string name)
+		{
+			lock (locker)
+			{
+				var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+				if (row != null)
+				{
+					return row.value;
+				}
+				else
+				{
+					return null;
+
+				}
+			}
+		}
+
+		public void SaveVariable(string name, string value)
+		{
+			lock (locker)
+			{
+				var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+				if (row != null)
+				{
+					database.Update(new Variable { name = name, value = value });
+				}
+				else
+				{
+					database.Insert(new Variable { name = name, value = value });
+				}
+			}
+		}
+
+		public string GetTag(int id)
+		{
+			lock (locker)
+			{
+				var now = DateTime.UtcNow;
+				var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
+				return row?.name;
+			}
+		}
+
+		public TagCache GetTag(string name)
+		{
+			lock (locker)
+			{
+				var now = DateTime.UtcNow;
+				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
+				return row;
+			}
+
+		}
+
+		public void SetTagId(string name, int id)
+		{
+			lock (locker)
+			{
+				var now = DateTime.UtcNow;
+				var expires = now + new TimeSpan(7, 0, 0, 0);
+				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+				if (row != null)
+				{
+					if (row.expires <= now) row = new TagCache { name = name };
+					row.id = id;
+					row.expires = expires;
+					database.Update(row);
+				}
+				else
+				{
+					database.Insert(new TagCache { name = name, id = id, expires = expires });
+				}
+			}
+
+		}
+
+		public void SetTagDetails(TagCache tag)
+		{
+			lock (locker)
+			{
+				var now = DateTime.UtcNow;
+				tag.expires = now + new TimeSpan(7, 0, 0, 0);
+				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
+				if (row != null)
+				{
+					if (row.expires <= now) tag.id = 0;
+					database.Update(tag);
+				}
+				else
+				{
+					tag.id = 0;
+					database.Insert(tag);
+				}
+			}
+		}
+
+		public string GetLanguage(int id)
+		{
+			lock (locker)
+			{
+				var row = database.Table<LanguageCache>().FirstOrDefault(x => x.id == id);
+				return row?.name;
+			}
+		}
+
+		public void SetLanguage(string name, int id)
+		{
+			lock (locker)
+			{
+				var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
+				if (row != null)
+				{
+					row.id = id;
+					database.Update(row);
+				}
+				else
+				{
+					database.Insert(new LanguageCache { name = name, id = id });
+				}
+			}
+
+		}
+
+        public IEnumerable<ReadingList> GetReadingListItems()
         {
             lock (locker)
             {
-                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (row != null)
-                {
-                    return row.value;
-                }
-                else
-                {
-                    return null;
-
-                }
+                return (from i in database.Table<ReadingList>() select i);
             }
         }
 
-        public void SaveVariable(string name, string value)
+        public void SaveReadingListItems(params ReadingList[] items)
+        {
+            SaveReadingListItems(items as IReadOnlyCollection<ReadingList>);
+
+        }
+
+        public void SaveReadingListItems(IReadOnlyCollection<ReadingList> items)
         {
             lock (locker)
             {
-                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (row != null)
+                foreach (var item in items)
                 {
-                    database.Update(new Variable { name = name, value = value });
-                }
-                else
-                {
-                    database.Insert(new Variable { name = name, value = value });
-                }
-            }
-        }
 
-        public string GetTagForId(int id)
-        {
-            lock (locker)
-            {
-                var now = DateTime.UtcNow;
-                var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
-                return row?.name;
-            }
-        }
-
-        public string GetTagMerger(string name)
-        {
-            lock (locker)
-            {
-                var now = DateTime.UtcNow;
-                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
-                return row?.merger;
-            }
-
-        }
-        public string GetTagCategory(string name)
-        {
-            lock (locker)
-            {
-                var now = DateTime.UtcNow;
-                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
-                return row?.category;
-            }
-
-        }
-
-        public void SetTagId(string name, int id)
-        {
-            lock (locker)
-            {
-                var now = DateTime.UtcNow;
-                var expires = now + new TimeSpan(7, 0, 0, 0);
-                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
-                if (row != null)
-                {
-                    if (row.expires <= now) row = new TagCache { name = name };
-                    row.id = id;
-                    row.expires = expires;
-                    database.Update(row);
-                }
-                else
-                {
-                    database.Insert(new TagCache { name = name, id = id, expires = expires });
-                }
-            }
-
-        }
-
-        public void SetTagMerger(string name, string merger)
-        {
-            lock (locker)
-            {
-                var now = DateTime.UtcNow;
-                var expires = now + new TimeSpan(7, 0, 0, 0);
-                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
-                if (row != null)
-                {
-                    if (row.expires <= now) row = new TagCache { name = name };
-                    row.merger = merger;
-                    row.expires = expires;
-                    database.Update(row);
-                }
-                else
-                {
-                    database.Insert(new TagCache { name = name, merger = merger, expires = expires });
+                    var row = database.Table<ReadingList>().FirstOrDefault(x => x.Uri == item.Uri);
+                    if (row != null)
+                    {
+                        database.Update(item);
+                    }
+                    else
+                    {
+                        database.Insert(item);
+                    }
                 }
             }
         }
-        public void SetTagCategory(string name, string category)
-        {
-            lock (locker)
-            {
-                var now = DateTime.UtcNow;
-                var expires = now + new TimeSpan(7, 0, 0, 0);
-                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
-                if (row != null)
-                {
-                    if (row.expires <= now) row = new TagCache { name = name };
-                    row.category = category;
-                    row.expires = expires;
-                    database.Update(row);
-                }
-                else
-                {
-                    database.Insert(new TagCache { name = name, category = category, expires = expires });
-                }
-            }
-        }
-
-        public string GetLanguage(int id)
-        {
-            lock (locker)
-            {
-                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.id == id);
-                return row?.name;
-            }
-        }
-
-        public void SetLanguage(string name, int id)
-        {
-            lock (locker)
-            {
-                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
-                if (row != null)
-                {
-                    row.id = id;
-                    database.Update(row);
-                }
-                else
-                {
-                    database.Insert(new LanguageCache { name = name, id = id });
-                }
-            }
-
-        }
-
     }
 }

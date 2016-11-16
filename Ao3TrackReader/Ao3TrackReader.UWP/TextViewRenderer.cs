@@ -21,7 +21,7 @@ namespace Ao3TrackReader.UWP
             base.OnElementChanged(e);
 
             var view = e.NewElement as TextView;
-            if (e.NewElement != null)
+            if (view != null)
             {
                 UpdateControl(view);
             }
@@ -29,8 +29,6 @@ namespace Ao3TrackReader.UWP
 
         protected override void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            base.OnElementPropertyChanged(sender, e);
-
             var view = Element as TextView;
 
             if (view != null &&
@@ -38,10 +36,16 @@ namespace Ao3TrackReader.UWP
                 e.PropertyName == Label.FormattedTextProperty.PropertyName ||
                 e.PropertyName == TextView.TextTreeProperty.PropertyName)
             {
-                UpdateControl(view);
+                if (view.TextTree != null)
+                {
+                    UpdateControl(view);
+                    return;
+                }
             }
-        }
 
+            base.OnElementPropertyChanged(sender, e);
+        }
+        
         void UpdateControl(TextView view)
         {
             if (view.TextTree == null) return;
@@ -49,8 +53,8 @@ namespace Ao3TrackReader.UWP
             var inlines = ConvertTree(view.TextTree);
 
             Control.Inlines.Clear();
-            if (inlines != null) Control.Inlines.Add(inlines);
-            UpdateLayout();
+            if (inlines != null) Control.Inlines.Add(inlines);            
+            
         }
 
 

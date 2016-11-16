@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Ao3TrackReader.Helper;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.Platform.UWP;
@@ -120,23 +121,31 @@ namespace Ao3TrackReader
             readingList.Unfocused += ReadingList_Unfocused;
             readingList.ItemTapped += ReadingList_ItemTapped;
 
-            System.Threading.Tasks.Task.Run(async () =>
+            // Restore the reading list contents!
+            var items = new Dictionary<string, Models.ReadingList>();
+            foreach (var i in App.Database.GetReadingListItems())
             {
-                var models = await Data.Ao3SiteDataLookup.Lookup(new[] {
-                    "http://archiveofourown.org/"
-                    /*
-                    "http://archiveofourown.org/works/8398573",
-                    "http://archiveofourown.org/works?utf8=%E2%9C%93&work_search%5Bsort_column%5D=revised_at&work_search%5Brating_ids%5D%5B%5D=11&work_search%5Bwarning_ids%5D%5B%5D=16&work_search%5Bwarning_ids%5D%5B%5D=14&work_search%5Bcategory_ids%5D%5B%5D=116&work_search%5Bfandom_ids%5D%5B%5D=1635478&work_search%5Bcharacter_ids%5D%5B%5D=3553370&work_search%5Brelationship_ids%5D%5B%5D=4001273&work_search%5Brelationship_ids%5D%5B%5D=2499660&work_search%5Bfreeform_ids%5D%5B%5D=18154&work_search%5Bother_tag_names%5D=Clarke+Griffin%2COctavia+Blake&work_search%5Bquery%5D=-omega&work_search%5Blanguage_id%5D=1&work_search%5Bcomplete%5D=0&commit=Sort+and+Filter&tag_id=Clarke+Griffin*s*Lexa",
-                    "http://archiveofourown.org/works/8379496",
-                    "http://archiveofourown.org/works/8512471"*/
-                });
+                items[i.Uri] = i;
+            }
 
-                DoOnMainThread(() =>
+            if (items.Count == 0) items.Add("https://archiveofourown.org/", new Models.ReadingList());
+
+            var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
+            foreach (var m in models)
+            {
+                if (m.Value != null)
                 {
-                    foreach (var m in models)
-                        readingListBacking.Add(new Models.Ao3PageViewModel { BaseData = m.Value });
-                });
-            });
+                    var item = items[m.Key];
+                    if (string.IsNullOrWhiteSpace(m.Value.Title))
+                        m.Value.Title = item.Title;
+                    if (string.IsNullOrWhiteSpace(m.Value.PrimaryTag) || m.Value.PrimaryTag=="<Work>")
+                        m.Value.PrimaryTag = item.PrimaryTag;
+
+                    var viewmodel = new Models.Ao3PageViewModel { BaseData = m.Value };
+                    readingListBacking.Add(viewmodel);
+                    refreshReadingListItem(viewmodel);
+                }
+            }
 
             urlBar = new StackLayout
             {
@@ -397,16 +406,56 @@ namespace Ao3TrackReader
             }
         }
 
+        Regex regexPageQuery = new Regex(@"(?<PAGE>&?page=\d+&?)");
         public void addToReadingList(string href)
+        {
+            href = regexPageQuery.Replace(href, (m) => {
+                if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
+                else return "";
+            });
+
+            var uribuilder = new UriBuilder(href.TrimEnd('?'));
+
+            if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
+            {
+                if (uribuilder.Scheme == "http")
+                {
+                    uribuilder.Scheme = "https";
+                }
+                uribuilder.Port = -1;
+            }
+            else
+                return;
+
+            href = uribuilder.ToString();
+
+            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
+                return;
+
+            var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
+            var model = models.SingleOrDefault();
+            if (model.Value == null) return;
+
+            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+            readingListBacking.Add(viewmodel);
+            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+            refreshReadingListItem(viewmodel);
+        }
+
+        public void refreshReadingListItem(Models.Ao3PageViewModel viewmodel)
         {
             System.Threading.Tasks.Task.Run(async () =>
             {
-                var models = await Data.Ao3SiteDataLookup.Lookup(new[] { href });
+                var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
 
                 DoOnMainThread(() =>
                 {
-                    foreach (var m in models)
-                        readingListBacking.Add(new Models.Ao3PageViewModel { BaseData = m.Value });
+                    var model = models.SingleOrDefault();
+                    if (model.Value != null)
+                    {
+                        viewmodel.BaseData = model.Value;
+                        App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                    }
                 });
             });
 

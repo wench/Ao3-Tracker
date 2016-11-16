@@ -37,7 +37,7 @@ namespace Ao3TrackReader.Models
 
         public string Group { get; private set; }
         public string GroupType { get; private set; }
-        public string Title { get; private set; }
+        public TextTree Title { get; private set; }
         public string Date { get; private set; }
         public string Subtitle { get; private set; }
         public string Details { get; private set; }
@@ -105,6 +105,23 @@ namespace Ao3TrackReader.Models
             }
         }
 
+        public bool TagsVisible
+        {
+            get
+            {
+
+                if (tags != null)
+                {
+                    foreach (var t in tags)
+                    {
+                        if (t.Key == Ao3TagType.Fandoms) continue;
+                        if (t.Value != null && t.Value.Count > 0)
+                            return true;
+                    }
+                }
+                return false;
+            }
+        }
 
         Ao3PageModel baseData;
         public Ao3PageModel BaseData
@@ -135,51 +152,60 @@ namespace Ao3TrackReader.Models
                     }
                 }
 
-                Uri image;
-                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Rating)) != null || imageRatingUri != null)
-                {
-                    OnPropertyChanging("ImageRating");
-                    imageRatingUri = image;
-                    OnPropertyChanged("ImageRating");
-                }
+                OnPropertyChanging("ImageRating");
+                imageRatingUri = value.GetRequiredTagUri(Ao3RequiredTag.Rating);
+                OnPropertyChanged("ImageRating");
 
-                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Warnings)) != null || imageWarningsUri != null)
-                {
-                    OnPropertyChanging("ImageWarnings");
-                    imageWarningsUri = image;
-                    OnPropertyChanged("ImageWarnings");
-                }
+                OnPropertyChanging("ImageWarnings");
+                imageWarningsUri = value.GetRequiredTagUri(Ao3RequiredTag.Warnings);
+                OnPropertyChanged("ImageWarnings");
 
-                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Category)) != null || imageCategoryUri != null)
-                {
-                    OnPropertyChanging("ImageCategory");
-                    imageCategoryUri = image;
-                    OnPropertyChanged("ImageCategory");
-                }
+                OnPropertyChanging("ImageCategory");
+                imageCategoryUri = value.GetRequiredTagUri(Ao3RequiredTag.Category);
+                OnPropertyChanged("ImageCategory");
 
-                if ((image = value.GetRequiredTagUri(Ao3RequiredTag.Complete)) != null || imageCompleteUri != null)
-                {
-                    OnPropertyChanging("ImageComplete");
-                    imageCompleteUri = image;
-                    OnPropertyChanged("ImageComplete");
-                }
+                OnPropertyChanging("ImageComplete");
+                imageCompleteUri = value.GetRequiredTagUri(Ao3RequiredTag.Complete);
+                OnPropertyChanged("ImageComplete");
 
                 OnPropertyChanging("Uri");
                 Uri = value.Uri;
                 OnPropertyChanged("Uri");
 
-                OnPropertyChanging("Title");
-                Title = value.Title ?? "";
+                var ts = new Span();
+                if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
                 if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
                 {
-                    Title += " by " + string.Join(",  ", value.Details.Authors.Values);
+                    ts.Nodes.Add(new TextNode { Text = " by ", Foreground = App.Colors["SystemBaseHighColor"] });
+                    bool first = true;
+                    foreach (var user in value.Details.Authors)
+                    {
+                        if (!first)
+                        {
+                            ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
+                            first = false;
+                        }
+                        ts.Nodes.Add(user.Value);
+                    }
                 }
                 if (value.Details?.Recipiants != null && value.Details.Recipiants.Count != 0)
                 {
-                    Title += " for " + string.Join(",  ", value.Details.Recipiants.Values);
+                    ts.Nodes.Add(new TextNode { Text = " for ", Foreground = App.Colors["SystemBaseHighColor"] });
+                    bool first = true;
+                    foreach (var user in value.Details.Recipiants)
+                    {
+                        if (!first)
+                        {
+                            ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
+                            first = false;
+                        }
+                        ts.Nodes.Add(user.Value);
+                    }
                 }
-                Title = Title.Trim();
-                if (Title == "") Title = Uri.PathAndQuery;
+
+                OnPropertyChanging("Title");
+                if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
+                else Title = ts;
                 OnPropertyChanged("Title");
 
                 OnPropertyChanging("Date");
@@ -227,10 +253,13 @@ namespace Ao3TrackReader.Models
 
                 Details = string.Join("   ", d);
                 if (!string.IsNullOrWhiteSpace(value.SearchQuery)) Details = ("Query: " + value.SearchQuery + "\n" + Details).Trim();
+                if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
                 OnPropertyChanged("Details");
 
                 OnPropertyChanging("Tags");
+                OnPropertyChanging("TagsVisible");
                 tags = value.Tags;
+                OnPropertyChanged("TagsVisible");
                 OnPropertyChanged("Tags");
             }
         }

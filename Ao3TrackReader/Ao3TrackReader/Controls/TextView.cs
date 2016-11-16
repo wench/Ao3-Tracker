@@ -70,7 +70,7 @@ namespace Ao3TrackReader.Controls
 		  Xamarin.Forms.BindableProperty.Create("TextTree", typeof(TextTree), typeof(TextView), defaultValue: null);
 
 		public TextTree TextTree
-        {
+		{
 			get { return (TextTree)GetValue(TextTreeProperty); }
 			set { SetValue(TextTreeProperty, value); }
 		}

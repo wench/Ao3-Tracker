@@ -61,6 +61,19 @@ namespace Ao3TrackReader
             RemoveFromGroup(item);
         }
 
+        public T Find(Predicate<T> pred)
+        {
+            foreach (var g in this)
+            {
+                foreach (var e in g)
+                {
+                    if (pred(e))
+                        return e;
+                }
+            }
+            return default(T);
+        }
+
         private void AddToGroup(T item)
         {
             string groupName = item.Group;
