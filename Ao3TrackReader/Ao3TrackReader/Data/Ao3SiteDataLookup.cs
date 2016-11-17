@@ -126,9 +126,11 @@ namespace Ao3TrackReader.Data
         static Regex regexEscTag = new Regex(@"([/&.?#])");
         static Regex regexUnescTag = new Regex(@"(\*[sadqh])\*");
         static Regex regexTag = new Regex(@"^/tags/(?<TAGNAME>[^/?#]+)(/(?<TYPE>(works|bookmarks)?))?$", RegexOptions.ExplicitCapture);
-        static Regex regexWork = new Regex(@"^/works/(?<WORKID>\d+)(/chapter/(?<CHAPTERID>\d+))?$", RegexOptions.ExplicitCapture);
+        static Regex regexWork = new Regex(@"^/works/(?<WORKID>\d+)(/chapters/(?<CHAPTERID>\d+))?$", RegexOptions.ExplicitCapture);
+        static Regex regexWorkComment = new Regex(@"^/works/(?<WORKID>\d+)/comments/(?<COMMENTID>\d+)$", RegexOptions.ExplicitCapture);
         static Regex regexRSSTagTitle = new Regex(@"AO3 works tagged '(?<TAGNAME>.*)'$", RegexOptions.ExplicitCapture);
         static Regex regexTagCategory = new Regex(@"This tag belongs to the (?<CATEGORY>\w*) Category\.", RegexOptions.ExplicitCapture);
+        static Regex regexPageQuery = new Regex(@"(?<PAGE>&?page=\d+&?)");
 
         static string EscapeTag(string tag)
         {
@@ -150,7 +152,7 @@ namespace Ao3TrackReader.Data
             });
         }
 
-        static string LookupTagQuick(int tagid)
+        static public string LookupTagQuick(int tagid)
         {
             string tag = App.Database.GetTag(tagid);
             if (!string.IsNullOrEmpty(tag))
@@ -159,7 +161,7 @@ namespace Ao3TrackReader.Data
             return null;
         }
 
-        static async Task<string> LookupTagAsync(int tagid)
+        static public async Task<string> LookupTagAsync(int tagid)
         {
             string tag = App.Database.GetTag(tagid);
             if (!string.IsNullOrEmpty(tag))
@@ -212,7 +214,7 @@ namespace Ao3TrackReader.Data
             return tag;
         }
 
-        static TagCache LookupTagQuick(string intag)
+        static public TagCache LookupTagQuick(string intag)
         {
             intag = UnescapeTag(intag);
             var tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
@@ -223,7 +225,7 @@ namespace Ao3TrackReader.Data
             return null;
         }
 
-        static async Task<TagCache> LookupTagAsync(string intag)
+        static public async Task<TagCache> LookupTagAsync(string intag)
         {
             intag = UnescapeTag(intag);
             var tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
@@ -311,7 +313,7 @@ namespace Ao3TrackReader.Data
             return tag;
         }
 
-        static Ao3TagType GetTypeForCategory(string category)
+        static public Ao3TagType GetTypeForCategory(string category)
         {
             if (!string.IsNullOrEmpty(category))
             {
@@ -322,7 +324,7 @@ namespace Ao3TrackReader.Data
 
             return Ao3TagType.Other;
         }
-        static string LookupLanguageQuick(int langid)
+        static public string LookupLanguageQuick(int langid)
         {
             string name = App.Database.GetLanguage(langid);
             if (!string.IsNullOrEmpty(name))
@@ -333,7 +335,7 @@ namespace Ao3TrackReader.Data
             return null;
         }
 
-        static async Task<string> LookupLanguageAsync(int langid)
+        static public async Task<string> LookupLanguageAsync(int langid)
         {
             string name = App.Database.GetLanguage(langid);
             if (!string.IsNullOrEmpty(name))
@@ -387,7 +389,10 @@ namespace Ao3TrackReader.Data
 
             foreach (string url in urls)
             {
-                var uribuilder = new UriBuilder(url);
+                var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) => {
+                    if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
+                    else return "";
+                }).TrimEnd('?'));
 
                 if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
                 {
@@ -402,6 +407,8 @@ namespace Ao3TrackReader.Data
                     dict[url] = null;
                     continue;
                 }
+
+                uribuilder.Fragment = null;
 
                 Uri uri = uribuilder.Uri;
 
@@ -434,7 +441,8 @@ namespace Ao3TrackReader.Data
                     var sTAGNAME = match.Groups["TAGNAME"].Value;
                     var sTYPE = match.Groups["TYPE"].Value;
 
-                    model.Title = ("Tag " + (sTYPE ?? "")).Trim();
+                    model.Title = (sTYPE ?? "").Trim();
+                    model.Title = model.Title[0].ToString().ToUpper() + model.Title.Substring(1);
 
                     if (sTYPE == "works")
                     {
@@ -475,8 +483,23 @@ namespace Ao3TrackReader.Data
                 {
                     model.Type = Ao3PageType.Work;
                     model.PrimaryTag = "<Work>";
+                    model.PrimaryTagType = Ao3TagType.Other;
 
                     var sWORKID = match.Groups["WORKID"].Value;
+                    model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
+                    model.Title = "Work " + sWORKID;
+
+                    model.Details = new Ao3WorkDetails();
+
+                    try
+                    {
+                        model.Details.WorkId = long.Parse(sWORKID);
+                    }
+                    catch
+                    {
+
+                    }
+
                 }
                 else
                 {
@@ -498,7 +521,10 @@ namespace Ao3TrackReader.Data
             foreach (string url in urls)
             { 
                 tasks.Add(Task.Run(async () => {
-                    var uribuilder = new UriBuilder(url);
+                    var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) => {
+                        if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
+                        else return "";
+                    }).TrimEnd('?'));
 
                     if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
                     {
@@ -512,6 +538,8 @@ namespace Ao3TrackReader.Data
                     {
                         return new KeyValuePair<string, Ao3PageModel>(url, null);
                     }
+
+                    uribuilder.Fragment = null;
 
                     Uri uri = uribuilder.Uri;
 
@@ -544,17 +572,23 @@ namespace Ao3TrackReader.Data
                         var sTAGNAME = match.Groups["TAGNAME"].Value;
                         var sTYPE = match.Groups["TYPE"].Value;
 
-                        model.Title = ("Tag " + (sTYPE ?? "")).Trim();
+                        model.Title = (sTYPE ?? "").Trim();
+                        model.Title = model.Title[0].ToString().ToUpper() + model.Title.Substring(1);
 
-                        if (sTYPE == "works") { 
+                        if (sTYPE == "works")
+                        {
                             model.Type = Ao3PageType.Search;
                             if (uri.Query.Contains("work_search"))
                                 model.Title = "Search";
                         }
                         else if (sTYPE == "bookmarks")
+                        {
                             model.Type = Ao3PageType.Bookmarks;
+                        }
                         else
+                        {
                             model.Type = Ao3PageType.Tag;
+                        }
 
                         var tagdetails = await LookupTagAsync(sTAGNAME);
                         model.PrimaryTag = tagdetails.actual;
@@ -591,6 +625,18 @@ namespace Ao3TrackReader.Data
                         model.Type = Ao3PageType.Work;
 
                         var sWORKID = match.Groups["WORKID"].Value;
+                        model.Uri = uri = new Uri(uri,"/works/" + sWORKID);
+
+                        model.Details = new Ao3WorkDetails();
+
+                        try
+                        {
+                            model.Details.WorkId = long.Parse(sWORKID);
+                        }
+                        catch
+                        {
+
+                        }
 
                         var wsuri = new Uri(@"https://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
                         var response = await App.HttpClient.GetAsync(wsuri);
@@ -608,15 +654,6 @@ namespace Ao3TrackReader.Data
                             doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
 
                             var worknode = doc.GetElementbyId("work_" + sWORKID);
-
-                            model.Details = new Ao3WorkDetails();
-
-                            try { 
-                                model.Details.WorkId = long.Parse(sWORKID);
-                            }
-                            catch {
-
-                            }
 
                             await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
                         }

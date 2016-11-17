@@ -15,6 +15,11 @@ namespace Ao3Track {
     let $feedback_actions = $('#feedback > .actions');
     let $chapter_text = $();    
 
+    let jumpnow = window.location.hash === "#ao3t:jump";
+    if (jumpnow) {
+        history.replaceState({}, document.title, window.location.href.substr(0,window.location.href.indexOf('#')));
+    }
+
     export function scrollToLocation (workchap: IWorkChapter) {
         if (!$chapter_text) { return; }
 
@@ -239,6 +244,7 @@ namespace Ao3Track {
                 let workchap = it[works[i]];
                 if (works[i] === workid) {
                     EnableLastLocationJump(workchap);
+                    if (jumpnow) { scrollToLocation(workchap); }
                 }
                 let $work = $($works[i]);
                 $work.find(".stats .lastchapters").remove();
@@ -247,7 +253,7 @@ namespace Ao3Track {
                 let str_id = workchap.chapterid.toString();
                 let str_num = workchap.number.toString();
                 let chapter_path = '/works/' + works[i] + (workchap.chapterid ? '/chapters/' + str_id : '');
-                $chapters.after('<dt class="ao3-track-last">Last:</dt>', '<dd class="ao3-track-last"><a href="' + chapter_path + '">' + str_num + '</a></dd>');
+                $chapters.after('<dt class="ao3-track-last">Last:</dt>', '<dd class="ao3-track-last"><a href="' + chapter_path + '#ao3t:jump">' + str_num + '</a></dd>');
 
                 let $blurb_heading = $work.find('.header h4.heading');
                 if ($blurb_heading.length) {
@@ -260,7 +266,7 @@ namespace Ao3Track {
 
                     if (chapter_count > chapters_finished) {
                         let unread = chapter_count - chapters_finished;
-                        $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '" target="_blank">' + unread + ' unfinished chapter' + (unread === 1 ? '' : 's') + '</a>)</span>');
+                        $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + ' unfinished chapter' + (unread === 1 ? '' : 's') + '</a>)</span>');
                     }
 
                 }

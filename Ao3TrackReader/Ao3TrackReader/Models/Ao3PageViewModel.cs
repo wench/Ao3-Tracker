@@ -172,7 +172,26 @@ namespace Ao3TrackReader.Models
                 Uri = value.Uri;
                 OnPropertyChanged("Uri");
 
+                Helper.IWorkChapter workchap = null;
+
+                if (value.Type == Models.Ao3PageType.Work && value.Details != null && value.Details.WorkId != 0)
+                {
+                    var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { value.Details.WorkId });
+                    tworkchaps.Wait();
+                    tworkchaps.Result.TryGetValue(value.Details.WorkId, out workchap);
+                }
+
                 var ts = new Span();
+
+                if (value.Type == Ao3PageType.Search || value.Type == Ao3PageType.Bookmarks || value.Type == Ao3PageType.Tag)
+                {
+                    if (!string.IsNullOrWhiteSpace(value.PrimaryTag))
+                    {
+                        ts.Nodes.Add(value.PrimaryTag);
+                        if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = App.Colors["SystemBaseHighColor"] });
+                    }
+                }
+
                 if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
                 if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
                 {
@@ -203,6 +222,18 @@ namespace Ao3TrackReader.Models
                     }
                 }
 
+                if (value.Details?.Chapters != null && workchap != null)
+                {
+                    var chapters_finished = workchap.number;
+                    if (workchap.location != null) { chapters_finished--; }
+                    var unread = value.Details.Chapters.Item1 - chapters_finished;
+
+                    if (unread > 0)
+                    {
+                        ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + " unfinished chapter" + (unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
+                    }
+                }
+
                 OnPropertyChanging("Title");
                 if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
                 else Title = ts;
@@ -227,17 +258,11 @@ namespace Ao3TrackReader.Models
                     if (value.Details.Chapters != null)
                     {
                         string readstr = "";
-                        if (value.Details.WorkId != 0)
+                        if (workchap != null)
                         {
-                            var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { value.Details.WorkId });
-                            tworkchaps.Wait();
-                            Helper.IWorkChapter workchap;
-                            if (tworkchaps.Result.TryGetValue(value.Details.WorkId, out workchap))
-                            {
-                                var chapters_finished = workchap.number;
-                                if (workchap.location != null) { chapters_finished--; }
-                                readstr = chapters_finished.ToString() + "/";
-                            }
+                            var chapters_finished = workchap.number;
+                            if (workchap.location != null) { chapters_finished--; }
+                            readstr = chapters_finished.ToString() + "/";
                         }
 
                         d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item1.ToString() + "/" + (value.Details.Chapters.Item2?.ToString() ?? "?"));
@@ -248,7 +273,6 @@ namespace Ao3TrackReader.Models
                     if (value.Details.Kudos != null) d.Add("Kudos:\xA0" + value.Details.Kudos.ToString());
                     if (value.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + value.Details.Bookmarks.ToString());
                     if (value.Details.Hits != null) d.Add("Hits:\xA0" + value.Details.Hits.ToString());
-
                 }
 
                 Details = string.Join("   ", d);

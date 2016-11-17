@@ -16,10 +16,68 @@ namespace Ao3TrackReader.Controls
 			} }
         public static Color GroupTypeColor { get { return App.Colors["SystemChromeHighColor"]; } }
 
+        public event EventHandler<Object> ContextOpen;
+        public void OnOpen(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
 
-		public ReadingListView ()
+            ContextOpen?.Invoke(this, mi.CommandParameter);
+        }
+
+        public event EventHandler<Object> ContextOpenLast;
+        public void OnOpenLast(object sender, EventArgs e)
+        {            
+            var mi = ((MenuItem)sender);            
+
+            ContextOpenLast?.Invoke(this, mi.CommandParameter);
+        }
+
+        public event EventHandler<Object> ContextDelete;
+        public void OnDelete(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            ContextDelete?.Invoke(this, mi.CommandParameter);
+        }
+
+        public event EventHandler<Object> AddPage;
+        public void OnAddPage(object sender, EventArgs e)
+        {
+            AddPage?.Invoke(this, e);
+        }
+
+        public void OnClose(object sender, EventArgs e)
+        {
+            OnScreen = false;
+        }
+
+        public ReadingListView ()
 		{
 			InitializeComponent ();
 		}
-	}
+
+        public bool OnScreen
+        {
+            get
+            {
+                return TranslationX < Width / 2;
+            }
+            set
+            {
+                if (value == false)
+                {
+                    Unfocus();
+                    ViewExtensions.CancelAnimations(this);
+                    this.TranslateTo(Width, 0, 100, Easing.CubicIn);
+                }
+                else
+                {
+                    ViewExtensions.CancelAnimations(this);
+                    this.TranslateTo(0, 0, 100, Easing.CubicIn);
+                    Focus();
+                }
+            }
+        }
+
+
+    }
 }

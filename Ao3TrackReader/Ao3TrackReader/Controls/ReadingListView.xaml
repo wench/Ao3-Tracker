@@ -5,7 +5,12 @@
   <ListView.ItemTemplate>
     <DataTemplate>
       <ViewCell>
-        <Grid ColumnSpacing="3" RowSpacing="3" Padding="0,0,0,16">
+        <ViewCell.ContextActions>
+          <MenuItem Text="Open"   Clicked="OnOpen"   CommandParameter="{Binding .}" />
+          <MenuItem Text="Open at Last Location"   Clicked="OnOpenLast"   CommandParameter="{Binding .}" />
+          <MenuItem Text="Delete" Clicked="OnDelete" CommandParameter="{Binding .}" IsDestructive="True" />
+        </ViewCell.ContextActions>
+        <Grid ColumnSpacing="3" RowSpacing="3" Padding="16,16,16,16">
           <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="Auto" />
@@ -15,20 +20,20 @@
             <ColumnDefinition Width="25" />
             <ColumnDefinition Width="25" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="80" />
+            <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" />
           <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" />
           <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" />
           <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" />
           <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
-            <local:TextView TextTree="{Binding Title}" TextColor="{x:Static local:ReadingListView.GroupTitleColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="FillAndExpand" />
-            <Label Text="{Binding Subtitle}" TextColor="{x:Static local:ReadingListView.GroupTypeColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="FillAndExpand"/>
+            <local:TextView TextTree="{Binding Title}" TextColor="{x:Static local:ReadingListView.GroupTitleColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+            <Label Text="{Binding Subtitle}" TextColor="{x:Static local:ReadingListView.GroupTypeColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" />
           </StackLayout>
           <Label Text="{Binding Date}" FontSize="12" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
           <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,13,0">
-            <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="FillAndExpand"/>
-            <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="FillAndExpand" />
+            <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand"/>
+            <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" />
           </StackLayout>
         </Grid>
       </ViewCell>
@@ -39,4 +44,10 @@
       <TextCell Text="{Binding Group}" Detail="{Binding GroupType}" TextColor="{x:Static local:ReadingListView.GroupTitleColor}" DetailColor="{x:Static local:ReadingListView.GroupTypeColor}"/>
     </DataTemplate>
   </ListView.GroupHeaderTemplate>
+  <ListView.Header>
+    <StackLayout Orientation="Horizontal" Padding="0,0,16,0">
+      <Button Text="" Clicked="OnAddPage" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalOptions="Start"/>
+      <Button Text="" Clicked="OnClose" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalOptions="EndAndExpand" />
+    </StackLayout>
+  </ListView.Header>
 </ListView>

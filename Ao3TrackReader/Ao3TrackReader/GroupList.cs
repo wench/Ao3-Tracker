@@ -110,7 +110,10 @@ namespace Ao3TrackReader
 
         private void RemoveFromGroup(T item)
         {
-            var g = this.Where((l) => l.Group == item.Group).FirstOrDefault();
+            string groupName = item.Group;
+            if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
+
+            var g = this.Where((l) => l.Group == groupName).FirstOrDefault();
             if (g != null)
             {
                 g.Remove(item);
@@ -128,9 +131,21 @@ namespace Ao3TrackReader
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group") {
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group")
+            {
                 // Add into group
                 AddToGroup((T)sender);
+            }
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "GroupType")
+            {
+                var item = (T)sender;
+                if (!string.IsNullOrWhiteSpace(item.GroupType))
+                {
+                    string groupName = item.Group;
+                    if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
+                    var g = this.Where((l) => l.Group == groupName).FirstOrDefault();
+                    if (g != null) g.GroupType = item.GroupType;
+                }
             }
         }
     }

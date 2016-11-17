@@ -290,5 +290,21 @@ namespace Ao3TrackReader
                 }
             }
         }
+        public void DeleteReadingListItems(params string[] items)
+        {
+            DeleteReadingListItems(items as IReadOnlyCollection<string>);
+
+        }
+
+        public void DeleteReadingListItems(IReadOnlyCollection<string> items)
+        {
+            lock (locker)
+            {
+                foreach (var item in items)
+                {
+                    database.Delete<ReadingList>(item);
+                }
+            }
+        }
     }
 }
