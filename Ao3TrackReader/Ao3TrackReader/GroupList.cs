@@ -8,13 +8,15 @@ using System.Linq;
 
 namespace Ao3TrackReader
 {
-    public interface IGroupable
+    public interface IGroupable<in T> : IComparable<T>
     {
+        event EventHandler CompareChanged;
         string Group { get; }
         string GroupType { get; }
     }
 
     public class GroupSubList<T> : ObservableCollection<T>, INotifyPropertyChanged, INotifyPropertyChanging
+        where T : IGroupable<T>
     {
         public GroupSubList(string group)
         {
@@ -40,9 +42,61 @@ namespace Ao3TrackReader
         {
             PropertyChanging?.Invoke(this, args);
         }
+
+        public void AddSorted(T item)
+        {
+            int i = 0;
+            for (; i < Count; i++)
+            {
+                if (item.CompareTo(this[i]) <= 0)
+                {
+                    break;
+                }
+            }
+
+            InsertItem(i, item);
+        }
+
+        private void Item_CompareChanged(object sender, EventArgs e)
+        {
+            T item = (T) sender;
+            int i = 0, c = -1, n = -1;
+            for (; i < Count; i++)
+            {
+                T check = this[i];
+                if (object.ReferenceEquals(item,check))
+                {
+                    c = i;
+                }
+                else if (n == -1 && item.CompareTo(this[i]) < 0)
+                {
+                    n = i;
+                }
+                if (c != -1 && n != -1)
+                    break;
+            }
+            if (c == n-1) return;
+            if (c != -1 && n != -1)
+            {
+                MoveItem(c, n); // Is this correct??
+            }
+        }
+
+        protected override void InsertItem(int index, T item)
+        {
+            item.CompareChanged += Item_CompareChanged;
+            base.InsertItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            this[index].CompareChanged -= Item_CompareChanged;
+            base.RemoveItem(index);
+        }
     }
 
-    public class GroupList<T> : ObservableCollection<GroupSubList<T>> where T : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging
+    public class GroupList<T> : ObservableCollection<GroupSubList<T>>
+        where T : IGroupable<T>, INotifyPropertyChanged, INotifyPropertyChanging
     { 
         public void Add(T item)
         {
@@ -97,12 +151,12 @@ namespace Ao3TrackReader
             {
                 g = new GroupSubList<T>(groupName);
                 if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
-                g.Add(item);
+                g.AddSorted(item);
                 Insert(i, g);
             }
             else
             {
-                g.Add(item);
+                g.AddSorted(item);
                 if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
             }
 

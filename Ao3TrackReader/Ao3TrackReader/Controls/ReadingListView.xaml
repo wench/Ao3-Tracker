@@ -4,11 +4,11 @@
              HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}">
   <ListView.ItemTemplate>
     <DataTemplate>
-      <ViewCell>
+      <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
         <ViewCell.ContextActions>
-          <MenuItem Text="Open"   Clicked="OnOpen"   CommandParameter="{Binding .}" />
-          <MenuItem Text="Open at Last Location"   Clicked="OnOpenLast"   CommandParameter="{Binding .}" />
-          <MenuItem Text="Delete" Clicked="OnDelete" CommandParameter="{Binding .}" IsDestructive="True" />
+          <MenuItem Text="Open"   Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
+          <local:RLMenuItem Text="Open at Last Location" Clicked="OnMenuOpenLast" CommandParameter="{Binding .}" Filter="MenuOpenLastFilter"/>
+          <MenuItem Text="Delete" Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
         </ViewCell.ContextActions>
         <Grid ColumnSpacing="3" RowSpacing="3" Padding="16,16,16,16">
           <Grid.RowDefinitions>
@@ -47,6 +47,7 @@
   <ListView.Header>
     <StackLayout Orientation="Horizontal" Padding="0,0,16,0">
       <Button Text="" Clicked="OnAddPage" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalOptions="Start"/>
+      <Button Text="" Clicked="OnRefresh" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalOptions="Start"/>
       <Button Text="" Clicked="OnClose" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalOptions="EndAndExpand" />
     </StackLayout>
   </ListView.Header>

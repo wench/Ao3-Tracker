@@ -8,54 +8,83 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-	public partial class ReadingListView : ListView
-	{
-		public static Color GroupTitleColor { get {
-				var c = App.Colors["SystemChromeAltLowColor"];
-				return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0);
-			} }
+    public class RLMenuItem : MenuItem
+    {
+        public event Func<RLMenuItem, bool> Filter;
+
+        public bool OnFilter()
+        {
+            return Filter?.Invoke(this) ?? true;
+        }
+    }
+
+    public partial class ReadingListView : ListView
+    {
+        GroupList<Models.Ao3PageViewModel> readingListBacking;
+        private readonly WebViewPage wpv;
+
+        public static Color GroupTitleColor
+        {
+            get
+            {
+                var c = App.Colors["SystemChromeAltLowColor"];
+                return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0);
+            }
+        }
         public static Color GroupTypeColor { get { return App.Colors["SystemChromeHighColor"]; } }
 
-        public event EventHandler<Object> ContextOpen;
-        public void OnOpen(object sender, EventArgs e)
+        double old_width; 
+        public ReadingListView(WebViewPage wpv)
         {
-            var mi = ((MenuItem)sender);
+            this.wpv = wpv;
 
-            ContextOpen?.Invoke(this, mi.CommandParameter);
+            InitializeComponent();
+
+            TranslationX = old_width = 480;
+            WidthRequest = old_width;
+            readingListBacking = new GroupList<Models.Ao3PageViewModel>();
+            ItemsSource = readingListBacking;
+            BackgroundColor = App.Colors["SystemAltMediumHighColor"];
+
+            // Restore the reading list contents!
+            var items = new Dictionary<string, Models.ReadingList>();
+            foreach (var i in App.Database.GetReadingListItems())
+            {
+                items[i.Uri] = i;
+            }
+
+            if (items.Count == 0)
+            {
+                Add("https://archiveofourown.org/");
+            }
+            else
+            {
+                var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
+                foreach (var m in models)
+                {
+                    if (m.Value != null)
+                    {
+                        var item = items[m.Key];
+                        if (string.IsNullOrWhiteSpace(m.Value.Title))
+                            m.Value.Title = item.Title;
+                        if (string.IsNullOrWhiteSpace(m.Value.PrimaryTag) || m.Value.PrimaryTag == "<Work>")
+                        {
+                            m.Value.PrimaryTag = item.PrimaryTag;
+                            var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
+                            if (tagdata != null) m.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                            else m.Value.PrimaryTagType = Models.Ao3TagType.Other;
+                        }
+
+                        var viewmodel = new Models.Ao3PageViewModel { BaseData = m.Value };
+                        readingListBacking.Add(viewmodel);
+                        Refresh(viewmodel);
+                    }
+                }
+            }
         }
 
-        public event EventHandler<Object> ContextOpenLast;
-        public void OnOpenLast(object sender, EventArgs e)
-        {            
-            var mi = ((MenuItem)sender);            
 
-            ContextOpenLast?.Invoke(this, mi.CommandParameter);
-        }
-
-        public event EventHandler<Object> ContextDelete;
-        public void OnDelete(object sender, EventArgs e)
-        {
-            var mi = ((MenuItem)sender);
-            ContextDelete?.Invoke(this, mi.CommandParameter);
-        }
-
-        public event EventHandler<Object> AddPage;
-        public void OnAddPage(object sender, EventArgs e)
-        {
-            AddPage?.Invoke(this, e);
-        }
-
-        public void OnClose(object sender, EventArgs e)
-        {
-            OnScreen = false;
-        }
-
-        public ReadingListView ()
-		{
-			InitializeComponent ();
-		}
-
-        public bool OnScreen
+        public bool IsOnScreen
         {
             get
             {
@@ -78,6 +107,162 @@ namespace Ao3TrackReader.Controls
             }
         }
 
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            bool wasshowing = TranslationX < old_width / 2;
+            old_width = width;
 
+            base.OnSizeAllocated(width, height);
+
+            ViewExtensions.CancelAnimations(this);
+
+            if (wasshowing) TranslationX = 0.0;
+            else TranslationX = width;
+        }
+
+        public void OnCellTapped(object sender, EventArgs e)
+        {
+            var mi = ((Cell)sender);
+            var item = mi.BindingContext as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
+                {
+                    wpv.NavigateToLast(item.BaseData.Details.WorkId);
+                }
+                else
+                {
+                    wpv.Navigate(item.Uri);
+                }
+            }
+
+        }
+
+        private bool MenuOpenLastFilter(RLMenuItem mi)
+        {
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item.BaseData == null) return true;
+
+            return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Other;
+        }
+
+        private void OnCellAppearing(object sender, EventArgs e)
+        {
+            var cell= ((Cell)sender);
+            for (int i = 0; i < cell.ContextActions.Count; i++)
+            {
+                var mi = cell.ContextActions[i] as RLMenuItem;
+                if (mi != null && mi.OnFilter() == false)
+                {
+                    cell.ContextActions.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        public void OnMenuOpenLast(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
+                {
+                    wpv.NavigateToLast(item.BaseData.Details.WorkId);
+                }
+                else
+                {
+                    wpv.Navigate(item.Uri);
+                }
+            }
+        }
+
+        public void OnMenuOpen(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                wpv.Navigate(item.Uri);
+            }
+        }
+
+        public void OnMenuDelete(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                readingListBacking.Remove(item);
+                App.Database.DeleteReadingListItems(item.Uri.AbsoluteUri);
+            }
+
+        }
+
+        public void OnAddPage(object sender, EventArgs e)
+        {
+            Add(wpv.Current.AbsoluteUri);
+        }
+
+        public void OnRefresh(object sender, EventArgs e)
+        {
+            foreach (var g in readingListBacking)
+            {
+                foreach (var i in g)
+                {
+                    Refresh(i);
+                }
+
+            }
+        }
+
+        public void OnClose(object sender, EventArgs e)
+        {
+            IsOnScreen = false;
+        }
+
+        public void Add(string href)
+        {
+            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
+                return;
+
+            var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
+            var model = models.SingleOrDefault();
+            if (model.Value == null) return;
+
+            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
+                return;
+
+            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+            readingListBacking.Add(viewmodel);
+            Refresh(viewmodel);
+        }
+
+        public void Refresh(Models.Ao3PageViewModel viewmodel)
+        {
+            Task.Run(async () =>
+            {
+                var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
+
+                wpv.DoOnMainThread(() =>
+                {
+                    var model = models.SingleOrDefault();
+                    if (model.Value != null)
+                    {
+                        if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
+                        {
+                            App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
+
+                            var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
+                            if (pvm != null) readingListBacking.Remove(pvm);
+                        }
+                        App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                        viewmodel.BaseData = model.Value;
+                    }
+                });
+            });
+
+        }
     }
 }

@@ -7,11 +7,11 @@ namespace Ao3TrackReader.Models
 
     public enum Ao3PageType
     {
-        Other,
-        Work,
-        Tag, 
+        Tag,
         Search,
+        Work,
         Bookmarks,
+        Other,
         Unknown
     }
 
@@ -43,7 +43,7 @@ namespace Ao3TrackReader.Models
         public IReadOnlyDictionary<string,Tuple<int,string>> Series { get; set; }
         public string LastUpdated { get; set; }
         public int? Words { get; set; }
-        public Tuple<int, int?> Chapters { get; set; }
+        public Tuple<int?, int, int?> Chapters { get; set; }
         public int? Collections { get; set; }
         public int? Comments { get; set; }
         public int? Kudos { get; set; }

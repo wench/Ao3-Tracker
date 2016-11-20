@@ -17,11 +17,58 @@ namespace Ao3TrackReader.Models
     // <ICON>  
 
 
-    public class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging
-
+    public class Ao3PageViewModel : IGroupable<Ao3PageViewModel>, INotifyPropertyChanged, INotifyPropertyChanging
     {
+        public int CompareTo(Ao3PageViewModel y)
+        {
+            // Pages with no base data go last
+            if (baseData == y.baseData) return 0;
+            if (baseData == null) return 1;
+            if (y.baseData == null) return -1;
+
+            // Sort based on the page type
+            int c = baseData.Type.CompareTo(y.baseData.Type);
+            if (c != 0) return c;
+
+            // Sort based on chapters remaining
+            if (y.baseData.Type == Ao3PageType.Work)
+            {
+                int? xc = baseData?.Details?.Chapters?.Item1;
+                int? yc = y.baseData?.Details?.Chapters?.Item1;
+                if (xc != null || yc != null)
+                {
+                    if (xc == null) return 1;
+                    if (yc == null) return -1;
+                    xc = baseData.Details.Chapters.Item2 - xc;
+                    yc = y.baseData.Details.Chapters.Item2 - yc;
+                    c = xc.Value.CompareTo(yc.Value);
+                    if (c != 0) return -c; // higher numbers of unread chapters first
+                }
+            }
+
+            // Sort based on title
+            string tx = Title?.ToString();
+            string ty = y.Title?.ToString();
+
+            if (tx != ty)
+            {
+                if (tx == null) return 1;
+                if (ty == null) return -1;
+                c = StringComparer.OrdinalIgnoreCase.Compare(tx, ty);
+                if (c != 0) return c;
+            }
+
+            string ux = Uri?.AbsoluteUri;
+            string uy = y.Uri?.AbsoluteUri;
+            if (ux == uy) return 0;
+            if (ux == null) return 1;
+            if (uy == null) return -1;
+            return StringComparer.OrdinalIgnoreCase.Compare(ux, uy); 
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+        public event EventHandler CompareChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -130,7 +177,10 @@ namespace Ao3TrackReader.Models
             set
             {
                 if (baseData == value) return;
+                bool sortchanged = baseData == null || baseData.Type != value.Type;
                 baseData = value;
+
+
 
                 // Generate everything from Ao3PageModel 
                 string newGroup = value.PrimaryTag ?? "";
@@ -169,17 +219,10 @@ namespace Ao3TrackReader.Models
                 OnPropertyChanged("ImageComplete");
 
                 OnPropertyChanging("Uri");
+                sortchanged = sortchanged || value.Uri != Uri;
                 Uri = value.Uri;
                 OnPropertyChanged("Uri");
 
-                Helper.IWorkChapter workchap = null;
-
-                if (value.Type == Models.Ao3PageType.Work && value.Details != null && value.Details.WorkId != 0)
-                {
-                    var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { value.Details.WorkId });
-                    tworkchaps.Wait();
-                    tworkchaps.Result.TryGetValue(value.Details.WorkId, out workchap);
-                }
 
                 var ts = new Span();
 
@@ -222,21 +265,22 @@ namespace Ao3TrackReader.Models
                     }
                 }
 
-                if (value.Details?.Chapters != null && workchap != null)
+                if (value.Details?.Chapters?.Item1 != null)
                 {
-                    var chapters_finished = workchap.number;
-                    if (workchap.location != null) { chapters_finished--; }
-                    var unread = value.Details.Chapters.Item1 - chapters_finished;
+                    var unread = value.Details.Chapters.Item2 - value.Details.Chapters.Item1;
 
                     if (unread > 0)
                     {
+                        sortchanged = true;
                         ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + " unfinished chapter" + (unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
                     }
                 }
 
                 OnPropertyChanging("Title");
+                var oldtitle = Title;
                 if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
                 else Title = ts;
+                sortchanged = sortchanged || (oldtitle?.ToString() != Title?.ToString());
                 OnPropertyChanged("Title");
 
                 OnPropertyChanging("Date");
@@ -258,14 +302,8 @@ namespace Ao3TrackReader.Models
                     if (value.Details.Chapters != null)
                     {
                         string readstr = "";
-                        if (workchap != null)
-                        {
-                            var chapters_finished = workchap.number;
-                            if (workchap.location != null) { chapters_finished--; }
-                            readstr = chapters_finished.ToString() + "/";
-                        }
-
-                        d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item1.ToString() + "/" + (value.Details.Chapters.Item2?.ToString() ?? "?"));
+                        if (value.Details.Chapters.Item1 != null) readstr = value.Details.Chapters.Item1.ToString() + "/";
+                        d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item2.ToString() + "/" + (value.Details.Chapters.Item3?.ToString() ?? "?"));
                     }
 
                     if (value.Details.Collections != null) d.Add("Collections:\xA0" + value.Details.Collections.ToString());
@@ -285,6 +323,11 @@ namespace Ao3TrackReader.Models
                 tags = value.Tags;
                 OnPropertyChanged("TagsVisible");
                 OnPropertyChanged("Tags");
+
+                if (sortchanged)
+                {
+                    CompareChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
         }
 

@@ -63,7 +63,7 @@ namespace Ao3TrackReader
 
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
         {
-            readingList.OnScreen = false;
+            readingList.IsOnScreen = false;
         }
 
         private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
@@ -151,10 +151,13 @@ namespace Ao3TrackReader
             Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();           
         }
 
+        public Uri Current {
+            get { return WebView.Source; }
+        }
 
-        void Navigate(string uri)
+        public void Navigate(Uri uri)
         {
-            WebView.Navigate(new Uri(uri));
+            WebView.Navigate(uri);
         }
 
         private Uri nextPage;

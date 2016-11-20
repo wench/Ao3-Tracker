@@ -30,7 +30,6 @@ namespace Ao3TrackReader
 #endif
         Label PrevPageIndicator;
         Label NextPageIndicator;
-        GroupList<Models.Ao3PageViewModel> readingListBacking;
         Controls.ReadingListView readingList;
         Entry urlEntry;
         StackLayout urlBar;
@@ -57,7 +56,7 @@ namespace Ao3TrackReader
             commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), false, () => { GoForward(); }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
             commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () => readingList.OnScreen = !readingList.OnScreen ));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () => readingList.IsOnScreen = !readingList.IsOnScreen ));
             commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () =>
                 FontSize += 10));
             commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () =>
@@ -94,55 +93,14 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            Navigate("https://archiveofourown.com/");
+            Navigate(new Uri("https://archiveofourown.com/"));
 
             // retore font size!
             FontSize = 100;
 
-            readingListBacking = new GroupList<Models.Ao3PageViewModel>();
-
-            readingList = new Controls.ReadingListView();
+            readingList = new Controls.ReadingListView(this);
             AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 480, 1));
             AbsoluteLayout.SetLayoutFlags(readingList, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
-            readingList.ItemsSource = readingListBacking;
-            readingList.BackgroundColor = App.Colors["SystemAltMediumHighColor"];
-            readingList.TranslationX = 480;
-            readingList.ItemTapped += ReadingList_ItemTapped;
-            readingList.ContextOpen += ReadingList_ContextOpen;
-            readingList.ContextDelete += ReadingList_ContextDelete;
-            readingList.ContextOpenLast += ReadingList_ContextOpenLast;
-            readingList.AddPage += ReadingList_AddPage;
-
-            // Restore the reading list contents!
-            var items = new Dictionary<string, Models.ReadingList>();
-            foreach (var i in App.Database.GetReadingListItems())
-            {
-                items[i.Uri] = i;
-            }
-
-            if (items.Count == 0) items.Add("https://archiveofourown.org/", new Models.ReadingList());
-
-            var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
-            foreach (var m in models)
-            {
-                if (m.Value != null)
-                {
-                    var item = items[m.Key];
-                    if (string.IsNullOrWhiteSpace(m.Value.Title))
-                        m.Value.Title = item.Title;
-                    if (string.IsNullOrWhiteSpace(m.Value.PrimaryTag) || m.Value.PrimaryTag == "<Work>")
-                    {
-                        m.Value.PrimaryTag = item.PrimaryTag;
-                        var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                        if (tagdata != null) m.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
-                        else m.Value.PrimaryTagType = Models.Ao3TagType.Other;
-                    }
-
-                    var viewmodel = new Models.Ao3PageViewModel { BaseData = m.Value };
-                    readingListBacking.Add(viewmodel);
-                    refreshReadingListItem(viewmodel);
-                }
-            }
 
             urlBar = new StackLayout
             {
@@ -151,8 +109,6 @@ namespace Ao3TrackReader
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Spacing = 4
             };
-            //AbsoluteLayout.SetLayoutBounds(urlFrame, new Rectangle(0, 1, 1, 44));
-            //AbsoluteLayout.SetLayoutFlags(urlFrame, AbsoluteLayoutFlags.WidthProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
             urlEntry = new Entry
             {
                 VerticalOptions = LayoutOptions.Center,
@@ -234,16 +190,9 @@ namespace Ao3TrackReader
             Content = outerlayout;
         }
 
-        private void ReadingList_AddPage(object sender, object e)
-        {
-            addToReadingList(WebView.Source.AbsoluteUri);
-        }
-
         private void Mainlayout_SizeChanged(object sender, EventArgs e)
         {
             var mainlayout = sender as Layout;
-            bool wasshowing = readingList.TranslationX < readingList.Width / 2;
-            ViewExtensions.CancelAnimations(readingList);
             double desired;
 
             if (mainlayout.Width < 480)
@@ -252,61 +201,27 @@ namespace Ao3TrackReader
                 AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, desired = 480, 1));
             else
                 AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, desired = mainlayout.Width/2, 1));
-
-            if (wasshowing) readingList.TranslationX = 0.0;
-            else readingList.TranslationX = desired;
         }
 
-        private void ReadingList_ContextOpenLast(object sender, object e)
+        public void NavigateToLast(long workid)
         {
-            var item = e as Models.Ao3PageViewModel;
-            if (item != null)
+            Task.Run(async () =>
             {
-                if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
-                {
-                    Task.Run(async () =>
+                var workchaps = await App.Storage.getWorkChaptersAsync(new[] { workid });
+
+                DoOnMainThread(() => {
+                    IWorkChapter wc;
+                    if (workchaps.TryGetValue(workid, out wc) && wc.chapterid != 0)
                     {
-                        var workchaps = await App.Storage.getWorkChaptersAsync(new[] { item.BaseData.Details.WorkId });
+                        Navigate(new Uri(string.Concat("https://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
+                    }
+                    else
+                    {
+                        Navigate(new Uri(string.Concat("https://archiveofourown.org/works/", workid, "#ao3t:jump")));
+                    }
+                });
+            });
 
-                        DoOnMainThread(() => {
-                            IWorkChapter wc;
-                            if (workchaps.TryGetValue(item.BaseData.Details.WorkId, out wc) && wc.chapterid != 0) {
-                                Navigate(new Uri(item.Uri,string.Concat("/works/", item.BaseData.Details.WorkId, "/chapters/", wc.chapterid, "#ao3t:jump")).AbsoluteUri);
-                            }
-                            else { 
-                                Navigate(item.Uri.AbsoluteUri);
-                            }
-                        });
-                    });
-                }
-                else
-                {
-                    Navigate(item.Uri.AbsoluteUri);
-                }
-            }
-
-        }
-
-        private void ReadingList_ContextDelete(object sender, object e)
-        {
-            var item = e as Models.Ao3PageViewModel;
-            if (item != null)
-            {
-                readingListBacking.Remove(item);
-                App.Database.DeleteReadingListItems(item.Uri.AbsoluteUri);
-            }
-        }
-
-        private void ReadingList_ContextOpen(object sender, object e)
-        {
-            var item = e as Models.Ao3PageViewModel;
-            if (item != null) Navigate(item.Uri.AbsoluteUri);
-        }
-
-        private void ReadingList_ItemTapped(object sender, ItemTappedEventArgs e)
-        {
-            var item = e.Item as Models.Ao3PageViewModel;
-            if (item != null) ReadingList_ContextOpenLast(sender, item);
         }
 
         private void UrlCancel_Clicked(object sender, EventArgs e)
@@ -470,48 +385,10 @@ namespace Ao3TrackReader
             }
         }
 
+
         public void addToReadingList(string href)
         {
-            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
-                return;
-
-            var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
-            var model = models.SingleOrDefault();
-            if (model.Value == null) return;
-
-            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
-                return;
-
-            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
-            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-            readingListBacking.Add(viewmodel);
-            refreshReadingListItem(viewmodel);
-        }
-
-        public void refreshReadingListItem(Models.Ao3PageViewModel viewmodel)
-        {
-            System.Threading.Tasks.Task.Run(async () =>
-            {
-                var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
-
-                DoOnMainThread(() =>
-                {
-                    var model = models.SingleOrDefault();
-                    if (model.Value != null)
-                    {
-                        if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
-                        {
-                            App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
-
-                            var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
-                            if (pvm != null) readingListBacking.Remove(pvm);
-                        }
-                        App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-                        viewmodel.BaseData = model.Value;
-                    }
-                });
-            });
-
+            readingList.Add(href);
         }
     }
 }

@@ -134,6 +134,7 @@ namespace Ao3TrackReader.Data
 
         static string EscapeTag(string tag)
         {
+            if (tag == null) return null;
             return regexEscTag.Replace(tag, (match) =>
             {
                 int i = Array.IndexOf(usescTagStrings, match.Value);
@@ -144,6 +145,7 @@ namespace Ao3TrackReader.Data
 
         static string UnescapeTag(string tag)
         {
+            if (tag == null) return null;
             return regexUnescTag.Replace(tag, (match) =>
             {
                 int i = Array.IndexOf(escTagStrings, match.Value);
@@ -848,22 +850,6 @@ namespace Ao3TrackReader.Data
 
             }
 
-            var chapters = stats?.ElementByClass("dd", "chapters")?.InnerText?.Trim()?.Split('/');
-            if (chapters != null)
-            {
-                try
-                {
-                    int? total;
-                    if (chapters[1] == "?") total = null;
-                    else total = int.Parse(chapters[1]);
-                    model.Details.Chapters = new Tuple<int, int?>(int.Parse(chapters[0]), total);
-                }
-                catch
-                {
-
-                }
-            }
-
             try
             {
                 model.Details.Collections = int.Parse(stats?.ElementByClass("dd", "collections")?.InnerText);
@@ -938,6 +924,28 @@ namespace Ao3TrackReader.Data
 
                 }
                 if (series.Count > 0) model.Details.Series = series;
+            }
+
+            var chapters = stats?.ElementByClass("dd", "chapters")?.InnerText?.Trim()?.Split('/');
+            if (chapters != null)
+            {
+                try
+                {
+                    int? total;
+                    if (chapters[1] == "?") total = null;
+                    else total = int.Parse(chapters[1]);
+                    var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { model.Details.WorkId });
+                    Helper.IWorkChapter workchap = null;
+                    tworkchaps.Result.TryGetValue(model.Details.WorkId, out workchap);
+                    int chapters_finished = workchap != null ? (int)workchap.number : (int)0;
+                    if (workchap?.location != null) { chapters_finished--; }
+
+                    model.Details.Chapters = new Tuple<int?, int, int?>(chapters_finished, int.Parse(chapters[0]), total);
+                }
+                catch
+                {
+
+                }
             }
         }
 
