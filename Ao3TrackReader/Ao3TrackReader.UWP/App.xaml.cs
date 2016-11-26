@@ -30,6 +30,7 @@ namespace Ao3TrackReader.UWP
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            //RequestedTheme = ApplicationTheme.Light;
         }
 
         /// <summary>

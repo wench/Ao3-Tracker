@@ -89,6 +89,7 @@ namespace Ao3TrackReader.Models
         public string Subtitle { get; private set; }
         public string Details { get; private set; }
 
+        public int? Unread { get; private set; }
 
         private Uri imageRatingUri;
         public ImageSource ImageRating { get { return new UriImageSource { Uri = imageRatingUri }; } }
@@ -102,6 +103,12 @@ namespace Ao3TrackReader.Models
         private Uri imageCompleteUri;
         public ImageSource ImageComplete { get { return new UriImageSource { Uri = imageCompleteUri }; } }
 
+
+        public TextTree Summary { get; private set; }
+
+        public bool SummaryVisible { get { return Summary != null ; } }
+
+        
         SortedDictionary<Ao3TagType, List<string>> tags;
         public TextTree Tags
         {
@@ -180,7 +187,18 @@ namespace Ao3TrackReader.Models
                 bool sortchanged = baseData == null || baseData.Type != value.Type;
                 baseData = value;
 
+                int? newunread = value.Details?.Chapters?.Item1;
+                if (newunread != null)
+                {
+                    newunread = value.Details.Chapters.Item2 - newunread;
 
+                }
+                if (Unread != newunread)
+                {
+                    OnPropertyChanging("Unread");
+                    Unread = newunread;
+                    OnPropertyChanged("Unread");
+                }
 
                 // Generate everything from Ao3PageModel 
                 string newGroup = value.PrimaryTag ?? "";
@@ -265,15 +283,10 @@ namespace Ao3TrackReader.Models
                     }
                 }
 
-                if (value.Details?.Chapters?.Item1 != null)
+                if (Unread != null && Unread > 0)
                 {
-                    var unread = value.Details.Chapters.Item2 - value.Details.Chapters.Item1;
-
-                    if (unread > 0)
-                    {
-                        sortchanged = true;
-                        ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + " unfinished chapter" + (unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
-                    }
+                    sortchanged = true;
+                    ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unfinished chapter" + (Unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
                 }
 
                 OnPropertyChanging("Title");
@@ -317,6 +330,12 @@ namespace Ao3TrackReader.Models
                 if (!string.IsNullOrWhiteSpace(value.SearchQuery)) Details = ("Query: " + value.SearchQuery + "\n" + Details).Trim();
                 if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
                 OnPropertyChanged("Details");
+
+                OnPropertyChanging("Summary");
+                OnPropertyChanging("SummaryVisable");
+                Summary = value.Details?.Summary;
+                OnPropertyChanged("SummaryVisable");
+                OnPropertyChanged("Summary");
 
                 OnPropertyChanging("Tags");
                 OnPropertyChanging("TagsVisible");

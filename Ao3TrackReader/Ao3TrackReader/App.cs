@@ -51,9 +51,8 @@ namespace Ao3TrackReader
                 Colors[r] = Color.FromHex(b.ToString());
             }
 
-
             // The root page of your application
-            MainPage = new NavigationPage(new WebViewPage());
+            MainPage = new WebViewPage();
 
         }
 

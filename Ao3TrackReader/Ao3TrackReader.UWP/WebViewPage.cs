@@ -128,6 +128,7 @@ namespace Ao3TrackReader
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
             nextPageButton.IsEnabled = canGoForward;
+            helper?.ClearEvents();
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
@@ -137,6 +138,7 @@ namespace Ao3TrackReader
             NextPageIndicator.IsVisible = false;
             WebView.RenderTransform = null;
             WebView.Opacity = 1;
+            helper?.ClearEvents();
         }
 
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
@@ -148,6 +150,7 @@ namespace Ao3TrackReader
             Title = t;
 
             // Inject JS script
+            helper?.ClearEvents();
             Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();           
         }
 
@@ -157,6 +160,7 @@ namespace Ao3TrackReader
 
         public void Navigate(Uri uri)
         {
+            helper?.ClearEvents();
             WebView.Navigate(uri);
         }
 

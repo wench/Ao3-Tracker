@@ -10,7 +10,7 @@
           <local:RLMenuItem Text="Open at Last Location" Clicked="OnMenuOpenLast" CommandParameter="{Binding .}" Filter="MenuOpenLastFilter"/>
           <MenuItem Text="Delete" Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
         </ViewCell.ContextActions>
-        <Grid ColumnSpacing="3" RowSpacing="3" Padding="16,16,16,16">
+        <Grid ColumnSpacing="3" RowSpacing="3" Margin="8" Padding="8" BackgroundColor="{x:Static local:ReadingListView.ItemBackgroundColor}">
           <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="Auto" />
@@ -33,6 +33,7 @@
           <Label Text="{Binding Date}" FontSize="12" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
           <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,13,0">
             <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand"/>
+            <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" />
             <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" />
           </StackLayout>
         </Grid>

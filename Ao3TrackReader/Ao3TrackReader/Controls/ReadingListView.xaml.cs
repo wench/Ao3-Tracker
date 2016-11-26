@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -33,13 +34,18 @@ namespace Ao3TrackReader.Controls
         }
         public static Color GroupTypeColor { get { return App.Colors["SystemChromeHighColor"]; } }
 
-        double old_width; 
+        public static Color ItemBackgroundColor { get { return App.Colors["SystemListLowColor"]; } }
+
+        double old_width;
+        System.Collections.Concurrent.ConcurrentBag<Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>> updateBag;
+
         public ReadingListView(WebViewPage wpv)
         {
             this.wpv = wpv;
 
             InitializeComponent();
 
+            updateBag = new System.Collections.Concurrent.ConcurrentBag<Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>>();
             TranslationX = old_width = 480;
             WidthRequest = old_width;
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
@@ -148,7 +154,7 @@ namespace Ao3TrackReader.Controls
 
         private void OnCellAppearing(object sender, EventArgs e)
         {
-            var cell= ((Cell)sender);
+            var cell = ((Cell)sender);
             for (int i = 0; i < cell.ContextActions.Count; i++)
             {
                 var mi = cell.ContextActions[i] as RLMenuItem;
@@ -206,14 +212,13 @@ namespace Ao3TrackReader.Controls
 
         public void OnRefresh(object sender, EventArgs e)
         {
-            foreach (var g in readingListBacking)
+            Task.Run(() =>
             {
-                foreach (var i in g)
+                foreach (var i in readingListBacking.All)
                 {
                     Refresh(i);
                 }
-
-            }
+            });
         }
 
         public void OnClose(object sender, EventArgs e)
@@ -226,17 +231,23 @@ namespace Ao3TrackReader.Controls
             if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
                 return;
 
-            var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
-            var model = models.SingleOrDefault();
-            if (model.Value == null) return;
+            Task.Run(() =>
+            {
+                var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
+                var model = models.SingleOrDefault();
+                if (model.Value == null) return;
 
-            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
-                return;
+                if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
+                    return;
 
-            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
-            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-            readingListBacking.Add(viewmodel);
-            Refresh(viewmodel);
+                var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                wpv.DoOnMainThread(() =>
+                {
+                    readingListBacking.Add(viewmodel);
+                });
+                Refresh(viewmodel);
+            });
         }
 
         public void Refresh(Models.Ao3PageViewModel viewmodel)
@@ -245,22 +256,28 @@ namespace Ao3TrackReader.Controls
             {
                 var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
 
-                wpv.DoOnMainThread(() =>
+                var model = models.SingleOrDefault();
+                if (model.Value != null)
                 {
-                    var model = models.SingleOrDefault();
-                    if (model.Value != null)
+                    if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
                     {
-                        if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
-                        {
-                            App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
+                        App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
 
-                            var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
-                            if (pvm != null) readingListBacking.Remove(pvm);
-                        }
-                        App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-                        viewmodel.BaseData = model.Value;
+                        var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
+                        if (pvm != null) readingListBacking.Remove(pvm);
                     }
-                });
+                    App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                    updateBag.Add(new Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>(viewmodel, model.Value));
+                    wpv.DoOnMainThread(() =>
+                    {
+                        while (!updateBag.IsEmpty)
+                        {
+                            Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel> tuple;
+                            if (updateBag.TryTake(out tuple))
+                                tuple.Item1.BaseData = tuple.Item2;
+                        }
+                    });
+                }
             });
 
         }

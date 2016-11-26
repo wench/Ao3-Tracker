@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TextView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3SiteDataLookup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\HtmlConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\SyncedStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageModel.cs" />
@@ -24,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\LanguageCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ReadingList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TagCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SettingsPage.cs" />

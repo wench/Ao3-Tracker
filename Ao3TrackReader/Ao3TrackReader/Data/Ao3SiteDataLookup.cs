@@ -57,7 +57,7 @@ namespace Ao3TrackReader.Data
     //
     // Get icons from https://archiveofourown.org/images/skins/iconsets/default_large/<<CLASSNAME>>.png
 
-    public static class HtmlAgilitiyExtension
+    public static class Extensions
     {
         public static string[] GetClasses(this HtmlNode node)
         {
@@ -116,10 +116,15 @@ namespace Ao3TrackReader.Data
                 if (e.HasClass(classname)) yield return e;
             }
         }
+
+        public static string HtmlDecode(this string str)
+        {
+            return WebUtility.HtmlDecode(str);
+        }
     }
 
 
-    public class Ao3SiteDataLookup
+    public static class Ao3SiteDataLookup
     {
         static string[] escTagStrings = { "*s*", "*a*", "*d*", "*q*", "*h*" };
         static string[] usescTagStrings = { "/", "&", ".", "?", "#" };
@@ -268,7 +273,7 @@ namespace Ao3TrackReader.Data
                             var href = e.Attributes["href"];
                             if (href != null && !string.IsNullOrEmpty(href.Value))
                             {
-                                var newuri = new Uri(uri, WebUtility.HtmlDecode(href.Value));
+                                var newuri = new Uri(uri, href.Value.HtmlDecode());
                                 var m = regexTag.Match(newuri.LocalPath);
                                 if (m.Success) tag.actual = UnescapeTag(m.Groups["TAGNAME"].Value);
                                 break;
@@ -285,7 +290,7 @@ namespace Ao3TrackReader.Data
                             var href = e.Attributes["href"];
                             if (href != null && !string.IsNullOrEmpty(href.Value))
                             {
-                                var newuri = new Uri(uri, WebUtility.HtmlDecode(href.Value));
+                                var newuri = new Uri(uri, href.Value.HtmlDecode());
                                 var m = regexTag.Match(newuri.LocalPath);
                                 if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
                                     tag.parents.Add(UnescapeTag(m.Groups["TAGNAME"].Value));
@@ -299,7 +304,7 @@ namespace Ao3TrackReader.Data
                     {
                         if (p.InnerText != null)
                         {
-                            var m = regexTagCategory.Match(p.InnerText);
+                            var m = regexTagCategory.Match(p.InnerText.HtmlDecode());
                             if (m.Success)
                             {
                                 tag.category = m.Groups["CATEGORY"].Value;
@@ -372,7 +377,7 @@ namespace Ao3TrackReader.Data
                         int i;
                         if (int.TryParse(value.Value, out i))
                         {
-                            var n = opt.InnerText.Trim();
+                            var n = opt.InnerText.HtmlDecode().Trim();
                             App.Database.SetLanguage(n, i);
                             if (i == langid) name = n;
                         }
@@ -706,7 +711,7 @@ namespace Ao3TrackReader.Data
                     var href = a.Attributes["href"];
                     if (href != null && !string.IsNullOrEmpty(href.Value))
                     {
-                        var reluri = new Uri(baseuri, WebUtility.HtmlDecode(href.Value));
+                        var reluri = new Uri(baseuri, href.Value.HtmlDecode());
                         var m = regexTag.Match(reluri.LocalPath);
                         if (m.Success)
                         {
@@ -732,7 +737,7 @@ namespace Ao3TrackReader.Data
                     var href = a.Attributes["href"];
                     if (href != null && !string.IsNullOrEmpty(href.Value))
                     {
-                        var reluri = new Uri(baseuri, WebUtility.HtmlDecode(href.Value));
+                        var reluri = new Uri(baseuri, href.Value.HtmlDecode());
                         var m = regexTag.Match(reluri.LocalPath);
                         if (m.Success)
                         {
@@ -755,23 +760,23 @@ namespace Ao3TrackReader.Data
                 if (links != null)
                 {
                     var titlenode = links.FirstOrDefault();
-                    model.Title = titlenode?.InnerText;
+                    model.Title = titlenode?.InnerText?.HtmlDecode();
 
                     foreach (var n in links)
                     {
                         var href = n.Attributes["href"];
                         var rel = n.Attributes["rel"];
-                        var uri = new Uri(baseuri, WebUtility.HtmlDecode(href.Value));
+                        var uri = new Uri(baseuri, href.Value.HtmlDecode());
 
                         if (rel?.Value == "author")
                         {
-                            authors[uri.AbsoluteUri] = n.InnerText;
+                            authors[uri.AbsoluteUri] = n.InnerText.HtmlDecode();
                             continue;
                         }
 
                         if (href.Value.EndsWith("/gifts"))
                         {
-                            recipiants[uri.AbsoluteUri] = n.InnerText;
+                            recipiants[uri.AbsoluteUri] = n.InnerText.HtmlDecode();
                         }
                     }
                 }
@@ -806,7 +811,7 @@ namespace Ao3TrackReader.Data
                 if (tag == null)
                     model.RequiredTags[n.Key] = null;
                 else
-                    model.RequiredTags[n.Key] = new Tuple<string, string>(tag, n.Value.InnerText.Trim());
+                    model.RequiredTags[n.Key] = new Tuple<string, string>(tag, n.Value.InnerText.HtmlDecode().Trim());
 
             }
 
@@ -837,13 +842,13 @@ namespace Ao3TrackReader.Data
 
             var stats = worknode.ElementByClass("dl", "stats");
 
-            model.Details.LastUpdated = headernode?.ElementByClass("p", "datetime")?.InnerText?.Trim();
+            model.Details.LastUpdated = headernode?.ElementByClass("p", "datetime")?.InnerText?.HtmlDecode()?.Trim();
 
-            model.Language = stats?.ElementByClass("dd", "language")?.InnerText?.Trim();
+            model.Language = stats?.ElementByClass("dd", "language")?.InnerText?.HtmlDecode()?.Trim();
 
             try
             {
-                model.Details.Words = int.Parse(stats?.ElementByClass("dd", "words")?.InnerText?.Replace(",", ""));
+                model.Details.Words = int.Parse(stats?.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""));
             }
             catch
             {
@@ -852,7 +857,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Collections = int.Parse(stats?.ElementByClass("dd", "collections")?.InnerText);
+                model.Details.Collections = int.Parse(stats?.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -861,7 +866,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Comments = int.Parse(stats?.ElementByClass("dd", "comments")?.InnerText);
+                model.Details.Comments = int.Parse(stats?.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -870,7 +875,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Kudos = int.Parse(stats?.ElementByClass("dd", "kudos")?.InnerText);
+                model.Details.Kudos = int.Parse(stats?.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -879,7 +884,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Bookmarks = int.Parse(stats?.ElementByClass("dd", "bookmarks")?.InnerText);
+                model.Details.Bookmarks = int.Parse(stats?.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -888,7 +893,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Hits = int.Parse(stats?.ElementByClass("dd", "hits")?.InnerText);
+                model.Details.Hits = int.Parse(stats?.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -908,14 +913,14 @@ namespace Ao3TrackReader.Data
 
                     var s = link.Attributes["href"]?.Value;
                     if (String.IsNullOrWhiteSpace(s)) continue;
-                    var uri = new Uri(baseuri, WebUtility.HtmlDecode(s));
+                    var uri = new Uri(baseuri, s.HtmlDecode());
 
-                    var part = n.Element("strong")?.InnerText;
+                    var part = n.Element("strong")?.InnerText?.HtmlDecode();
                     if (String.IsNullOrWhiteSpace(part)) continue;
 
                     try
                     {
-                        series[uri.AbsoluteUri] = new Tuple<int, string>(int.Parse(part), link.InnerText);
+                        series[uri.AbsoluteUri] = new Tuple<int, string>(int.Parse(part), link.InnerText?.HtmlDecode());
                     }
                     catch
                     {
@@ -941,6 +946,21 @@ namespace Ao3TrackReader.Data
                     if (workchap?.location != null) { chapters_finished--; }
 
                     model.Details.Chapters = new Tuple<int?, int, int?>(chapters_finished, int.Parse(chapters[0]), total);
+                }
+                catch
+                {
+
+                }
+            }
+
+            // Horrible horrible dirty grabbing of the summary
+            var summarynode = worknode.ElementByClass("blockquote", "summary");
+            if (summarynode != null)
+            {
+
+                try
+                {
+                    model.Details.Summary = HtmlConverter.ConvertNode(summarynode);
                 }
                 catch
                 {

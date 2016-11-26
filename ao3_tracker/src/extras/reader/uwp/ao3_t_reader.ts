@@ -59,17 +59,7 @@ namespace Ao3Track {
 
     // Nonsense to allow for swiping back and foward between pages 
 
-    function removeTouchEvents() {
-        Ao3TrackHelper.leftOffset = 0.0;
-        //Ao3TrackHelper.opacity = 1.0;
-        Ao3TrackHelper.showPrevPageIndicator = false;
-        Ao3TrackHelper.showNextPageIndicator = false;
-        document.removeEventListener("touchmove", touchMoveHandler);
-        document.removeEventListener("touchend", touchEndHandler);
-        document.removeEventListener("touchcancel", touchCancelHandler);
-        window.removeEventListener("pointermove", pointerMoveHandler);
-        window.removeEventListener("pointerup", pointerEndHandler);
-    }
+    let dragging = false;
     let canforward = false;
     let canbackward = false;
     let startTouchX: number = 0;
@@ -113,6 +103,7 @@ namespace Ao3Track {
     }
     function touchStartHandler(event: TouchEvent) {
         let touch = event.touches.item(0);
+        dragging = false;
         if (event.touches.length > 1 || !touch) {
             removeTouchEvents();
             return;
@@ -120,25 +111,24 @@ namespace Ao3Track {
         startTouchX = touch.screenX / zoomFactor;
         startTouchY = touch.screenY / zoomFactor;
 
-        setImmediate(() => {
-            canforward = false;
-            canbackward = false;
-            if (Ao3TrackHelper.canGoBack && startTouchX < startLimit) {
-                // going backwards....
-                canbackward = true;
-            }
-            if (Ao3TrackHelper.canGoForward && startTouchX >= (window.innerWidth - startLimit)) {
-                // Going forwards
-                canforward = true;
-            }
-            if (!canbackward && !canforward) {
-                removeTouchEvents();
-                return;
-            }
-            if ('ontouchmove' in document) { document.addEventListener("touchmove", touchMoveHandler); }
-            if ('ontouchend' in document) { document.addEventListener("touchend", touchEndHandler); }
-            if ('ontouchcancel' in document) { document.addEventListener("touchcancel", touchCancelHandler); }
-        });
+        canforward = false;
+        canbackward = false;
+        if (Ao3TrackHelper.canGoBack && startTouchX < startLimit) {
+            // going backwards....
+            canbackward = true;
+        }
+        if (Ao3TrackHelper.canGoForward && startTouchX >= (window.innerWidth - startLimit)) {
+            // Going forwards
+            canforward = true;
+        }
+        if (!canbackward && !canforward) {
+            removeTouchEvents();
+            return;
+        }
+        dragging = true;
+        if ('ontouchmove' in document) { document.addEventListener("touchmove", touchMoveHandler); }
+        if ('ontouchend' in document) { document.addEventListener("touchend", touchEndHandler); }
+        if ('ontouchcancel' in document) { document.addEventListener("touchcancel", touchCancelHandler); }
     }
     let lastTouchX: number = 0;
     let lastTouchY: number = 0;
@@ -166,52 +156,50 @@ namespace Ao3Track {
     }
     function touchMoveHandler(event: TouchEvent) {
         let touch = event.touches.item(0);
-        if (event.touches.length > 1 || !touch) {
+        if (!dragging || event.touches.length > 1 || !touch) {
             removeTouchEvents();
             return;
         }
         lastTouchX = touch.screenX / zoomFactor;
         lastTouchY = touch.screenY / zoomFactor;
-        setImmediate(() => {
 
-            let offset = lastTouchX - startTouchX;
-            let offsetY = Math.abs(lastTouchY - startTouchY);
+        let offset = lastTouchX - startTouchX;
+        let offsetY = Math.abs(lastTouchY - startTouchY);
 
-            // Too much y movement? Disable this entirely 
-            if (offsetY >= yLimit * 2) {
-                removeTouchEvents();
-                return;
-            }
+        // Too much y movement? Disable this entirely 
+        if (offsetY >= yLimit * 2) {
+            removeTouchEvents();
+            return;
+        }
 
-            if ((!canbackward && offset > 0.0) || (!canforward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) ||
-                (offsetY >= yLimit)) {
-                offset = 0.0;
-            }
-            else if (offset < -maxSlide) {
-                offset = -maxSlide;
-            }
-            else if (offset > maxSlide) {
-                offset = maxSlide;
-            }
+        if ((!canbackward && offset > 0.0) || (!canforward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) ||
+            (offsetY >= yLimit)) {
+            offset = 0.0;
+        }
+        else if (offset < -maxSlide) {
+            offset = -maxSlide;
+        }
+        else if (offset > maxSlide) {
+            offset = maxSlide;
+        }
 
-            // css class handling
-            if (canforward && offset < -endThreshold && offsetY < yLimit) {
-                Ao3TrackHelper.showNextPageIndicator = true;
-            }
-            else {
-                Ao3TrackHelper.showNextPageIndicator = false;
-            }
+        // css class handling
+        if (canforward && offset < -endThreshold && offsetY < yLimit) {
+            Ao3TrackHelper.showNextPageIndicator = true;
+        }
+        else {
+            Ao3TrackHelper.showNextPageIndicator = false;
+        }
 
-            if (canbackward && offset >= endThreshold && offsetY < yLimit) {
-                Ao3TrackHelper.showPrevPageIndicator = true;
-            }
-            else {
-                Ao3TrackHelper.showPrevPageIndicator = false;
-            }
+        if (canbackward && offset >= endThreshold && offsetY < yLimit) {
+            Ao3TrackHelper.showPrevPageIndicator = true;
+        }
+        else {
+            Ao3TrackHelper.showPrevPageIndicator = false;
+        }
 
-            Ao3TrackHelper.leftOffset = offset;
-            //Ao3TrackHelper.opacity = (window.innerWidth - Math.abs(offset)) / window.innerWidth;
-        });
+        Ao3TrackHelper.leftOffset = offset;
+        //Ao3TrackHelper.opacity = (window.innerWidth - Math.abs(offset)) / window.innerWidth;
     }
     function pointerEndHandler(event: PointerEvent) {
         // Only Touch
@@ -236,23 +224,36 @@ namespace Ao3Track {
         touchEndHandler(te as TouchEvent);
     }
     function touchEndHandler(event: TouchEvent) {
-        setImmediate(() => {
-            let offset = lastTouchX - startTouchX;
-            let offsetY = Math.abs(lastTouchY - startTouchY);
+        if (!dragging) { 
+            removeTouchEvents();
+            return; 
+        }
+        let offset = lastTouchX - startTouchX;
+        let offsetY = Math.abs(lastTouchY - startTouchY);
 
-            if (canforward && offset < -endThreshold && offsetY < yLimit) {
-                Ao3TrackHelper.goForward();
-            }
-            else if (canbackward && offset >= endThreshold && offsetY < yLimit) {
-                Ao3TrackHelper.goBack();
-            }
-            else {
-                removeTouchEvents();
-            }
-        });
+        if (canforward && offset < -endThreshold && offsetY < yLimit) {
+            Ao3TrackHelper.goForward();
+        }
+        else if (canbackward && offset >= endThreshold && offsetY < yLimit) {
+            Ao3TrackHelper.goBack();
+        }
+        removeTouchEvents();
     }
     function touchCancelHandler(event: TouchEvent) {
         removeTouchEvents();
+    }
+
+    function removeTouchEvents() {
+        Ao3TrackHelper.leftOffset = 0.0;
+        //Ao3TrackHelper.opacity = 1.0;
+        Ao3TrackHelper.showPrevPageIndicator = false;
+        Ao3TrackHelper.showNextPageIndicator = false;
+        document.removeEventListener("touchmove", touchMoveHandler);
+        document.removeEventListener("touchend", touchEndHandler);
+        document.removeEventListener("touchcancel", touchCancelHandler);
+        window.removeEventListener("pointermove", pointerMoveHandler);
+        window.removeEventListener("pointerup", pointerEndHandler);
+        dragging = false;
     }
 
     function setTouchState() {

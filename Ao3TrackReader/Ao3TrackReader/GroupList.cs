@@ -13,6 +13,7 @@ namespace Ao3TrackReader
         event EventHandler CompareChanged;
         string Group { get; }
         string GroupType { get; }
+        int? Unread { get; }
     }
 
     public class GroupSubList<T> : ObservableCollection<T>, INotifyPropertyChanged, INotifyPropertyChanging
@@ -97,7 +98,9 @@ namespace Ao3TrackReader
 
     public class GroupList<T> : ObservableCollection<GroupSubList<T>>
         where T : IGroupable<T>, INotifyPropertyChanged, INotifyPropertyChanging
-    { 
+    {
+        GroupSubList<T> hidden = new GroupSubList<T>("<Hidden>");
+
         public void Add(T item)
         {
             // Add the item to the correct list
@@ -128,6 +131,11 @@ namespace Ao3TrackReader
             return default(T);
         }
 
+        bool IsHidden(T item)
+        {
+            return item.Unread == 0;
+        }
+
         private void AddToGroup(T item)
         {
             string groupName = item.Group;
@@ -135,7 +143,11 @@ namespace Ao3TrackReader
             GroupSubList<T> g = null;
 
             int i = 0;
-            for (; i < Count; i++)
+            if (IsHidden(item))
+            {
+                g = hidden;
+            }
+            else for (; i < Count; i++)
             {
                 int c = String.Compare(this[i].Group, groupName);
                 if (c == 0) {
@@ -167,7 +179,7 @@ namespace Ao3TrackReader
             string groupName = item.Group;
             if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
 
-            var g = this.Where((l) => l.Group == groupName).FirstOrDefault();
+            var g = IsHidden(item)?hidden:this.Where((l) => l.Group == groupName).FirstOrDefault();
             if (g != null)
             {
                 g.Remove(item);
@@ -177,7 +189,7 @@ namespace Ao3TrackReader
 
         private void Item_PropertyChanging(object sender, PropertyChangingEventArgs e)
         {
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group") {
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread") {
                 // Remove from its group
                 RemoveFromGroup((T)sender);
             }
@@ -185,7 +197,7 @@ namespace Ao3TrackReader
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group")
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread")
             {
                 // Add into group
                 AddToGroup((T)sender);
@@ -193,13 +205,30 @@ namespace Ao3TrackReader
             if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "GroupType")
             {
                 var item = (T)sender;
-                if (!string.IsNullOrWhiteSpace(item.GroupType))
+                if (!IsHidden(item) && !string.IsNullOrWhiteSpace(item.GroupType))
                 {
                     string groupName = item.Group;
                     if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
                     var g = this.Where((l) => l.Group == groupName).FirstOrDefault();
                     if (g != null) g.GroupType = item.GroupType;
                 }
+            }
+        }
+
+
+        public IEnumerable<GroupSubList<T>> AllGroups
+        {
+            get
+            {
+                return this.Concat(new[] { hidden });
+            }
+        }
+
+        public IEnumerable<T> All
+        {
+            get
+            {
+                return AllGroups.SelectMany(group => group);
             }
         }
     }

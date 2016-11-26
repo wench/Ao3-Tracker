@@ -49,6 +49,7 @@ namespace Ao3TrackReader.Models
         public int? Kudos { get; set; }
         public int? Bookmarks { get; set; }
         public int? Hits { get; set; }
+        public TextTree Summary { get; set; }
     }
 
 

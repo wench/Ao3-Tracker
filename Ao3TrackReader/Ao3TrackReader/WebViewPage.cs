@@ -38,8 +38,6 @@ namespace Ao3TrackReader
         public WebViewPage()
         {
             Title = "Ao3Track Reader";
-            NavigationPage.SetHasNavigationBar(this, true);
-
 
             var mainlayout = new StackLayout
             {
@@ -55,7 +53,7 @@ namespace Ao3TrackReader
             commandBar.PrimaryCommands.Add(prevPageButton = CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), false, () => { GoBack(); }));
             commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), false, () => { GoForward(); }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
-            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.ShowBcc), false, this.OnJumpClicked));
+            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.Redo), false, this.OnJumpClicked));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () => readingList.IsOnScreen = !readingList.IsOnScreen ));
             commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () =>
                 FontSize += 10));

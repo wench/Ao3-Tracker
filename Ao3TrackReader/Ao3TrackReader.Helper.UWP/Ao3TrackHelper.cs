@@ -47,6 +47,11 @@ namespace Ao3TrackReader.Helper
                 AlterFontSizeEvent?.Invoke(this, null);
             });
         }
+        public void ClearEvents()
+        {
+            JumpToLastLocationEvent = null;
+            AlterFontSizeEvent = null;
+        }
 
         public IAsyncOperation<object> getWorkChaptersAsync([ReadOnlyArray] long[] works)
         {
