@@ -386,7 +386,7 @@ namespace Ao3TrackReader
 
         public void addToReadingList(string href)
         {
-            readingList.Add(href);
+            readingList.AddAsync(href);
         }
     }
 }

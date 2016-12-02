@@ -689,7 +689,7 @@ namespace Ao3TrackReader.Data
             SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
 
             // Tags node
-            HtmlNode tagsnode = worknode.ElementByClass("ul", "tags");
+            HtmlNode tagsnode = worknode?.ElementByClass("ul", "tags");
 
             if (tagsnode != null)
             {
@@ -726,7 +726,7 @@ namespace Ao3TrackReader.Data
             }
 
             // Header
-            var headernode = worknode.ElementByClass("div", "header");
+            var headernode = worknode?.ElementByClass("div", "header");
 
             // Get Fandom tags
             HtmlNode fandomnode = headernode?.ElementByClass("fandoms");
@@ -840,7 +840,7 @@ namespace Ao3TrackReader.Data
 
             // Stats
 
-            var stats = worknode.ElementByClass("dl", "stats");
+            var stats = worknode?.ElementByClass("dl", "stats");
 
             model.Details.LastUpdated = headernode?.ElementByClass("p", "datetime")?.InnerText?.HtmlDecode()?.Trim();
 
@@ -848,7 +848,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Words = int.Parse(stats?.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""));
+                if (stats != null) model.Details.Words = int.Parse(stats.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""));
             }
             catch
             {
@@ -857,7 +857,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Collections = int.Parse(stats?.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode());
+                if (stats != null) model.Details.Collections = int.Parse(stats.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -866,7 +866,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Comments = int.Parse(stats?.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode());
+                if (stats != null) model.Details.Comments = int.Parse(stats.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -875,7 +875,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Kudos = int.Parse(stats?.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode());
+                if (stats != null) model.Details.Kudos = int.Parse(stats.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -884,7 +884,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Bookmarks = int.Parse(stats?.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode());
+                if (stats != null) model.Details.Bookmarks = int.Parse(stats.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -893,7 +893,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Hits = int.Parse(stats?.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode());
+                if (stats != null) model.Details.Hits = int.Parse(stats.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode());
             }
             catch
             {
@@ -902,7 +902,7 @@ namespace Ao3TrackReader.Data
 
             // Series
 
-            var seriesnode = worknode.ElementByClass("ul", "series");
+            var seriesnode = worknode?.ElementByClass("ul", "series");
             if (seriesnode != null)
             {
                 Dictionary<string, Tuple<int, string>> series = new Dictionary<string, Tuple<int, string>>(1);
@@ -954,7 +954,7 @@ namespace Ao3TrackReader.Data
             }
 
             // Horrible horrible dirty grabbing of the summary
-            var summarynode = worknode.ElementByClass("blockquote", "summary");
+            var summarynode = worknode?.ElementByClass("blockquote", "summary");
             if (summarynode != null)
             {
 

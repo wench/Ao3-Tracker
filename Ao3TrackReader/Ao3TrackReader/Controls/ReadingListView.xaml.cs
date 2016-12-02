@@ -49,9 +49,8 @@ namespace Ao3TrackReader.Controls
             TranslationX = old_width = 480;
             WidthRequest = old_width;
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
-            ListView.ItemsSource = readingListBacking;
             var c = App.Colors["SystemAltMediumHighColor"];
-            BackgroundColor = new Color(c.R,c.G,c.B,(1+c.A)/2);
+            BackgroundColor = new Color(c.R, c.G, c.B, (3 + c.A) / 4);
 
             // Restore the reading list contents!
             var items = new Dictionary<string, Models.ReadingList>();
@@ -60,9 +59,10 @@ namespace Ao3TrackReader.Controls
                 items[i.Uri] = i;
             }
 
+            List<Task> tasks = new List<Task>();
             if (items.Count == 0)
             {
-                Add("https://archiveofourown.org/");
+                tasks.Add(AddAsync("https://archiveofourown.org/"));
             }
             else
             {
@@ -72,7 +72,7 @@ namespace Ao3TrackReader.Controls
                     if (m.Value != null)
                     {
                         var item = items[m.Key];
-                        if (string.IsNullOrWhiteSpace(m.Value.Title))
+                        if (string.IsNullOrWhiteSpace(m.Value.Title) || m.Value.Type == Models.Ao3PageType.Work)
                             m.Value.Title = item.Title;
                         if (string.IsNullOrWhiteSpace(m.Value.PrimaryTag) || m.Value.PrimaryTag == "<Work>")
                         {
@@ -84,10 +84,20 @@ namespace Ao3TrackReader.Controls
 
                         var viewmodel = new Models.Ao3PageViewModel { BaseData = m.Value };
                         readingListBacking.Add(viewmodel);
-                        Refresh(viewmodel);
+                        tasks.Add(RefreshAsync(viewmodel));
                     }
                 }
             }
+            ListView.ItemsSource = readingListBacking;
+            Task.Run(async () =>
+            {
+                await Task.WhenAll(tasks);
+
+                wpv.DoOnMainThread(() =>
+                {
+                    RefreshButton.IsEnabled = true;
+                });
+            });
         }
 
 
@@ -101,7 +111,7 @@ namespace Ao3TrackReader.Controls
             {
                 if (value == false)
                 {
-                    Unfocus();
+                    ListView.Unfocus();
                     ViewExtensions.CancelAnimations(this);
                     this.TranslateTo(Width, 0, 100, Easing.CubicIn);
                 }
@@ -109,7 +119,7 @@ namespace Ao3TrackReader.Controls
                 {
                     ViewExtensions.CancelAnimations(this);
                     this.TranslateTo(0, 0, 100, Easing.CubicIn);
-                    Focus();
+                    ListView.Focus();
                 }
             }
         }
@@ -148,7 +158,7 @@ namespace Ao3TrackReader.Controls
         private bool MenuOpenLastFilter(RLMenuItem mi)
         {
             var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item.BaseData == null) return true;
+            if (item?.BaseData == null) return true;
 
             return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Other;
         }
@@ -208,17 +218,27 @@ namespace Ao3TrackReader.Controls
 
         public void OnAddPage(object sender, EventArgs e)
         {
-            Add(wpv.Current.AbsoluteUri);
+            AddAsync(wpv.Current.AbsoluteUri);
         }
 
         public void OnRefresh(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            ListView.Focus();
+            RefreshButton.IsEnabled = false;
+            Task.Run(async () =>
             {
+                List<Task> tasks = new List<Task>();
                 foreach (var i in readingListBacking.All)
                 {
-                    Refresh(i);
+                    tasks.Add(RefreshAsync(i));
                 }
+
+                await Task.WhenAll(tasks);
+
+                wpv.DoOnMainThread(() =>
+                {
+                    RefreshButton.IsEnabled = true;
+                });
             });
         }
 
@@ -227,12 +247,12 @@ namespace Ao3TrackReader.Controls
             IsOnScreen = false;
         }
 
-        public void Add(string href)
+        public Task AddAsync(string href)
         {
             if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
-                return;
+                return null;
 
-            Task.Run(() =>
+            return Task.Run(async () =>
             {
                 var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
                 var model = models.SingleOrDefault();
@@ -247,40 +267,39 @@ namespace Ao3TrackReader.Controls
                 {
                     readingListBacking.Add(viewmodel);
                 });
-                Refresh(viewmodel);
+                await RefreshAsync(viewmodel);
             });
         }
 
-        public void Refresh(Models.Ao3PageViewModel viewmodel)
+        public Task RefreshAsync(Models.Ao3PageViewModel viewmodel)
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
-                var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
+                    var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
 
-                var model = models.SingleOrDefault();
-                if (model.Value != null)
-                {
-                    if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
+                    var model = models.SingleOrDefault();
+                    if (model.Value != null)
                     {
-                        App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
-
-                        var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
-                        if (pvm != null) readingListBacking.Remove(pvm);
-                    }
-                    App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-                    updateBag.Add(new Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>(viewmodel, model.Value));
-                    wpv.DoOnMainThread(() =>
-                    {
-                        while (!updateBag.IsEmpty)
+                        if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
                         {
-                            Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel> tuple;
-                            if (updateBag.TryTake(out tuple))
-                                tuple.Item1.BaseData = tuple.Item2;
-                        }
-                    });
-                }
-            });
+                            App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
 
+                            var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
+                            if (pvm != null) readingListBacking.Remove(pvm);
+                        }
+                        App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                        updateBag.Add(new Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>(viewmodel, model.Value));
+                        wpv.DoOnMainThread(() =>
+                        {
+                            while (!updateBag.IsEmpty)
+                            {
+                                Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel> tuple;
+                                if (updateBag.TryTake(out tuple))
+                                    tuple.Item1.BaseData = tuple.Item2;
+                            }
+                        });
+                    }
+            });
         }
     }
 }
