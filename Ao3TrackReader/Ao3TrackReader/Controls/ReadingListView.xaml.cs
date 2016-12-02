@@ -19,7 +19,7 @@ namespace Ao3TrackReader.Controls
         }
     }
 
-    public partial class ReadingListView : ListView
+    public partial class ReadingListView : StackLayout
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
         private readonly WebViewPage wpv;
@@ -49,8 +49,9 @@ namespace Ao3TrackReader.Controls
             TranslationX = old_width = 480;
             WidthRequest = old_width;
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
-            ItemsSource = readingListBacking;
-            BackgroundColor = App.Colors["SystemAltMediumHighColor"];
+            ListView.ItemsSource = readingListBacking;
+            var c = App.Colors["SystemAltMediumHighColor"];
+            BackgroundColor = new Color(c.R,c.G,c.B,(1+c.A)/2);
 
             // Restore the reading list contents!
             var items = new Dictionary<string, Models.ReadingList>();

@@ -79,6 +79,14 @@ namespace Ao3TrackReader.UWP
                     (byte)(n.Foreground.Value.B * 255)
                 )
             );
+            if (n.Strike == true)
+            {
+                if (i.Foreground == null)
+                {
+                    i.Foreground = new SolidColorBrush();
+                }
+                i.Foreground.Opacity = 0.25;
+            }
         }
 
         bool TrimNewLines(Inline inline, bool had = true, bool strip_all = true)
