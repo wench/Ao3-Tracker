@@ -44,8 +44,13 @@ namespace Ao3TrackReader.Data
 
         event EventHandler<bool> SyncFromServerEvent;
 
+        HttpClient HttpClient { get; set; }
+
         public SyncedStorage()
         {
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            HttpClient = new HttpClient(httpClientHandler);
+
             storage = new Dictionary<long, Work>();
             unsynced = new Dictionary<long, Work>();
 
@@ -69,7 +74,7 @@ namespace Ao3TrackReader.Data
             }
             else
             {
-                App.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
                 serversync = SyncState.Syncing;
             }
 
@@ -174,7 +179,7 @@ namespace Ao3TrackReader.Data
                 {
                     //console.log("dosync: sending GET request");
 
-                    var response = await App.HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
+                    var response = await HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
 
                     if (!response.IsSuccessStatusCode)
                     {
@@ -183,7 +188,7 @@ namespace Ao3TrackReader.Data
                             //console.error("dosync: FAILED %s", response.ReasonPhrase);
                             serversync = SyncState.Disabled;
                             onSyncFromServer(false);
-
+                            return;
                         }
                     }
 
@@ -266,7 +271,7 @@ namespace Ao3TrackReader.Data
                     var json = JsonConvert.SerializeObject(current);
                     var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                    response = await App.HttpClient.PostAsync(new Uri(url_base, "Values"), postBody);
+                    response = await HttpClient.PostAsync(new Uri(url_base, "Values"), postBody);
                     if (!response.IsSuccessStatusCode)
                     {
                         lock (locker)
@@ -440,7 +445,6 @@ namespace Ao3TrackReader.Data
 
         public Task<Dictionary<string, string>> Login(string username, string password)
         {
-
             return Task.Run(async () =>
             {
                 Dictionary<string, string> errors = null;
@@ -448,7 +452,7 @@ namespace Ao3TrackReader.Data
                 lock (locker)
                 {
                     serversync = SyncState.Disabled;
-                    App.HttpClient.DefaultRequestHeaders.Authorization = null;
+                    HttpClient.DefaultRequestHeaders.Authorization = null;
                     App.Database.SaveVariable("authorization.username", "");
                     App.Database.SaveVariable("authorization.credential", "");
                 }
@@ -461,7 +465,7 @@ namespace Ao3TrackReader.Data
 
                 var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                var response = await App.HttpClient.PostAsync(new Uri(url_base, "User/Login"), postBody);
+                var response = await HttpClient.PostAsync(new Uri(url_base, "User/Login"), postBody);
                 if (!response.IsSuccessStatusCode)
                 {
                     errors = new Dictionary<string, string> {
@@ -489,7 +493,7 @@ namespace Ao3TrackReader.Data
                         Authorization authorization;
                         authorization.credential = cred;
                         authorization.username = username;
-                        App.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
+                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
                         last_sync = 0;
                         App.Database.SaveVariable("authorization.username", authorization.username);
                         App.Database.SaveVariable("authorization.credential", authorization.credential);
@@ -505,7 +509,37 @@ namespace Ao3TrackReader.Data
 
                 return errors;
             });
+        }
 
+        public Task<Models.ServerReadingList> SyncReadingListAsync(Models.ServerReadingList srl)
+        {
+            return Task.Run(async () =>
+            {
+                if (serversync == SyncState.Disabled)
+                {
+                    return null;
+                }
+
+                var json = JsonConvert.SerializeObject(srl);
+                var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                var response = await HttpClient.PostAsync(new Uri(url_base, "ReadingList"), postBody);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var content = await response.Content.ReadAsStringAsync();
+                Models.ServerReadingList res = null;
+
+                try
+                {
+                    res = JsonConvert.DeserializeObject<Models.ServerReadingList>(content);
+                }
+                catch (Newtonsoft.Json.JsonException /*e*/)
+                {
+                }
+                
+                return res;
+            });
         }
     }
 }

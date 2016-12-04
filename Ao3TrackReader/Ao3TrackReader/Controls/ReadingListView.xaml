@@ -4,6 +4,7 @@
   <StackLayout VerticalOptions="Start" Orientation="Horizontal">
     <Button Text="&#58001;" Clicked="OnAddPage" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="Start" x:Name="AddPageButton"/>
     <Button Text="&#57673;" Clicked="OnRefresh" IsEnabled="False" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="Start" x:Name="RefreshButton"/>
+    <Button Text="&#57710;" Clicked="OnShowHidden" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="Start" x:Name="ShowHiddenButton"/>    
     <Button Text="&#57610;" Clicked="OnClose" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="EndAndExpand" />
   </StackLayout>
   <ListView VerticalOptions="Fill" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" x:Name="ListView">

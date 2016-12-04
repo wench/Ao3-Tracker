@@ -120,7 +120,7 @@ namespace Ao3TrackReader
 
         public T Find(Predicate<T> pred)
         {
-            foreach (var g in this)
+            foreach (var g in AllGroups)
             {
                 foreach (var e in g)
                 {
@@ -131,9 +131,51 @@ namespace Ao3TrackReader
             return default(T);
         }
 
-        bool IsHidden(T item)
+        bool hide_nounread = true;
+        private bool IsHidden(T item)
         {
-            return item.Unread == 0;
+            return (hide_nounread && item.Unread == 0);
+        }
+
+        private void ResortHidden()
+        {
+            List<T> toHide = new List<T>();
+            foreach (var g in this.ToArray())
+            {
+                foreach (var e in g.ToArray())
+                {
+                    if (IsHidden(e))
+                    {
+                        g.Remove(e);
+                        toHide.Add(e);
+                    }
+                }
+                if (g.Count == 0) Remove(g);
+            }
+            foreach (var e in hidden.ToArray())
+            {
+                if (!IsHidden(e))
+                {
+                    hidden.Remove(e);
+                    AddToGroup(e);
+                }
+            }
+            foreach (var e in toHide)
+            {
+                hidden.Add(e);
+
+            }
+        }
+
+        public bool HideNoUnread {
+            get { return hide_nounread; }
+            set {
+                if (hide_nounread != value)
+                {
+                    hide_nounread = value;
+                    ResortHidden();
+                }
+            }
         }
 
         private void AddToGroup(T item)

@@ -8,6 +8,8 @@
         <EntityTypeShape EntityType="Ao3TrackModel.User" Width="1.5" PointX="0.75" PointY="0.875" IsExpanded="true" />
         <EntityTypeShape EntityType="Ao3TrackModel.Work" Width="1.5" PointX="3" PointY="0.875" IsExpanded="true" />
         <AssociationConnector Association="Ao3TrackModel.FK_Works_Users" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="Ao3TrackModel.ReadingList" Width="1.5" PointX="3" PointY="4" />
+        <AssociationConnector Association="Ao3TrackModel.FK_ReadingList_Users" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

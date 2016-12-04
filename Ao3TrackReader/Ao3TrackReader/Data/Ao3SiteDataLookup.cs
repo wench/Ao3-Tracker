@@ -136,6 +136,14 @@ namespace Ao3TrackReader.Data
         static Regex regexRSSTagTitle = new Regex(@"AO3 works tagged '(?<TAGNAME>.*)'$", RegexOptions.ExplicitCapture);
         static Regex regexTagCategory = new Regex(@"This tag belongs to the (?<CATEGORY>\w*) Category\.", RegexOptions.ExplicitCapture);
         static Regex regexPageQuery = new Regex(@"(?<PAGE>&?page=\d+&?)");
+        static HttpClient HttpClient { get; set; }
+
+        static Ao3SiteDataLookup()
+        {
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            httpClientHandler.AllowAutoRedirect = false;
+            HttpClient = new HttpClient(httpClientHandler);
+        }
 
         static string EscapeTag(string tag)
         {
@@ -179,7 +187,7 @@ namespace Ao3TrackReader.Data
 
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get,uri);
             message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/atom+xml"));
-            var response = await App.HttpClient.SendAsync(message, System.Net.Http.HttpCompletionOption.ResponseHeadersRead);
+            var response = await HttpClient.SendAsync(message, System.Net.Http.HttpCompletionOption.ResponseHeadersRead);
 
             if (response.StatusCode == HttpStatusCode.Redirect)
             {
@@ -245,7 +253,7 @@ namespace Ao3TrackReader.Data
 
             var uri = new Uri(@"https://archiveofourown.org/tags/" + intag);
 
-            var response = await App.HttpClient.GetAsync(uri);
+            var response = await HttpClient.GetAsync(uri);
 
             if (response.IsSuccessStatusCode)
             {
@@ -352,7 +360,7 @@ namespace Ao3TrackReader.Data
 
             var uri = new Uri(@"https://archiveofourown.org/works/search");
 
-            var response = await App.HttpClient.GetAsync(uri);
+            var response = await HttpClient.GetAsync(uri);
 
             if (response.IsSuccessStatusCode)
             {
@@ -646,7 +654,7 @@ namespace Ao3TrackReader.Data
                         }
 
                         var wsuri = new Uri(@"https://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
-                        var response = await App.HttpClient.GetAsync(wsuri);
+                        var response = await HttpClient.GetAsync(wsuri);
 
                         if(response.IsSuccessStatusCode)
                         {

@@ -21,11 +21,6 @@ namespace Ao3TrackReader
             get; private set;
         }
 
-        public static HttpClient HttpClient
-        {
-            get; private set;
-        }
-
         static App()
         {
         }
@@ -34,9 +29,6 @@ namespace Ao3TrackReader
         public App()
         {
             Database = new Ao3TrackDatabase();
-            HttpClientHandler httpClientHandler = new HttpClientHandler();
-            httpClientHandler.AllowAutoRedirect = false;
-            HttpClient = new HttpClient(httpClientHandler);
             Storage = new SyncedStorage();
 
             Colors = new Dictionary<string, Color>();

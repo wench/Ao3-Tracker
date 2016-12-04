@@ -12,13 +12,11 @@ namespace Ao3tracksync.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Work
+    public partial class ReadingList
     {
-        public long userid { get; set; }
         public long id { get; set; }
-        public long chapterid { get; set; }
-        public long number { get; set; }
+        public long userid { get; set; }
+        public string path { get; set; }
         public long timestamp { get; set; }
-        public Nullable<long> location { get; set; }
     }
 }

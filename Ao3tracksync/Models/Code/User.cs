@@ -15,6 +15,11 @@ namespace Ao3tracksync.Models
 
     public partial class User
     {
+        public User()
+        {
+
+        }
+
         public User(string username, string email, string roles, string password)
         {
             this.username = username;
@@ -27,6 +32,9 @@ namespace Ao3tracksync.Models
         {
             using (var ctx = new Models.Ao3TrackEntities())
             {
+                ctx.Configuration.AutoDetectChangesEnabled = false;
+                ctx.Configuration.ProxyCreationEnabled = false;
+
                 var usr = (from u in ctx.Users where u.username == username select u).AsEnumerable().FirstOrDefault();
 
                 if (usr == null)
@@ -43,6 +51,9 @@ namespace Ao3tracksync.Models
         {
             using (var ctx = new Models.Ao3TrackEntities())
             {
+                ctx.Configuration.AutoDetectChangesEnabled = false;
+                ctx.Configuration.ProxyCreationEnabled = false;
+
                 var usr = (from u in ctx.Users where u.username == username select u).AsEnumerable().FirstOrDefault();
 
                 if (usr == null)

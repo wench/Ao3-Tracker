@@ -27,5 +27,6 @@ namespace Ao3tracksync.Models
     
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Work> Works { get; set; }
+        public virtual DbSet<ReadingList> ReadingLists { get; set; }
     }
 }

@@ -19,7 +19,7 @@ using System.Web;
 
 namespace Ao3tracksync.Controllers
 {
-    [Authorize(Roles = "users"), AllowCrossSite, System.Web.Mvc.OutputCache(Location = OutputCacheLocation.None)]
+    [RoutePrefix("api/Values"), Authorize(Roles = "users"), AllowCrossSite, System.Web.Mvc.OutputCache(Location = OutputCacheLocation.None)]
     public class ValuesController : ApiController
     {
         public static bool Initialized { get; private set; }
@@ -49,17 +49,16 @@ namespace Ao3tracksync.Controllers
         };
 
         #region GET api/User/Init
-        [AllowAnonymous, HttpGet, Route("Login")]
+        [AllowAnonymous, HttpGet, Route("Init")]
         public void Init()
         {
             using (var ctx = new Models.Ao3TrackEntities())
             {
-
             }
         }
         #endregion
 
-        #region api/values
+        #region OPTIONS api/values
         [AllowAnonymous, CrossSiteOptions]
         public void Options()
         {

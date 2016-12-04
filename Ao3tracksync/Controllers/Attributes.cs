@@ -26,9 +26,12 @@ namespace Ao3tracksync.Controllers
         {
             try
             {
-                Uri uri = new Uri(ActionContext.Request.Headers.GetValues("Origin").First());
-                if (uri.Scheme.Contains("extension"))
-                    ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", uri.OriginalString);
+                if (ActionContext.Request.Headers.Contains("Origin"))
+                {
+                    Uri uri = new Uri(ActionContext.Request.Headers.GetValues("Origin").First());
+                    if (uri.Scheme.Contains("extension"))
+                        ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", uri.OriginalString);
+                }
             }
             catch
             {

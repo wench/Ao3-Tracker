@@ -36,6 +36,12 @@ namespace Ao3TrackReader.Controls
 
         public static Color ItemBackgroundColor { get { return App.Colors["SystemListLowColor"]; } }
 
+        public static Color ButtonActiveColor { get {
+                var c = App.Colors["SystemBaseMediumColor"];
+                return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0, c.A);
+            }
+        }
+
         double old_width;
         System.Collections.Concurrent.ConcurrentBag<Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>> updateBag;
 
@@ -51,6 +57,8 @@ namespace Ao3TrackReader.Controls
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
             var c = App.Colors["SystemAltMediumHighColor"];
             BackgroundColor = new Color(c.R, c.G, c.B, (3 + c.A) / 4);
+
+            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? ButtonActiveColor : Color.Transparent;
 
             // Restore the reading list contents!
             var items = new Dictionary<string, Models.ReadingList>();
@@ -88,6 +96,7 @@ namespace Ao3TrackReader.Controls
                     }
                 }
             }
+            SyncToServerAsync();
             ListView.ItemsSource = readingListBacking;
             Task.Run(async () =>
             {
@@ -210,8 +219,7 @@ namespace Ao3TrackReader.Controls
             var item = mi.CommandParameter as Models.Ao3PageViewModel;
             if (item != null)
             {
-                readingListBacking.Remove(item);
-                App.Database.DeleteReadingListItems(item.Uri.AbsoluteUri);
+                RemoveAsync(item.Uri.AbsoluteUri);
             }
 
         }
@@ -242,32 +250,96 @@ namespace Ao3TrackReader.Controls
             });
         }
 
+        public void OnShowHidden(object sender, EventArgs e)
+        {
+            readingListBacking.HideNoUnread = !readingListBacking.HideNoUnread;
+            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? ButtonActiveColor : Color.Transparent;
+        }
+
         public void OnClose(object sender, EventArgs e)
         {
             IsOnScreen = false;
         }
 
-        public Task AddAsync(string href)
+        public async void SyncToServerAsync()
+        {
+            var srl = new Models.ServerReadingList();
+            try
+            {
+                srl.last_sync = Convert.ToInt64(App.Database.GetVariable("ReadingList.last_sync"));
+            }
+            catch
+            {
+                srl.last_sync = 0;
+            }
+
+            srl.paths = App.Database.GetReadingListItems().ToDictionary(i => i.Uri, i => i.Timestamp);
+
+            srl = await App.Storage.SyncReadingListAsync(srl);
+            if (srl == null) return;
+
+            App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
+
+            foreach (var item in srl.paths)
+            {
+                if (item.Value == -1)
+                {
+                    RemoveAsyncImpl(item.Key);
+                }
+                else
+                {
+                    AddAsyncImpl(item.Key,item.Value);
+                }
+            }
+        }
+
+        void RemoveAsyncImpl(string href)
+        {
+            App.Database.DeleteReadingListItems(href);
+            var model = readingListBacking.Find((m) => m.Uri.AbsoluteUri == href);
+            if (model == null) return;
+            wpv.DoOnMainThread(() =>
+            {
+                readingListBacking.Remove(model);
+            });
+        }
+
+        public Task RemoveAsync(string href)
+        {
+            return Task.Run(() =>
+            {
+                RemoveAsyncImpl(href);
+                SyncToServerAsync();
+            });
+        }
+
+        void AddAsyncImpl(string href, long timestamp)
         {
             if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
-                return null;
+                return;
 
-            return Task.Run(async () =>
+            var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
+            var model = models.SingleOrDefault();
+            if (model.Value == null) return;
+
+            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
+                return;
+
+            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp });
+            wpv.DoOnMainThread(() =>
             {
-                var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
-                var model = models.SingleOrDefault();
-                if (model.Value == null) return;
+                readingListBacking.Add(viewmodel);
+            });
+            RefreshAsync(viewmodel);
+        }
 
-                if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
-                    return;
-
-                var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
-                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-                wpv.DoOnMainThread(() =>
-                {
-                    readingListBacking.Add(viewmodel);
-                });
-                await RefreshAsync(viewmodel);
+        public Task AddAsync(string href)
+        {
+            return Task.Run(() =>
+            {
+                AddAsyncImpl(href, (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000);
+                SyncToServerAsync();
             });
         }
 
@@ -275,30 +347,30 @@ namespace Ao3TrackReader.Controls
         {
             return Task.Run(async () =>
             {
-                    var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
+                var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
 
-                    var model = models.SingleOrDefault();
-                    if (model.Value != null)
+                var model = models.SingleOrDefault();
+                if (model.Value != null)
+                {
+                    if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
                     {
-                        if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
-                        {
-                            App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
+                        App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
 
-                            var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
-                            if (pvm != null) readingListBacking.Remove(pvm);
-                        }
-                        App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-                        updateBag.Add(new Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>(viewmodel, model.Value));
-                        wpv.DoOnMainThread(() =>
-                        {
-                            while (!updateBag.IsEmpty)
-                            {
-                                Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel> tuple;
-                                if (updateBag.TryTake(out tuple))
-                                    tuple.Item1.BaseData = tuple.Item2;
-                            }
-                        });
+                        var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
+                        if (pvm != null) readingListBacking.Remove(pvm);
                     }
+                    App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                    updateBag.Add(new Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>(viewmodel, model.Value));
+                    wpv.DoOnMainThread(() =>
+                    {
+                        while (!updateBag.IsEmpty)
+                        {
+                            Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel> tuple;
+                            if (updateBag.TryTake(out tuple))
+                                tuple.Item1.BaseData = tuple.Item2;
+                        }
+                    });
+                }
             });
         }
     }

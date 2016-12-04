@@ -36,7 +36,7 @@ namespace Ao3tracksync.Controllers
         static UserController() { Initialized = true; }
 
         #region GET api/User/Init
-        [AllowAnonymous, HttpGet, Route("Login")]
+        [AllowAnonymous, HttpGet, Route("Init")]
         public void Init()
         {
             using (var ctx = new Models.Ao3TrackEntities())

@@ -14,19 +14,10 @@ namespace Ao3tracksync.Models
     
     public partial class User
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public User()
-        {
-            this.Works = new HashSet<Work>();
-        }
-    
         public long id { get; set; }
         public string username { get; set; }
         public string email { get; set; }
         public string roles { get; set; }
         public byte[] hash { get; set; }
-    
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Work> Works { get; set; }
     }
 }
