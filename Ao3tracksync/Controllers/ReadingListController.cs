@@ -43,9 +43,12 @@ namespace Ao3tracksync.Controllers
                 {
                     ls = ctx.ReadingLists.Add(new Models.ReadingList { userid = User.id, path = "", timestamp = 0 });
                 }
+                var latest = ls.timestamp;
 
                 foreach (var item in existing)
                 {
+                    if (item.Value.timestamp > latest) latest = item.Value.timestamp;
+
                     if (!incoming.paths.ContainsKey(item.Key))
                     {
                         if (item.Value.timestamp >= incoming.last_sync)
@@ -67,6 +70,8 @@ namespace Ao3tracksync.Controllers
 
                 foreach (var item in incoming.paths)
                 {
+                    if (item.Value > latest) latest = item.Value;
+
                     if (!existing.ContainsKey(item.Key))
                     {
                         if (item.Value >= ls.timestamp)
@@ -85,7 +90,7 @@ namespace Ao3tracksync.Controllers
                     }
                 }
 
-                ls.timestamp = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000;
+                ls.timestamp = latest+1;
 
                 ctx.SaveChanges();
 
