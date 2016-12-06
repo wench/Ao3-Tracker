@@ -173,6 +173,9 @@ namespace Ao3TrackReader.Helper
                 Clipboard.SetContent(dp);
             }
         }
-
+        public void setCookies(string cookies)
+        {
+            handler.setCookies(cookies);
+        }
     }
 }

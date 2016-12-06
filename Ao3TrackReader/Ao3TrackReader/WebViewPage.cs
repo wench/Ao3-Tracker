@@ -388,5 +388,11 @@ namespace Ao3TrackReader
         {
             readingList.AddAsync(href);
         }
+
+        public void setCookies(string cookies)
+        {
+            if (App.Database.GetVariable("siteCookies") != cookies)
+                App.Database.SaveVariable("siteCookies", cookies);
+        }
     }
 }

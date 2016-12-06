@@ -46,5 +46,6 @@ namespace Ao3TrackReader.Helper
 
         IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
         void addToReadingList(string href);
+        void setCookies(string cookies);
     }
 }

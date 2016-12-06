@@ -670,7 +670,32 @@ namespace Ao3TrackReader.Data
 
                             var worknode = doc.GetElementbyId("work_" + sWORKID);
 
-                            await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
+                            if (worknode == null)
+                            {
+                                // No worknode, try with cookies
+                                string cookies = App.Database.GetVariable("siteCookies");
+                                if (!string.IsNullOrWhiteSpace(cookies))
+                                {
+                                    var request = new HttpRequestMessage(HttpMethod.Get, wsuri);
+                                    request.Headers.Add("Cookie", cookies);
+                                    response = await HttpClient.SendAsync(request);
+
+                                    if (response.IsSuccessStatusCode)
+                                    {
+                                        try
+                                        {
+                                            encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
+                                        }
+                                        catch
+                                        {
+                                        }
+                                        doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
+                                        worknode = doc.GetElementbyId("work_" + sWORKID);
+                                    }
+                                }
+                            }
+
+                            if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
                         }
                     }
                     else

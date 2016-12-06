@@ -337,4 +337,5 @@ namespace Ao3Track {
         }
     }
     document.body.addEventListener("contextmenu", contextMenuHandler);
+    Ao3TrackHelper.setCookies(document.cookie);
 };

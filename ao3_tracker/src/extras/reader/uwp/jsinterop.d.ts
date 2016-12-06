@@ -64,4 +64,5 @@ declare namespace Ao3TrackHelper {
     function showContextMenu(x: number, y: number, menuItems: string[]) : WinJS.Promise<string|null>;
     function addToReadingList(href: string) : void;
     function copyToClipboard(str: string, type:string) : void; 
+    function setCookies(cookies: string) : void;
 }
