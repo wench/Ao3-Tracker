@@ -160,6 +160,7 @@ namespace Ao3TrackReader.Controls
                 {
                     wpv.Navigate(item.Uri);
                 }
+                IsOnScreen = false;
             }
 
         }
@@ -200,6 +201,7 @@ namespace Ao3TrackReader.Controls
                 {
                     wpv.Navigate(item.Uri);
                 }
+                IsOnScreen = false;
             }
         }
 
@@ -210,6 +212,7 @@ namespace Ao3TrackReader.Controls
             if (item != null)
             {
                 wpv.Navigate(item.Uri);
+                IsOnScreen = false;
             }
         }
 
