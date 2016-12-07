@@ -14,6 +14,7 @@
           <ViewCell.ContextActions>
             <MenuItem Text="Open"   Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
             <local:RLMenuItem Text="Open at Last Location" Clicked="OnMenuOpenLast" CommandParameter="{Binding .}" Filter="MenuOpenLastFilter"/>
+            <MenuItem Text="Refresh" Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
             <MenuItem Text="Delete" Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
           </ViewCell.ContextActions>
           <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,8,4" Padding="8" BackgroundColor="{x:Static local:ReadingListView.ItemBackgroundColor}">

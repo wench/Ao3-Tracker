@@ -43,7 +43,6 @@ namespace Ao3TrackReader.Controls
         }
 
         double old_width;
-        System.Collections.Concurrent.ConcurrentBag<Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>> updateBag;
 
         public ReadingListView(WebViewPage wpv)
         {
@@ -51,7 +50,6 @@ namespace Ao3TrackReader.Controls
 
             InitializeComponent();
 
-            updateBag = new System.Collections.Concurrent.ConcurrentBag<Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>>();
             TranslationX = old_width = 480;
             WidthRequest = old_width;
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
@@ -216,6 +214,17 @@ namespace Ao3TrackReader.Controls
             }
         }
 
+        public void OnMenuRefresh(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                RefreshAsync(item);
+            }
+
+        }
+
         public void OnMenuDelete(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
@@ -363,15 +372,9 @@ namespace Ao3TrackReader.Controls
                         if (pvm != null) readingListBacking.Remove(pvm);
                     }
                     App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
-                    updateBag.Add(new Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel>(viewmodel, model.Value));
                     wpv.DoOnMainThread(() =>
                     {
-                        while (!updateBag.IsEmpty)
-                        {
-                            Tuple<Models.Ao3PageViewModel, Models.Ao3PageModel> tuple;
-                            if (updateBag.TryTake(out tuple))
-                                tuple.Item1.BaseData = tuple.Item2;
-                        }
+                        viewmodel.BaseData = model.Value;
                     });
                 }
             });
