@@ -68,7 +68,6 @@ namespace Ao3TrackReader.Models
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
-        public event EventHandler CompareChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -184,169 +183,135 @@ namespace Ao3TrackReader.Models
             set
             {
                 if (baseData == value) return;
-                bool sortchanged = baseData == null || baseData.Type != value.Type;
-                baseData = value;
 
-                int? newunread = value.Details?.Chapters?.Item1;
-                if (newunread != null)
+                OnPropertyChanging("");
+                try
                 {
-                    newunread = value.Details.Chapters.Item2 - newunread;
+                    baseData = value;
 
-                }
-                if (Unread != newunread)
-                {
-                    OnPropertyChanging("Unread");
-                    Unread = newunread;
-                    OnPropertyChanged("Unread");
-                }
-
-                // Generate everything from Ao3PageModel 
-                string newGroup = value.PrimaryTag ?? "";
-                if (Group != newGroup)
-                {
-                    OnPropertyChanging("Group");
-                    Group = newGroup;
-                    OnPropertyChanged("Group");
-                }
-
-                if (!string.IsNullOrWhiteSpace(newGroup))
-                {
-                    string newgrouptype = value.PrimaryTagType.ToString().TrimEnd('s');
-                    if (newgrouptype != GroupType)
+                    int? newunread = value.Details?.Chapters?.Item1;
+                    if (newunread != null)
                     {
-                        OnPropertyChanging("GroupType");
-                        GroupType = newgrouptype;
-                        OnPropertyChanged("GroupType");
+                        newunread = value.Details.Chapters.Item2 - newunread;
+
                     }
-                }
-
-                OnPropertyChanging("ImageRating");
-                imageRatingUri = value.GetRequiredTagUri(Ao3RequiredTag.Rating);
-                OnPropertyChanged("ImageRating");
-
-                OnPropertyChanging("ImageWarnings");
-                imageWarningsUri = value.GetRequiredTagUri(Ao3RequiredTag.Warnings);
-                OnPropertyChanged("ImageWarnings");
-
-                OnPropertyChanging("ImageCategory");
-                imageCategoryUri = value.GetRequiredTagUri(Ao3RequiredTag.Category);
-                OnPropertyChanged("ImageCategory");
-
-                OnPropertyChanging("ImageComplete");
-                imageCompleteUri = value.GetRequiredTagUri(Ao3RequiredTag.Complete);
-                OnPropertyChanged("ImageComplete");
-
-                OnPropertyChanging("Uri");
-                sortchanged = sortchanged || value.Uri != Uri;
-                Uri = value.Uri;
-                OnPropertyChanged("Uri");
-
-
-                var ts = new Span();
-
-                if (value.Type == Ao3PageType.Search || value.Type == Ao3PageType.Bookmarks || value.Type == Ao3PageType.Tag)
-                {
-                    if (!string.IsNullOrWhiteSpace(value.PrimaryTag))
+                    if (Unread != newunread)
                     {
-                        ts.Nodes.Add(value.PrimaryTag);
-                        if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = App.Colors["SystemBaseHighColor"] });
+                        Unread = newunread;
                     }
-                }
 
-                if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
-                if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
-                {
-                    ts.Nodes.Add(new TextNode { Text = " by ", Foreground = App.Colors["SystemBaseHighColor"] });
-                    bool first = true;
-                    foreach (var user in value.Details.Authors)
+                    // Generate everything from Ao3PageModel 
+                    string newGroup = value.PrimaryTag ?? "";
+                    if (Group != newGroup)
                     {
-                        if (!first)
+                        Group = newGroup;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(newGroup))
+                    {
+                        string newgrouptype = value.PrimaryTagType.ToString().TrimEnd('s');
+                        if (newgrouptype != GroupType)
                         {
-                            ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
-                            first = false;
+                            GroupType = newgrouptype;
                         }
-                        ts.Nodes.Add(user.Value);
                     }
-                }
-                if (value.Details?.Recipiants != null && value.Details.Recipiants.Count != 0)
-                {
-                    ts.Nodes.Add(new TextNode { Text = " for ", Foreground = App.Colors["SystemBaseHighColor"] });
-                    bool first = true;
-                    foreach (var user in value.Details.Recipiants)
+
+                    imageRatingUri = value.GetRequiredTagUri(Ao3RequiredTag.Rating);
+                    imageWarningsUri = value.GetRequiredTagUri(Ao3RequiredTag.Warnings);
+                    imageCategoryUri = value.GetRequiredTagUri(Ao3RequiredTag.Category);
+                    imageCompleteUri = value.GetRequiredTagUri(Ao3RequiredTag.Complete);
+
+                    Uri = value.Uri;
+
+
+                    var ts = new Span();
+
+                    if (value.Type == Ao3PageType.Search || value.Type == Ao3PageType.Bookmarks || value.Type == Ao3PageType.Tag)
                     {
-                        if (!first)
+                        if (!string.IsNullOrWhiteSpace(value.PrimaryTag))
                         {
-                            ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
-                            first = false;
+                            ts.Nodes.Add(value.PrimaryTag);
+                            if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = App.Colors["SystemBaseHighColor"] });
                         }
-                        ts.Nodes.Add(user.Value);
                     }
-                }
 
-                if (Unread != null && Unread > 0)
-                {
-                    sortchanged = true;
-                    ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unfinished chapter" + (Unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
-                }
-
-                OnPropertyChanging("Title");
-                var oldtitle = Title;
-                if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
-                else Title = ts;
-                sortchanged = sortchanged || (oldtitle?.ToString() != Title?.ToString());
-                OnPropertyChanged("Title");
-
-                OnPropertyChanging("Date");
-                Date = value.Details?.LastUpdated ?? "";
-                OnPropertyChanged("Date");
-
-                OnPropertyChanging("Subtitle");
-                Subtitle = "";
-                if (value.Tags != null && value.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", value.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
-                OnPropertyChanged("Subtitle");
-
-                OnPropertyChanging("Details");
-                List<string> d = new List<string>();
-                if (!string.IsNullOrWhiteSpace(value.Language)) d.Add("Language: " + value.Language);
-                if (value.Details != null)
-                {
-                    if (value.Details.Words != null) d.Add("Words:\xA0" + value.Details.Words.ToString());
-
-                    if (value.Details.Chapters != null)
+                    if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
+                    if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
                     {
-                        string readstr = "";
-                        if (value.Details.Chapters.Item1 != null) readstr = value.Details.Chapters.Item1.ToString() + "/";
-                        d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item2.ToString() + "/" + (value.Details.Chapters.Item3?.ToString() ?? "?"));
+                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = App.Colors["SystemBaseHighColor"] });
+                        bool first = true;
+                        foreach (var user in value.Details.Authors)
+                        {
+                            if (!first)
+                            {
+                                ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
+                                first = false;
+                            }
+                            ts.Nodes.Add(user.Value);
+                        }
+                    }
+                    if (value.Details?.Recipiants != null && value.Details.Recipiants.Count != 0)
+                    {
+                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = App.Colors["SystemBaseHighColor"] });
+                        bool first = true;
+                        foreach (var user in value.Details.Recipiants)
+                        {
+                            if (!first)
+                            {
+                                ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
+                                first = false;
+                            }
+                            ts.Nodes.Add(user.Value);
+                        }
                     }
 
-                    if (value.Details.Collections != null) d.Add("Collections:\xA0" + value.Details.Collections.ToString());
-                    if (value.Details.Comments != null) d.Add("Comments:\xA0" + value.Details.Comments.ToString());
-                    if (value.Details.Kudos != null) d.Add("Kudos:\xA0" + value.Details.Kudos.ToString());
-                    if (value.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + value.Details.Bookmarks.ToString());
-                    if (value.Details.Hits != null) d.Add("Hits:\xA0" + value.Details.Hits.ToString());
+                    if (Unread != null && Unread > 0)
+                    {
+                        ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
+                    }
+
+                    var oldtitle = Title;
+                    if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
+                    else Title = ts;
+
+                    Date = value.Details?.LastUpdated ?? "";
+
+                    Subtitle = "";
+                    if (value.Tags != null && value.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", value.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
+
+                    List<string> d = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(value.Language)) d.Add("Language: " + value.Language);
+                    if (value.Details != null)
+                    {
+                        if (value.Details.Words != null) d.Add("Words:\xA0" + value.Details.Words.ToString());
+
+                        if (value.Details.Chapters != null)
+                        {
+                            string readstr = "";
+                            if (value.Details.Chapters.Item1 != null) readstr = value.Details.Chapters.Item1.ToString() + "/";
+                            d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item2.ToString() + "/" + (value.Details.Chapters.Item3?.ToString() ?? "?"));
+                        }
+
+                        if (value.Details.Collections != null) d.Add("Collections:\xA0" + value.Details.Collections.ToString());
+                        if (value.Details.Comments != null) d.Add("Comments:\xA0" + value.Details.Comments.ToString());
+                        if (value.Details.Kudos != null) d.Add("Kudos:\xA0" + value.Details.Kudos.ToString());
+                        if (value.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + value.Details.Bookmarks.ToString());
+                        if (value.Details.Hits != null) d.Add("Hits:\xA0" + value.Details.Hits.ToString());
+                    }
+
+                    Details = string.Join("   ", d);
+                    if (!string.IsNullOrWhiteSpace(value.SearchQuery)) Details = ("Query: " + value.SearchQuery + "\n" + Details).Trim();
+                    if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
+
+                    Summary = value.Details?.Summary;
+
+                    tags = value.Tags;
                 }
-
-                Details = string.Join("   ", d);
-                if (!string.IsNullOrWhiteSpace(value.SearchQuery)) Details = ("Query: " + value.SearchQuery + "\n" + Details).Trim();
-                if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
-                OnPropertyChanged("Details");
-
-                OnPropertyChanging("Summary");
-                OnPropertyChanging("SummaryVisable");
-                Summary = value.Details?.Summary;
-                OnPropertyChanged("SummaryVisable");
-                OnPropertyChanged("Summary");
-
-                OnPropertyChanging("Tags");
-                OnPropertyChanging("TagsVisible");
-                tags = value.Tags;
-                OnPropertyChanged("TagsVisible");
-                OnPropertyChanged("Tags");
-
-                if (sortchanged)
+                finally
                 {
-                    CompareChanged?.Invoke(this, EventArgs.Empty);
+                    OnPropertyChanged("");
                 }
+
             }
         }
 

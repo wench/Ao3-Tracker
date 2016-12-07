@@ -10,7 +10,6 @@ namespace Ao3TrackReader
 {
     public interface IGroupable<in T> : IComparable<T>
     {
-        event EventHandler CompareChanged;
         string Group { get; }
         string GroupType { get; }
         int? Unread { get; }
@@ -85,13 +84,11 @@ namespace Ao3TrackReader
 
         protected override void InsertItem(int index, T item)
         {
-            item.CompareChanged += Item_CompareChanged;
             base.InsertItem(index, item);
         }
 
         protected override void RemoveItem(int index)
         {
-            this[index].CompareChanged -= Item_CompareChanged;
             base.RemoveItem(index);
         }
     }
