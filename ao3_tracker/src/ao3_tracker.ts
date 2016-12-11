@@ -266,7 +266,7 @@ namespace Ao3Track {
 
                     if (chapter_count > chapters_finished) {
                         let unread = chapter_count - chapters_finished;
-                        $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + ' unfinished chapter' + (unread === 1 ? '' : 's') + '</a>)</span>');
+                        $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + ' unread chapter' + (unread === 1 ? '' : 's') + '</a>)</span>');
                     }
 
                 }

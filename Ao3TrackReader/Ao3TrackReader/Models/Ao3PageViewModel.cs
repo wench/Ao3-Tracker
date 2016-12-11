@@ -243,10 +243,10 @@ namespace Ao3TrackReader.Models
                         foreach (var user in value.Details.Authors)
                         {
                             if (!first)
-                            {
-                                ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = App.Colors["SystemBaseHighColor"] });
+                            else
                                 first = false;
-                            }
+
                             ts.Nodes.Add(user.Value);
                         }
                     }
@@ -257,10 +257,10 @@ namespace Ao3TrackReader.Models
                         foreach (var user in value.Details.Recipiants)
                         {
                             if (!first)
-                            {
-                                ts.Nodes.Add(new TextNode { Text = ",  ", Foreground = App.Colors["SystemBaseHighColor"] });
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = App.Colors["SystemBaseHighColor"] });
+                            else
                                 first = false;
-                            }
+
                             ts.Nodes.Add(user.Value);
                         }
                     }

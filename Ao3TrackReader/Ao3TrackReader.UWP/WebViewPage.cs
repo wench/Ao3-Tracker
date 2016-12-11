@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage
+    public partial class WebViewPage : IEventHandler
     {
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];
@@ -259,17 +259,6 @@ namespace Ao3TrackReader
                 WebView.Opacity = value;
             }
         }
-
-        public double realWidth
-        {
-            get { return WebView.ActualWidth; }
-
-        }
-        public double realHeight
-        {
-            get { return WebView.ActualHeight; }
-        }
-
 
         public Windows.Foundation.IAsyncOperation<string> showContextMenu(double x, double y, string[] menuItems)
         {

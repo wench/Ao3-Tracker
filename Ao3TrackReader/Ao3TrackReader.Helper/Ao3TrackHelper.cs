@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
+
+#if WINDOWS_UWP
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
+#else 
+using System.Threading.Tasks;
+#endif
 
 namespace Ao3TrackReader.Helper
 {
@@ -19,11 +23,17 @@ namespace Ao3TrackReader.Helper
 
     public interface IEventHandler
     {
+#if WINDOWS_UWP
         [DefaultOverload]
+#endif
         object DoOnMainThread(MainThreadFunc function);
         void DoOnMainThread(MainThreadAction function);
 
+#if WINDOWS_UWP
         IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
+#else
+        Task<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
+#endif
         void SetWorkChapters(IDictionary<long, IWorkChapter> works);
         bool JumpToLastLocationEnabled { get; set; }
         string NextPage { get; set; }
@@ -41,10 +51,12 @@ namespace Ao3TrackReader.Helper
         int FontSizeMax { get; }
         int FontSizeMin { get; }
         int FontSize { get; set; }
-        double realWidth { get; }
-        double realHeight { get; }
 
+#if WINDOWS_UWP
         IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
+#else
+        Task<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
+#endif
         void addToReadingList(string href);
         void setCookies(string cookies);
     }

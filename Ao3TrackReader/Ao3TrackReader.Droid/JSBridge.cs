@@ -1,27 +1,26 @@
 ﻿using System;
 using Android.Webkit;
-using CustomRenderer.Droid;
 using Java.Interop;
 
-namespace CustomRenderer.Droid
+namespace Ao3TrackReader.Droid
 {
 	public class JSBridge : Java.Lang.Object
 	{
-		readonly WeakReference<HybridWebViewRenderer> hybridWebViewRenderer;
+		readonly WeakReference<WebViewPage> hybridWebViewRenderer;
 
-		public JSBridge (HybridWebViewRenderer hybridRenderer)
+		public JSBridge (WebViewPage hybridRenderer)
 		{
-			hybridWebViewRenderer = new WeakReference <HybridWebViewRenderer> (hybridRenderer);
+			hybridWebViewRenderer = new WeakReference <WebViewPage> (hybridRenderer);
 		}
 
 		[JavascriptInterface]
 		[Export ("invokeAction")]
 		public void InvokeAction (string data)
 		{
-			HybridWebViewRenderer hybridRenderer;
+			WebViewPage hybridRenderer;
 
 			if (hybridWebViewRenderer != null && hybridWebViewRenderer.TryGetTarget (out hybridRenderer)) {
-				hybridRenderer.Element.InvokeAction (data);
+				//hybridRenderer.Element.InvokeAction (data);
 			}
 		}
 	}

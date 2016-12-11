@@ -139,16 +139,6 @@ namespace Ao3TrackReader.Helper
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
 
-        public double realWidth
-        {
-            get { return (double)handler.DoOnMainThread(() => handler.realWidth); }
-
-        }
-        public double realHeight
-        {
-            get { return (double)handler.DoOnMainThread(() => handler.realHeight); }
-        }
-
         public IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
         {
             return handler.showContextMenu(x, y, menuItems);

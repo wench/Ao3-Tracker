@@ -13,6 +13,8 @@ using Xamarin.Forms.Platform.UWP;
 using SymbolIcon = Windows.UI.Xaml.Controls.SymbolIcon;
 using Symbol = Windows.UI.Xaml.Controls.Symbol;
 using AppBarButton = Windows.UI.Xaml.Controls.AppBarButton;
+#elif __ANDROID__
+using Android.OS;
 #endif
 
 
@@ -46,10 +48,9 @@ namespace Ao3TrackReader
                 Spacing = 0
             };
 
-            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
-
             var commandBar = CreateCommandBar();
 #if WINDOWS_UWP
+            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
             commandBar.PrimaryCommands.Add(prevPageButton = CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), false, () => { GoBack(); }));
             commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), false, () => { GoForward(); }));
             commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
@@ -283,16 +284,23 @@ namespace Ao3TrackReader
             return App.Storage.getWorkChaptersAsync(works).AsAsyncOperation();
         }
 #else
-        public Windows.Foundation.IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync(long[] works)
+        public Task<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync(long[] works)
         {
             return App.Storage.getWorkChaptersAsync(works);
         }
 #endif
 
+        public bool IsMainThread {
+#if WINDOWS_UWP
+            get { return Dispatcher.HasThreadAccess; }
+#elif __ANDROID__
+            get { return Looper.MainLooper != Looper.MyLooper(); }
+#endif
+        }
+
         public object DoOnMainThread(MainThreadFunc function)
         {
-
-            if (Dispatcher.HasThreadAccess)
+            if (IsMainThread)
             {
                 return function();
             }
@@ -314,7 +322,7 @@ namespace Ao3TrackReader
 
         public void DoOnMainThread(MainThreadAction function)
         {
-            if (Dispatcher.HasThreadAccess)
+            if (IsMainThread)
             {
                 function();
             }
