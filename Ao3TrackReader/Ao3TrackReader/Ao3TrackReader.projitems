@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\Icons.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SettingsPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
   </ItemGroup>

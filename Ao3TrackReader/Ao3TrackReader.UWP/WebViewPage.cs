@@ -89,12 +89,12 @@ namespace Ao3TrackReader
             };
         }
 
-        private AppBarButton CreateAppBarButton(string label, IconElement icon, bool enabled, Action clicked)
+        private AppBarButton CreateAppBarButton(string label, string icon, bool enabled, Action clicked)
         {
 
             var button = new AppBarButton
             {
-                Icon = icon,
+                Icon = new BitmapIcon { UriSource = new Uri("ms-appx:///" + icon) },
                 Label = label,
                 IsEnabled = enabled
             };

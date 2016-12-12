@@ -21,11 +21,21 @@ namespace Ao3TrackReader
             get; private set;
         }
 
+
         static App()
         {
         }
 
         public static Dictionary<string, Color> Colors { get; private set; }
+
+        public static bool IsDark { get { return true; } }
+
+        public static string PlatformIcon(string name)
+        {
+            string dl = IsDark ? "_dark" : "_light";
+            return Device.OnPlatform(name + dl, name + dl, "Assets/" + name + dl);
+        }
+
         public App()
         {
             Database = new Ao3TrackDatabase();

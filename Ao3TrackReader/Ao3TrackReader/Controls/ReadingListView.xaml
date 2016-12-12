@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <StackLayout xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Ao3TrackReader.Controls.ReadingListView"
-          xmlns:local="clr-namespace:Ao3TrackReader.Controls" Spacing="0">
+          xmlns:local="clr-namespace:Ao3TrackReader.Controls" xmlns:res="clr-namespace:Ao3TrackReader.Resources"  Spacing="0">
   <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-    <Button Text="&#58001;" Clicked="OnAddPage" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="Start" x:Name="AddPageButton"/>
-    <Button Text="&#57673;" Clicked="OnRefresh" IsEnabled="False" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="Start" x:Name="RefreshButton"/>
-    <Button Text="&#57710;" Clicked="OnShowHidden" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="Start" x:Name="ShowHiddenButton"/>    
-    <Button Text="&#57610;" Clicked="OnClose" FontFamily="Segoe MDL2 Assets" FontSize="20" HorizontalOptions="EndAndExpand" />
+    <Button Image="{x:Static res:Icons.AddPage}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton"/>
+    <Button Image="{x:Static res:Icons.Refresh}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton"/>
+    <Button Image="{x:Static res:Icons.Filter}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton"/>    
+    <Button Image="{x:Static res:Icons.Close}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
   </StackLayout>
   <ListView VerticalOptions="Fill" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" x:Name="ListView">
     <ListView.ItemTemplate>

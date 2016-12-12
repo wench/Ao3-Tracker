@@ -7,8 +7,10 @@ using Xamarin.Forms;
 using Ao3TrackReader.Helper;
 using System.Threading;
 using System.Text.RegularExpressions;
+using Icons = Ao3TrackReader.Resources.Icons;
 
 #if WINDOWS_UWP
+using BitmapIcon = Windows.UI.Xaml.Controls.BitmapIcon;
 using Xamarin.Forms.Platform.UWP;
 using SymbolIcon = Windows.UI.Xaml.Controls.SymbolIcon;
 using Symbol = Windows.UI.Xaml.Controls.Symbol;
@@ -51,17 +53,17 @@ namespace Ao3TrackReader
             var commandBar = CreateCommandBar();
 #if WINDOWS_UWP
             Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
-            commandBar.PrimaryCommands.Add(prevPageButton = CreateAppBarButton("Back", new SymbolIcon(Symbol.Back), false, () => { GoBack(); }));
-            commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", new SymbolIcon(Symbol.Forward), false, () => { GoForward(); }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", new SymbolIcon(Symbol.Refresh), true, () => WebView.Refresh()));
-            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", new SymbolIcon(Symbol.Redo), false, this.OnJumpClicked));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", new SymbolIcon(Symbol.Bookmarks), true, () => readingList.IsOnScreen = !readingList.IsOnScreen ));
-            commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", new SymbolIcon(Symbol.FontIncrease), true, () =>
+            commandBar.PrimaryCommands.Add(prevPageButton = CreateAppBarButton("Back", Icons.Back, false, () => { GoBack(); }));
+            commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", Icons.Forward, false, () => { GoForward(); }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", Icons.Refresh, true, () => WebView.Refresh()));
+            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", Icons.Redo, false, this.OnJumpClicked));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", Icons.Bookmarks, true, () => readingList.IsOnScreen = !readingList.IsOnScreen ));
+            commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", Icons.FontUp, true, () =>
                 FontSize += 10));
-            commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", new SymbolIcon(Symbol.FontDecrease), true, () =>
+            commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", Icons.FontDown, true, () =>
                 FontSize -= 10));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", new SymbolIcon(Symbol.Sync), true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Url Bar", new SymbolIcon(Symbol.Rename), true, () =>
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", Icons.Sync, true, () => { }));
+            commandBar.PrimaryCommands.Add(CreateAppBarButton("Url Bar", Icons.Rename, true, () =>
             {
                 if (urlBar.IsVisible)
                 {
@@ -76,8 +78,8 @@ namespace Ao3TrackReader
                 }
             }));
 
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", new SymbolIcon(Symbol.Font), true, () => FontSize = 100));
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", new SymbolIcon(Symbol.Setting), true, SettingsButton_Clicked));
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", Icons.Font, true, () => FontSize = 100));
+            commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", Icons.Settings, true, SettingsButton_Clicked));
 
 #else
 #endif
@@ -120,7 +122,6 @@ namespace Ao3TrackReader
 
             var urlButton = new Button()
             {
-                //Text = "\x2192",
                 Text = "Go",
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.End
@@ -129,8 +130,7 @@ namespace Ao3TrackReader
 
             var urlCancel = new Button()
             {
-                //Text = "\xD7",
-                Text = "\x274C",
+                Image = Icons.Close,
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.End
             };

@@ -116,6 +116,64 @@
     <None Include="Windows_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\addpage_dark.scale-100.png" />
+    <Content Include="Assets\addpage_dark.scale-200.png" />
+    <Content Include="Assets\addpage_light.scale-100.png" />
+    <Content Include="Assets\addpage_light.scale-200.png" />
+    <Content Include="Assets\back_dark.scale-100.png" />
+    <Content Include="Assets\back_dark.scale-200.png" />
+    <Content Include="Assets\back_light.scale-100.png" />
+    <Content Include="Assets\back_light.scale-200.png" />
+    <Content Include="Assets\bookmarks_dark.scale-100.png" />
+    <Content Include="Assets\bookmarks_dark.scale-200.png" />
+    <Content Include="Assets\bookmarks_light.scale-100.png" />
+    <Content Include="Assets\bookmarks_light.scale-200.png" />
+    <Content Include="Assets\close_dark.scale-100.png" />
+    <Content Include="Assets\close_dark.scale-200.png" />
+    <Content Include="Assets\close_light.scale-100.png" />
+    <Content Include="Assets\close_light.scale-200.png" />
+    <Content Include="Assets\filter_dark.scale-100.png" />
+    <Content Include="Assets\filter_dark.scale-200.png" />
+    <Content Include="Assets\filter_light.scale-100.png" />
+    <Content Include="Assets\filter_light.scale-200.png" />
+    <Content Include="Assets\fontdown_dark.scale-100.png" />
+    <Content Include="Assets\fontdown_dark.scale-200.png" />
+    <Content Include="Assets\fontdown_light.scale-100.png" />
+    <Content Include="Assets\fontdown_light.scale-200.png" />
+    <Content Include="Assets\fontup_dark.scale-100.png" />
+    <Content Include="Assets\fontup_dark.scale-200.png" />
+    <Content Include="Assets\fontup_light.scale-100.png" />
+    <Content Include="Assets\fontup_light.scale-200.png" />
+    <Content Include="Assets\font_dark.scale-100.png" />
+    <Content Include="Assets\font_dark.scale-200.png" />
+    <Content Include="Assets\font_light.scale-100.png" />
+    <Content Include="Assets\font_light.scale-200.png" />
+    <Content Include="Assets\forward_dark.scale-100.png" />
+    <Content Include="Assets\forward_dark.scale-200.png" />
+    <Content Include="Assets\forward_light.scale-100.png" />
+    <Content Include="Assets\forward_light.scale-200.png" />
+    <Content Include="Assets\redo_dark.scale-100.png" />
+    <Content Include="Assets\redo_dark.scale-200.png" />
+    <Content Include="Assets\redo_light.scale-100.png" />
+    <Content Include="Assets\redo_light.scale-200.png" />
+    <Content Include="Assets\refresh_dark.scale-100.png" />
+    <Content Include="Assets\refresh_dark.scale-200.png" />
+    <Content Include="Assets\refresh_light.scale-100.png" />
+    <Content Include="Assets\refresh_light.scale-200.png" />
+    <Content Include="Assets\rename_dark.scale-100.png" />
+    <Content Include="Assets\rename_dark.scale-200.png" />
+    <Content Include="Assets\rename_light.scale-100.png" />
+    <Content Include="Assets\rename_light.scale-200.png" />
+    <Content Include="Assets\settings_dark.scale-100.png" />
+    <Content Include="Assets\settings_dark.scale-200.png" />
+    <Content Include="Assets\settings_light.scale-100.png" />
+    <Content Include="Assets\settings_light.scale-200.png" />
+    <Content Include="Assets\sync_dark.scale-100.png" />
+    <Content Include="Assets\sync_dark.scale-200.png" />
+    <Content Include="Assets\sync_light.scale-100.png" />
+    <Content Include="Assets\sync_light.scale-200.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Properties\Default.rd.xml">
       <SubType>Designer</SubType>
     </Content>
