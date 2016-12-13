@@ -42,6 +42,8 @@ namespace Ao3TrackReader
 
         }
 
+        Ao3TrackHelper helper;
+
         WebView WebView { get; set; }
         
         private Xamarin.Forms.View CreateWebView()
@@ -77,8 +79,6 @@ namespace Ao3TrackReader
                 args.Handled = true;
             }
         }
-
-        Ao3TrackHelper helper;
 
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
         {

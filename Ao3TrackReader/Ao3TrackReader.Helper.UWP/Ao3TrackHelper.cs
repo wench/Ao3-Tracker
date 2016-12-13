@@ -9,13 +9,6 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace Ao3TrackReader.Helper
 {
-    [AllowForWeb]
-    public sealed class WorkChapter : IWorkChapter
-    {
-        public long number { get; set; }
-        public long chapterid { get; set; }
-        public long? location { get; set; }
-    }
 
     [AllowForWeb]
     public sealed class Ao3TrackHelper
@@ -38,9 +31,15 @@ namespace Ao3TrackReader.Helper
                 JumpToLastLocationEvent?.Invoke(this, pagejump);
             });
         }
+        public bool jumpToLastLocationEnabled
+        {
+            get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
+            set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
+        }
+
 
         public event EventHandler<object> AlterFontSizeEvent;
-        public void OnAlterFontSizeEvent()
+        public void OnAlterFontSize()
         {
             Task<object>.Run(() =>
             {
@@ -61,9 +60,9 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
-        public IDictionary<long, IWorkChapter> createWorkChapterMap()
+        public IDictionary<long, WorkChapter> createWorkChapterMap()
         {
-            return new Dictionary<long, IWorkChapter>();
+            return new Dictionary<long, WorkChapter>();
         }
 
         public IWorkChapter createWorkChapter(long number, long chapterid, long? location)
@@ -77,7 +76,7 @@ namespace Ao3TrackReader.Helper
 
         }
 
-        public void setWorkChapters(IDictionary<long, IWorkChapter> works)
+        public void setWorkChapters(IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
             {
@@ -85,11 +84,35 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public bool jumpToLastLocationEnabled
+        public IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
         {
-            get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
-            set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
+            return handler.showContextMenu(x, y, menuItems);
         }
+
+        public void addToReadingList(string href)
+        {
+            handler.addToReadingList(href);
+        }
+        public void copyToClipboard(string str, string type)
+        {
+            if (type == "text" || type == "uri")
+            {
+                var dp = new DataPackage();
+                dp.SetText(str);
+                Clipboard.SetContent(dp);
+            }
+            else if (type == "uri")
+            {
+                var dp = new DataPackage();
+                dp.SetWebLink(new Uri(str));
+                Clipboard.SetContent(dp);
+            }
+        }
+        public void setCookies(string cookies)
+        {
+            handler.setCookies(cookies);
+        }
+
         public string nextPage
         {
             get { return handler.NextPage; }
@@ -137,35 +160,6 @@ namespace Ao3TrackReader.Helper
         {
             get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
-        }
-
-        public IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
-        {
-            return handler.showContextMenu(x, y, menuItems);
-        }
-
-        public void addToReadingList(string href)
-        {
-            handler.addToReadingList(href);
-        }
-        public void copyToClipboard(string str, string type)
-        {
-            if (type == "text" || type == "uri")
-            {
-                var dp = new DataPackage();
-                dp.SetText(str);
-                Clipboard.SetContent(dp);
-            }
-            else if (type == "uri")
-            {
-                var dp = new DataPackage();
-                dp.SetWebLink(new Uri(str));
-                Clipboard.SetContent(dp);
-            }
-        }
-        public void setCookies(string cookies)
-        {
-            handler.setCookies(cookies);
         }
     }
 }

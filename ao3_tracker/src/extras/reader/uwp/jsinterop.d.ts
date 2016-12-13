@@ -41,7 +41,7 @@ declare namespace Ao3TrackHelper {
 
     function createWorkChapter(number: number, chapterid: number, location: number | null) : IWorkChapter;
 
-    let onjumptolastlocationevent : ((pagejump : boolean)=>void) | null;
+    var onjumptolastlocationevent : ((pagejump : boolean)=>void) | null;
     
     var jumpToLastLocationEnabled : boolean; 
 
@@ -56,8 +56,8 @@ declare namespace Ao3TrackHelper {
     var showPrevPageIndicator : boolean;
     var showNextPageIndicator : boolean;
 
-    let onalterfontsizeevent : ((ev: any)=>void) | null;
-    let fontSize: number;
+    var onalterfontsizeevent : ((ev: any)=>void) | null;
+    var fontSize: number;
 
     function showContextMenu(x: number, y: number, menuItems: string[]) : WinJS.Promise<string|null>;
     function addToReadingList(href: string) : void;

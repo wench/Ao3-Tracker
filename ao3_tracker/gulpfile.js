@@ -30,11 +30,22 @@ var uwp_scripts = [
     'src/ao3_tracker.ts',
     'src/extras/reader/uwp/ao3_t_reader.ts'
 ];
+var webkit_scripts = [
+    'src/global.d.ts',
+    'src/ao3_tracker.ts',
+    'src/extras/reader/webkit/ao3_t_callbacks.ts',
+    'src/extras/reader/webkit/ao3_t_reader.ts'
+];
 
 gulp.task('reader:uwp:scripts', function() {
     return gulp.src(uwp_scripts)
         .pipe(ts(tsOptions))
         .pipe(gulp.dest('build/reader/uwp'));
+});
+gulp.task('reader:webkit:scripts', function() {
+    return gulp.src(webkit_scripts)
+        .pipe(ts(tsOptions))
+        .pipe(gulp.dest('build/reader/webkit'));
 });
 
 gulp.task('reader:uwp:styles', function() {
@@ -42,9 +53,15 @@ gulp.task('reader:uwp:styles', function() {
         .pipe(less())
         .pipe(gulp.dest('build/reader/uwp'));
 });
+gulp.task('reader:webkit:styles', function() {
+    return gulp.src('src/*.less')
+        .pipe(less())
+        .pipe(gulp.dest('build/reader/webkit'));
+});
 
 gulp.task('reader:uwp', ['reader:uwp:scripts', 'reader:uwp:styles']);
-gulp.task('reader', ['reader:uwp']);
+gulp.task('reader:webkit', ['reader:webkit:scripts', 'reader:webkit:styles']);
+gulp.task('reader', ['reader:uwp','reader:webkit']);
 
 gulp.task('styles', function() {
     return gulp.src('src/*.less')

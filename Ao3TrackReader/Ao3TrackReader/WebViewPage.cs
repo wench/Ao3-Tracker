@@ -251,7 +251,7 @@ namespace Ao3TrackReader
                 var workchaps = await App.Storage.getWorkChaptersAsync(new[] { workid });
 
                 DoOnMainThread(() => {
-                    IWorkChapter wc;
+                    WorkChapter wc;
                     if (workchaps.TryGetValue(workid, out wc) && wc.chapterid != 0)
                     {
                         Navigate(new Uri(string.Concat("https://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
@@ -313,7 +313,7 @@ namespace Ao3TrackReader
                     decFontSizeButton.IsEnabled = FontSize > FontSizeMin;
                     incFontSizeButton.IsEnabled = FontSize < FontSizeMax;
                 });
-                helper.OnAlterFontSizeEvent();
+                helper.OnAlterFontSize();
             }
         }
 
@@ -321,12 +321,12 @@ namespace Ao3TrackReader
         static object locker = new object();
 
 #if WINDOWS_UWP
-        public Windows.Foundation.IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync(long[] works)
+        public Windows.Foundation.IAsyncOperation<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(long[] works)
         {
             return App.Storage.getWorkChaptersAsync(works).AsAsyncOperation();
         }
 #else
-        public Task<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync(long[] works)
+        public Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(long[] works)
         {
             return App.Storage.getWorkChaptersAsync(works);
         }
@@ -378,7 +378,7 @@ namespace Ao3TrackReader
         }
 
 
-        public void SetWorkChapters(IDictionary<long, IWorkChapter> works)
+        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             App.Storage.setWorkChapters(works);
         }

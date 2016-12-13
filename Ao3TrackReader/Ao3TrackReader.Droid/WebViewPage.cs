@@ -5,7 +5,6 @@ using System.Text;
 
 using System.Threading.Tasks;
 //using Xamarin.Forms;
-using Ao3TrackReader.Helper;
 
 using Android.App;
 using Android.Content;
@@ -21,10 +20,43 @@ using Android.Webkit;
 using WebView = Android.Webkit.WebView;
 using Android.Graphics;
 
+using Ao3TrackReader.Helper;
+using Ao3TrackReader.Droid;
+using Java.Lang;
+
 namespace Ao3TrackReader
 {
     public partial class WebViewPage : IEventHandler
     {
+        const string JavaScriptInject = @"(function(){
+            var head = document.getElementsByTagName('head')[0];
+            for (var i = 0; i< Ao3TrackHelper.cssToInject.length; i++) {                    
+                var link = document.createElement('link');
+                link.type = 'text/css';
+                link.rel = 'stylesheet';
+                link.href = Ao3TrackHelper.cssToInject[i];
+                head.appendChild(link);
+            }
+            for (var i = 0; i< Ao3TrackHelper.scriptsToInject.length; i++) {                    
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = Ao3TrackHelper.scriptsToInject[i];
+                head.appendChild(script);
+            }
+        })();";
+
+        public string[] scriptsToInject
+        {
+            get { return new[] { "file:///android_asset/ao3_t_callbacks.js", "file:///android_asset/ao3_t_reader.js", "file:///android_asset/ao3_tracker.js" }; }
+        }
+        public string[] cssToInject
+        {
+            get { return new[] { "file:///android_asset/ao3_tracker.css" }; }
+
+        }
+
+        Ao3TrackHelper helper;
+
         WebView WebView { get; set; }
         WebClient webClient;
 
@@ -65,7 +97,7 @@ namespace Ao3TrackReader
 
             }
             if (urlEntry != null) urlEntry.Text = args.AbsoluteUri;
-            //WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
+            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelper");
             nextPage = null;
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
@@ -84,6 +116,22 @@ namespace Ao3TrackReader
             helper?.ClearEvents();
         }
 
+        public class ValueCallback : Java.Lang.Object, IValueCallback
+        {
+            Action<string> callback;
+            public ValueCallback(Action<string> callback)
+            {
+                this.callback = callback;
+            }
+
+            public void OnReceiveValue(Java.Lang.Object value)
+            {
+                if (value != null) callback(value.ToString());
+                else callback(null);
+            }
+        }
+
+
         private void OnPageFinished(WebView sender)
         {
             var t = WebView.Title;
@@ -94,7 +142,16 @@ namespace Ao3TrackReader
 
             // Inject JS script
             helper?.ClearEvents();
-            Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();
+            WebView.EvaluateJavascript(JavaScriptInject, new ValueCallback((value)=> { }));
+        }
+
+        public void EvaluateJavascript(string code)
+        {
+            WebView.EvaluateJavascript(code, new ValueCallback((value) => { }));
+        }
+        public void CallJavascript(string function, params object[] args)
+        {
+            WebView.EvaluateJavascript(function + "(" + string.Join(",",args) + ");", new ValueCallback((value) => { }));
         }
 
         public Uri Current
@@ -130,14 +187,6 @@ namespace Ao3TrackReader
         }
 
 
-        public string[] cssToInject
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         public double leftOffset
         {
             get
@@ -163,15 +212,7 @@ namespace Ao3TrackReader
                 throw new NotImplementedException();
             }
         }
-
-        public string[] scriptsToInject
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
+        
         public Task<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
         {
             throw new NotImplementedException();

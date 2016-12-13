@@ -57,73 +57,6 @@ namespace Ao3TrackReader.Data
     //
     // Get icons from https://archiveofourown.org/images/skins/iconsets/default_large/<<CLASSNAME>>.png
 
-    public static class Extensions
-    {
-        public static string[] GetClasses(this HtmlNode node)
-        {
-            var attrClass = node.Attributes["class"];
-            if (attrClass != null && !string.IsNullOrEmpty(attrClass.Value))
-                return attrClass.Value.Split(' ');
-            return new string[] { };
-        }
-
-        public static bool HasClass(this HtmlNode node, string classname)
-        {
-            return Array.IndexOf(node.GetClasses(), classname) != -1;
-        }
-
-        public static HtmlNode ElementByClass(this HtmlNode node, string classname)
-        {
-            foreach (var e in node.ChildNodes)
-            {
-                if (e.NodeType != HtmlNodeType.Element) continue;
-
-                if (e.HasClass(classname)) return e;
-            }
-            return null;
-        }
-
-        public static HtmlNode ElementByClass(this HtmlNode node, string tagname, string classname)
-        {
-            foreach (var e in node.Elements(tagname))
-            {
-                if (e.HasClass(classname)) return e;
-            }
-            return null;
-        }
-
-        public static IEnumerable<HtmlNode> ElementsByClass(this HtmlNode node, string classname)
-        {
-            foreach (var e in node.ChildNodes)
-            {
-                if (e.NodeType != HtmlNodeType.Element) continue;
-                if (e.HasClass(classname)) yield return e;
-            }
-        }
-
-        public static IEnumerable<HtmlNode> ElementsByClass(this HtmlNode node, string tagname, string classname)
-        {
-            foreach (var e in node.Elements(tagname))
-            {
-                if (e.HasClass(classname)) yield return e;
-            }
-        }
-
-        public static IEnumerable<HtmlNode> DescendantsByClass(this HtmlNode node, string tagname, string classname)
-        {
-            foreach (var e in node.Descendants(tagname))
-            {
-                if (e.HasClass(classname)) yield return e;
-            }
-        }
-
-        public static string HtmlDecode(this string str)
-        {
-            return WebUtility.HtmlDecode(str);
-        }
-    }
-
-
     public static class Ao3SiteDataLookup
     {
         static string[] escTagStrings = { "*s*", "*a*", "*d*", "*q*", "*h*" };
@@ -973,7 +906,7 @@ namespace Ao3TrackReader.Data
                     if (chapters[1] == "?") total = null;
                     else total = int.Parse(chapters[1]);
                     var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { model.Details.WorkId });
-                    Helper.IWorkChapter workchap = null;
+                    Helper.WorkChapter workchap = null;
                     tworkchaps.Result.TryGetValue(model.Details.WorkId, out workchap);
                     int chapters_finished = workchap != null ? (int)workchap.number : (int)0;
                     if (workchap?.location != null) { chapters_finished--; }

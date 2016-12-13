@@ -18,6 +18,27 @@ namespace Ao3TrackReader.Helper
         long? location { get; set; }
     }
 
+#if WINDOWS_UWP
+    [AllowForWeb]
+#endif
+    public sealed class WorkChapter : IWorkChapter
+    {
+        public WorkChapter()
+        {
+
+        }
+        public WorkChapter(IWorkChapter toCopy)
+        {
+            number = toCopy.number;
+            chapterid = toCopy.chapterid;
+            location = toCopy.location;
+        }
+
+        public long number { get; set; }
+        public long chapterid { get; set; }
+        public long? location { get; set; }
+    }
+
     public delegate void MainThreadAction();
     public delegate object MainThreadFunc();
 
@@ -30,11 +51,11 @@ namespace Ao3TrackReader.Helper
         void DoOnMainThread(MainThreadAction function);
 
 #if WINDOWS_UWP
-        IAsyncOperation<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
+        IAsyncOperation<IDictionary<long, WorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
 #else
-        Task<IDictionary<long, IWorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
+        Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
 #endif
-        void SetWorkChapters(IDictionary<long, IWorkChapter> works);
+        void SetWorkChapters(IDictionary<long, WorkChapter> works);
         bool JumpToLastLocationEnabled { get; set; }
         string NextPage { get; set; }
         string PrevPage { get; set; }

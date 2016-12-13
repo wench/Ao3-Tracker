@@ -367,12 +367,12 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        public Task<IDictionary<long, IWorkChapter>> getWorkChaptersAsync(ICollection<long> works)
+        public Task<IDictionary<long, WorkChapter>> getWorkChaptersAsync(ICollection<long> works)
         {
             return Task.Run(() =>
             {
                 ManualResetEventSlim handle = null;
-                IDictionary<long, IWorkChapter> r = new Dictionary<long, IWorkChapter>(works.Count);
+                IDictionary<long, WorkChapter> r = new Dictionary<long, WorkChapter>(works.Count);
 
                 EventHandler<bool> sendResponse = (sender, success) =>
                 {
@@ -381,7 +381,7 @@ namespace Ao3TrackReader.Data
                         Work work;
                         if (storage.TryGetValue(w, out work))
                         {
-                            r[w] = work;
+                            r[w] = new WorkChapter(work);
                         }
                     }
                     if (handle != null) handle.Set();
@@ -404,7 +404,7 @@ namespace Ao3TrackReader.Data
             });
         }
 
-        public void setWorkChapters(IDictionary<long, IWorkChapter> works)
+        public void setWorkChapters(IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
             {

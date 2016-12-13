@@ -150,7 +150,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JSBridge.cs" />
+    <Compile Include="Ao3TrackHelper.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -333,6 +333,20 @@
     <AndroidResource Include="..\Icons\200\sync_light.png">
       <Link>Resources\drawable-hdpi\sync_light.png</Link>
     </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_tracker.css">
+      <Link>Assets\ao3_tracker.css</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_tracker.js">
+      <Link>Assets\ao3_tracker.js</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_callbacks.js">
+      <Link>Assets\ao3_t_callbacks.js</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_reader.js">
+      <Link>Assets\ao3_t_reader.js</Link>
+    </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
