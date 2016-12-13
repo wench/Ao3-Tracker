@@ -78,31 +78,6 @@ namespace Ao3TrackReader
             }
         }
 
-        private CommandBar CreateCommandBar()
-        {
-            return new CommandBar
-            {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                ClosedDisplayMode = AppBarClosedDisplayMode.Compact,
-                OverflowButtonVisibility = CommandBarOverflowButtonVisibility.Visible
-            };
-        }
-
-        private AppBarButton CreateAppBarButton(string label, string icon, bool enabled, Action clicked)
-        {
-
-            var button = new AppBarButton
-            {
-                Icon = new BitmapIcon { UriSource = new Uri("ms-appx:///" + icon) },
-                Label = label,
-                IsEnabled = enabled
-            };
-            button.Click += (sender, e) => { clicked(); };
-            return button;
-
-        }
-
         Ao3TrackHelper helper;
 
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
@@ -164,52 +139,9 @@ namespace Ao3TrackReader
             WebView.Navigate(uri);
         }
 
-        private Uri nextPage;
-        public string NextPage
+        public void Refresh()
         {
-            get
-            {
-                return nextPage?.AbsoluteUri;
-            }
-            set
-            {
-                nextPage = null;
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    try
-                    {
-                        nextPage = new Uri(WebView.Source, value);
-                    }
-                    catch
-                    {
-
-                    }
-                }
-                nextPageButton.IsEnabled = canGoForward;
-            }
-        }
-        private Uri prevPage;
-        public string PrevPage
-        {
-            get
-            {
-                return prevPage?.AbsoluteUri;
-            }
-            set
-            {
-                prevPage = null;
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    try
-                    {
-                        prevPage = new Uri(WebView.Source, value);
-                    }
-                    catch
-                    {
-                    }
-                }
-                prevPageButton.IsEnabled = canGoBack;
-            }
+            WebView.Refresh();
         }
 
         public bool canGoBack { get { return WebView.CanGoBack || prevPage != null; } }

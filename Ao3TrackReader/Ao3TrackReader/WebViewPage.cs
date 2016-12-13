@@ -70,7 +70,7 @@ namespace Ao3TrackReader
             {
                 Text = "Refresh",
                 Icon = Icons.Refresh,
-                Command = new Command(()=>WebView.Refresh())
+                Command = new Command(Refresh)
             });
             ToolbarItems.Add(new ToolbarItem
             {
@@ -119,7 +119,7 @@ namespace Ao3TrackReader
                             }
                             else
                             {
-                                urlEntry.Text = WebView.Source.AbsoluteUri;
+                                urlEntry.Text = Current.AbsoluteUri;
                                 urlBar.IsVisible = true;
                                 urlEntry.Focus();
                             }
@@ -285,7 +285,7 @@ namespace Ao3TrackReader
                         uri.Scheme = "https";
                     }
                     uri.Port = -1;
-                    WebView.Navigate(uri.Uri);
+                    Navigate(uri.Uri);
                 }
                 else
                 {
@@ -395,17 +395,11 @@ namespace Ao3TrackReader
         {
             set
             {
-#if WINDOWS_UWP
                 if (jumpButton != null) jumpButton.IsEnabled = value;
-#else
-#endif
             }
             get
             {
-#if WINDOWS_UWP
                 return jumpButton?.IsEnabled ?? false;
-#else
-#endif
             }
         }
 
@@ -433,6 +427,53 @@ namespace Ao3TrackReader
             }
         }
 
+        private Uri nextPage;
+        public string NextPage
+        {
+            get
+            {
+                return nextPage?.AbsoluteUri;
+            }
+            set
+            {
+                nextPage = null;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    try
+                    {
+                        nextPage = new Uri(Current, value);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                nextPageButton.IsEnabled = canGoForward;
+            }
+        }
+        private Uri prevPage;
+        public string PrevPage
+        {
+            get
+            {
+                return prevPage?.AbsoluteUri;
+            }
+            set
+            {
+                prevPage = null;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    try
+                    {
+                        prevPage = new Uri(Current, value);
+                    }
+                    catch
+                    {
+                    }
+                }
+                prevPageButton.IsEnabled = canGoBack;
+            }
+        }
 
         public void addToReadingList(string href)
         {
