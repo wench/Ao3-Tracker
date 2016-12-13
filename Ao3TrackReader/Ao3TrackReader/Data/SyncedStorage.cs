@@ -42,6 +42,20 @@ namespace Ao3TrackReader.Data
             }
         };
 
+        public event EventHandler BeginSyncEvent;
+        public event EventHandler<bool> EndSyncEvent;
+
+        public bool IsSyncing
+        {
+            get { return serversync == SyncState.Syncing; }
+        }
+
+        public bool CanSync
+        {
+            get { return serversync != SyncState.Delayed; }
+        }
+
+
         event EventHandler<bool> SyncFromServerEvent;
 
         HttpClient HttpClient { get; set; }
@@ -94,6 +108,7 @@ namespace Ao3TrackReader.Data
         {
             lock (locker)
             {
+                EndSyncEvent?.Invoke(this, success);
                 var e = SyncFromServerEvent;
                 SyncFromServerEvent = null;
                 Task.Run(() =>
@@ -174,6 +189,7 @@ namespace Ao3TrackReader.Data
                 no_sync_until = now + 5 * 60 * 1000;
 
                 serversync = SyncState.Syncing; // set to syncing!
+                BeginSyncEvent?.Invoke(this,EventArgs.Empty);
 
                 Task.Run(async () =>
                 {
@@ -246,8 +262,6 @@ namespace Ao3TrackReader.Data
                         }
                         App.Database.SaveItems(newitems.Values);
 
-                        onSyncFromServer(true);
-
                         current = unsynced;
                         unsynced = new Dictionary<long, Work>();
                         time = last_sync;
@@ -256,6 +270,7 @@ namespace Ao3TrackReader.Data
                         {
                             App.Database.SaveVariable("last_sync", last_sync.ToString());
                             serversync = SyncState.Ready;
+                            onSyncFromServer(true);
                             return;
                         }
                     }

@@ -9,12 +9,10 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using Icons = Ao3TrackReader.Resources.Icons;
 
+using Xamarin.Forms.PlatformConfiguration;
+
 #if WINDOWS_UWP
-using BitmapIcon = Windows.UI.Xaml.Controls.BitmapIcon;
-using Xamarin.Forms.Platform.UWP;
-using SymbolIcon = Windows.UI.Xaml.Controls.SymbolIcon;
-using Symbol = Windows.UI.Xaml.Controls.Symbol;
-using AppBarButton = Windows.UI.Xaml.Controls.AppBarButton;
+using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 #elif __ANDROID__
 using Android.OS;
 #endif
@@ -25,19 +23,20 @@ namespace Ao3TrackReader
     public partial class WebViewPage : ContentPage, IEventHandler
     {
 #if WINDOWS_UWP
-        AppBarButton jumpButton { get; set; }
-        AppBarButton incFontSizeButton { get; set; }
-        AppBarButton decFontSizeButton { get; set; }
-        AppBarButton nextPageButton { get; set; }
-        AppBarButton prevPageButton { get; set; }
         public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
 #endif
+        DisableableCommand jumpButton { get; set; }
+        DisableableCommand incFontSizeButton { get; set; }
+        DisableableCommand decFontSizeButton { get; set; }
+        DisableableCommand nextPageButton { get; set; }
+        DisableableCommand prevPageButton { get; set; }
+        DisableableCommand syncButton { get; set; }
+
         Label PrevPageIndicator;
         Label NextPageIndicator;
         Controls.ReadingListView readingList;
         Entry urlEntry;
         StackLayout urlBar;
-        AbsoluteLayout modelPopup;
 
         public WebViewPage()
         {
@@ -49,40 +48,99 @@ namespace Ao3TrackReader
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Spacing = 0
             };
-
-            var commandBar = CreateCommandBar();
+            
 #if WINDOWS_UWP
             Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
-            commandBar.PrimaryCommands.Add(prevPageButton = CreateAppBarButton("Back", Icons.Back, false, () => { GoBack(); }));
-            commandBar.PrimaryCommands.Add(nextPageButton = CreateAppBarButton("Forward", Icons.Forward, false, () => { GoForward(); }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Refresh", Icons.Refresh, true, () => WebView.Refresh()));
-            commandBar.PrimaryCommands.Add(jumpButton = CreateAppBarButton("Jump", Icons.Redo, false, this.OnJumpClicked));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Reading List", Icons.Bookmarks, true, () => readingList.IsOnScreen = !readingList.IsOnScreen ));
-            commandBar.PrimaryCommands.Add(incFontSizeButton = CreateAppBarButton("Font Increase", Icons.FontUp, true, () =>
-                FontSize += 10));
-            commandBar.PrimaryCommands.Add(decFontSizeButton = CreateAppBarButton("Font Decrease", Icons.FontDown, true, () =>
-                FontSize -= 10));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Sync", Icons.Sync, true, () => { }));
-            commandBar.PrimaryCommands.Add(CreateAppBarButton("Url Bar", Icons.Rename, true, () =>
-            {
-                if (urlBar.IsVisible)
-                {
-                    urlBar.IsVisible = false;
-                    urlBar.Unfocus();
-                }
-                else
-                {
-                    urlEntry.Text = WebView.Source.AbsoluteUri;
-                    urlBar.IsVisible = true;
-                    urlEntry.Focus();
-                }
-            }));
-
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Reset Font Size", Icons.Font, true, () => FontSize = 100));
-            commandBar.SecondaryCommands.Add(CreateAppBarButton("Settings", Icons.Settings, true, SettingsButton_Clicked));
-
+            On<Xamarin.Forms.PlatformConfiguration.Windows>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 #else
 #endif
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Back",
+                Icon = Icons.Back,
+                Command = prevPageButton = new DisableableCommand(GoBack,false)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Forward",
+                Icon = Icons.Forward,
+                Command = nextPageButton = new DisableableCommand(GoForward, false)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Refresh",
+                Icon = Icons.Refresh,
+                Command = new Command(()=>WebView.Refresh())
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Jump",
+                Icon = Icons.Redo,
+                Command = jumpButton = new DisableableCommand(OnJumpClicked, false)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Reading List",
+                Icon = Icons.Bookmarks,
+                Command = new Command(() => readingList.IsOnScreen = !readingList.IsOnScreen)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Font Increase",
+                Icon = Icons.FontUp,
+                Command = incFontSizeButton = new DisableableCommand(() => FontSize += 10)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Font Decrease",
+                Icon = Icons.FontDown,
+                Command = decFontSizeButton = new DisableableCommand(() => FontSize -= 10)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Sync",
+                Icon = Icons.Sync,
+                Command = syncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync)
+            });
+            App.Storage.BeginSyncEvent += Storage_BeginSyncEvent;
+            App.Storage.EndSyncEvent += Storage_EndSyncEvent;
+            syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
+
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Url Bar",
+                Icon = Icons.Rename,
+                Command = new Command(() =>
+                        {
+                            if (urlBar.IsVisible)
+                            {
+                                urlBar.IsVisible = false;
+                                urlBar.Unfocus();
+                            }
+                            else
+                            {
+                                urlEntry.Text = WebView.Source.AbsoluteUri;
+                                urlBar.IsVisible = true;
+                                urlEntry.Focus();
+                            }
+                        })
+            });
+
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Reset Font Size",
+                Icon = Icons.Font,
+                Order = ToolbarItemOrder.Secondary,
+                Command = new Command(() => FontSize = 100)
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Settings",
+                Icon = Icons.Settings,
+                Order = ToolbarItemOrder.Secondary,
+                Command = new Command(SettingsButton_Clicked)
+            });
+
             NextPageIndicator = new Label { Text = "Next Page", Rotation = 90, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
             AbsoluteLayout.SetLayoutBounds(NextPageIndicator, new Rectangle(.98, .5, 100, 100));
             AbsoluteLayout.SetLayoutFlags(NextPageIndicator, AbsoluteLayoutFlags.PositionProportional);
@@ -154,39 +212,23 @@ namespace Ao3TrackReader
                     }
             });
             mainlayout.Children.Add(urlBar);
-            mainlayout.Children.Add(commandBar);
             mainlayout.SizeChanged += Mainlayout_SizeChanged;
 
-            /*
-            ToolbarItem tbi = null;
-
-            tbi = new ToolbarItem("Jump", "jump.png", () =>
-            {
-                webView.OnJumpClicked();
-            }, 0, 0);
-
-            ToolbarItems.Add(tbi);
-            */
             AbsoluteLayout.SetLayoutBounds(mainlayout, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(mainlayout, AbsoluteLayoutFlags.All);
 
-            modelPopup = new AbsoluteLayout();
-            AbsoluteLayout.SetLayoutBounds(modelPopup, new Rectangle(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(modelPopup, AbsoluteLayoutFlags.All);
-            //modelPopup.BackgroundColor = new Color(0, 0, 0, .5);
+            Content = mainlayout;
+        }
 
-            var outerlayout = new AbsoluteLayout
-            {
-                Children =
-                {
-                    mainlayout,
-                    modelPopup
+        private void Storage_EndSyncEvent(object sender, bool e)
+        {
+            DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
 
-                }
+        }
 
-            };
-
-            Content = outerlayout;
+        private void Storage_BeginSyncEvent(object sender, EventArgs e)
+        {
+            DoOnMainThread(() => syncButton.IsEnabled = false);
         }
 
         private void Mainlayout_SizeChanged(object sender, EventArgs e)
@@ -355,7 +397,7 @@ namespace Ao3TrackReader
             {
 #if WINDOWS_UWP
                 if (jumpButton != null) jumpButton.IsEnabled = value;
-#else                
+#else
 #endif
             }
             get
@@ -363,7 +405,7 @@ namespace Ao3TrackReader
 #if WINDOWS_UWP
                 return jumpButton?.IsEnabled ?? false;
 #else
-#endif              
+#endif
             }
         }
 

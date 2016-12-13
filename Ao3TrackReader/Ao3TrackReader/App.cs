@@ -54,8 +54,7 @@ namespace Ao3TrackReader
             }
 
             // The root page of your application
-            MainPage = new WebViewPage();
-
+            MainPage = new NavigationPage(new WebViewPage());
         }
 
         protected override void OnStart()

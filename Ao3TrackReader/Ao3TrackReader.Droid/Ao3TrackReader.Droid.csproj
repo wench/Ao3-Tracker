@@ -165,6 +165,176 @@
     <AndroidResource Include="Resources\Drawable\Icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidResource Include="..\Icons\addpage_dark.png">
+      <Link>Resources\drawable-ldpi\addpage_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\addpage_dark.png">
+      <Link>Resources\drawable-hdpi\addpage_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\addpage_light.png">
+      <Link>Resources\drawable-ldpi\addpage_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\addpage_light.png">
+      <Link>Resources\drawable-hdpi\addpage_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\back_dark.png">
+      <Link>Resources\drawable-ldpi\back_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\back_dark.png">
+      <Link>Resources\drawable-hdpi\back_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\back_light.png">
+      <Link>Resources\drawable-ldpi\back_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\back_light.png">
+      <Link>Resources\drawable-hdpi\back_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\bookmarks_dark.png">
+      <Link>Resources\drawable-ldpi\bookmarks_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\bookmarks_dark.png">
+      <Link>Resources\drawable-hdpi\bookmarks_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\bookmarks_light.png">
+      <Link>Resources\drawable-ldpi\bookmarks_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\bookmarks_light.png">
+      <Link>Resources\drawable-hdpi\bookmarks_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\close_dark.png">
+      <Link>Resources\drawable-ldpi\close_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\close_dark.png">
+      <Link>Resources\drawable-hdpi\close_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\close_light.png">
+      <Link>Resources\drawable-ldpi\close_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\close_light.png">
+      <Link>Resources\drawable-hdpi\close_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\filter_dark.png">
+      <Link>Resources\drawable-ldpi\filter_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\filter_dark.png">
+      <Link>Resources\drawable-hdpi\filter_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\filter_light.png">
+      <Link>Resources\drawable-ldpi\filter_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\filter_light.png">
+      <Link>Resources\drawable-hdpi\filter_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\fontdown_dark.png">
+      <Link>Resources\drawable-ldpi\fontdown_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\fontdown_dark.png">
+      <Link>Resources\drawable-hdpi\fontdown_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\fontdown_light.png">
+      <Link>Resources\drawable-ldpi\fontdown_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\fontdown_light.png">
+      <Link>Resources\drawable-hdpi\fontdown_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\fontup_dark.png">
+      <Link>Resources\drawable-ldpi\fontup_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\fontup_dark.png">
+      <Link>Resources\drawable-hdpi\fontup_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\fontup_light.png">
+      <Link>Resources\drawable-ldpi\fontup_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\fontup_light.png">
+      <Link>Resources\drawable-hdpi\fontup_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\font_dark.png">
+      <Link>Resources\drawable-ldpi\font_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\font_dark.png">
+      <Link>Resources\drawable-hdpi\font_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\font_light.png">
+      <Link>Resources\drawable-ldpi\font_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\font_light.png">
+      <Link>Resources\drawable-hdpi\font_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\forward_dark.png">
+      <Link>Resources\drawable-ldpi\forward_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\forward_dark.png">
+      <Link>Resources\drawable-hdpi\forward_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\forward_light.png">
+      <Link>Resources\drawable-ldpi\forward_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\forward_light.png">
+      <Link>Resources\drawable-hdpi\forward_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\redo_dark.png">
+      <Link>Resources\drawable-ldpi\redo_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\redo_dark.png">
+      <Link>Resources\drawable-hdpi\redo_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\redo_light.png">
+      <Link>Resources\drawable-ldpi\redo_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\redo_light.png">
+      <Link>Resources\drawable-hdpi\redo_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\refresh_dark.png">
+      <Link>Resources\drawable-ldpi\refresh_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\refresh_dark.png">
+      <Link>Resources\drawable-hdpi\refresh_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\refresh_light.png">
+      <Link>Resources\drawable-ldpi\refresh_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\refresh_light.png">
+      <Link>Resources\drawable-hdpi\refresh_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\rename_dark.png">
+      <Link>Resources\drawable-ldpi\rename_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\rename_dark.png">
+      <Link>Resources\drawable-hdpi\rename_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\rename_light.png">
+      <Link>Resources\drawable-ldpi\rename_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\rename_light.png">
+      <Link>Resources\drawable-hdpi\rename_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\settings_dark.png">
+      <Link>Resources\drawable-ldpi\settings_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\settings_dark.png">
+      <Link>Resources\drawable-hdpi\settings_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\settings_light.png">
+      <Link>Resources\drawable-ldpi\settings_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\settings_light.png">
+      <Link>Resources\drawable-hdpi\settings_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\sync_dark.png">
+      <Link>Resources\drawable-ldpi\sync_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\sync_dark.png">
+      <Link>Resources\drawable-hdpi\sync_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\sync_light.png">
+      <Link>Resources\drawable-ldpi\sync_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\sync_light.png">
+      <Link>Resources\drawable-hdpi\sync_light.png</Link>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition="Exists('..\Ao3TrackReader\Ao3TrackReader.projitems')" />
