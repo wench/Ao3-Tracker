@@ -35,6 +35,7 @@ namespace Ao3TrackReader
         Label PrevPageIndicator;
         Label NextPageIndicator;
         Controls.ReadingListView readingList;
+        Controls.SettingsView settingsPane;
         Entry urlEntry;
         StackLayout urlBar;
 
@@ -82,7 +83,10 @@ namespace Ao3TrackReader
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
-                Command = new Command(() => readingList.IsOnScreen = !readingList.IsOnScreen)
+                Command = new Command(() => {
+                    readingList.IsOnScreen = !readingList.IsOnScreen;
+                    settingsPane.IsOnScreen = false;
+                })
             });
             ToolbarItems.Add(new ToolbarItem
             {
@@ -138,7 +142,10 @@ namespace Ao3TrackReader
                 Text = "Settings",
                 Icon = Icons.Settings,
                 Order = ToolbarItemOrder.Secondary,
-                Command = new Command(SettingsButton_Clicked)
+                Command = new Command(() => {
+                    settingsPane.IsOnScreen = !settingsPane.IsOnScreen;
+                    readingList.IsOnScreen = false;
+                })
             });
 
             NextPageIndicator = new Label { Text = "Next Page", Rotation = 90, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
@@ -160,6 +167,10 @@ namespace Ao3TrackReader
             readingList = new Controls.ReadingListView(this);
             AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 480, 1));
             AbsoluteLayout.SetLayoutFlags(readingList, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
+
+            settingsPane = new Controls.SettingsView(this);
+            AbsoluteLayout.SetLayoutBounds(settingsPane, new Rectangle(1, 0, 480, 1));
+            AbsoluteLayout.SetLayoutFlags(settingsPane, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
 
             urlBar = new StackLayout
             {
@@ -209,6 +220,7 @@ namespace Ao3TrackReader
                         PrevPageIndicator,
                         NextPageIndicator,
                         readingList,
+                        settingsPane
                     }
             });
             mainlayout.Children.Add(urlBar);
@@ -401,13 +413,6 @@ namespace Ao3TrackReader
             {
                 return jumpButton?.IsEnabled ?? false;
             }
-        }
-
-        public async void SettingsButton_Clicked()
-        {
-            var settingsPage = new SettingsPage();
-
-            await Navigation.PushModalAsync(settingsPage);
         }
 
         public bool showPrevPageIndicator

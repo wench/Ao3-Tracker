@@ -331,6 +331,40 @@ namespace Ao3TrackReader.Data
             return name;
         }
 
+        public static Uri CanonicalUri(string url)
+        {
+            var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) => {
+                if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
+                else return "";
+            }).TrimEnd('?'));
+
+            if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
+            {
+                if (uribuilder.Scheme == "http")
+                {
+                    uribuilder.Scheme = "https";
+                }
+                uribuilder.Port = -1;
+            }
+            else
+            {
+                return null;
+            }
+
+            uribuilder.Fragment = null;
+
+            Uri uri = uribuilder.Uri;
+
+            Match match = null;
+
+            if ((match = regexWork.Match(uri.LocalPath)).Success)   // View Work
+            {
+                var sWORKID = match.Groups["WORKID"].Value;
+                uri = new Uri(uri, "/works/" + sWORKID);
+            }
+
+            return uri;
+        }
         public static IDictionary<string, Ao3PageModel> LookupQuick(ICollection<string> urls)
         {
             var dict = new Dictionary<string, Ao3PageModel>(urls.Count);

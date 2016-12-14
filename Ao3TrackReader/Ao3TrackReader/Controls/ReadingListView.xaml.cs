@@ -163,6 +163,21 @@ namespace Ao3TrackReader.Controls
 
         }
 
+        public void PageChange(Uri uri)
+        {
+            uri = Data.Ao3SiteDataLookup.CanonicalUri(uri.AbsoluteUri);
+            wpv.DoOnMainThread(() => ListView.SelectedItem = readingListBacking.Find((m) => m.Uri.AbsoluteUri == uri?.AbsoluteUri));
+        }
+
+        public void OnSelection(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null)
+            {
+                PageChange(wpv.Current);
+                return;
+            }
+        }
+
         private bool MenuOpenLastFilter(RLMenuItem mi)
         {
             var item = mi.CommandParameter as Models.Ao3PageViewModel;
@@ -258,6 +273,7 @@ namespace Ao3TrackReader.Controls
                 wpv.DoOnMainThread(() =>
                 {
                     RefreshButton.IsEnabled = true;
+                    PageChange(wpv.Current);
                 });
             });
         }
@@ -288,27 +304,29 @@ namespace Ao3TrackReader.Controls
             srl.paths = App.Database.GetReadingListItems().ToDictionary(i => i.Uri, i => i.Timestamp);
 
             srl = await App.Storage.SyncReadingListAsync(srl);
-            if (srl == null) return;
-
-            App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
-
-            foreach (var item in srl.paths)
+            if (srl != null)
             {
-                if (item.Value == -1)
+                App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
+
+                foreach (var item in srl.paths)
                 {
-                    RemoveAsyncImpl(item.Key);
-                }
-                else
-                {
-                    AddAsyncImpl(item.Key,item.Value);
+                    if (item.Value == -1)
+                    {
+                        RemoveAsyncImpl(item.Key);
+                    }
+                    else
+                    {
+                        AddAsyncImpl(item.Key, item.Value);
+                    }
                 }
             }
+            PageChange(wpv.Current);
         }
 
         void RemoveAsyncImpl(string href)
         {
             App.Database.DeleteReadingListItems(href);
-            var model = readingListBacking.Find((m) => m.Uri.AbsoluteUri == href);
+            var model = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href);
             if (model == null) return;
             wpv.DoOnMainThread(() =>
             {
@@ -327,14 +345,14 @@ namespace Ao3TrackReader.Controls
 
         void AddAsyncImpl(string href, long timestamp)
         {
-            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == href) != null)
+            if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href) != null)
                 return;
 
             var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
             var model = models.SingleOrDefault();
             if (model.Value == null) return;
 
-            if (readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
+            if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
                 return;
 
             var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
@@ -368,13 +386,14 @@ namespace Ao3TrackReader.Controls
                     {
                         App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
 
-                        var pvm = readingListBacking.Find((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
+                        var pvm = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
                         if (pvm != null) readingListBacking.Remove(pvm);
                     }
                     App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
                     wpv.DoOnMainThread(() =>
                     {
                         viewmodel.BaseData = model.Value;
+
                     });
                 }
             });

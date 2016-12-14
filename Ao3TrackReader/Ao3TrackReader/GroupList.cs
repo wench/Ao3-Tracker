@@ -117,6 +117,18 @@ namespace Ao3TrackReader
 
         public T Find(Predicate<T> pred)
         {
+            foreach (var g in this)
+            {
+                foreach (var e in g)
+                {
+                    if (pred(e))
+                        return e;
+                }
+            }
+            return default(T);
+        }
+        public T FindInAll(Predicate<T> pred)
+        {
             foreach (var g in AllGroups)
             {
                 foreach (var e in g)

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="Ao3TrackReader" Publisher="CN=Alexis" Version="0.5.1.0" />
+  <Identity Name="Ao3TrackReader" Publisher="CN=Alexis" Version="0.6.1.0" />
   <mp:PhoneIdentity PhoneProductId="f736c883-f105-4d30-a719-4bf328872f5e" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Ao3Track Reader</DisplayName>
@@ -16,7 +16,11 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="FPCL.WIndows.App">
       <uap:VisualElements DisplayName="Ao3Track Reader" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Ao3Track Reader for Windows Universal Platform" BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Ao3Tracker">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
+          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
         <uap:InitialRotationPreference>
@@ -27,8 +31,8 @@
         </uap:InitialRotationPreference>
       </uap:VisualElements>
       <uap:ApplicationContentUriRules>
-        <uap:Rule Match="https://archiveofourown.com/" Type="include" WindowsRuntimeAccess="none" />
-        <uap:Rule Match="https://wenchy.net/" Type="include" WindowsRuntimeAccess="none" />
+        <uap:Rule Match="https://archiveofourown.com/" Type="include" WindowsRuntimeAccess="allowForWebOnly" />
+        <uap:Rule Match="https://wenchy.net/" Type="include" WindowsRuntimeAccess="allowForWebOnly" />
       </uap:ApplicationContentUriRules>
     </Application>
   </Applications>

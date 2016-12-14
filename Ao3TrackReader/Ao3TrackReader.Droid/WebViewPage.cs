@@ -75,7 +75,11 @@ namespace Ao3TrackReader
 
         private void WebView_FocusChange(object sender, Android.Views.View.FocusChangeEventArgs e)
         {
-            if (e.HasFocus) readingList.IsOnScreen = false;
+            if (e.HasFocus)
+            {
+                readingList.IsOnScreen = false;
+                settingsPane.IsOnScreen = false;
+            }
         }
 
 
@@ -97,6 +101,7 @@ namespace Ao3TrackReader
 
             }
             if (urlEntry != null) urlEntry.Text = args.AbsoluteUri;
+            readingList?.PageChange(args);
             WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelper");
             nextPage = null;
             prevPage = null;
@@ -109,6 +114,7 @@ namespace Ao3TrackReader
         private void OnPageStarted(WebView sender)
         {
             if (urlEntry != null) urlEntry.Text = WebView.Url;
+            readingList?.PageChange(Current);
             PrevPageIndicator.IsVisible = false;
             NextPageIndicator.IsVisible = false;
             //WebView.RenderTransform = null;

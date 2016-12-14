@@ -24,22 +24,37 @@ namespace Ao3TrackReader
 
         static App()
         {
+            Database = new Ao3TrackDatabase();
+            Storage = new SyncedStorage();
+
+            theme = Ao3TrackReader.App.Database.GetVariable("Theme");
+            if (string.IsNullOrWhiteSpace(theme)) theme = "light";
         }
 
         public static Dictionary<string, Color> Colors { get; private set; }
 
-        public static bool IsDark { get { return true; } }
-
+        static readonly string theme;
         public static string PlatformIcon(string name)
         {
-            string dl = IsDark ? "_dark" : "_light";
+            string dl = "_" + theme;
             return Device.OnPlatform(name + dl, name + dl, "Assets/" + name + dl);
         }
 
         public App()
         {
-            Database = new Ao3TrackDatabase();
-            Storage = new SyncedStorage();
+#if __ANDROID__
+            var x = typeof(Xamarin.Forms.Themes.DarkThemeResources);
+            x = typeof(Xamarin.Forms.Themes.LightThemeResources);
+            x = typeof(Xamarin.Forms.Themes.Android.UnderlineEffect);
+#elif __IOS__
+            var x = typeof(Xamarin.Forms.Themes.DarkThemeResources);
+            x = typeof(Xamarin.Forms.Themes.LightThemeResources);
+            x = typeof(Xamarin.Forms.Themes.iOS.UnderlineEffect);
+#endif
+            // Theme selection
+            //this.Resources = new ResourceDictionary { MergedWith = typeof(Xamarin.Forms.Themes.LightThemeResources) };
+
+
 
             Colors = new Dictionary<string, Color>();
 

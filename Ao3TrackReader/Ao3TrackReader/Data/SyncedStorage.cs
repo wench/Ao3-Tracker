@@ -55,6 +55,11 @@ namespace Ao3TrackReader.Data
             get { return serversync != SyncState.Delayed; }
         }
 
+        public string Username
+        {
+            get { return App.Database.GetVariable("authorization.username") ?? ""; }
+        }
+
 
         event EventHandler<bool> SyncFromServerEvent;
 
