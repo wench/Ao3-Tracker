@@ -7,6 +7,8 @@ using Xamarin.Forms;
 using Ao3TrackReader.Helper;
 using System.Threading;
 using System.Text.RegularExpressions;
+using Ao3TrackReader.Controls;
+using Ao3TrackReader.Resources;
 using Icons = Ao3TrackReader.Resources.Icons;
 
 using Xamarin.Forms.PlatformConfiguration;
@@ -34,8 +36,8 @@ namespace Ao3TrackReader
 
         Label PrevPageIndicator;
         Label NextPageIndicator;
-        Controls.ReadingListView readingList;
-        Controls.SettingsView settingsPane;
+        ReadingListView readingList;
+        SettingsView settingsPane;
         Entry urlEntry;
         StackLayout urlBar;
 
@@ -49,41 +51,46 @@ namespace Ao3TrackReader
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Spacing = 0
             };
-            
+
 #if WINDOWS_UWP
-            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
-            On<Xamarin.Forms.PlatformConfiguration.Windows>().SetToolbarPlacement(ToolbarPlacement.Bottom);
-#else
+            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;            
 #endif
+
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Back",
                 Icon = Icons.Back,
-                Command = prevPageButton = new DisableableCommand(GoBack,false)
+                Order = ToolbarItemOrder.Primary,
+                Command = prevPageButton = new DisableableCommand(GoBack, false)
             });
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Forward",
                 Icon = Icons.Forward,
+                Order = ToolbarItemOrder.Primary,
                 Command = nextPageButton = new DisableableCommand(GoForward, false)
             });
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Refresh",
                 Icon = Icons.Refresh,
+                Order = ToolbarItemOrder.Primary,
                 Command = new Command(Refresh)
             });
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Jump",
                 Icon = Icons.Redo,
+                Order = ToolbarItemOrder.Primary,
                 Command = jumpButton = new DisableableCommand(OnJumpClicked, false)
             });
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
-                Command = new Command(() => {
+                Order = ToolbarItemOrder.Primary,
+                Command = new Command(() =>
+                {
                     readingList.IsOnScreen = !readingList.IsOnScreen;
                     settingsPane.IsOnScreen = false;
                 })
@@ -142,7 +149,8 @@ namespace Ao3TrackReader
                 Text = "Settings",
                 Icon = Icons.Settings,
                 Order = ToolbarItemOrder.Secondary,
-                Command = new Command(() => {
+                Command = new Command(() =>
+                {
                     settingsPane.IsOnScreen = !settingsPane.IsOnScreen;
                     readingList.IsOnScreen = false;
                 })
@@ -164,13 +172,15 @@ namespace Ao3TrackReader
             // retore font size!
             FontSize = 100;
 
-            readingList = new Controls.ReadingListView(this);
-            AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, 480, 1));
-            AbsoluteLayout.SetLayoutFlags(readingList, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
-
-            settingsPane = new Controls.SettingsView(this);
-            AbsoluteLayout.SetLayoutBounds(settingsPane, new Rectangle(1, 0, 480, 1));
-            AbsoluteLayout.SetLayoutFlags(settingsPane, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
+            var panes = new PaneContainer
+            {
+                Children = {
+                    (readingList = new ReadingListView(this)),
+                    (settingsPane = new SettingsView(this))
+                }
+            };
+            AbsoluteLayout.SetLayoutBounds(panes, new Rectangle(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(panes, AbsoluteLayoutFlags.All);
 
             urlBar = new StackLayout
             {
@@ -219,12 +229,10 @@ namespace Ao3TrackReader
                         wv,
                         PrevPageIndicator,
                         NextPageIndicator,
-                        readingList,
-                        settingsPane
+                        panes
                     }
             });
             mainlayout.Children.Add(urlBar);
-            mainlayout.SizeChanged += Mainlayout_SizeChanged;
 
             AbsoluteLayout.SetLayoutBounds(mainlayout, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(mainlayout, AbsoluteLayoutFlags.All);
@@ -243,26 +251,14 @@ namespace Ao3TrackReader
             DoOnMainThread(() => syncButton.IsEnabled = false);
         }
 
-        private void Mainlayout_SizeChanged(object sender, EventArgs e)
-        {
-            var mainlayout = sender as Layout;
-            double desired;
-
-            if (mainlayout.Width < 480)
-                AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, desired = mainlayout.Width, 1));
-            else if (mainlayout.Width < 960)
-                AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, desired = 480, 1));
-            else
-                AbsoluteLayout.SetLayoutBounds(readingList, new Rectangle(1, 0, desired = mainlayout.Width/2, 1));
-        }
-
         public void NavigateToLast(long workid)
         {
             Task.Run(async () =>
             {
                 var workchaps = await App.Storage.getWorkChaptersAsync(new[] { workid });
 
-                DoOnMainThread(() => {
+                DoOnMainThread(() =>
+                {
                     WorkChapter wc;
                     if (workchaps.TryGetValue(workid, out wc) && wc.chapterid != 0)
                     {
@@ -344,7 +340,8 @@ namespace Ao3TrackReader
         }
 #endif
 
-        public bool IsMainThread {
+        public bool IsMainThread
+        {
 #if WINDOWS_UWP
             get { return Dispatcher.HasThreadAccess; }
 #elif __ANDROID__

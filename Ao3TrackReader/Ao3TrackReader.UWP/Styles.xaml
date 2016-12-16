@@ -4,7 +4,7 @@
     xmlns:local="using:Ao3TrackReader.UWP">
 
   <Style x:Key="TitleTextBlockStyle" TargetType="TextBlock">
-    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="FontSize" Value="14"/>
   </Style>
 
 </ResourceDictionary>

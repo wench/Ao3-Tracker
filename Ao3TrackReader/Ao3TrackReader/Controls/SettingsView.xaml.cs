@@ -5,36 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Ao3TrackReader.Resources;
 
 namespace Ao3TrackReader.Controls
 {
-    public partial class SettingsView : ContentView
+    public partial class SettingsView : PaneView
     {
-        public static Color GroupTitleColor
-        {
-            get
-            {
-                var c = App.Colors["SystemChromeAltLowColor"];
-                return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0);
-            }
-        }
-
-        public static Color ButtonActiveColor
-        {
-            get
-            {
-                var c = App.Colors["SystemBaseMediumColor"];
-                return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0, c.A);
-            }
-        }
-        public static Color ButtonDefaultColor
-        {
-            get 
-            {
-                return App.Colors["SystemBaseLowColor"];
-            }
-}
-
         bool isCreateUser;
         WebViewPage wpv;
         Dictionary<string, string> themes;
@@ -44,10 +20,8 @@ namespace Ao3TrackReader.Controls
             this.wpv = wpv;
             InitializeComponent();
 
-            var c = App.Colors["SystemAltMediumHighColor"];
-            BackgroundColor = new Color(c.R, c.G, c.B, (3 + c.A) / 4);
+            BackgroundColor = Colors.Alt.Trans.High;
             isCreateUser = false;
-            TranslationX = 480;
 
             themes = new Dictionary<string, string> {
                 { "light", "Light" },
@@ -56,26 +30,12 @@ namespace Ao3TrackReader.Controls
             themeList.ItemsSource = themes.Values;
         }
 
-        public bool IsOnScreen
+        protected override void OnIsOnScreenChanging(bool newValue)
         {
-            get
+            if (newValue == true)
             {
-                return TranslationX < Width / 2;
-            }
-            set
-            {
-                if (value == false)
-                {
-                    ViewExtensions.CancelAnimations(this);
-                    this.TranslateTo(Width, 0, 100, Easing.CubicIn);
-                }
-                else
-                {
-                    ViewExtensions.CancelAnimations(this);
-                    this.TranslateTo(0, 0, 100, Easing.CubicIn);
-                    UpdateSyncForm();
-                    SelectCurrentTheme();
-                }
+                UpdateSyncForm();
+                SelectCurrentTheme();
             }
         }
 
@@ -168,7 +128,7 @@ namespace Ao3TrackReader.Controls
                 syncForm.IsVisible = false;
                 var text = new FormattedString();
                 text.Spans.Add(new Span { Text = "Logged in as: " });
-                text.Spans.Add(new Span { Text = name, ForegroundColor = GroupTitleColor });
+                text.Spans.Add(new Span { Text = name, ForegroundColor = Colors.Highlight.Low });
                 syncLoggedInLabel.FormattedText = text;
             }
             else
@@ -177,8 +137,8 @@ namespace Ao3TrackReader.Controls
                 syncForm.IsVisible = true;
                 if (isCreateUser)
                 {
-                    syncLoginButton.BorderColor = ButtonDefaultColor;
-                    syncCreateButton.BorderColor = ButtonActiveColor;
+                    syncLoginButton.BorderColor = Colors.Base.Trans.Low;
+                    syncCreateButton.BorderColor = Colors.Highlight.Trans.Medium;
                     verifyLabel.IsVisible = true;
                     verify.IsVisible = true;
                     emailLabel.IsVisible = true;
@@ -186,8 +146,8 @@ namespace Ao3TrackReader.Controls
                 }
                 else
                 {
-                    syncLoginButton.BorderColor = ButtonActiveColor;
-                    syncCreateButton.BorderColor = ButtonDefaultColor;
+                    syncLoginButton.BorderColor = Colors.Highlight.Trans.Medium;
+                    syncCreateButton.BorderColor = Colors.Base.Trans.Low;
                     verifyLabel.IsVisible = false;
                     verify.IsVisible = false;
                     emailLabel.IsVisible = false;

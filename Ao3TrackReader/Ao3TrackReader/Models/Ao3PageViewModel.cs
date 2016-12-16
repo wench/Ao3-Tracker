@@ -6,7 +6,7 @@ using Color = Xamarin.Forms.Color;
 using ImageSource = Xamarin.Forms.ImageSource;
 using UriImageSource = Xamarin.Forms.UriImageSource;
 using System.Linq;
-using Ao3TrackReader.Controls;
+using Ao3TrackReader.Resources;
 
 namespace Ao3TrackReader.Models
 {
@@ -125,19 +125,17 @@ namespace Ao3TrackReader.Models
 
                         if (t.Key == Ao3TagType.Warnings)
                         {
-                            s.Foreground = App.Colors["SystemBaseHighColor"];
+                            s.Foreground = Colors.Base.High;
                             s.Bold = true;
                         }
                         else if (t.Key == Ao3TagType.Relationships)
-                            s.Foreground = App.Colors["SystemChromeAltLowColor"];
+                            s.Foreground = Colors.Base.MediumHigh;
                         else if (t.Key == Ao3TagType.Characters)
                         {
-                            var c1 = App.Colors["SystemChromeAltLowColor"];
-                            var c2 = App.Colors["SystemChromeHighColor"];
-                            s.Foreground = new Color((c1.R + c2.R) / 2, (c1.G + c2.G) / 2, (c1.B + c2.B) / 2);
+                            s.Foreground = Colors.Base.MediumLow;
                         }
                         else
-                            s.Foreground = App.Colors["SystemChromeHighColor"];
+                            s.Foreground = Colors.Base.Low;
 
                         foreach (var tag in t.Value)
                         {
@@ -231,19 +229,19 @@ namespace Ao3TrackReader.Models
                         if (!string.IsNullOrWhiteSpace(value.PrimaryTag))
                         {
                             ts.Nodes.Add(value.PrimaryTag);
-                            if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = App.Colors["SystemBaseHighColor"] });
+                            if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = Colors.Base });
                         }
                     }
 
                     if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
                     if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = App.Colors["SystemBaseHighColor"] });
+                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Colors.Base });
                         bool first = true;
                         foreach (var user in value.Details.Authors)
                         {
                             if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = App.Colors["SystemBaseHighColor"] });
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
                             else
                                 first = false;
 
@@ -252,12 +250,12 @@ namespace Ao3TrackReader.Models
                     }
                     if (value.Details?.Recipiants != null && value.Details.Recipiants.Count != 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = App.Colors["SystemBaseHighColor"] });
+                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Colors.Base });
                         bool first = true;
                         foreach (var user in value.Details.Recipiants)
                         {
                             if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = App.Colors["SystemBaseHighColor"] });
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
                             else
                                 first = false;
 
@@ -267,7 +265,7 @@ namespace Ao3TrackReader.Models
 
                     if (Unread != null && Unread > 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = App.Colors["SystemBaseHighColor"] });
+                        ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
                     }
 
                     var oldtitle = Title;

@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:res="clr-namespace:Ao3TrackReader.Resources"  
-             xmlns:local="clr-namespace:Ao3TrackReader.Controls" x:Class="Ao3TrackReader.Controls.SettingsView" WidthRequest="320">
-    <ContentView.Content>
+<local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
+            x:Class="Ao3TrackReader.Controls.SettingsView">
+    <local:PaneView.Content>
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Settings" FontSize="Large" />
-                <Button Image="{x:Static res:Icons.Close}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+                <Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 
             <StackLayout Spacing="12" Margin="4,0,0,0">
@@ -15,7 +15,7 @@
 
                 <StackLayout Spacing="8" x:Name="syncLoggedIn">
                     <Label Text="Logged in as: " x:Name="syncLoggedInLabel" FontSize="Micro" />
-                    <Button Text="Logout" BorderColor="{x:Static local:SettingsView.ButtonDefaultColor}" Clicked="OnSyncLogout" HorizontalOptions="Start" />
+                    <Button Text="Logout" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncLogout" HorizontalOptions="Start" />
                 </StackLayout>
 
                 <StackLayout Spacing="8" x:Name="syncForm">
@@ -42,7 +42,7 @@
                     <Label Text="Text" TextColor="#990000" FontSize="Micro" FontAttributes="Bold" x:Name="emailErrors" />
 
                     <StackLayout Orientation="Horizontal">
-                        <Button Text="Submit" BorderColor="{x:Static local:SettingsView.ButtonDefaultColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>
+                        <Button Text="Submit" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>
                         <ActivityIndicator IsRunning="False" IsVisible="False"  x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                     </StackLayout>
                 </StackLayout>
@@ -55,5 +55,5 @@
 
             </StackLayout>
         </StackLayout>
-    </ContentView.Content>
-</ContentView>
+    </local:PaneView.Content>
+</local:PaneView>

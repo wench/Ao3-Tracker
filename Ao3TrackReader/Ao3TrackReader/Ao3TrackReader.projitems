@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PaneView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PaneContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListView.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>ReadingListView.xaml</DependentUpon>
@@ -26,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DisableableCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ListConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\LanguageCache.cs" />
@@ -34,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\Colors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Icons.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
   </ItemGroup>

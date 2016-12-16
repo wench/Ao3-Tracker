@@ -110,5 +110,22 @@ namespace Ao3TrackReader
                 if (e.HasClass(classname)) yield return e;
             }
         }
+
+        /// <summary>
+        /// Gamma correct blend a color with another color
+        /// </summary>
+        /// <param name="color">Foreground color</param>
+        /// <param name="behind">Background color</param>
+        /// <returns></returns>
+        public static Xamarin.Forms.Color Blend(this Xamarin.Forms.Color color, Xamarin.Forms.Color behind)
+        {
+            if (behind.A != 1) behind = behind.Blend(Xamarin.Forms.Color.Black);
+
+            return new Xamarin.Forms.Color(
+                    Math.Pow(Math.Pow(color.R, 2.2) * color.A + Math.Pow(behind.R, 2.2) * (1 - color.A), 1 / 2.2),
+                    Math.Pow(Math.Pow(color.G, 2.2) * color.A + Math.Pow(behind.G, 2.2) * (1 - color.A), 1 / 2.2),
+                    Math.Pow(Math.Pow(color.B, 2.2) * color.A + Math.Pow(behind.B, 2.2) * (1 - color.A), 1 / 2.2)
+                );
+        }
     }
 }

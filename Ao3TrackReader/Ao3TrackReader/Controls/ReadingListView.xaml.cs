@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Ao3TrackReader.Resources;
 
 namespace Ao3TrackReader.Controls
 {
@@ -19,30 +20,10 @@ namespace Ao3TrackReader.Controls
         }
     }
 
-    public partial class ReadingListView : StackLayout
+    public partial class ReadingListView : PaneView
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
         private readonly WebViewPage wpv;
-
-        public static Color GroupTitleColor
-        {
-            get
-            {
-                var c = App.Colors["SystemChromeAltLowColor"];
-                return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0);
-            }
-        }
-        public static Color GroupTypeColor { get { return App.Colors["SystemChromeHighColor"]; } }
-
-        public static Color ItemBackgroundColor { get { return App.Colors["SystemListLowColor"]; } }
-
-        public static Color ButtonActiveColor { get {
-                var c = App.Colors["SystemBaseMediumColor"];
-                return new Color(((int)(c.R * 255) ^ 0x90) / 255.0, ((int)(c.G * 255) ^ 0) / 510.0, ((int)(c.B * 255) ^ 0) / 255.0, c.A);
-            }
-        }
-
-        double old_width;
 
         public ReadingListView(WebViewPage wpv)
         {
@@ -50,13 +31,10 @@ namespace Ao3TrackReader.Controls
 
             InitializeComponent();
 
-            TranslationX = old_width = 480;
-            WidthRequest = old_width;
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
-            var c = App.Colors["SystemAltMediumHighColor"];
-            BackgroundColor = new Color(c.R, c.G, c.B, (3 + c.A) / 4);
+            BackgroundColor = Colors.Alt.Trans.High;
 
-            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? ButtonActiveColor : Color.Transparent;
+            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
 
             // Restore the reading list contents!
             var items = new Dictionary<string, Models.ReadingList>();
@@ -107,41 +85,16 @@ namespace Ao3TrackReader.Controls
             });
         }
 
-
-        public bool IsOnScreen
+        protected override void OnIsOnScreenChanging(bool newValue)
         {
-            get
+            if (newValue == true)
             {
-                return TranslationX < Width / 2;
+                ListView.Focus();
             }
-            set
+            else
             {
-                if (value == false)
-                {
-                    ListView.Unfocus();
-                    ViewExtensions.CancelAnimations(this);
-                    this.TranslateTo(Width, 0, 100, Easing.CubicIn);
-                }
-                else
-                {
-                    ViewExtensions.CancelAnimations(this);
-                    this.TranslateTo(0, 0, 100, Easing.CubicIn);
-                    ListView.Focus();
-                }
+                ListView.Unfocus();
             }
-        }
-
-        protected override void OnSizeAllocated(double width, double height)
-        {
-            bool wasshowing = TranslationX < old_width / 2;
-            old_width = width;
-
-            base.OnSizeAllocated(width, height);
-
-            ViewExtensions.CancelAnimations(this);
-
-            if (wasshowing) TranslationX = 0.0;
-            else TranslationX = width;
         }
 
         public void OnCellTapped(object sender, EventArgs e)
@@ -281,7 +234,7 @@ namespace Ao3TrackReader.Controls
         public void OnShowHidden(object sender, EventArgs e)
         {
             readingListBacking.HideNoUnread = !readingListBacking.HideNoUnread;
-            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? ButtonActiveColor : Color.Transparent;
+            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
         }
 
         public void OnClose(object sender, EventArgs e)

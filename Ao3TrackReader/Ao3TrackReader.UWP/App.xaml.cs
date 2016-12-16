@@ -31,9 +31,7 @@ namespace Ao3TrackReader.UWP
             this.InitializeComponent();
             this.Suspending += OnSuspending;
 
-            string theme = Ao3TrackReader.App.Database.GetVariable("Theme");
-            if (string.IsNullOrWhiteSpace(theme)) theme = "light";
-            switch (theme) {
+            switch (Ao3TrackReader.App.Theme) {
                 case "light":
                     RequestedTheme = ApplicationTheme.Light;
                     break;
