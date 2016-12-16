@@ -321,7 +321,7 @@ namespace Ao3TrackReader
                     decFontSizeButton.IsEnabled = FontSize > FontSizeMin;
                     incFontSizeButton.IsEnabled = FontSize < FontSizeMax;
                 });
-                helper.OnAlterFontSize();
+                helper?.OnAlterFontSize();
             }
         }
 
@@ -345,11 +345,33 @@ namespace Ao3TrackReader
 #if WINDOWS_UWP
             get { return Dispatcher.HasThreadAccess; }
 #elif __ANDROID__
-            get { return Looper.MainLooper != Looper.MyLooper(); }
+            get { return Looper.MainLooper == Looper.MyLooper(); }
 #endif
         }
 
-        public object DoOnMainThread(MainThreadFunc function)
+        public T DoOnMainThread<T>(Func<T> function)
+        {
+            if (IsMainThread)
+            {
+                return function();
+            }
+            else
+            {
+                T result = default(T);
+                ManualResetEventSlim handle = new ManualResetEventSlim();
+
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    result = function();
+                    handle.Set();
+                });
+                handle.Wait();
+
+                return result;
+            }
+        }
+
+        object IEventHandler.DoOnMainThread(MainThreadFunc function)
         {
             if (IsMainThread)
             {

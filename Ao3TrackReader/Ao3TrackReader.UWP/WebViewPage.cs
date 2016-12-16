@@ -133,7 +133,9 @@ namespace Ao3TrackReader
         }
 
         public Uri Current {
-            get { return WebView.Source; }
+            get {
+                return DoOnMainThread(()=> WebView.Source);
+            }
         }
 
         public void Navigate(Uri uri)

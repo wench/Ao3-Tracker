@@ -30,28 +30,30 @@ namespace Ao3TrackReader
     {
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];
-            for (var i = 0; i< Ao3TrackHelper.cssToInject.length; i++) {                    
+            var toInject = JSON.parse(Ao3TrackHelper.get_CssToInject());
+            for (var i = 0; i< toInject.length; i++) {                    
                 var link = document.createElement('link');
                 link.type = 'text/css';
                 link.rel = 'stylesheet';
-                link.href = Ao3TrackHelper.cssToInject[i];
+                link.href = toInject[i];
                 head.appendChild(link);
             }
-            for (var i = 0; i< Ao3TrackHelper.scriptsToInject.length; i++) {                    
+            toInject = JSON.parse(Ao3TrackHelper.get_ScriptsToInject());
+            for (var i = 0; i< toInject.length; i++) {                    
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
-                script.src = Ao3TrackHelper.scriptsToInject[i];
+                script.src = toInject[i];
                 head.appendChild(script);
             }
         })();";
 
         public string[] scriptsToInject
         {
-            get { return new[] { "file:///android_asset/ao3_t_callbacks.js", "file:///android_asset/ao3_t_reader.js", "file:///android_asset/ao3_tracker.js" }; }
+            get { return new[] { "https://ao3track.wenchy.net/ao3_t_callbacks.js", "https://ao3track.wenchy.net/ao3_t_reader.js", "https://ao3track.wenchy.net/ao3_tracker.js" }; }
         }
         public string[] cssToInject
         {
-            get { return new[] { "file:///android_asset/ao3_tracker.css" }; }
+            get { return new[] { "https://ao3track.wenchy.net/ao3_tracker.css" }; }
 
         }
 
@@ -64,6 +66,15 @@ namespace Ao3TrackReader
         {
             WebView = new WebView(Forms.Context);
             WebView.SetWebViewClient(webClient = new WebClient(this));
+            WebView.SetWebChromeClient(new ChromeClient(this));
+            WebView.Settings.AllowFileAccess = true;
+            WebView.Settings.AllowFileAccessFromFileURLs = true;
+            WebView.Settings.AllowContentAccess = true;
+            WebView.Settings.JavaScriptEnabled = true;
+            WebView.Settings.AllowUniversalAccessFromFileURLs = true;
+            WebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
+
+
             //WebView.NewWindowRequested += WebView_NewWindowRequested; ??
             WebView.FocusChange += WebView_FocusChange;
 
@@ -102,7 +113,6 @@ namespace Ao3TrackReader
             }
             if (urlEntry != null) urlEntry.Text = args.AbsoluteUri;
             readingList?.PageChange(args);
-            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelper");
             nextPage = null;
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
@@ -115,6 +125,7 @@ namespace Ao3TrackReader
         {
             if (urlEntry != null) urlEntry.Text = WebView.Url;
             readingList?.PageChange(Current);
+            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelper");
             PrevPageIndicator.IsVisible = false;
             NextPageIndicator.IsVisible = false;
             //WebView.RenderTransform = null;
@@ -148,21 +159,24 @@ namespace Ao3TrackReader
 
             // Inject JS script
             helper?.ClearEvents();
-            WebView.EvaluateJavascript(JavaScriptInject, new ValueCallback((value)=> { }));
+            EvaluateJavascript(JavaScriptInject);
         }
 
         public void EvaluateJavascript(string code)
         {
-            WebView.EvaluateJavascript(code, new ValueCallback((value) => { }));
+            DoOnMainThread(() => WebView.EvaluateJavascript(code, new ValueCallback((value) => { })));
         }
         public void CallJavascript(string function, params object[] args)
         {
-            WebView.EvaluateJavascript(function + "(" + string.Join(",",args) + ");", new ValueCallback((value) => { }));
+            DoOnMainThread(() => WebView.EvaluateJavascript(function + "(" + string.Join(",", args) + ");", new ValueCallback((value) => { })));
         }
 
         public Uri Current
         {
-            get { return new Uri(WebView.Url); }
+            get
+            {
+                return DoOnMainThread(() => new Uri(WebView.Url));
+            }
         }
 
         public void Navigate(Uri uri)
@@ -197,12 +211,12 @@ namespace Ao3TrackReader
         {
             get
             {
-                throw new NotImplementedException();
+                return WebView.TranslationX;
             }
 
             set
             {
-                throw new NotImplementedException();
+                WebView.TranslationX = (float)value;
             }
         }
 
@@ -210,18 +224,17 @@ namespace Ao3TrackReader
         {
             get
             {
-                throw new NotImplementedException();
+                return 1;
             }
-
             set
             {
-                throw new NotImplementedException();
+
             }
         }
-        
+
         public Task<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => (string)null);
         }
 
         class WebClient : WebViewClient
@@ -231,6 +244,71 @@ namespace Ao3TrackReader
             public WebClient(WebViewPage page)
             {
                 this.page = page;
+            }
+            public override void OnLoadResource(WebView view, string url)
+            {
+                base.OnLoadResource(view, url);
+            }
+
+            public override WebResourceResponse ShouldInterceptRequest(WebView view, IWebResourceRequest request)
+            {
+                var req = request.Url.ToString();
+                if (req.StartsWith("https://ao3track.wenchy.net"))
+                {
+                    try
+                    {
+                        var uri = new Uri(req);
+                        string mime;
+                        string encoding = "UTF-8";
+                        switch (System.IO.Path.GetExtension(uri.LocalPath))
+                        {
+                            case ".js":
+                                mime = "application/javascript";
+                                break;
+
+                            case ".css":
+                                mime = "text/css";
+                                break;
+
+                            case ".jpg":
+                            case ".jpeg":
+                                mime = "image/jpeg";
+                                encoding = "cp1252";
+                                break;
+
+                            case ".png":
+                                mime = "image/png";
+                                encoding = "cp1252";
+                                break;
+
+                            case ".gif":
+                                mime = "image/gif";
+                                encoding = "cp1252";
+                                break;
+
+                            case ".htm":
+                            case ".html":
+                                mime = "text/html";
+                                break;
+
+                            default:
+                                mime = "text/plain";
+                                break;
+                        }
+
+
+                        return new WebResourceResponse(
+                            mime,
+                            encoding,
+                            Forms.Context.Assets.Open(uri.LocalPath.TrimStart('/'))
+                            );
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                return base.ShouldInterceptRequest(view, request);
             }
 
             public override void OnPageFinished(WebView view, string url)
@@ -245,11 +323,39 @@ namespace Ao3TrackReader
                 base.OnPageStarted(view, url, favicon);
             }
 
+            [Obsolete]
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
                 return page.ShouldOverrideUrlLoading(view, new Uri(url));
             }
+
+            public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
+            {
+                return page.ShouldOverrideUrlLoading(view, new Uri(request.Url.ToString()));
+            }
         }
+
+        class ChromeClient : WebChromeClient
+        {
+            WebViewPage page;
+
+            public ChromeClient(WebViewPage page)
+            {
+                this.page = page;
+            }
+
+            public override bool OnConsoleMessage(ConsoleMessage consoleMessage)
+            {
+                string message = consoleMessage.Message();
+                return true;
+            }
+            [Obsolete]
+            public override void OnConsoleMessage(string message, int lineNumber, string sourceID)
+            {
+                return;
+            }
+        }
+
     }
 
 }

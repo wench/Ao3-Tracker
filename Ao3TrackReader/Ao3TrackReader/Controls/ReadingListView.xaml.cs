@@ -72,7 +72,8 @@ namespace Ao3TrackReader.Controls
                     }
                 }
             }
-            SyncToServerAsync();
+            Task.Run(() => SyncToServerAsync());
+
             ListView.ItemsSource = readingListBacking;
             Task.Run(async () =>
             {
