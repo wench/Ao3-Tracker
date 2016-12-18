@@ -77,6 +77,11 @@ namespace Ao3TrackReader.Controls
                     if (errors != null && errors.Count > 0)
                     {
                     }
+                    else
+                    {
+                        UpdateSyncForm();
+                        wpv.ReadingList.SyncToServerAsync();
+                    }
                     syncSubmitButton.IsEnabled = true;
                     syncIndicator.IsRunning = false;
                     syncIndicator.IsVisible = false;

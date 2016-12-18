@@ -36,8 +36,8 @@ namespace Ao3TrackReader
 
         Label PrevPageIndicator;
         Label NextPageIndicator;
-        ReadingListView readingList;
-        SettingsView settingsPane;
+        public ReadingListView ReadingList { get; private set; }
+        public SettingsView SettingsPane { get; private set; }
         Entry urlEntry;
         StackLayout urlBar;
 
@@ -91,8 +91,8 @@ namespace Ao3TrackReader
                 Order = ToolbarItemOrder.Primary,
                 Command = new Command(() =>
                 {
-                    readingList.IsOnScreen = !readingList.IsOnScreen;
-                    settingsPane.IsOnScreen = false;
+                    ReadingList.IsOnScreen = !ReadingList.IsOnScreen;
+                    SettingsPane.IsOnScreen = false;
                 })
             });
             ToolbarItems.Add(new ToolbarItem
@@ -151,8 +151,8 @@ namespace Ao3TrackReader
                 Order = ToolbarItemOrder.Secondary,
                 Command = new Command(() =>
                 {
-                    settingsPane.IsOnScreen = !settingsPane.IsOnScreen;
-                    readingList.IsOnScreen = false;
+                    SettingsPane.IsOnScreen = !SettingsPane.IsOnScreen;
+                    ReadingList.IsOnScreen = false;
                 })
             });
 
@@ -167,7 +167,7 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            Navigate(new Uri("https://archiveofourown.com/"));
+            Navigate(new Uri("https://archiveofourown.org/"));
 
             // retore font size!
             FontSize = 100;
@@ -175,8 +175,8 @@ namespace Ao3TrackReader
             var panes = new PaneContainer
             {
                 Children = {
-                    (readingList = new ReadingListView(this)),
-                    (settingsPane = new SettingsView(this))
+                    (ReadingList = new ReadingListView(this)),
+                    (SettingsPane = new SettingsView(this))
                 }
             };
             AbsoluteLayout.SetLayoutBounds(panes, new Rectangle(0, 0, 1, 1));
@@ -501,7 +501,7 @@ namespace Ao3TrackReader
 
         public void addToReadingList(string href)
         {
-            readingList.AddAsync(href);
+            ReadingList.AddAsync(href);
         }
 
         public void setCookies(string cookies)

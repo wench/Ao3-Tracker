@@ -309,13 +309,13 @@ namespace Ao3TrackReader.Controls
             if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
                 return;
 
-            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
             App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp });
             wpv.DoOnMainThread(() =>
             {
+                var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
                 readingListBacking.Add(viewmodel);
+                RefreshAsync(viewmodel);
             });
-            RefreshAsync(viewmodel);
         }
 
         public Task AddAsync(string href)

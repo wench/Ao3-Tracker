@@ -88,8 +88,8 @@ namespace Ao3TrackReader
         {
             if (e.HasFocus)
             {
-                readingList.IsOnScreen = false;
-                settingsPane.IsOnScreen = false;
+                ReadingList.IsOnScreen = false;
+                SettingsPane.IsOnScreen = false;
             }
         }
 
@@ -112,7 +112,7 @@ namespace Ao3TrackReader
 
             }
             if (urlEntry != null) urlEntry.Text = args.AbsoluteUri;
-            readingList?.PageChange(args);
+            ReadingList?.PageChange(args);
             nextPage = null;
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
@@ -124,7 +124,7 @@ namespace Ao3TrackReader
         private void OnPageStarted(WebView sender)
         {
             if (urlEntry != null) urlEntry.Text = WebView.Url;
-            readingList?.PageChange(Current);
+            ReadingList?.PageChange(Current);
             WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelper");
             PrevPageIndicator.IsVisible = false;
             NextPageIndicator.IsVisible = false;

@@ -65,8 +65,8 @@ namespace Ao3TrackReader
 
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
         {
-            readingList.IsOnScreen = false;
-            settingsPane.IsOnScreen = false;
+            ReadingList.IsOnScreen = false;
+            SettingsPane.IsOnScreen = false;
         }
 
         private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
@@ -99,7 +99,7 @@ namespace Ao3TrackReader
 
             }
             if (urlEntry != null) urlEntry.Text = args.Uri.AbsoluteUri;
-            readingList?.PageChange(args.Uri);
+            ReadingList?.PageChange(args.Uri);
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
             nextPage = null;
             prevPage = null;
@@ -111,7 +111,7 @@ namespace Ao3TrackReader
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
         {
             if (urlEntry != null) urlEntry.Text = WebView.Source.AbsoluteUri;
-            readingList?.PageChange(Current);
+            ReadingList?.PageChange(Current);
             PrevPageIndicator.IsVisible = false;
             NextPageIndicator.IsVisible = false;
             WebView.RenderTransform = null;
@@ -134,7 +134,9 @@ namespace Ao3TrackReader
 
         public Uri Current {
             get {
-                return DoOnMainThread(()=> WebView.Source);
+                return DoOnMainThread(()=> {
+                    return WebView.Source;
+                    });
             }
         }
 

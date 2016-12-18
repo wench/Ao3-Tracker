@@ -50,14 +50,11 @@ namespace Ao3TrackReader.UWP
         void UpdateControl(TextView view)
         {
             if (view.TextTree == null) return;
-
-            bool endblock = false;
-            var inlines = ConvertTree(view.TextTree, ref endblock);
-            TrimNewLines(inlines);
-
             Control.Inlines.Clear();
-            if (inlines != null) Control.Inlines.Add(inlines);            
-            
+            var flat = view.TextTree.Flatten(new StateNode());
+            flat = flat.TrimNewLines();
+            var inlines = Convert(flat);
+            Control.Inlines.Add(inlines);                        
         }
 
 
@@ -89,80 +86,41 @@ namespace Ao3TrackReader.UWP
             }
         }
 
-        bool TrimNewLines(Inline inline, bool had = true, bool strip_all = true)
+        Inline Convert(ICollection<TextNode> n)
         {
-            if (inline is Windows.UI.Xaml.Documents.LineBreak)
+            if (n.Count == 1)
             {
-                had = true;
-            }
-            else if (inline is Windows.UI.Xaml.Documents.Span)
-            {
-                var s = inline as Windows.UI.Xaml.Documents.Span;
-
-                if (strip_all)
-                {
-                    while (s.Inlines.LastOrDefault() is Windows.UI.Xaml.Documents.LineBreak)
-                        s.Inlines.RemoveAt(s.Inlines.Count - 1);
-                }
-
-                foreach (var c in s.Inlines.Reverse())
-                {
-                    had = TrimNewLines(c, had, strip_all);
-                    strip_all = false;
-                }
-            }
-            else if (inline is Windows.UI.Xaml.Documents.Run)
-            {
-                var r = inline as Windows.UI.Xaml.Documents.Run;
-                if (had && r.Text.EndsWith("\n"))
-                    r.Text = r.Text.TrimEnd('\n');
-                had = r.Text.StartsWith("\n");
-            }
-            return had;
-        }
-
-        Inline ConvertTree(TextTree n, ref bool endblock)
-        {
-            if (n is TextNode)
-            {
-                var tn = n as TextNode;
+                var tn = n.First();
 
                 Inline i = new Windows.UI.Xaml.Documents.Run { Text = tn.Text };
-                ApplyStyles(n, i);
+                ApplyStyles(tn, i);
                 if (tn.Underline == true)
                 {
                     var u = new Windows.UI.Xaml.Documents.Underline();
                     u.Inlines.Add(i);
                     i = u;
                 }
-                endblock = false;
                 return i;
             }
-            else if (n is Models.Block || n is Models.Span)
+            else 
             {
-                var sn = n as Models.Span;
+                Windows.UI.Xaml.Documents.Span s = new Windows.UI.Xaml.Documents.Span();
 
-                Windows.UI.Xaml.Documents.Span s = sn.Underline == true ? new Windows.UI.Xaml.Documents.Underline() : new Windows.UI.Xaml.Documents.Span();
-                ApplyStyles(n, s);
-
-                bool hadblock = false;
-                foreach (var t in sn.Nodes)
+                foreach (var tn in n)
                 {
-                    s.Inlines.Add(ConvertTree(t, ref hadblock));
-                    if (t is Models.Block && hadblock == false)
+                    Inline i = new Windows.UI.Xaml.Documents.Run { Text = tn.Text };
+                    ApplyStyles(tn, i);
+                    if (tn.Underline == true)
                     {
-                        s.Inlines.Add(new LineBreak());
-                        s.Inlines.Add(new LineBreak());
-                        hadblock = true;
+                        var u = new Windows.UI.Xaml.Documents.Underline();
+                        u.Inlines.Add(i);
+                        i = u;
                     }
+                    s.Inlines.Add(i);
                 }
 
-                endblock = hadblock;
                 return s;
             }
-
-            endblock = false;
-            return null;
         }
     }
 }

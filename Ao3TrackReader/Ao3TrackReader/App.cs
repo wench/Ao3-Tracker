@@ -46,20 +46,19 @@ namespace Ao3TrackReader
             Resources = new ResourceDictionary();
 #if !WINDOWS_UWP
             // Andriod and iOS uses Xamarin Forms theme           
-            Type MergedWith;
             switch (Theme)
             {
                 default:
                 case "light":
-                    MergedWith = typeof(Xamarin.Forms.Themes.LightThemeResources);
+                    Resources.MergedWith = typeof(Xamarin.Forms.Themes.LightThemeResources);
                     break;
 
                 case "dark":
-                    MergedWith = typeof(Xamarin.Forms.Themes.DarkThemeResources);
+                    Resources.MergedWith = typeof(Xamarin.Forms.Themes.DarkThemeResources);
                     break;
             }
 
-            Resources.MergedWith = MergedWith;
+            
 #endif
             var sets = new Dictionary<string, BaseColorSet>();
             foreach (var cat in typeof(Resources.Colors).GetProperties(BindingFlags.Public | BindingFlags.Static))

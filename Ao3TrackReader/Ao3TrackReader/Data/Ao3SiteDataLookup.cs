@@ -120,45 +120,58 @@ namespace Ao3TrackReader.Data
 
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get,uri);
             message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/atom+xml"));
-            var response = await HttpClient.SendAsync(message, System.Net.Http.HttpCompletionOption.ResponseHeadersRead);
-
-            if (response.StatusCode == HttpStatusCode.Redirect)
+            try
             {
-                Uri newuri = response.Headers.Location;
-                var m = regexTag.Match(newuri.LocalPath);
-                if (m.Success)
+                var response = await HttpClient.SendAsync(message, System.Net.Http.HttpCompletionOption.ResponseHeadersRead);
+
+                if (response.StatusCode == HttpStatusCode.Redirect)
                 {
-                    tag = UnescapeTag(m.Groups["TAGNAME"].Value);
+                    Uri newuri = response.Headers.Location;
+                    var m = regexTag.Match(newuri.LocalPath);
+                    if (m.Success)
+                    {
+                        tag = UnescapeTag(m.Groups["TAGNAME"].Value);
+                    }
                 }
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.IgnoreWhitespace = true;
-                settings.IgnoreComments = true;
-
-                using (var xml = XmlReader.Create(await response.Content.ReadAsStreamAsync(), settings))
+                else if (response.IsSuccessStatusCode)
                 {
-                    xml.MoveToContent();
-                    if (!xml.ReadToDescendant("title")) return null;
+                    XmlReaderSettings settings = new XmlReaderSettings();
+                    settings.IgnoreWhitespace = true;
+                    settings.IgnoreComments = true;
 
-                    try {
-                        xml.Read();
+                    using (var xml = XmlReader.Create(await response.Content.ReadAsStreamAsync(), settings))
+                    {
+                        xml.MoveToContent();
+                        if (!xml.ReadToDescendant("title")) return null;
 
-                        var m = regexRSSTagTitle.Match(xml.ReadContentAsString());
-                        if (m.Success)
+                        try
                         {
-                            tag = m.Groups["TAGNAME"].Value;
+                            xml.Read();
+
+                            var m = regexRSSTagTitle.Match(xml.ReadContentAsString());
+                            if (m.Success)
+                            {
+                                tag = m.Groups["TAGNAME"].Value;
+                            }
                         }
-                    }
-                    catch {
+                        catch
+                        {
+
+                        }
 
                     }
-
                 }
-            }
 
-            if (tag != null) App.Database.SetTagId(tag, tagid);
+                if (tag != null) App.Database.SetTagId(tag, tagid);
+            }
+            catch (HttpRequestException)
+            {
+
+            }
+            catch (TaskCanceledException)
+            {
+
+            }
             return tag;
         }
 
@@ -186,78 +199,89 @@ namespace Ao3TrackReader.Data
 
             var uri = new Uri(@"https://archiveofourown.org/tags/" + intag);
 
-            var response = await HttpClient.GetAsync(uri);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                HtmlDocument doc = new HtmlDocument();
-                Encoding encoding = Encoding.UTF8;
-                try
-                {
-                    encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
-                }
-                catch
-                {
-                }
-                doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
-                var main = doc.GetElementbyId("main");
+                var response = await HttpClient.GetAsync(uri);
 
-                HtmlNode tagnode = main.ElementByClass("div", "tag");
-                if (tagnode != null)
+                if (response.IsSuccessStatusCode)
                 {
-                    // Merger?
-                    HtmlNode mergernode = tagnode.ElementByClass("div", "merger");
-                    if (mergernode != null)
+                    HtmlDocument doc = new HtmlDocument();
+                    Encoding encoding = Encoding.UTF8;
+                    try
                     {
-                        foreach (var e in mergernode.DescendantsByClass("a", "tag"))
+                        encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
+                    }
+                    catch
+                    {
+                    }
+                    doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
+                    var main = doc.GetElementbyId("main");
+
+                    HtmlNode tagnode = main.ElementByClass("div", "tag");
+                    if (tagnode != null)
+                    {
+                        // Merger?
+                        HtmlNode mergernode = tagnode.ElementByClass("div", "merger");
+                        if (mergernode != null)
                         {
-                            var href = e.Attributes["href"];
-                            if (href != null && !string.IsNullOrEmpty(href.Value))
+                            foreach (var e in mergernode.DescendantsByClass("a", "tag"))
                             {
-                                var newuri = new Uri(uri, href.Value.HtmlDecode());
-                                var m = regexTag.Match(newuri.LocalPath);
-                                if (m.Success) tag.actual = UnescapeTag(m.Groups["TAGNAME"].Value);
-                                break;
+                                var href = e.Attributes["href"];
+                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                {
+                                    var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                    var m = regexTag.Match(newuri.LocalPath);
+                                    if (m.Success) tag.actual = UnescapeTag(m.Groups["TAGNAME"].Value);
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Parents
+                        HtmlNode parenttagsnode = tagnode.ElementByClass("div", "parent")?.Element("ul");
+                        if (parenttagsnode != null)
+                        {
+                            foreach (var e in parenttagsnode.DescendantsByClass("a", "tag"))
+                            {
+                                var href = e.Attributes["href"];
+                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                {
+                                    var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                    var m = regexTag.Match(newuri.LocalPath);
+                                    if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
+                                        tag.parents.Add(UnescapeTag(m.Groups["TAGNAME"].Value));
+                                }
+                            }
+
+                        }
+
+                        // Category
+                        foreach (var p in tagnode.Elements("p"))
+                        {
+                            if (p.InnerText != null)
+                            {
+                                var m = regexTagCategory.Match(p.InnerText.HtmlDecode());
+                                if (m.Success)
+                                {
+                                    tag.category = m.Groups["CATEGORY"].Value;
+                                    break;
+                                }
                             }
                         }
                     }
 
-                    // Parents
-                    HtmlNode parenttagsnode = tagnode.ElementByClass("div", "parent")?.Element("ul");
-                    if (parenttagsnode != null)
-                    {
-                        foreach (var e in parenttagsnode.DescendantsByClass("a", "tag"))
-                        {
-                            var href = e.Attributes["href"];
-                            if (href != null && !string.IsNullOrEmpty(href.Value))
-                            {
-                                var newuri = new Uri(uri, href.Value.HtmlDecode());
-                                var m = regexTag.Match(newuri.LocalPath);
-                                if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
-                                    tag.parents.Add(UnescapeTag(m.Groups["TAGNAME"].Value));
-                            }
-                        }
-
-                    }
-
-                    // Category
-                    foreach (var p in tagnode.Elements("p"))
-                    {
-                        if (p.InnerText != null)
-                        {
-                            var m = regexTagCategory.Match(p.InnerText.HtmlDecode());
-                            if (m.Success)
-                            {
-                                tag.category = m.Groups["CATEGORY"].Value;
-                                break;
-                            }
-                        }
-                    }
                 }
+
+                App.Database.SetTagDetails(tag);
+            }
+            catch (HttpRequestException)
+            {
 
             }
+            catch (TaskCanceledException)
+            {
 
-            App.Database.SetTagDetails(tag);
+            }
             return tag;
         }
 
@@ -621,48 +645,61 @@ namespace Ao3TrackReader.Data
                         }
 
                         var wsuri = new Uri(@"https://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
-                        var response = await HttpClient.GetAsync(wsuri);
-
-                        if(response.IsSuccessStatusCode)
+                        try
                         {
+                            var response = await HttpClient.GetAsync(wsuri);
 
-                            HtmlDocument doc = new HtmlDocument();
-                            Encoding encoding = Encoding.UTF8;
-                            try { 
-                                encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
-                            }
-                            catch {
-                            }
-                            doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
-
-                            var worknode = doc.GetElementbyId("work_" + sWORKID);
-
-                            if (worknode == null)
+                            if (response.IsSuccessStatusCode)
                             {
-                                // No worknode, try with cookies
-                                string cookies = App.Database.GetVariable("siteCookies");
-                                if (!string.IsNullOrWhiteSpace(cookies))
-                                {
-                                    var request = new HttpRequestMessage(HttpMethod.Get, wsuri);
-                                    request.Headers.Add("Cookie", cookies);
-                                    response = await HttpClient.SendAsync(request);
 
-                                    if (response.IsSuccessStatusCode)
+                                HtmlDocument doc = new HtmlDocument();
+                                Encoding encoding = Encoding.UTF8;
+                                try
+                                {
+                                    encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
+                                }
+                                catch
+                                {
+                                }
+                                doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
+
+                                var worknode = doc.GetElementbyId("work_" + sWORKID);
+
+                                if (worknode == null)
+                                {
+                                    // No worknode, try with cookies
+                                    string cookies = App.Database.GetVariable("siteCookies");
+                                    if (!string.IsNullOrWhiteSpace(cookies))
                                     {
-                                        try
+                                        var request = new HttpRequestMessage(HttpMethod.Get, wsuri);
+                                        request.Headers.Add("Cookie", cookies);
+                                        response = await HttpClient.SendAsync(request);
+
+                                        if (response.IsSuccessStatusCode)
                                         {
-                                            encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
+                                            try
+                                            {
+                                                encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
+                                            }
+                                            catch
+                                            {
+                                            }
+                                            doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
+                                            worknode = doc.GetElementbyId("work_" + sWORKID);
                                         }
-                                        catch
-                                        {
-                                        }
-                                        doc.Load(await response.Content.ReadAsStreamAsync(), encoding);
-                                        worknode = doc.GetElementbyId("work_" + sWORKID);
                                     }
                                 }
-                            }
 
-                            if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
+                                if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
+                            }
+                        }
+                        catch (HttpRequestException)
+                        {
+
+                        }
+                        catch (TaskCanceledException)
+                        {
+
                         }
                     }
                     else
