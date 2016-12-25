@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ao3TrackReader.Helper;
 using Windows.UI.Xaml;
@@ -119,12 +120,15 @@ namespace Ao3TrackReader
             helper?.ClearEvents();
         }
 
+        Regex chapter_view_split_regex = new Regex(@"^(.* - Chapter \d+) - (.*)$");
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
             var t = WebView.DocumentTitle;
 
             t = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length - 21) : t;
             t = t.EndsWith(" [Archive of Our Own]") ? t.Substring(0, t.Length - 21) : t;
+
+            t = chapter_view_split_regex.Replace(t,"$1\n$2", 1, 0);
             Title = t;
 
             // Inject JS script

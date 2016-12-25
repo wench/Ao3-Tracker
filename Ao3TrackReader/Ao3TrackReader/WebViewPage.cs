@@ -97,6 +97,16 @@ namespace Ao3TrackReader
             });
             ToolbarItems.Add(new ToolbarItem
             {
+                Text = "Add to Reading List",
+                Icon = Icons.AddPage,
+                Order = ToolbarItemOrder.Primary,
+                Command = new Command(() =>
+                {
+                    ReadingList.AddAsync(Current.AbsoluteUri);
+                })
+            });
+            ToolbarItems.Add(new ToolbarItem
+            {
                 Text = "Font Increase",
                 Icon = Icons.FontUp,
                 Command = incFontSizeButton = new DisableableCommand(() => FontSize += 10)

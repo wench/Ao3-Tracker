@@ -260,8 +260,6 @@ namespace Ao3TrackReader.Controls
             srl = await App.Storage.SyncReadingListAsync(srl);
             if (srl != null)
             {
-                App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
-
                 foreach (var item in srl.paths)
                 {
                     if (item.Value == -1)
@@ -273,6 +271,7 @@ namespace Ao3TrackReader.Controls
                         AddAsyncImpl(item.Key, item.Value);
                     }
                 }
+                App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
             }
             PageChange(wpv.Current);
         }
