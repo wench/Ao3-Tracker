@@ -281,6 +281,7 @@ namespace Ao3TrackReader
                     var row = database.Table<ReadingList>().FirstOrDefault(x => x.Uri == item.Uri);
                     if (row != null)
                     {
+                        if (item.Timestamp == 0) item.Timestamp = row.Timestamp;
                         database.Update(item);
                     }
                     else

@@ -46,29 +46,39 @@ namespace Ao3TrackReader.Controls
             List<Task> tasks = new List<Task>();
             if (items.Count == 0)
             {
-                tasks.Add(AddAsync("https://archiveofourown.org/"));
+                tasks.Add(AddAsync("http://archiveofourown.org/"));
             }
             else
             {
+                var timestamp = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000L;
                 var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
-                foreach (var m in models)
+                foreach (var model in models)
                 {
-                    if (m.Value != null)
+                    if (model.Value != null)
                     {
-                        var item = items[m.Key];
-                        if (string.IsNullOrWhiteSpace(m.Value.Title) || m.Value.Type == Models.Ao3PageType.Work)
-                            m.Value.Title = item.Title;
-                        if (string.IsNullOrWhiteSpace(m.Value.PrimaryTag) || m.Value.PrimaryTag == "<Work>")
+                        var item = items[model.Key];
+                        if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
+                            model.Value.Title = item.Title;
+                        if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag == "<Work>")
                         {
-                            m.Value.PrimaryTag = item.PrimaryTag;
+                            model.Value.PrimaryTag = item.PrimaryTag;
                             var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                            if (tagdata != null) m.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
-                            else m.Value.PrimaryTagType = Models.Ao3TagType.Other;
+                            if (tagdata != null) model.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                            else model.Value.PrimaryTagType = Models.Ao3TagType.Other;
                         }
 
-                        var viewmodel = new Models.Ao3PageViewModel { BaseData = m.Value };
-                        readingListBacking.Add(viewmodel);
-                        tasks.Add(RefreshAsync(viewmodel));
+                        if (model.Value.Uri.AbsoluteUri != model.Key)
+                        {
+                            App.Database.DeleteReadingListItems(model.Key);
+                            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp});
+                        }
+
+                        if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
+                        {
+                            var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+                            readingListBacking.Add(viewmodel);
+                            tasks.Add(RefreshAsync(viewmodel));
+                        }
                     }
                 }
             }
@@ -119,7 +129,7 @@ namespace Ao3TrackReader.Controls
 
         public void PageChange(Uri uri)
         {
-            uri = Data.Ao3SiteDataLookup.CanonicalUri(uri.AbsoluteUri);
+            uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
             wpv.DoOnMainThread(() => ListView.SelectedItem = readingListBacking.Find((m) => m.Uri.AbsoluteUri == uri?.AbsoluteUri));
         }
 
@@ -217,7 +227,7 @@ namespace Ao3TrackReader.Controls
             Task.Run(async () =>
             {
                 List<Task> tasks = new List<Task>();
-                foreach (var i in readingListBacking.All)
+                foreach (var i in readingListBacking.AllSafe)
                 {
                     tasks.Add(RefreshAsync(i));
                 }
@@ -321,7 +331,7 @@ namespace Ao3TrackReader.Controls
         {
             return Task.Run(() =>
             {
-                AddAsyncImpl(href, (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000);
+                AddAsyncImpl(href, (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000L);
                 SyncToServerAsync();
             });
         }

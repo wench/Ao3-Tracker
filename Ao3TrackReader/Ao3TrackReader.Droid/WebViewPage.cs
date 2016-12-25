@@ -22,6 +22,7 @@ using Android.Graphics;
 
 using Ao3TrackReader.Helper;
 using Ao3TrackReader.Droid;
+using Ao3TrackReader.Data;
 using Java.Lang;
 
 namespace Ao3TrackReader
@@ -99,18 +100,17 @@ namespace Ao3TrackReader
             jumpButton.IsEnabled = false;
             Title = "Loading...";
 
-            if (args.Host == "archiveofourown.org" || args.Host == "www.archiveofourown.org")
+            var uri = Ao3SiteDataLookup.CheckUri(args);
+            if (uri == null)
             {
-                if (args.Scheme == "http")
-                {
-                    var uri = new UriBuilder(args);
-                    uri.Scheme = "https";
-                    uri.Port = -1;
-                    Navigate(uri.Uri);
-                    return true;
-                }
-
+                return true;
             }
+            if (uri != args)
+            {
+                Navigate(uri);
+                return true;
+            }
+            
             if (urlEntry != null) urlEntry.Text = args.AbsoluteUri;
             ReadingList?.PageChange(args);
             nextPage = null;
@@ -252,15 +252,14 @@ namespace Ao3TrackReader
 
             public override WebResourceResponse ShouldInterceptRequest(WebView view, IWebResourceRequest request)
             {
-                var req = request.Url.ToString();
-                if (req.StartsWith("https://ao3track.wenchy.net"))
+                if (request.Url.Host == "ao3track.wenchy.net")
                 {
                     try
                     {
-                        var uri = new Uri(req);
+                        string file = request.Url.LastPathSegment;
                         string mime;
                         string encoding = "UTF-8";
-                        switch (System.IO.Path.GetExtension(uri.LocalPath))
+                        switch (System.IO.Path.GetExtension(file))
                         {
                             case ".js":
                                 mime = "application/javascript";
@@ -300,7 +299,7 @@ namespace Ao3TrackReader
                         return new WebResourceResponse(
                             mime,
                             encoding,
-                            Forms.Context.Assets.Open(uri.LocalPath.TrimStart('/'))
+                            Forms.Context.Assets.Open(file)
                             );
                     }
                     catch

@@ -11,6 +11,7 @@ using Xamarin.Forms.Platform.UWP;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
 using System.Threading;
+using Ao3TrackReader.Data;
 
 namespace Ao3TrackReader
 {
@@ -72,13 +73,10 @@ namespace Ao3TrackReader
 
         private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
         {
-            if (args.Uri.Host == "archiveofourown.org" || args.Uri.Host == "www.archiveofourown.org") {
-                var uri = new UriBuilder(args.Uri);
-                if (uri.Scheme == "http")
-                    uri.Scheme = "https";
-                uri.Port = -1;
-                WebView.Navigate(uri.Uri);
+            var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
+            if (uri != null) {
                 args.Handled = true;
+                WebView.Navigate(uri);
             }
         }
 
@@ -87,18 +85,20 @@ namespace Ao3TrackReader
             jumpButton.IsEnabled = false;
             Title = "Loading...";
 
-            if (args.Uri.Host == "archiveofourown.org" || args.Uri.Host == "www.archiveofourown.org")
+            var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
+            if (uri == null)
             {
-                if (args.Uri.Scheme == "http") {
-                    var uri = new UriBuilder(args.Uri);
-                    uri.Scheme = "https";
-                    uri.Port = -1;
-                    args.Cancel = true;
-                    WebView.Navigate(uri.Uri);
-                    return;
-                }
-
+                // Handle external uri
+                args.Cancel = true;
+                return;
             }
+            else if (uri != args.Uri)
+            {
+                args.Cancel = true;
+                WebView.Navigate(uri);
+                return;
+            }
+
             if (urlEntry != null) urlEntry.Text = args.Uri.AbsoluteUri;
             ReadingList?.PageChange(args.Uri);
             WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
@@ -146,6 +146,8 @@ namespace Ao3TrackReader
 
         public void Navigate(Uri uri)
         {
+            uri = Ao3SiteDataLookup.CheckUri(uri);
+            if (uri == null) return;
             helper?.ClearEvents();
             WebView.Navigate(uri);
         }
@@ -162,12 +164,12 @@ namespace Ao3TrackReader
         public void GoBack()
         {
             if (WebView.CanGoBack) WebView.GoBack();
-            else if (prevPage != null) WebView.Navigate(prevPage);
+            else if (prevPage != null) Navigate(prevPage);
         }
         public void GoForward()
         {
             if (WebView.CanGoForward) WebView.GoForward();
-            else if (nextPage != null) WebView.Navigate(nextPage);
+            else if (nextPage != null) Navigate(nextPage);
 
         }
 

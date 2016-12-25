@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Ao3TrackReader.Helper;
+using Ao3TrackReader.Data;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Ao3TrackReader.Controls;
@@ -177,7 +178,7 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            Navigate(new Uri("https://archiveofourown.org/"));
+            Navigate(new Uri("http://archiveofourown.org/"));
 
             // retore font size!
             FontSize = 100;
@@ -272,11 +273,11 @@ namespace Ao3TrackReader
                     WorkChapter wc;
                     if (workchaps.TryGetValue(workid, out wc) && wc.chapterid != 0)
                     {
-                        Navigate(new Uri(string.Concat("https://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
+                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
                     }
                     else
                     {
-                        Navigate(new Uri(string.Concat("https://archiveofourown.org/works/", workid, "#ao3t:jump")));
+                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "#ao3t:jump")));
                     }
                 });
             });
@@ -295,15 +296,10 @@ namespace Ao3TrackReader
             urlBar.Unfocus();
             try
             {
-                var uri = new UriBuilder(urlEntry.Text);
-                if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
+                var uri = Ao3SiteDataLookup.CheckUri(new Uri(urlEntry.Text));
+                if (uri != null)
                 {
-                    if (uri.Scheme == "http")
-                    {
-                        uri.Scheme = "https";
-                    }
-                    uri.Port = -1;
-                    Navigate(uri.Uri);
+                    Navigate(uri);
                 }
                 else
                 {

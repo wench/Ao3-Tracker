@@ -74,7 +74,7 @@ namespace Ao3TrackReader.Models
                 else if (tag == Ao3RequiredTag.Warnings) rt = new Tuple<string, string>("warning-none", "None");
             }
 
-            return new Uri("https://archiveofourown.org/images/skins/iconsets/default_large/"+rt.Item1+".png");
+            return new Uri("http://archiveofourown.org/images/skins/iconsets/default_large/"+rt.Item1+".png");
         }
         public string GetRequiredTagText(Ao3RequiredTag tag)
         {

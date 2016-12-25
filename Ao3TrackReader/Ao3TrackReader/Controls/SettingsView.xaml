@@ -8,7 +8,7 @@
                 <Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 
-            <StackLayout Spacing="12" Margin="4,0,0,0">
+            <StackLayout Spacing="12" Margin="4,0,12,0">
                 <Label Text="Cloud Sync" FontSize="Medium" />
 
                 <Label Text="Login to your Ao3Track Sync account to syncronize work locations and reading lists across devices.&#xA;&#xA;This is not the same as your user account on Ao3. You must first create a separate Ao3Track Sync account" FontSize="Micro" />
@@ -47,11 +47,25 @@
                     </StackLayout>
                 </StackLayout>
 
+                <Label Text="Secure Browsing" FontSize="Medium" Margin="0,12,0,0"/>
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Using HTTPS for secure browing" FontSize="Micro" HorizontalOptions="StartAndExpand" />
+                    <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
+                </StackLayout>
+
                 <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
-
                 <Label Text="You must restart the app to apply a new theme" FontSize="Micro" />
-
-                <ListView x:Name="themeList" ItemSelected="OnThemeSelected" />
+                <ListView x:Name="themeList" ItemSelected="OnThemeSelected" WidthRequest="100" HorizontalOptions="Start">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <AbsoluteLayout Margin="4,4,4,4" Padding="4" BackgroundColor="{StaticResource BaseTransVeryLowColor}">
+                                    <Label Text="{Binding .}" TextColor="{StaticResource BaseMediumColor}" FontSize="Micro" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" />
+                                </AbsoluteLayout>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
 
             </StackLayout>
         </StackLayout>

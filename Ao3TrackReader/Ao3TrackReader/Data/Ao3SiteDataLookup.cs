@@ -76,7 +76,34 @@ namespace Ao3TrackReader.Data
             HttpClientHandler httpClientHandler = new HttpClientHandler();
             httpClientHandler.AllowAutoRedirect = false;
             HttpClient = new HttpClient(httpClientHandler);
+            if (!bool.TryParse(App.Database.GetVariable("UseHttps"), out use_https))
+            {
+                App.Database.SaveVariable("UseHttps", use_https.ToString());
+            }
         }
+
+        static bool use_https = false;
+        public static bool UseHttps
+        {
+            get
+            {
+                return use_https;
+            }
+            set
+            {
+                if (use_https != value)
+                {
+                    use_https = value;
+                    App.Database.SaveVariable("UseHttps", use_https.ToString());
+                }
+            }
+        }
+
+        public static string Scheme
+        {
+            get { return UseHttps ? "https" : "http"; }
+        }
+
 
         static string EscapeTag(string tag)
         {
@@ -116,7 +143,7 @@ namespace Ao3TrackReader.Data
                 return tag;
 
             tag = null;
-            var uri = new Uri(@"https://archiveofourown.org/tags/feed/" + tagid.ToString());
+            var uri = new Uri(Scheme + @"://archiveofourown.org/tags/feed/" + tagid.ToString());
 
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get,uri);
             message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/atom+xml"));
@@ -197,7 +224,7 @@ namespace Ao3TrackReader.Data
             tag.actual = intag;
             intag = EscapeTag(intag);
 
-            var uri = new Uri(@"https://archiveofourown.org/tags/" + intag);
+            var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + intag);
 
             try
             {
@@ -315,7 +342,7 @@ namespace Ao3TrackReader.Data
                 return name;
             }
 
-            var uri = new Uri(@"https://archiveofourown.org/works/search");
+            var uri = new Uri(Scheme + @"://archiveofourown.org/works/search");
 
             var response = await HttpClient.GetAsync(uri);
 
@@ -355,7 +382,24 @@ namespace Ao3TrackReader.Data
             return name;
         }
 
-        public static Uri CanonicalUri(string url)
+        public static Uri CheckUri(Uri uri)
+        {
+            if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
+            {
+                if (uri.Scheme != Scheme || uri.Port != -1 || uri.Host == "www.archiveofourown.org")
+                {
+                    var uribuilder = new UriBuilder(uri);
+                    uribuilder.Host = "archiveofourown.org";
+                    uribuilder.Scheme = Scheme;
+                    uribuilder.Port = -1;
+                    uri = uribuilder.Uri;
+                }
+                return uri;
+            }
+            return null;
+        }
+
+        public static Uri ReadingListlUri(string url)
         {
             var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) => {
                 if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
@@ -364,10 +408,8 @@ namespace Ao3TrackReader.Data
 
             if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
             {
-                if (uribuilder.Scheme == "http")
-                {
-                    uribuilder.Scheme = "https";
-                }
+                uribuilder.Host = "archiveofourown.org";
+                uribuilder.Scheme = "http";
                 uribuilder.Port = -1;
             }
             else
@@ -402,10 +444,8 @@ namespace Ao3TrackReader.Data
 
                 if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
                 {
-                    if (uribuilder.Scheme == "http")
-                    {
-                        uribuilder.Scheme = "https";
-                    }
+                    uribuilder.Host = "archiveofourown.org";
+                    uribuilder.Scheme = "http";
                     uribuilder.Port = -1;
                 }
                 else
@@ -534,10 +574,8 @@ namespace Ao3TrackReader.Data
 
                     if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
                     {
-                        if (uribuilder.Scheme == "http")
-                        {
-                            uribuilder.Scheme = "https";
-                        }
+                        uribuilder.Host = "archiveofourown.org";
+                        uribuilder.Scheme = "http";
                         uribuilder.Port = -1;
                     }
                     else
@@ -644,7 +682,7 @@ namespace Ao3TrackReader.Data
 
                         }
 
-                        var wsuri = new Uri(@"https://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
+                        var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
                         try
                         {
                             var response = await HttpClient.GetAsync(wsuri);

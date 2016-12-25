@@ -36,12 +36,18 @@ namespace Ao3TrackReader.Controls
             {
                 UpdateSyncForm();
                 SelectCurrentTheme();
+                httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
             }
         }
 
         public void OnClose(object sender, EventArgs e)
         {
             IsOnScreen = false;
+        }
+
+        public void OnHttpsSwitch(object sender, EventArgs e)
+        {
+            Data.Ao3SiteDataLookup.UseHttps = httpsSwitch.IsToggled;
         }
 
         public void OnSyncLogin(object sender, EventArgs e)
