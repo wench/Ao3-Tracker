@@ -26,8 +26,8 @@ namespace Ao3Track {
         chrome.runtime.sendMessage(req, callback);
     }
 
-    export function SetNextPage(uri : string) {
-        let $e =  jQuery('head link[rel=next]');
+    export function SetNextPage(uri: string) {
+        let $e = jQuery('head link[rel=next]');
         if ($e.length > 0) {
             $e.attr('href', uri);
         }
@@ -35,8 +35,8 @@ namespace Ao3Track {
             jQuery('<link rel="next"></link>').attr('href', uri).appendTo('head');
         }
     }
-    export function SetPrevPage(uri : string) {
-        let $e =  jQuery('head link[rel=prev]');
+    export function SetPrevPage(uri: string) {
+        let $e = jQuery('head link[rel=prev]');
         if ($e.length > 0) {
             $e.attr('href', uri);
         }
@@ -44,7 +44,7 @@ namespace Ao3Track {
             jQuery('<link rel="prev"></link>').attr('href', uri).appendTo('head');
         }
     }
-    
+
     let $actions = $('<div class=" actions" id="ao3t-actions"a></div>').appendTo("#outer");
     let $actions_ul = $('<ul></ul>').appendTo($actions);
     let $sync_now = $('<li><a href="#" id="ao3t-sync-now">Sync Now</a></li>').appendTo($actions_ul);
@@ -56,15 +56,19 @@ namespace Ao3Track {
         });
     });
 
-    export function DisableLastLocationJump()    {
+    export function DisableLastLocationJump() {
         $('#ao3t-last-loc').remove();
     }
 
-    export function EnableLastLocationJump(lastloc: IWorkChapter)    {
-        $('<li><a href="#" id="ao3t-last-loc">Jump to previous</a></li>').appendTo($actions_ul).click((eventObject) => {
-            eventObject.preventDefault();
-            eventObject.stopImmediatePropagation();
-            scrollToLocation(lastloc);
-        });
+    let curLastLoc: IWorkChapter | null = null;
+    export function EnableLastLocationJump(lastloc: IWorkChapter) {
+        if (curLastLoc === null) {
+            $('<li><a href="#" id="ao3t-last-loc">Jump to previous</a></li>').appendTo($actions_ul).click((eventObject) => {
+                eventObject.preventDefault();
+                eventObject.stopImmediatePropagation();
+                if (curLastLoc !== null) { scrollToLocation(curLastLoc); }
+            });
+        }
+        curLastLoc = lastloc;
     }
 }

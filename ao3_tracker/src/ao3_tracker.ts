@@ -20,8 +20,10 @@ namespace Ao3Track {
         history.replaceState({}, document.title, window.location.href.substr(0,window.location.href.indexOf('#')));
     }
 
-    export function scrollToLocation (workchap: IWorkChapter) {
+    export function scrollToLocation (workchap: IWorkChapter, isOnLoad? : boolean) {
         if (!$chapter_text) { return; }
+
+        let had_chapter = false;
 
         $chapter_text.each(function (index, elem) {
             let $e = $(elem);
@@ -30,6 +32,8 @@ namespace Ao3Track {
             if (data.id !== workchap.chapterid) {
                 return true;
             }
+
+            had_chapter = true;
 
             let centre = window.innerHeight / 2;
 
@@ -74,6 +78,11 @@ namespace Ao3Track {
 
             return false;
         });
+
+        // Change page!
+        if (!had_chapter && !isOnLoad) {
+            window.location.replace('/works/' + workid + (workchap.chapterid ? '/chapters/' + workchap.chapterid.toString() : '') + "#ao3t:jump");
+        }
     };
 
     function updateLocation () {
@@ -208,6 +217,7 @@ namespace Ao3Track {
                 last_location = new_location;
 
                 if (last_location.location === null) {
+                    EnableLastLocationJump(last_location);
                     SetWorkChapters({ [workid]: last_set_location = last_location });
                 }
             }
@@ -218,6 +228,7 @@ namespace Ao3Track {
                  (last_location.number === last_set_location.number && last_set_location.location !== null &&
                   (last_location.location === null || last_location.location > last_set_location.location)))) 
             {
+                EnableLastLocationJump(last_location);
                 SetWorkChapters({ [workid]: last_set_location = last_location });
             }
         }, 5000);
@@ -244,25 +255,26 @@ namespace Ao3Track {
                 let workchap = it[works[i]];
                 if (works[i] === workid) {
                     EnableLastLocationJump(workchap);
-                    if (jumpnow) { scrollToLocation(workchap); }
+                    if (jumpnow) { scrollToLocation(workchap, true); }
                 }
                 let $work = $($works[i]);
                 $work.find(".stats .lastchapters").remove();
 
                 let $chapters = $work.find(".stats dd.chapters");
+                let chapters_text = $chapters.text().match(regex_chapter_count);
+
                 let str_id = workchap.chapterid.toString();
-                let str_num = workchap.number.toString();
+                let chapters_finished = workchap.number;
+                if (workchap.location !== null) { chapters_finished--; }
                 let chapter_path = '/works/' + works[i] + (workchap.chapterid ? '/chapters/' + str_id : '');
-                $chapters.after('<dt class="ao3-track-last">Last:</dt>', '<dd class="ao3-track-last"><a href="' + chapter_path + '#ao3t:jump">' + str_num + '</a></dd>');
+                $chapters.prepend('<a href="' + chapter_path + '#ao3t:jump">' + chapters_finished.toString() + '</a>/');
+
+                if (chapters_text === null) { continue; }
 
                 let $blurb_heading = $work.find('.header h4.heading');
                 if ($blurb_heading.length) {
-                    let chapters_text = $chapters.text().match(regex_chapter_count);
-                    if (chapters_text === null) { continue; }
 
                     let chapter_count = parseInt(chapters_text[1]);
-                    let chapters_finished = workchap.number;
-                    if (workchap.location !== null) { chapters_finished--; }
 
                     if (chapter_count > chapters_finished) {
                         let unread = chapter_count - chapters_finished;

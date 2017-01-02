@@ -1,12 +1,13 @@
 {
     "compilerOptions": {
         "allowJs": false,
-        "target": "es5",
+        "target": "es6",
         "module": "none",
         "noImplicitAny": true,
         "removeComments": false,
         "preserveConstEnums": true,
         "strictNullChecks": true,
+        "alwaysStrict": true,
         "sourceMap": true,
         "outDir": "./build",
         "typeRoots": ["./typings"]

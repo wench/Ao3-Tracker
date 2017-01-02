@@ -36,7 +36,7 @@ namespace Ao3TrackReader
 
         public string[] scriptsToInject
         {
-            get { return new[] { "ms-appx-web:///Content/ao3_t_reader.js", "ms-appx-web:///Content/ao3_tracker.js" }; }
+            get { return new[] { "ms-appx-web:///Content/ao3_t_reader.js", "ms-appx-web:///Content/ao3_tracker.js", "ms-appx-web:///Content/ao3_t_unitconv.js" }; }
         }
         public string[] cssToInject
         {

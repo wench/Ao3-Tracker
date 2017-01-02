@@ -8,78 +8,103 @@ var preprocess = require('gulp-preprocess');
 var merge = require('merge-stream');
 
 var tsOptions = {
-    target: "es5",
     module: "none",
     noImplicitAny: true,
     removeComments: false,
     preserveConstEnums: true,
     strictNullChecks: true,
+    alwaysStrict: true
 };
 
-gulp.task('scripts', function() {
+var tsOptions_ES5 = Object.assign({ 
+    target: "ES5" 
+},tsOptions);
+
+var tsOptions_ES6 = Object.assign({ 
+    target: "ES6" 
+},tsOptions);
+
+function scripts() {
     return gulp.src('src/*.ts')
         .pipe(sourcemaps.init())
-        .pipe(ts(tsOptions))
+        .pipe(ts(tsOptions_ES6))
         .pipe(sourcemaps.write('maps'))
         .pipe(gulp.dest('build/chrome'))
         .pipe(gulp.dest('build/edge'));
-});
+}
+gulp.task('scripts', scripts);
 
 var uwp_scripts = [
     'src/global.d.ts',
     'src/ao3_tracker.ts',
+    'src/ao3_t_unitconv.ts',
     'src/extras/reader/uwp/ao3_t_reader.ts'
 ];
 var webkit_scripts = [
     'src/global.d.ts',
     'src/ao3_tracker.ts',
+    'src/ao3_t_unitconv.ts',
     'src/extras/reader/webkit/ao3_t_callbacks.ts',
     'src/extras/reader/webkit/ao3_t_reader.ts'
 ];
 
-gulp.task('reader:uwp:scripts', function() {
-    return gulp.src(uwp_scripts)
-        .pipe(ts(tsOptions))
-        .pipe(gulp.dest('build/reader/uwp'));
-});
-gulp.task('reader:webkit:scripts', function() {
-    return gulp.src(webkit_scripts)
-        .pipe(ts(tsOptions))
-        .pipe(gulp.dest('build/reader/webkit'));
-});
+var reader = {
+    scripts: {
+        uwp: function reader_scripts_uwp() {
+            return gulp.src(uwp_scripts)
+                .pipe(ts(tsOptions_ES6))
+                .pipe(gulp.dest('build/reader/uwp'));
+        },
+        webkit: function reader_scripts_webkit() {
+           return gulp.src(webkit_scripts)
+            .pipe(ts(tsOptions_ES6))
+            .pipe(gulp.dest('build/reader/webkit'));
+        },
+    },
 
-gulp.task('reader:uwp:styles', function() {
-    return gulp.src('src/*.less')
-        .pipe(less())
-        .pipe(gulp.dest('build/reader/uwp'));
-});
-gulp.task('reader:webkit:styles', function() {
-    return gulp.src('src/*.less')
-        .pipe(less())
-        .pipe(gulp.dest('build/reader/webkit'));
-});
+    styles: {
+        uwp: function reader_styles_uwp() {
+            return gulp.src('src/*.less')
+                .pipe(less())
+                .pipe(gulp.dest('build/reader/uwp'));
+        },
+        webkit: function reader_styles_webkit() {
+            return gulp.src('src/*.less')
+                .pipe(less())
+                .pipe(gulp.dest('build/reader/webkit'));
+        },
+    },
+};
+exports.reader_scripts = reader.scripts.all = gulp.series(reader.scripts.uwp,reader.scripts.webkit);
+exports.reader_styles = reader.styles.all = gulp.series(reader.styles.uwp,reader.styles.webkit);
+exports.reader_uwp = reader.uwp = gulp.series(reader.scripts.uwp, reader.styles.uwp);
+exports.reader_webkit = reader.webkit = gulp.series(reader.scripts.webkit, reader.styles.webkit);
+exports.reader = reader.all = gulp.series(reader.scripts.all,reader.styles.all);
 
-gulp.task('reader:uwp', ['reader:uwp:scripts', 'reader:uwp:styles']);
-gulp.task('reader:webkit', ['reader:webkit:scripts', 'reader:webkit:styles']);
-gulp.task('reader', ['reader:uwp','reader:webkit']);
+exports.reader_scripts_uwp = reader.scripts.uwp;
+exports.reader_styles_uwp = reader.styles.uwp;
+exports.reader_scripts_webkit = reader.scripts.webkit;
+exports.reader_styles_webkit = reader.styles.webkit;
 
-gulp.task('styles', function() {
+function styles() {
     return gulp.src('src/*.less')
         .pipe(sourcemaps.init())
         .pipe(less())
         .pipe(sourcemaps.write('maps'))
         .pipe(gulp.dest('build/edge'))
         .pipe(gulp.dest('build/chrome'));
-});
+}
+gulp.task('styles', styles);
 
-gulp.task('images', function() {
+function images() {
     return gulp.src('src/*.png')
         .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
         .pipe(gulp.dest('build/edge'))
         .pipe(gulp.dest('build/chrome'));
-});
+}
+gulp.task('images', images);
 
-gulp.task('pages', function() {
+function pages() {
     var edge = gulp.src('src/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' } }))
         .pipe(gulp.dest('build/edge'));
@@ -89,9 +114,10 @@ gulp.task('pages', function() {
         .pipe(gulp.dest('build/chrome'));
 
     return merge(edge, chrome);
-});
+}
+gulp.task('pages', pages);
 
-gulp.task('extras', function() {
+function extras() {
     var edge = gulp.src('src/extras/edge/**/*')
         .pipe(gulp.dest('build/edge'));
 
@@ -99,15 +125,17 @@ gulp.task('extras', function() {
         .pipe(gulp.dest('build/chrome'));
 
     return merge(edge, chrome);
-});
+}
+gulp.task('extras', extras);
 
-gulp.task('libs', function() {
+function libs() {
     return gulp.src('src/lib/**/*')
         .pipe(gulp.dest('build/edge/lib'))
         .pipe(gulp.dest('build/chrome/lib'));
-});
+}
+gulp.task('libs', libs);
 
-gulp.task('json', function() {
+function json() {
     var edge = gulp.src('src/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' }, extension: 'js' }))
         .pipe(gulp.dest('build/edge'));
@@ -117,17 +145,20 @@ gulp.task('json', function() {
         .pipe(gulp.dest('build/chrome'));
 
     return merge(edge, chrome);
-});
+}
+gulp.task('json', json);
 
-gulp.task('watch', ['default'], function() {
-    gulp.watch('src/**/*.ts', ['scripts']);
-    gulp.watch('src/**/*.less', ['styles']);
-    gulp.watch('src/**/*.png', ['images']);
-    gulp.watch('src/**/*.html', ['pages']);
-    gulp.watch('src/**/*.json', ['json']);
-    gulp.watch('src/extras/**/*', ['extras']);
-    gulp.watch('src/lib/**/*', ['libs']);
-});
+var build = gulp.series(scripts, styles, images, pages, json, extras, libs, reader.all);
+gulp.task('default', build);
+
+gulp.task('watch', gulp.series(build, function() {
+    gulp.watch('src/**/*.ts', scripts);
+    gulp.watch('src/**/*.less', styles);
+    gulp.watch('src/**/*.png', images);
+    gulp.watch('src/**/*.html', pages);
+    gulp.watch('src/**/*.json', json);
+    gulp.watch('src/extras/**/*', extras);
+    gulp.watch('src/lib/**/*', libs);
+}));
 
 
-gulp.task('default', ['scripts', 'styles', 'images', 'pages', 'json', 'extras', 'libs', 'reader']);

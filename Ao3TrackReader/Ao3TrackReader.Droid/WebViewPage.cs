@@ -50,7 +50,7 @@ namespace Ao3TrackReader
 
         public string[] scriptsToInject
         {
-            get { return new[] { "https://ao3track.wenchy.net/ao3_t_callbacks.js", "https://ao3track.wenchy.net/ao3_t_reader.js", "https://ao3track.wenchy.net/ao3_tracker.js" }; }
+            get { return new[] { "https://ao3track.wenchy.net/ao3_t_callbacks.js", "https://ao3track.wenchy.net/ao3_t_reader.js", "https://ao3track.wenchy.net/ao3_tracker.js", "https://ao3track.wenchy.net/ao3_t_unitconv.js" }; }
         }
         public string[] cssToInject
         {

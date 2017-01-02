@@ -17,7 +17,8 @@
             "ao3_t_edge.js",
             //@endif
             "ao3_t_browser.js",
-            "ao3_tracker.js"
+            "ao3_tracker.js",
+            "ao3_t_unitconv.js"
         ],
         "css" : [
             "ao3_tracker.css"

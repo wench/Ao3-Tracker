@@ -383,6 +383,9 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_reader.js">
       <Link>Assets\ao3_t_reader.js</Link>
     </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_unitconv.js">
+      <Link>Assets\ao3_t_unitconv.js</Link>
+    </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />

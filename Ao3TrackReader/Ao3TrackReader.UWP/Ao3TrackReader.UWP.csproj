@@ -307,6 +307,9 @@
     <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_t_reader.js">
       <Link>Content\ao3_t_reader.js</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_t_unitconv.js">
+      <Link>Content\ao3_t_unitconv.js</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

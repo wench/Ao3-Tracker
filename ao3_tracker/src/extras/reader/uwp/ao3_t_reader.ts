@@ -292,11 +292,11 @@ namespace Ao3Track {
     setTouchState();
 
     function contextMenuHandler(ev: PointerEvent) {
-        for (let target = ev.target as Element; target !== document.body; target = target.parentElement) {
+        for (let target = ev.target as (HTMLElement|null); target && target !== document.body; target = target.parentElement) {
             let a = target as HTMLAnchorElement;
             if (target.tagName === "A" && a.href && a.href !== "") {
-                event.preventDefault();
-                event.stopPropagation();
+                ev.preventDefault();
+                ev.stopPropagation();
 
                 Ao3TrackHelper.showContextMenu(ev.clientX, ev.clientY, [
                     "Open", 
