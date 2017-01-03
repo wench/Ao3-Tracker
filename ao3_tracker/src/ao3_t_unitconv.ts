@@ -1,9 +1,9 @@
 namespace Ao3Track {
     namespace UnitConv {
 
-        const value = "(\\d+\\.\\d+|\\d+)";
-        const end = "(?=\\.|,|\\s|$)";
-        const ws = "\\s*";
+        const valueExp = "(\\d+\\.\\d+||\\d+)";
+        const valueNegExp = "(-|minus|negative)?\s*(\\d*\\.\\d+|\\d+)";
+        const ws = "\\s*?";
         const wsp = "\\s+";
 
         function toFloat(input: (string | number)): number {
@@ -13,16 +13,26 @@ namespace Ao3Track {
             return parseFloat(input);
         }
 
+        interface UnitType
+        {
+            name: string; 
+            exp: string; 
+            alt?: string;
+        }
+        
         abstract class UnitRegex {
-            protected regex: RegExp;
-            constructor(regex: RegExp) {
+
+            protected regex: RegExp|null;
+            constructor(regex: RegExp|null) {
                 this.regex = regex;
             }
             abstract process(values: (string | number)[]): string | null;
             toString(): string {
+                if (this.regex === null) { return ""; }
                 return this.regex.source;
             };
             convert(src: string): string | null {
+                if (this.regex === null) { return null; }
                 let matches = src.match(this.regex);
                 if (matches && matches.length > 1) {
                     return this.process(matches);
@@ -38,21 +48,35 @@ namespace Ao3Track {
                 super(regex);
             }
             process(values: (string | number)[]): string {
-                return (Math.floor((toFloat(values[1]) - 32) * 10 * 5 / 9) / 10).toString() + "\xB0 C";
+                let value = Math.floor((toFloat(values[2]) - 32) * 10 * 5 / 9) / 10;
+                if (values[1]) {
+                    value = -value;
+                }
+                return value.toString() + "\xB0 C";
             }
         }
 
         abstract class MultiUnitRegex extends UnitRegex {
             protected groups: string[];
-            constructor(regex: RegExp, groups: string[]) {
+            constructor(regex: RegExp|null, groups: string[]) {
                 super(regex);
                 this.groups = groups;
             }
         }
         class DistanceUS extends MultiUnitRegex {
-            constructor(regex: RegExp, groups: string[]) {
+            constructor(regex: RegExp|null, groups: string[]) {
                 super(regex, groups);
             }
+
+            static readonly units: UnitType[] = [
+                { name: "mi", exp: "(?:mi|mile)s?" },
+                { name: "fur", exp: "(?:fur|furlong)s?" },
+                { name: "ch", exp: "(?:ch|chain)s?" },
+                { name: "yd", exp: "(?:yd|yard)s?" },
+                { name: "ft", exp: "(?:ft|fts|foot|feet|'|\u2032)" },
+                { name: "in", exp: "(?:in|ins|inch|inches|\"|\u2033)" },
+            ];
+            
             process(values: (string | number)[]): string {
                 let inches = 0;
                 let onlyfeet = true;
@@ -155,9 +179,18 @@ namespace Ao3Track {
         }
 
         class VolumeUS extends MultiUnitRegex {
-            constructor(regex: RegExp, groups: string[]) {
+            constructor(regex: RegExp|null, groups: string[]) {
                 super(regex, groups);
             }
+
+            static readonly units: UnitType[] = [
+                { name: "gal", exp: "(?:gal|gallon)s?" },
+                { name: "qt", exp: "(?:qt|quart)s?" },
+                { name: "pt", exp: "(?:pt|pint)s?" },
+                { name: "gi", exp: "(?:gi|gill)s?" },
+                { name: "oz", exp: "(?:fl[ -]?oz|fluid[ -]ounce|fluid[ -]ounces)", alt: "(?:fl[ -]?oz|oz|fluid[ -]ounce|ounce|fluid[ -]ounces|ounces)", },
+            ];
+            
             process(values: (string | number)[]): string {
                 let ml = 0;
 
@@ -212,9 +245,16 @@ namespace Ao3Track {
         }
 
         class WeightUS extends MultiUnitRegex {
-            constructor(regex: RegExp, groups: string[]) {
+            constructor(regex: RegExp|null, groups: string[]) {
                 super(regex, groups);
             }
+
+            static readonly units: UnitType[] = [
+                { name: "ton", exp: "(?:ton|short[ -?]ton|us[ -?]ton)s?" },
+                { name: "lb", exp: "(?:lb|pound)s?" },
+                { name: "oz", exp: "(?:oz|ounce|ounces)" },
+            ];
+                
             process(values: (string | number)[]): string {
                 let g = 0;
 
@@ -261,10 +301,10 @@ namespace Ao3Track {
         }
 
         class WordyRegex extends UnitRegex {
-            static number_words: string[] = [
+            static readonly number_words: string[] = [
                 "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"
             ];
-            static fraction_chars: string[] = [
+            static readonly fraction_chars: string[] = [
                 '\u215B',   // 1/8
                 '\xBC',     // 1/4
                 '\u215C',   // 3/8
@@ -288,12 +328,12 @@ namespace Ao3Track {
                 '\u2151',   // 1/9
                 '\u2152',   // 1/10
             ];
-            static fraction_words: string[] = [
+            static readonly fraction_words: string[] = [
                 "quarter",
                 "third",
                 "half"
             ];
-            static value: string =
+            static readonly value: string =
             "(" + WordyRegex.number_words.join('|') +
             "|" + '[' + WordyRegex.fraction_chars.join('') + ']' +
             "|" + WordyRegex.fraction_words.join('|') +
@@ -305,121 +345,88 @@ namespace Ao3Track {
 
             conv: UnitRegex;
             constructor(exp: string, conv: UnitRegex) {
-                super(new RegExp(WordyRegex.value + wsp + exp + end, "i"));
+                super(new RegExp(WordyRegex.value + wsp + exp, "i"));
                 this.conv = conv;
             }
-            process(values: string[]): string | null {
-                let i = WordyRegex.number_words.indexOf(values[1]);
-                if (i !== -1) {
-                    return this.conv.process([values[0], i + 1]);
-                }
-                i = WordyRegex.fraction_chars.indexOf(values[1]);
-                if (i !== -1) {
-                    let v: number;
-                    // 0 - 6 are eighths
-                    if (i <= 6) { v = (i + 1) / 8; }
-                    // 7-11 are sixths
-                    else if (i <= 11) { v = (i - 6) / 6; }
-                    // 12-15 are sixths
-                    else if (i <= 15) { v = (i - 11) / 6; }
-                    // 1/7
-                    else if (i === 16) { v = 1 / 7; }
-                    // 1/9
-                    else if (i === 17) { v = 1 / 9; }
-                    // 1/10
-                    else if (i === 18) { v = 1 / 10; }
-                    else {
+
+            process(values: (string|number)[]): string | null {
+                for (let index = 1; index < values.length; index++)
+                {
+                    let value = values[index].toString();
+                    let i = WordyRegex.number_words.indexOf(value);
+                    if (i !== -1) {
+                        values[index] = i + 1;
+                        continue;
+                    }
+                    i = WordyRegex.fraction_chars.indexOf(value);
+                    if (i !== -1) {
+                        let v: number;
+                        // 0 - 6 are eighths
+                        if (i <= 6) { v = (i + 1) / 8; }
+                        // 7-11 are sixths
+                        else if (i <= 11) { v = (i - 6) / 6; }
+                        // 12-15 are sixths
+                        else if (i <= 15) { v = (i - 11) / 6; }
+                        // 1/7
+                        else if (i === 16) { v = 1 / 7; }
+                        // 1/9
+                        else if (i === 17) { v = 1 / 9; }
+                        // 1/10
+                        else if (i === 18) { v = 1 / 10; }
+                        else {
+                            return null;
+                        }
+                        values[index] = v;
+                        continue;
+                    }
+                    i = WordyRegex.fraction_words.indexOf(value);
+                    if (i !== -1) {
+                        let v: number;
+                        if (i === 0) {
+                            v = 1/4;
+                        }
+                        else if (i === 1) {
+                            v = 1/3;
+                        }
+                        else if (i === 2) {
+                            v = 1/2;
+                        }
+                        else {
+                            return null;
+                        }
+                        values[index] = v;
+                        continue;
+                    }
+                    var split = value.split('/');
+                    if (split === null || split.length !== 2) {
                         return null;
                     }
-                    return this.conv.process([values[0], v]);
-                }
-                i = WordyRegex.fraction_words.indexOf(values[1]);
-                if (i !== -1) {
-                    let v: number;
-                    if (i === 0) {
-                        v = 1/4;
-                    }
-                    else if (i === 1) {
-                        v = 1/3;
-                    }
-                    else if (i === 2) {
-                        v = 1/2;
-                    }
-                    else {
-                        return null;
-                    }
-                    return this.conv.process([values[0], v]);
-                }
-                var split = values[1].split('/');
-                if (split && split.length === 2) {
-                    return this.conv.process([values[0], toFloat(split[0]) / toFloat(split[1])]);
+                    values[index] = toFloat(split[0]) / toFloat(split[1]);
                 }
 
-                return null;
+                return this.conv.process(values);
             }
         }
 
-        let distancesUS: { name: string; exp: string; }[] = [
-            { name: "mi", exp: "(?:mi|mile)s?" },
-            { name: "fur", exp: "(?:fur|furlong)s?" },
-            { name: "ch", exp: "(?:ch|chain)s?" },
-            { name: "yd", exp: "(?:yd|yard)s?" },
-            { name: "ft", exp: "(?:ft|fts|foot|feet|'|\u2032)" },
-            { name: "in", exp: "(?:in|ins|inch|inches|\"|\u2033)" },
-        ];
+        let convs: UnitRegex[] = [];
 
-        let volumesUS: { name: string; exp: string; alt: string | null }[] = [
-            { name: "qt", exp: "(?:qt|quart)s?", alt: null },
-            { name: "pt", exp: "(?:pt|pint)s?", alt: null },
-            { name: "gi", exp: "(?:gi|gill)s?", alt: null },
-            { name: "oz", exp: "(?:fl[ -]?oz|fluid[ -]ounce|fluid[ -]ounces)", alt: "(?:fl[ -]?oz|oz|fluid[ -]ounce|ounce|fluid[ -]ounces|ounces)", },
-        ];
-
-        let weightsUS: { name: string; exp: string; }[] = [
-            { name: "ton", exp: "(?:ton|short[ -?]ton|us[ -?]ton)s?" },
-            { name: "lb", exp: "(?:lb|pound)s?" },
-            { name: "oz", exp: "(?:oz|ounce|ounces)" },
-        ];
-
-        let convs: UnitRegex[] = [
-            new TemperatureF(new RegExp(value + "(?:" + ws + "(?:degree|degrees|F|\xB0))+" + end, "i"))
-        ];
-
-        for (let s = 0; s < distancesUS.length; s++) {
-            let exp = value + ws + distancesUS[s].exp;
-            let units = [distancesUS[s].name];
-            for (let i = s + 1; i < distancesUS.length; i++) {
-                exp = exp + "(?:" + ws + value + ws + distancesUS[i].exp + ")?";
-                units.push(distancesUS[i].name);
+        function createRegExps<T extends MultiUnitRegex>(c: { new(regex: RegExp|null, groups: string[]): T; units:UnitType[]; }): void {
+            let exp = "";
+            let units : string[] = [];
+            for (let s = 0; s < c.units.length; s++) {
+                exp += "(?:" + ws + valueExp + ws + c.units[s].exp + ")?";
+                units.push(c.units[s].name);
+                convs.push(new WordyRegex(c.units[s].exp,new c(null,[c.units[s].name])));
             }
-            let conv = new DistanceUS(new RegExp(exp + end, "i"), units);
-            convs.push(conv);
-            convs.push(new WordyRegex(distancesUS[s].exp,conv));
-        }
-        for (let s = 0; s < volumesUS.length; s++) {
-            let exp = value + ws + volumesUS[s].exp;
-            let units = [volumesUS[s].name];
-            for (let i = s + 1; i < volumesUS.length; i++) {
-                exp = exp + "(?:" + ws + value + ws + (volumesUS[i].alt || volumesUS[i].exp) + ")?";
-                units.push(volumesUS[i].name);
-            }
-            let conv = new VolumeUS(new RegExp(exp + end, "i"), units);
-            convs.push(conv);
-            convs.push(new WordyRegex(distancesUS[s].exp,conv));
-        }
-        for (let s = 0; s < weightsUS.length; s++) {
-            let exp = value + ws + weightsUS[s].exp;
-            let units = [weightsUS[s].name];
-            for (let i = s + 1; i < weightsUS.length; i++) {
-                exp = exp + "(?:" + ws + value + ws + weightsUS[i].exp + ")?";
-                units.push(weightsUS[i].name);
-            }
-            let conv = new WeightUS(new RegExp(exp + end, "i"), units);
-            convs.push(conv);
-            convs.push(new WordyRegex(distancesUS[s].exp,conv));
+            convs.push(new c(new RegExp("(?=\\d)" + exp + "(?!\\d)","i"), units));
         }
 
-        let all_regex = new RegExp('((?:' + convs.join(')|(?:').replace(/\((?!\?)/g, "(?:") + '))', 'gi');
+        createRegExps(DistanceUS);
+        createRegExps(VolumeUS);
+        createRegExps(WeightUS);
+        convs.push(new TemperatureF(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|F|\xB0))+", "i")));
+
+        let all_regex = new RegExp('(^|\\b|\\.|,|\\s|"|\')((?:' + convs.join(')|(?:').replace(/\((?!\?)/g, "(?:") + '))(?=\\b|\\.|,|\\s|"|\'|$)', 'gi');
 
         function ignoreElement(elem: Element) {
             if (elem.tagName === "SPAN" && elem.hasAttribute("class")) {
@@ -428,7 +435,7 @@ namespace Ao3Track {
                     return true;
                 }
             }
-            if (elem.tagName === "LINK" || elem.tagName === "SCRIPT" || elem.tagName === "HEAD" || elem.getAttribute("contenteditable") === "true") {
+            if (elem.tagName === "LINK" || elem.tagName === "SCRIPT" || elem.tagName === "HEAD"  || elem.tagName === "SELECT" || elem.tagName === "INPUT" || elem.getAttribute("contenteditable") === "true") {
                 return true;
             }
             return false;
@@ -441,8 +448,8 @@ namespace Ao3Track {
                 if (node.nodeValue !== null && node.nodeValue.search(all_regex) !== -1) {
                     text_nodes.push(node);
                 }
-            } else {
-                if (node.nodeType === 1 && ignoreElement(node as Element)) {
+            } else if (node.nodeType === 1) {
+                if (ignoreElement(node as Element)) {
                     return;
                 }
 
@@ -476,11 +483,12 @@ namespace Ao3Track {
             let split = (text_nodes[i].nodeValue || "").split(all_regex);
             let fragment = document.createDocumentFragment();
             for (let s = 0; s < split.length; s++) {
-                if (split[s] !== '') {
-                    let textnode = document.createTextNode(split[s]);
+                var text = split[s] + (s+1 < split.length ? split[s+1] : "");
+                if (text !== '') {
+                    let textnode = document.createTextNode(text);
                     fragment.appendChild(textnode);
                 }
-                s++;
+                s+=2;
                 if (s < split.length) {
                     let unitnode = document.createElement("span") as HTMLSpanElement;
                     unitnode.setAttribute("class", "mw_ao3track_unitconv");
