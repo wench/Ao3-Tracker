@@ -6,6 +6,8 @@ interface DirectoryEntry { }
 
 type FormErrorList = { [key:string]:string; };
 
+type timestamp = number;
+
 interface IWorkChapter {
     number: number;
     chapterid: number;
@@ -13,7 +15,7 @@ interface IWorkChapter {
 }
  
 interface IWorkChapterTS extends IWorkChapter {
-    timestamp: number;
+    timestamp: timestamp;
 }
 
 
@@ -26,6 +28,16 @@ interface IUserCreateData {
 interface IUserLoginData {
     username: string;
     password: string;    
+}
+
+interface IReadingList {
+    last_sync: timestamp;
+    paths: { [key:string]: { uri:string; timestamp: timestamp } };
+}
+
+interface IServerReadingList {
+    last_sync: timestamp;
+    paths: { [key:string]:timestamp; };
 }
 
 interface GetWorkChaptersMessage {
@@ -57,6 +69,11 @@ interface DoSyncMessage {
 }
 type SetDoSyncMessageResponse = boolean;
 
-type MessageType = GetWorkChaptersMessage|SetWorkChaptersMessage|UserCreateMessage|UserLoginMessage|DoSyncMessage;
+interface ReadingListMessage {
+    type: 'READING_LIST';
+    data: IServerReadingList;
+}
+type ReadingListMessageResponse = IServerReadingList|null;
 
 
+type MessageType = GetWorkChaptersMessage|SetWorkChaptersMessage|UserCreateMessage|UserLoginMessage|DoSyncMessage|ReadingListMessage;

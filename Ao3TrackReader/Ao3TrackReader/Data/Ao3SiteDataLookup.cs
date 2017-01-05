@@ -601,7 +601,7 @@ namespace Ao3TrackReader.Data
 
                         await FillModelFromSearchQueryAsync(uri, model);
                     }
-                    if (uri.LocalPath == "/works/search") // Work search and Advanced search
+                    else if (uri.LocalPath == "/works/search") // Work search and Advanced search
                     {
                         model.Type = Ao3PageType.Search;
                         model.Title = "Advanced Search";

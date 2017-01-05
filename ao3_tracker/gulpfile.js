@@ -12,8 +12,7 @@ var tsOptions = {
     noImplicitAny: true,
     removeComments: false,
     preserveConstEnums: true,
-    strictNullChecks: true,
-    alwaysStrict: true
+    strictNullChecks: true
 };
 
 var tsOptions_ES5 = Object.assign({ 
@@ -28,7 +27,7 @@ function scripts() {
     return gulp.src('src/*.ts')
         .pipe(sourcemaps.init())
         .pipe(ts(tsOptions_ES6))
-        .pipe(sourcemaps.write('maps'))
+        .pipe(sourcemaps.write('src-maps'))
         .pipe(gulp.dest('build/chrome'))
         .pipe(gulp.dest('build/edge'));
 }
@@ -52,12 +51,16 @@ var reader = {
     scripts: {
         uwp: function reader_scripts_uwp() {
             return gulp.src(uwp_scripts)
+                .pipe(sourcemaps.init())
                 .pipe(ts(tsOptions_ES6))
+                .pipe(sourcemaps.write('src-maps'))
                 .pipe(gulp.dest('build/reader/uwp'));
         },
         webkit: function reader_scripts_webkit() {
            return gulp.src(webkit_scripts)
+            .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES6))
+            .pipe(sourcemaps.write('src-maps'))
             .pipe(gulp.dest('build/reader/webkit'));
         },
     },
@@ -65,12 +68,16 @@ var reader = {
     styles: {
         uwp: function reader_styles_uwp() {
             return gulp.src('src/*.less')
+                .pipe(sourcemaps.init())
                 .pipe(less())
+                .pipe(sourcemaps.write('src-maps'))
                 .pipe(gulp.dest('build/reader/uwp'));
         },
         webkit: function reader_styles_webkit() {
             return gulp.src('src/*.less')
+                .pipe(sourcemaps.init())
                 .pipe(less())
+                .pipe(sourcemaps.write('src-maps'))
                 .pipe(gulp.dest('build/reader/webkit'));
         },
     },
@@ -90,7 +97,7 @@ function styles() {
     return gulp.src('src/*.less')
         .pipe(sourcemaps.init())
         .pipe(less())
-        .pipe(sourcemaps.write('maps'))
+        .pipe(sourcemaps.write('src-maps'))
         .pipe(gulp.dest('build/edge'))
         .pipe(gulp.dest('build/chrome'));
 }

@@ -8,23 +8,27 @@
         "page": "background.html",
         "persistent": true
     },
-    "content_scripts": [{
-        "all_frames": false,
-        "run_at": "document_end",
-        "js": [
-            "lib/jquery-3.1.1.min.js",
-            //@if BROWSER='Edge'
-            "ao3_t_edge.js",
-            //@endif
-            "ao3_t_browser.js",
-            "ao3_tracker.js",
-            "ao3_t_unitconv.js"
-        ],
-        "css" : [
-            "ao3_tracker.css"
-        ],
-        "matches": ["*://archiveofourown.org/*"]
-    }],
+    "content_scripts": [
+        {
+            "all_frames": false,
+            "run_at": "document_end",
+            "js": [
+                "lib/jquery-3.1.1.min.js",
+                //@if BROWSER='Edge'
+                "ao3_t_edge.js",
+                //@endif
+                "ao3_t_browser.js",
+                "ao3_tracker.js",
+                "ao3_t_unitconv.js"
+            ],
+            "css": [
+                "ao3_tracker.css"
+            ],
+            "matches": [
+                "*://archiveofourown.org/*"
+            ]
+        }
+    ],
     "options_page": "options.html",
     "manifest_version": 2,
     //@if BROWSER='Edge' 
@@ -32,5 +36,10 @@
     //@endif
     "name": "Ao3 Tracker",
     "version": "1",
-    "permissions": ["*://archiveofourown.org/*", "unlimitedStorage", "storage"]
+    "permissions": [
+        "*://archiveofourown.org/*",
+        "unlimitedStorage",
+        "storage",
+        "contextMenus"
+    ]
 }
