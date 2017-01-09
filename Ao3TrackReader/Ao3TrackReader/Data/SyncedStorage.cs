@@ -199,7 +199,7 @@ namespace Ao3TrackReader.Data
                 Task.Run(async () =>
                 {
                     //console.log("dosync: sending GET request");
-
+                    
                     var response = await HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
 
                     if (!response.IsSuccessStatusCode)

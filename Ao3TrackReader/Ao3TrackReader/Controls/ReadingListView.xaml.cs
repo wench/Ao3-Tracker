@@ -44,6 +44,9 @@ namespace Ao3TrackReader.Controls
             }
 
             List<Task> tasks = new List<Task>();
+            var semaphore = new SemaphoreSlim(4);
+            var vms = new List<Models.Ao3PageViewModel>();
+
             if (items.Count == 0)
             {
                 tasks.Add(AddAsync("http://archiveofourown.org/"));
@@ -59,7 +62,7 @@ namespace Ao3TrackReader.Controls
                         var item = items[model.Key];
                         if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
                             model.Value.Title = item.Title;
-                        if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag == "<Work>")
+                        if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
                         {
                             model.Value.PrimaryTag = item.PrimaryTag;
                             var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
@@ -77,7 +80,7 @@ namespace Ao3TrackReader.Controls
                         {
                             var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
                             readingListBacking.Add(viewmodel);
-                            tasks.Add(RefreshAsync(viewmodel));
+                            vms.Add(viewmodel);
                         }
                     }
                 }
@@ -87,6 +90,16 @@ namespace Ao3TrackReader.Controls
             ListView.ItemsSource = readingListBacking;
             Task.Run(async () =>
             {
+                foreach (var viewmodel in vms)
+                {
+                    await semaphore.WaitAsync();
+
+                    tasks.Add(Task.Run(async () => {
+                        await RefreshAsync(viewmodel);
+                        semaphore.Release();
+                    }));
+
+                }
                 await Task.WhenAll(tasks);
 
                 wpv.DoOnMainThread(() =>
@@ -108,23 +121,40 @@ namespace Ao3TrackReader.Controls
             }
         }
 
+        void GotoLast(Models.Ao3PageViewModel item)
+        {
+            if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
+            {
+                wpv.NavigateToLast(item.BaseData.Details.WorkId);
+            }
+            else if (item.BaseData.Type == Models.Ao3PageType.Series && item.BaseData.SeriesWorks?.Count > 0)
+            {
+                long workid = 0;
+
+                foreach (var workmodel in item.BaseData.SeriesWorks)
+                {
+                    workid = workmodel.Details.WorkId;
+                    if (workmodel.Details.Chapters.Item1 < workmodel.Details.Chapters.Item2) break;
+                }
+
+                if (workid != 0) wpv.NavigateToLast(workid);
+                else wpv.Navigate(item.Uri);
+            }
+            else
+            {
+                wpv.Navigate(item.Uri);
+            }
+            IsOnScreen = false;
+        }
+
         public void OnCellTapped(object sender, EventArgs e)
         {
             var mi = ((Cell)sender);
             var item = mi.BindingContext as Models.Ao3PageViewModel;
             if (item != null)
             {
-                if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
-                {
-                    wpv.NavigateToLast(item.BaseData.Details.WorkId);
-                }
-                else
-                {
-                    wpv.Navigate(item.Uri);
-                }
-                IsOnScreen = false;
+                GotoLast(item);
             }
-
         }
 
         public void PageChange(Uri uri)
@@ -147,7 +177,7 @@ namespace Ao3TrackReader.Controls
             var item = mi.CommandParameter as Models.Ao3PageViewModel;
             if (item?.BaseData == null) return true;
 
-            return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Other;
+            return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Series;
         }
 
         private void OnCellAppearing(object sender, EventArgs e)
@@ -170,15 +200,7 @@ namespace Ao3TrackReader.Controls
             var item = mi.CommandParameter as Models.Ao3PageViewModel;
             if (item != null)
             {
-                if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
-                {
-                    wpv.NavigateToLast(item.BaseData.Details.WorkId);
-                }
-                else
-                {
-                    wpv.Navigate(item.Uri);
-                }
-                IsOnScreen = false;
+                GotoLast(item);
             }
         }
 

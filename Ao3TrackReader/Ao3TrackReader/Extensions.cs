@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Ao3TrackReader
 {
@@ -126,6 +127,15 @@ namespace Ao3TrackReader
                     Math.Pow(Math.Pow(color.G, 2.2) * color.A + Math.Pow(behind.G, 2.2) * (1 - color.A), 1 / 2.2),
                     Math.Pow(Math.Pow(color.B, 2.2) * color.A + Math.Pow(behind.B, 2.2) * (1 - color.A), 1 / 2.2)
                 );
+        }
+
+
+        public static async Task<HtmlDocument> ReadAsHtmlDocumentAsync(this HttpContent httpContent)
+        {
+            HtmlDocument doc = new HtmlDocument();
+            var content = await httpContent.ReadAsStringAsync();
+            if (!String.IsNullOrWhiteSpace(content)) doc.Load(new System.IO.StringReader(content));
+            return doc;
         }
     }
 }

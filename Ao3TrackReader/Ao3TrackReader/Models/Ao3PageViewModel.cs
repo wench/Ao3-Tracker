@@ -26,15 +26,13 @@ namespace Ao3TrackReader.Models
             if (baseData == null) return 1;
             if (y.baseData == null) return -1;
 
-            // Sort based on the page type
-            int c = baseData.Type.CompareTo(y.baseData.Type);
-            if (c != 0) return c;
+            int c;
 
             // Sort based on chapters remaining
-            if (y.baseData.Type == Ao3PageType.Work)
+            if ((baseData.Type == Ao3PageType.Work || baseData.Type == Ao3PageType.Series) && (y.baseData.Type == Ao3PageType.Work || y.baseData.Type == Ao3PageType.Series))
             {
-                int? xc = baseData?.Details?.Chapters?.Item1;
-                int? yc = y.baseData?.Details?.Chapters?.Item1;
+                int? xc = baseData.Details?.Chapters?.Item1;
+                int? yc = y.baseData.Details?.Chapters?.Item1;
                 if (xc != null || yc != null)
                 {
                     if (xc == null) return 1;
@@ -45,6 +43,10 @@ namespace Ao3TrackReader.Models
                     if (c != 0) return -c; // higher numbers of unread chapters first
                 }
             }
+
+            // Sort based on the page type
+            c = baseData.Type.CompareTo(y.baseData.Type);
+            if (c != 0) return c;
 
             // Sort based on title
             string tx = Title?.ToString();
@@ -232,6 +234,8 @@ namespace Ao3TrackReader.Models
                             if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = Colors.Base });
                         }
                     }
+
+                    if (value.Type == Ao3PageType.Series) ts.Nodes.Add(new TextNode { Text = "Series ", Foreground = Colors.Base });
 
                     if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
                     if (value.Details?.Authors != null && value.Details.Authors.Count != 0)

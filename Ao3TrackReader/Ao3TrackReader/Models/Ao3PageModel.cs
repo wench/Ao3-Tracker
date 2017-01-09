@@ -11,6 +11,7 @@ namespace Ao3TrackReader.Models
         Search,
         Work,
         Bookmarks,
+        Series,
         Other,
         Unknown
     }
@@ -49,6 +50,7 @@ namespace Ao3TrackReader.Models
         public int? Kudos { get; set; }
         public int? Bookmarks { get; set; }
         public int? Hits { get; set; }
+        public int? Works { get; set; }
         public TextTree Summary { get; set; }
     }
 
@@ -90,5 +92,7 @@ namespace Ao3TrackReader.Models
         public Ao3WorkDetails Details { get; set; }
 
         public string SearchQuery { get; set; }
+
+        public IReadOnlyCollection<Ao3PageModel> SeriesWorks { get; set; }
     }
 }
