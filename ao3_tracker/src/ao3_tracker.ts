@@ -248,8 +248,36 @@ namespace Ao3Track {
         });
     }
 
+    let regex_chapter_count = /^(\d+)\//;
+
+    export function ExtendWorkSummary($work: JQuery, workid: number, workchap : IWorkChapter)
+    {
+        $work.find(".stats .lastchapters").remove();
+
+        let $chapters = $work.find(".stats dd.chapters");
+        let chapters_text = $chapters.text().match(regex_chapter_count);
+
+        let str_id = workchap.chapterid.toString();
+        let chapters_finished = workchap.number;
+        if (workchap.location !== null) { chapters_finished--; }
+        let chapter_path = '/works/' + workid + (workchap.chapterid ? '/chapters/' + str_id : '');
+        $chapters.prepend('<a href="' + chapter_path + '#ao3t:jump">' + chapters_finished.toString() + '</a>/');
+
+        if (chapters_text === null) { return; }
+
+        let $blurb_heading = $work.find('.header h4.heading');
+        if ($blurb_heading.length) {
+
+            let chapter_count = parseInt(chapters_text[1]);
+
+            if (chapter_count > chapters_finished) {
+                let unread = chapter_count - chapters_finished;
+                $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + ' unread chapter' + (unread === 1 ? '' : 's') + '</a>)</span>');
+            }
+        }
+    }
+
     GetWorkChapters(works, (it) => {
-        let regex_chapter_count = /^(\d+)\//;
         for (let i = 0; i < $works.length && i < works.length; i++) {
             if (works[i] in it) {
                 let workchap = it[works[i]];
@@ -257,31 +285,8 @@ namespace Ao3Track {
                     EnableLastLocationJump(workchap);
                     if (jumpnow) { scrollToLocation(workchap, true); }
                 }
-                let $work = $($works[i]);
-                $work.find(".stats .lastchapters").remove();
 
-                let $chapters = $work.find(".stats dd.chapters");
-                let chapters_text = $chapters.text().match(regex_chapter_count);
-
-                let str_id = workchap.chapterid.toString();
-                let chapters_finished = workchap.number;
-                if (workchap.location !== null) { chapters_finished--; }
-                let chapter_path = '/works/' + works[i] + (workchap.chapterid ? '/chapters/' + str_id : '');
-                $chapters.prepend('<a href="' + chapter_path + '#ao3t:jump">' + chapters_finished.toString() + '</a>/');
-
-                if (chapters_text === null) { continue; }
-
-                let $blurb_heading = $work.find('.header h4.heading');
-                if ($blurb_heading.length) {
-
-                    let chapter_count = parseInt(chapters_text[1]);
-
-                    if (chapter_count > chapters_finished) {
-                        let unread = chapter_count - chapters_finished;
-                        $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + ' unread chapter' + (unread === 1 ? '' : 's') + '</a>)</span>');
-                    }
-
-                }
+                ExtendWorkSummary($($works[i]), works[i], workchap);
             }
         }
     });

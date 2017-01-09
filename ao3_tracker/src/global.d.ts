@@ -69,11 +69,5 @@ interface DoSyncMessage {
 }
 type SetDoSyncMessageResponse = boolean;
 
-interface ReadingListMessage {
-    type: 'READING_LIST';
-    data: IServerReadingList;
-}
-type ReadingListMessageResponse = IServerReadingList|null;
 
-
-type MessageType = GetWorkChaptersMessage|SetWorkChaptersMessage|UserCreateMessage|UserLoginMessage|DoSyncMessage|ReadingListMessage;
+type MessageType = GetWorkChaptersMessage|SetWorkChaptersMessage|UserCreateMessage|UserLoginMessage|DoSyncMessage;

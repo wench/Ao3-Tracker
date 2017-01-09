@@ -295,6 +295,31 @@ namespace Ao3Track {
         window.setInterval(dosync, 1000 * 60 * 60 * 6);
     });
 
+    export function SyncReadingListAsync(srl: IServerReadingList) : Promise<IServerReadingList|null>
+    {
+        return new Promise<IServerReadingList|null>((resolve) => {
+            if (authorization.username === null || authorization.username === "" || authorization.credential === null || authorization.credential === "" || serversync === SyncState.Disabled) {
+                resolve(null);
+                return;                
+            }
+
+            jQuery.ajax({
+                url: url_base + "/ReadingList",
+                crossDomain: true,
+                type: "POST",
+                headers: { 'Authorization': "Ao3track " + authorization.toBase64() },
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(srl),
+                error: function (jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+                    resolve(null);
+                },
+                success: function (items: IServerReadingList, textStatus: string, jqXHR: JQueryXHR) {
+                    resolve(items);
+                }
+            });                    
+        });        
+    }
 
     export function processMessage(request: MessageType, sender: chrome.runtime.MessageSender|null, sendResponse: (response: any) => void) {
         switch (request.type) {
@@ -433,32 +458,7 @@ namespace Ao3Track {
                         }
                     });
                 }
-                return true;
-
-            case 'READING_LIST':
-                {
-                    if (authorization.username === null || authorization.username === "" || authorization.credential === null || authorization.credential === "" || serversync === SyncState.Disabled) {
-                        sendResponse(null);
-                        return false;                
-                    }
-
-                    jQuery.ajax({
-                        url: url_base + "/ReadingList",
-                        crossDomain: true,
-                        type: "POST",
-                        headers: { 'Authorization': "Ao3track " + authorization.toBase64() },
-                        dataType: "json",
-                        contentType: "application/json; charset=utf-8",
-                        data: JSON.stringify(request.data),
-                        error: function (jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
-                            sendResponse(null);
-                        },
-                        success: function (items: IServerReadingList, textStatus: string, jqXHR: JQueryXHR) {
-                            sendResponse(items);
-                        }
-                    });                    
-                }
-                return true;                
+                return true;              
         };
         return false;
     }
