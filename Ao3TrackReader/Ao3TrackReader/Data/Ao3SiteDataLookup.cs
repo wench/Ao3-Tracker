@@ -873,7 +873,7 @@ namespace Ao3TrackReader.Data
             required[Ao3RequiredTag.Category] = requirednode?.DescendantsByClass("span", "category")?.FirstOrDefault();
             required[Ao3RequiredTag.Complete] = requirednode?.DescendantsByClass("span", "iswip")?.FirstOrDefault();
 
-            model.RequiredTags = new Dictionary<Ao3RequiredTag, Tuple<string, string>>(4);
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             foreach (var n in required)
             {
                 if (n.Value == null)
@@ -892,7 +892,7 @@ namespace Ao3TrackReader.Data
                 if (tag == null)
                     model.RequiredTags[n.Key] = null;
                 else
-                    model.RequiredTags[n.Key] = new Tuple<string, string>(tag, n.Value.InnerText.HtmlDecode().Trim());
+                    model.RequiredTags[n.Key] = new Ao3RequredTagData(tag, n.Value.InnerText.HtmlDecode().Trim());
 
             }
 
@@ -986,7 +986,7 @@ namespace Ao3TrackReader.Data
             var seriesnode = worknode?.ElementByClass("ul", "series");
             if (seriesnode != null)
             {
-                Dictionary<string, Tuple<int, string>> series = new Dictionary<string, Tuple<int, string>>(1);
+                Dictionary<string, Ao3SeriesLink> series = new Dictionary<string, Ao3SeriesLink>(1);
                 foreach (var n in seriesnode.Elements("li"))
                 {
                     var link = n.Element("a");
@@ -1001,7 +1001,7 @@ namespace Ao3TrackReader.Data
 
                     try
                     {
-                        series[uri.AbsoluteUri] = new Tuple<int, string>(int.Parse(part), link.InnerText?.HtmlDecode());
+                        series[uri.AbsoluteUri] = new Ao3SeriesLink(int.Parse(part), link.InnerText?.HtmlDecode());
                     }
                     catch
                     {
@@ -1020,13 +1020,8 @@ namespace Ao3TrackReader.Data
                     int? total;
                     if (chapters[1] == "?") total = null;
                     else total = int.Parse(chapters[1]);
-                    var tworkchaps = App.Storage.getWorkChaptersAsync(new[] { model.Details.WorkId });
-                    Helper.WorkChapter workchap = null;
-                    tworkchaps.Result.TryGetValue(model.Details.WorkId, out workchap);
-                    int chapters_finished = workchap != null ? (int)workchap.number : (int)0;
-                    if (workchap?.location != null) { chapters_finished--; }
 
-                    model.Details.Chapters = new Tuple<int?, int, int?>(chapters_finished, int.Parse(chapters[0]), total);
+                    model.Details.Chapters = new Ao3ChapterDetails(int.Parse(chapters[0]), total);
                 }
                 catch
                 {
@@ -1080,8 +1075,9 @@ namespace Ao3TrackReader.Data
                 }));
             }
 
+            bool complete = false;
             var meta = main.ElementByClass("div", "wrapper")?.ElementByClass("dl", "meta");
-            model.RequiredTags = new Dictionary<Ao3RequiredTag, Tuple<string, string>>(1);
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(1);
             if (meta != null)
             {
                 foreach (var dt in meta.Elements("dt"))
@@ -1130,11 +1126,12 @@ namespace Ao3TrackReader.Data
                                             switch (sdd.InnerText.HtmlDecode().Trim())
                                             {
                                                 case "Yes":
-                                                    model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("complete-yes", "Complete");
+                                                    complete = true;
+                                                    model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-yes", "Complete");
                                                     break;
 
                                                 case "No":
-                                                    model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("complete-no", "Incomplete");
+                                                    model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-no", "Incomplete");
                                                     break;
 
                                                 default:
@@ -1167,11 +1164,9 @@ namespace Ao3TrackReader.Data
             HashSet<string> languages = new HashSet<string>();
             Dictionary<string, string> rectag = new Dictionary<string, string>();
 
-                int ? chapsread = null;
             int chapsavail = 0;
-            int? chapstotal = 0;
+            int? chapstotal = complete?new int?(0):null;
 
-            var summary = new Block();
             foreach (var workmodel in model.SeriesWorks)
             {
                 // Coalate tags
@@ -1189,18 +1184,18 @@ namespace Ao3TrackReader.Data
                 // Coalate required tags
                 foreach (var kvp in RequiredTagToType)
                 {
-                    Tuple<string, string> reqTag;
+                    Ao3RequredTagData reqTag;
                     if (workmodel.RequiredTags.TryGetValue(kvp.Key, out reqTag))
                     {
                         List<string> list;
                         if (!tags.TryGetValue(kvp.Value, out list))
                         {
-                            rectag[reqTag.Item2] = reqTag.Item1;
+                            rectag[reqTag.Label] = reqTag.Tag;
                             tags[kvp.Value] = list = new List<string>();
                         }
 
-                        if (!list.Contains(reqTag.Item2)) 
-                            list.Add(reqTag.Item2);
+                        if (!list.Contains(reqTag.Label)) 
+                            list.Add(reqTag.Label);
                     }
                 }
 
@@ -1212,82 +1207,9 @@ namespace Ao3TrackReader.Data
 
                 languages.Add(workmodel.Language);
 
-                chapsavail += workmodel.Details.Chapters.Item2;
-                if (workmodel.Details.Chapters.Item3 == null) chapstotal = null;
-                else if (chapstotal != null) chapstotal += workmodel.Details.Chapters.Item3;
-
-                int? unread = workmodel.Details.Chapters?.Item1;
-                if (unread != null)
-                {
-                    chapsread = (chapsread ?? 0) + unread;
-                    unread = workmodel.Details.Chapters.Item2 - unread;
-                }
-                var worksummary = new Span();
-
-                var ts = new Span { Foreground = Resources.Colors.Highlight.Low };
-
-                if (!string.IsNullOrWhiteSpace(workmodel.Title)) ts.Nodes.Add(new TextNode { Text = workmodel.Title, Foreground = Resources.Colors.Highlight.MediumHigh });
-                if (workmodel.Details?.Authors != null && workmodel.Details.Authors.Count != 0)
-                {
-                    ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Resources.Colors.Base.MediumLow });
-                    bool first = true;
-                    foreach (var user in workmodel.Details.Authors)
-                    {
-                        if (!first)
-                            ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.MediumLow });
-                        else
-                            first = false;
-
-                        ts.Nodes.Add(user.Value);
-                    }
-                }
-                if (workmodel.Details?.Recipiants != null && workmodel.Details.Recipiants.Count != 0)
-                {
-                    ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Resources.Colors.Base.MediumLow });
-                    bool first = true;
-                    foreach (var user in workmodel.Details.Recipiants)
-                    {
-                        if (!first)
-                            ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.MediumLow });
-                        else
-                            first = false;
-
-                        ts.Nodes.Add(user.Value);
-                    }
-                }
-                if (unread != null && unread > 0)
-                {
-                    ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + " unread chapter" + (unread == 1 ? "" : "s"), Foreground = Resources.Colors.Base.MediumHigh });
-                }
-
-                /*
-                List<string> d = new List<string>();
-                if (!string.IsNullOrWhiteSpace(workmodel.Language)) d.Add("Language: " + workmodel.Language);
-                if (workmodel.Details != null)
-                {
-                    if (workmodel.Details.Words != null) d.Add("Words:\xA0" + workmodel.Details.Words.ToString());
-
-                    if (workmodel.Details.Chapters != null)
-                    {
-                        string readstr = "";
-                        if (workmodel.Details.Chapters.Item1 != null) readstr = workmodel.Details.Chapters.Item1.ToString() + "/";
-                        d.Add("Chapters:\xA0" + readstr + workmodel.Details.Chapters.Item2.ToString() + "/" + (workmodel.Details.Chapters.Item3?.ToString() ?? "?"));
-                    }
-
-                    //if (workmodel.Details.Collections != null) d.Add("Collections:\xA0" + workmodel.Details.Collections.ToString());
-                    if (workmodel.Details.Comments != null) d.Add("Comments:\xA0" + workmodel.Details.Comments.ToString());
-                    if (workmodel.Details.Kudos != null) d.Add("Kudos:\xA0" + workmodel.Details.Kudos.ToString());
-                    //if (workmodel.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + workmodel.Details.Bookmarks.ToString());
-                    if (workmodel.Details.Hits != null) d.Add("Hits:\xA0" + workmodel.Details.Hits.ToString());
-                }*/
-
-                //var details = new TextNode { Text = string.Join("   ", d), Foreground = Resources.Colors.Base.MediumHigh };
-
-                worksummary.Nodes.Add(ts);
-                worksummary.Nodes.Add("\n");
-                //worksummary.Nodes.Add(details);
-
-                summary.Nodes.Add(worksummary);
+                chapsavail += workmodel.Details.Chapters.Available;
+                if (workmodel.Details.Chapters.Total == null) chapstotal = null;
+                else if (chapstotal != null) chapstotal += workmodel.Details.Chapters.Total;
             }
 
             // Generate required tags
@@ -1296,29 +1218,28 @@ namespace Ao3TrackReader.Data
             {
                 string sclass;
                 if (req.Count == 1 && rectag.TryGetValue(req[0], out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>("warning-yes", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
                 string sclass;
                 if (req.Count == 1 && rectag.TryGetValue(req[0], out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>("category-multi", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
                 string sclass;
                 if (req.Count == 1 && rectag.TryGetValue(req[0], out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>("rating-na", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
             }
 
-            model.Details.Chapters = new Tuple<int?, int, int?>(chapsread, chapsavail, chapstotal);
-            model.Details.Summary = summary;
+            model.Details.Chapters = new Ao3ChapterDetails(chapsavail, chapstotal);
             model.Language = string.Join(", ", languages);
 
             model.PrimaryTag = primaries.Select(kvp => kvp).OrderBy(kvp => kvp.Value).First().Key;
@@ -1343,7 +1264,7 @@ namespace Ao3TrackReader.Data
             }
 
 
-            model.RequiredTags = new Dictionary<Ao3RequiredTag, Tuple<string, string>>(4);
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             var tasks = new List<Task<KeyValuePair<Ao3TagType, Tuple<string, int>>>>();
 
             foreach (var i in Enum.GetValues(typeof(Ao3TagType)))
@@ -1410,7 +1331,7 @@ namespace Ao3TrackReader.Data
                 {
                     if (i != 0 || b)
                     {
-                        model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("complete-yes", "Complete only");
+                        model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-yes", "Complete only");
                     }
                     else
                     {
@@ -1418,11 +1339,11 @@ namespace Ao3TrackReader.Data
                 }
             }
             if (!model.RequiredTags.ContainsKey(Ao3RequiredTag.Complete) || model.RequiredTags[Ao3RequiredTag.Complete] == null)
-                model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("category-none", "Complete and Incomplete");
+                model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("category-none", "Complete and Incomplete");
 
             tasks.Add(Task.Run(() =>
             {
-                return new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Item2, 0));
+                return new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Label, 0));
             }));
 
             if (query.ContainsKey("work_search[query]"))
@@ -1463,27 +1384,27 @@ namespace Ao3TrackReader.Data
                 int id = 0;
                 string sclass;
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>("warning-yes", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
                 int id = 0;
                 string sclass;
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>("category-multi", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
                 int id = 0;
                 string sclass;
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>("rating-na", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
             }
         }
 
@@ -1505,7 +1426,7 @@ namespace Ao3TrackReader.Data
             }
 
 
-            model.RequiredTags = new Dictionary<Ao3RequiredTag, Tuple<string, string>>(4);
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             var tlist = new List<KeyValuePair<Ao3TagType, Tuple<string, int>>>();
 
             foreach (var i in Enum.GetValues(typeof(Ao3TagType)))
@@ -1563,7 +1484,7 @@ namespace Ao3TrackReader.Data
                 {
                     if (i != 0 || b)
                     {
-                        model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("complete-yes", "Complete only");
+                        model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-yes", "Complete only");
                     }
                     else
                     {
@@ -1571,9 +1492,9 @@ namespace Ao3TrackReader.Data
                 }
             }
             if (!model.RequiredTags.ContainsKey(Ao3RequiredTag.Complete) || model.RequiredTags[Ao3RequiredTag.Complete] == null)
-                model.RequiredTags[Ao3RequiredTag.Complete] = new Tuple<string, string>("category-none", "Complete and Incomplete");
+                model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("category-none", "Complete and Incomplete");
 
-            tlist.Add(new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Item2, 0)));
+            tlist.Add(new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Label, 0)));
 
             if (query.ContainsKey("work_search[query]"))
             {
@@ -1613,27 +1534,27 @@ namespace Ao3TrackReader.Data
                 int id = 0;
                 string sclass;
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Tuple<string, string>("warning-yes", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
                 int id = 0;
                 string sclass;
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Tuple<string, string>("category-multi", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
                 int id = 0;
                 string sclass;
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>(sclass, req[0]);
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Tuple<string, string>("rating-na", string.Join(", ", req));
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
             }
         }
 

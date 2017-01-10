@@ -36,15 +36,28 @@ namespace Ao3TrackReader.Models
         Complete
     }
 
+    public class Ao3ChapterDetails
+    {
+        public Ao3ChapterDetails(int available, int? total) { Available = available; Total = total; }
+        public int Available { get; set; }
+        public int? Total { get; set; }
+    }
+    public class Ao3SeriesLink
+    {
+        public Ao3SeriesLink(long seriesid, string url) { SeriesId = seriesid; Url = url; }
+        public long SeriesId { get; set; }
+        public string Url { get; set; }
+    }
+
     public class Ao3WorkDetails
     {
         public long WorkId { get; set; }
         public IReadOnlyDictionary<string,string> Authors { get; set; }
         public IReadOnlyDictionary<string, string> Recipiants { get; set; }
-        public IReadOnlyDictionary<string,Tuple<int,string>> Series { get; set; }
+        public IReadOnlyDictionary<string, Ao3SeriesLink> Series { get; set; }
         public string LastUpdated { get; set; }
         public int? Words { get; set; }
-        public Tuple<int?, int, int?> Chapters { get; set; }
+        public Ao3ChapterDetails Chapters { get; set; }
         public int? Collections { get; set; }
         public int? Comments { get; set; }
         public int? Kudos { get; set; }
@@ -52,6 +65,13 @@ namespace Ao3TrackReader.Models
         public int? Hits { get; set; }
         public int? Works { get; set; }
         public TextTree Summary { get; set; }
+    }
+
+    public class Ao3RequredTagData
+    {
+        public Ao3RequredTagData(string tag, string label) { Tag = tag; Label = label; }
+        public string Tag { get; private set; }
+        public string Label { get; private set; }
     }
 
 
@@ -65,26 +85,26 @@ namespace Ao3TrackReader.Models
 
         public SortedDictionary<Ao3TagType, List<string>> Tags { set; get; }
 
-        public Dictionary<Ao3RequiredTag, Tuple<string, string>> RequiredTags { get; set; }
+        public Dictionary<Ao3RequiredTag, Ao3RequredTagData> RequiredTags { get; set; }
         public Uri GetRequiredTagUri(Ao3RequiredTag tag) {
-            Tuple<string, string> rt = null;
+            Ao3RequredTagData rt = null;
             if (RequiredTags == null || !RequiredTags.TryGetValue(tag, out rt) || rt == null)
             {
-                if (tag == Ao3RequiredTag.Category) rt = new Tuple<string, string>("category-none", "None");
-                else if (tag == Ao3RequiredTag.Complete) rt = new Tuple<string, string>("category-none", "None");
-                else if (tag == Ao3RequiredTag.Rating) rt = new Tuple<string, string>("rating-notrated", "None");
-                else if (tag == Ao3RequiredTag.Warnings) rt = new Tuple<string, string>("warning-none", "None");
+                if (tag == Ao3RequiredTag.Category) rt = new Ao3RequredTagData("category-none", "None");
+                else if (tag == Ao3RequiredTag.Complete) rt = new Ao3RequredTagData("category-none", "None");
+                else if (tag == Ao3RequiredTag.Rating) rt = new Ao3RequredTagData("rating-notrated", "None");
+                else if (tag == Ao3RequiredTag.Warnings) rt = new Ao3RequredTagData("warning-none", "None");
             }
 
-            return new Uri("http://archiveofourown.org/images/skins/iconsets/default_large/"+rt.Item1+".png");
+            return new Uri("http://archiveofourown.org/images/skins/iconsets/default_large/"+rt.Tag+".png");
         }
         public string GetRequiredTagText(Ao3RequiredTag tag)
         {
-            Tuple<string, string> rt;
+            Ao3RequredTagData rt;
             if (RequiredTags == null || !RequiredTags.TryGetValue(tag, out rt))
                 return null;
 
-            return rt.Item2;
+            return rt.Label;
         }
 
         public string Language { set; get; }

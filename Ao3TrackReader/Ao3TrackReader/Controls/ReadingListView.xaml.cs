@@ -134,7 +134,16 @@ namespace Ao3TrackReader.Controls
                 foreach (var workmodel in item.BaseData.SeriesWorks)
                 {
                     workid = workmodel.Details.WorkId;
-                    if (workmodel.Details.Chapters.Item1 < workmodel.Details.Chapters.Item2) break;
+                    Helper.WorkChapter workchap;
+                    if (item.WorkChapters.TryGetValue(workid, out workchap))
+                    {
+                        int chapters_finished = (int)workchap.number;
+                        if (workchap.location != null) { chapters_finished--; }
+
+                        int unread = workmodel.Details.Chapters.Available - chapters_finished;
+
+                        if (unread < workmodel.Details.Chapters.Available) break;
+                    }
                 }
 
                 if (workid != 0) wpv.NavigateToLast(workid);

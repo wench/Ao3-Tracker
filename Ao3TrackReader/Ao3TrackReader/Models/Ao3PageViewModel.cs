@@ -7,6 +7,7 @@ using ImageSource = Xamarin.Forms.ImageSource;
 using UriImageSource = Xamarin.Forms.UriImageSource;
 using System.Linq;
 using Ao3TrackReader.Resources;
+using Ao3TrackReader.Data;
 
 namespace Ao3TrackReader.Models
 {
@@ -31,14 +32,14 @@ namespace Ao3TrackReader.Models
             // Sort based on chapters remaining
             if ((baseData.Type == Ao3PageType.Work || baseData.Type == Ao3PageType.Series) && (y.baseData.Type == Ao3PageType.Work || y.baseData.Type == Ao3PageType.Series))
             {
-                int? xc = baseData.Details?.Chapters?.Item1;
-                int? yc = y.baseData.Details?.Chapters?.Item1;
+                int? xc = ChaptersRead;
+                int? yc = y.ChaptersRead;
                 if (xc != null || yc != null)
                 {
                     if (xc == null) return 1;
                     if (yc == null) return -1;
-                    xc = baseData.Details.Chapters.Item2 - xc;
-                    yc = y.baseData.Details.Chapters.Item2 - yc;
+                    xc = baseData.Details.Chapters.Available - xc;
+                    yc = y.baseData.Details.Chapters.Available - yc;
                     c = xc.Value.CompareTo(yc.Value);
                     if (c != 0) return -c; // higher numbers of unread chapters first
                 }
@@ -65,7 +66,7 @@ namespace Ao3TrackReader.Models
             if (ux == uy) return 0;
             if (ux == null) return 1;
             if (uy == null) return -1;
-            return StringComparer.OrdinalIgnoreCase.Compare(ux, uy); 
+            return StringComparer.OrdinalIgnoreCase.Compare(ux, uy);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -90,6 +91,7 @@ namespace Ao3TrackReader.Models
         public string Subtitle { get; private set; }
         public string Details { get; private set; }
 
+        public int? ChaptersRead { get; private set; }
         public int? Unread { get; private set; }
 
         private Uri imageRatingUri;
@@ -107,9 +109,9 @@ namespace Ao3TrackReader.Models
 
         public TextTree Summary { get; private set; }
 
-        public bool SummaryVisible { get { return Summary != null ; } }
+        public bool SummaryVisible { get { return Summary != null; } }
 
-        
+
         SortedDictionary<Ao3TagType, List<string>> tags;
         public TextTree Tags
         {
@@ -176,7 +178,108 @@ namespace Ao3TrackReader.Models
             }
         }
 
+        EventHandler<Work> ChapterNumberChangedDelegate;
+
+        class Weak
+        {
+            WeakReference<Ao3PageViewModel> weakref;
+            public Weak(Ao3PageViewModel target) { weakref = new WeakReference<Ao3PageViewModel>(target); }
+
+            public void ChapterNumberChanged(object sender, Work workchap)
+            {
+                Ao3PageViewModel target;
+                if (weakref.TryGetTarget(out target))
+                    target.ChapterNumberChanged(sender, workchap);
+            }
+        }
+
+
+        void Register()
+        {
+            if (baseData.Type == Ao3PageType.Work)
+            {
+                if (baseData.Details != null)
+                {
+                    var workevents = WorkEvents.GetEvent(baseData.Details.WorkId);
+                    workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                }
+            }
+            else if (baseData.Type == Ao3PageType.Series)
+            {
+                if (baseData.SeriesWorks != null)
+                {
+                    foreach (var workdata in baseData.SeriesWorks)
+                    {
+                        var workevents = WorkEvents.GetEvent(workdata.Details.WorkId);
+                        workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                    }
+                }
+            }
+        }
+
+        void Deregister()
+        {
+            if (baseData == null || baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series)
+                return;
+
+            if (ChapterNumberChangedDelegate == null)
+            {
+                Weak weak = new Weak(this);
+                ChapterNumberChangedDelegate = new EventHandler<Work>(weak.ChapterNumberChanged);
+            }
+
+            if (baseData.Type == Ao3PageType.Work)
+            {
+                if (baseData.Details != null)
+                {
+                    var workevents = WorkEvents.TryGetEvent(baseData.Details.WorkId);
+                    if (workevents != null) workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                }
+            }
+            else if (baseData.Type == Ao3PageType.Series)
+            {
+                if (baseData.SeriesWorks != null)
+                {
+                    foreach (var workdata in baseData.SeriesWorks)
+                    {
+                        var workevents = WorkEvents.TryGetEvent(workdata.Details.WorkId);
+                        if (workevents != null) workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                    }
+                }
+            }
+        }
+
+
+        ~Ao3PageViewModel()
+        {
+            Deregister();
+            ChapterNumberChangedDelegate = null;
+        }
+
+        void ChapterNumberChanged(object sender, Work workchap)
+        {
+            if (baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series)
+                return;
+
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                OnPropertyChanging("");
+                try
+                {
+                    RecalculateChapters();
+                    UpdateTitle();
+                    UpdateDetails();
+                    UpdateSummary();
+                }
+                finally
+                {
+                    OnPropertyChanged("");
+                }
+            });
+        }
+
         Ao3PageModel baseData;
+
         public Ao3PageModel BaseData
         {
             get { return baseData; }
@@ -187,21 +290,14 @@ namespace Ao3TrackReader.Models
                 OnPropertyChanging("");
                 try
                 {
+                    Deregister();
                     baseData = value;
+                    Register();
 
-                    int? newunread = value.Details?.Chapters?.Item1;
-                    if (newunread != null)
-                    {
-                        newunread = value.Details.Chapters.Item2 - newunread;
-
-                    }
-                    if (Unread != newunread)
-                    {
-                        Unread = newunread;
-                    }
+                    RecalculateChapters();
 
                     // Generate everything from Ao3PageModel 
-                    string newGroup = value.PrimaryTag ?? "";
+                    string newGroup = baseData.PrimaryTag ?? "";
                     if (Group != newGroup)
                     {
                         Group = newGroup;
@@ -209,111 +305,256 @@ namespace Ao3TrackReader.Models
 
                     if (!string.IsNullOrWhiteSpace(newGroup))
                     {
-                        string newgrouptype = value.PrimaryTagType.ToString().TrimEnd('s');
+                        string newgrouptype = baseData.PrimaryTagType.ToString().TrimEnd('s');
                         if (newgrouptype != GroupType)
                         {
                             GroupType = newgrouptype;
                         }
                     }
 
-                    imageRatingUri = value.GetRequiredTagUri(Ao3RequiredTag.Rating);
-                    imageWarningsUri = value.GetRequiredTagUri(Ao3RequiredTag.Warnings);
-                    imageCategoryUri = value.GetRequiredTagUri(Ao3RequiredTag.Category);
-                    imageCompleteUri = value.GetRequiredTagUri(Ao3RequiredTag.Complete);
+                    imageRatingUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Rating);
+                    imageWarningsUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Warnings);
+                    imageCategoryUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Category);
+                    imageCompleteUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Complete);
 
-                    Uri = value.Uri;
+                    Uri = baseData.Uri;
 
+                    UpdateTitle();
 
-                    var ts = new Span();
-
-                    if (value.Type == Ao3PageType.Search || value.Type == Ao3PageType.Bookmarks || value.Type == Ao3PageType.Tag)
-                    {
-                        if (!string.IsNullOrWhiteSpace(value.PrimaryTag))
-                        {
-                            ts.Nodes.Add(value.PrimaryTag);
-                            if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = Colors.Base });
-                        }
-                    }
-
-                    if (value.Type == Ao3PageType.Series) ts.Nodes.Add(new TextNode { Text = "Series ", Foreground = Colors.Base });
-
-                    if (!string.IsNullOrWhiteSpace(value.Title)) ts.Nodes.Add(value.Title);
-                    if (value.Details?.Authors != null && value.Details.Authors.Count != 0)
-                    {
-                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Colors.Base });
-                        bool first = true;
-                        foreach (var user in value.Details.Authors)
-                        {
-                            if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
-                            else
-                                first = false;
-
-                            ts.Nodes.Add(user.Value);
-                        }
-                    }
-                    if (value.Details?.Recipiants != null && value.Details.Recipiants.Count != 0)
-                    {
-                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Colors.Base });
-                        bool first = true;
-                        foreach (var user in value.Details.Recipiants)
-                        {
-                            if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
-                            else
-                                first = false;
-
-                            ts.Nodes.Add(user.Value);
-                        }
-                    }
-
-                    if (Unread != null && Unread > 0)
-                    {
-                        ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
-                    }
-
-                    var oldtitle = Title;
-                    if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
-                    else Title = ts;
-
-                    Date = value.Details?.LastUpdated ?? "";
+                    Date = baseData.Details?.LastUpdated ?? "";
 
                     Subtitle = "";
-                    if (value.Tags != null && value.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", value.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
+                    if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
 
-                    List<string> d = new List<string>();
-                    if (!string.IsNullOrWhiteSpace(value.Language)) d.Add("Language: " + value.Language);
-                    if (value.Details != null)
-                    {
-                        if (value.Details.Words != null) d.Add("Words:\xA0" + value.Details.Words.ToString());
+                    UpdateDetails();
 
-                        if (value.Details.Chapters != null)
-                        {
-                            string readstr = "";
-                            if (value.Details.Chapters.Item1 != null) readstr = value.Details.Chapters.Item1.ToString() + "/";
-                            d.Add("Chapters:\xA0" + readstr + value.Details.Chapters.Item2.ToString() + "/" + (value.Details.Chapters.Item3?.ToString() ?? "?"));
-                        }
+                    UpdateSummary();
 
-                        if (value.Details.Collections != null) d.Add("Collections:\xA0" + value.Details.Collections.ToString());
-                        if (value.Details.Comments != null) d.Add("Comments:\xA0" + value.Details.Comments.ToString());
-                        if (value.Details.Kudos != null) d.Add("Kudos:\xA0" + value.Details.Kudos.ToString());
-                        if (value.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + value.Details.Bookmarks.ToString());
-                        if (value.Details.Hits != null) d.Add("Hits:\xA0" + value.Details.Hits.ToString());
-                    }
-
-                    Details = string.Join("   ", d);
-                    if (!string.IsNullOrWhiteSpace(value.SearchQuery)) Details = ("Query: " + value.SearchQuery + "\n" + Details).Trim();
-                    if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
-
-                    Summary = value.Details?.Summary;
-
-                    tags = value.Tags;
+                    tags = baseData.Tags;
                 }
                 finally
                 {
                     OnPropertyChanged("");
                 }
 
+            }
+        }
+
+        public IDictionary<long, Helper.WorkChapter> WorkChapters { get; private set; }
+        void RecalculateChapters()
+        {
+            if (baseData?.Details?.Chapters == null)
+            {
+                Unread = null;
+                ChaptersRead = null;
+                return;
+            }
+
+            try
+            {
+                if (baseData.Type == Ao3PageType.Work)
+                {
+                    var task = App.Storage.getWorkChaptersAsync(new[] { baseData.Details.WorkId });
+                    task.Wait();
+                    WorkChapters = task.Result;
+                    var workchap = WorkChapters.FirstOrDefault().Value;
+                    long chapters_finished = workchap?.number ?? 0;
+                    if (workchap?.location != null) { chapters_finished--; }
+                    ChaptersRead = (int)chapters_finished;
+                }
+                else if (baseData.Type == Ao3PageType.Series)
+                {
+                    var task = App.Storage.getWorkChaptersAsync(baseData.SeriesWorks.Select(pm => pm.Details.WorkId));
+                    task.Wait();
+                    WorkChapters = task.Result;
+                    long chapters_finished = 0;
+                    foreach (var workchap in WorkChapters.Values)
+                    {
+                        chapters_finished += workchap.number;
+                        if (workchap.location != null) { chapters_finished--; }
+
+                    }
+                    ChaptersRead = (int)chapters_finished;
+                }
+                else
+                {
+                    WorkChapters = null;
+                    ChaptersRead = null;
+                }
+            }
+            catch (Exception)
+            {
+                WorkChapters = null;
+                ChaptersRead = null;
+            }
+
+            int? newunread = ChaptersRead;
+            if (newunread != null)
+            {
+                newunread = baseData.Details.Chapters.Available - newunread;
+
+            }
+            if (Unread != newunread)
+            {
+                Unread = newunread;
+            }
+
+        }
+
+        void UpdateTitle()
+        {
+            var ts = new Span();
+
+            if (baseData.Type == Ao3PageType.Search || baseData.Type == Ao3PageType.Bookmarks || baseData.Type == Ao3PageType.Tag)
+            {
+                if (!string.IsNullOrWhiteSpace(baseData.PrimaryTag))
+                {
+                    ts.Nodes.Add(baseData.PrimaryTag);
+                    if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = Colors.Base });
+                }
+            }
+
+            if (baseData.Type == Ao3PageType.Series) ts.Nodes.Add(new TextNode { Text = "Series ", Foreground = Colors.Base });
+
+            if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(baseData.Title);
+            if (baseData.Details?.Authors != null && baseData.Details.Authors.Count != 0)
+            {
+                ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Colors.Base });
+                bool first = true;
+                foreach (var user in baseData.Details.Authors)
+                {
+                    if (!first)
+                        ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
+                    else
+                        first = false;
+
+                    ts.Nodes.Add(user.Value);
+                }
+            }
+            if (baseData.Details?.Recipiants != null && baseData.Details.Recipiants.Count != 0)
+            {
+                ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Colors.Base });
+                bool first = true;
+                foreach (var user in baseData.Details.Recipiants)
+                {
+                    if (!first)
+                        ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
+                    else
+                        first = false;
+
+                    ts.Nodes.Add(user.Value);
+                }
+            }
+
+            if (Unread != null && Unread > 0)
+            {
+                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
+            }
+
+            var oldtitle = Title;
+            if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
+            else Title = ts;
+
+        }
+
+        void UpdateDetails()
+        {
+            List<string> d = new List<string>();
+            if (!string.IsNullOrWhiteSpace(baseData.Language)) d.Add("Language: " + baseData.Language);
+            if (baseData.Details != null)
+            {
+                if (baseData.Details.Words != null) d.Add("Words:\xA0" + baseData.Details.Words.ToString());
+
+                if (baseData.Details.Chapters != null)
+                {
+                    string readstr = "";
+                    if (ChaptersRead != null) readstr = ChaptersRead.ToString() + "/";
+                    d.Add("Chapters:\xA0" + readstr + baseData.Details.Chapters.Available.ToString() + "/" + (baseData.Details.Chapters.Total?.ToString() ?? "?"));
+                }
+
+                if (baseData.Details.Collections != null) d.Add("Collections:\xA0" + baseData.Details.Collections.ToString());
+                if (baseData.Details.Comments != null) d.Add("Comments:\xA0" + baseData.Details.Comments.ToString());
+                if (baseData.Details.Kudos != null) d.Add("Kudos:\xA0" + baseData.Details.Kudos.ToString());
+                if (baseData.Details.Bookmarks != null) d.Add("Bookmarks:\xA0" + baseData.Details.Bookmarks.ToString());
+                if (baseData.Details.Hits != null) d.Add("Hits:\xA0" + baseData.Details.Hits.ToString());
+            }
+
+            Details = string.Join("   ", d);
+            if (!string.IsNullOrWhiteSpace(baseData.SearchQuery)) Details = ("Query: " + baseData.SearchQuery + "\n" + Details).Trim();
+            if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
+        }
+
+        void UpdateSummary()
+        {
+            if (baseData.Details?.Summary != null)
+            {
+                Summary = baseData.Details?.Summary;
+            }
+            else if (baseData.Type == Ao3PageType.Series)
+            {
+                var summary = new Block();
+                if (baseData.SeriesWorks != null) foreach (var workmodel in baseData.SeriesWorks)
+                {
+                    Helper.WorkChapter workchap;
+                    int? unread = null;
+                    if (WorkChapters != null)
+                    {
+                        int chapters_finished = 0;
+                        if (WorkChapters.TryGetValue(workmodel.Details.WorkId, out workchap))
+                        {
+                            chapters_finished = (int)workchap.number;
+                            if (workchap.location != null) { chapters_finished--; }
+                        }
+                        unread = workmodel.Details.Chapters.Available - chapters_finished;
+                     }
+                    var worksummary = new Span();
+
+                    var ts = new Span { Foreground = Resources.Colors.Highlight.Low };
+
+                    if (!string.IsNullOrWhiteSpace(workmodel.Title)) ts.Nodes.Add(new TextNode { Text = workmodel.Title, Foreground = Resources.Colors.Highlight.MediumHigh });
+                    if (workmodel.Details?.Authors != null && workmodel.Details.Authors.Count != 0)
+                    {
+                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Resources.Colors.Base.MediumLow });
+                        bool first = true;
+                        foreach (var user in workmodel.Details.Authors)
+                        {
+                            if (!first)
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.MediumLow });
+                            else
+                                first = false;
+
+                            ts.Nodes.Add(user.Value);
+                        }
+                    }
+                    if (workmodel.Details?.Recipiants != null && workmodel.Details.Recipiants.Count != 0)
+                    {
+                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Resources.Colors.Base.MediumLow });
+                        bool first = true;
+                        foreach (var user in workmodel.Details.Recipiants)
+                        {
+                            if (!first)
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.MediumLow });
+                            else
+                                first = false;
+
+                            ts.Nodes.Add(user.Value);
+                        }
+                    }
+                    if (unread != null && unread > 0)
+                    {
+                        ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + " unread chapter" + (unread == 1 ? "" : "s"), Foreground = Resources.Colors.Base.MediumHigh });
+                    }
+
+                    worksummary.Nodes.Add(ts);
+
+                    summary.Nodes.Add(worksummary);
+                    summary.Nodes.Add("\n");
+                }
+                Summary = summary;
+            }
+            else
+            {
+                Summary = null;
             }
         }
 

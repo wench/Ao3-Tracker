@@ -42,7 +42,6 @@ namespace Ao3TrackReader
 
         public App()
         {
-
             Resources = new ResourceDictionary();
 #if !WINDOWS_UWP
             // Andriod and iOS uses Xamarin Forms theme           

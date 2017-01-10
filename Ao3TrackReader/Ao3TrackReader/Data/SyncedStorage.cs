@@ -140,11 +140,11 @@ namespace Ao3TrackReader.Data
                 //console.log("delayedsync: setting up timeout callback");
                 no_sync_until = now + timeout;
                 serversync = SyncState.Delayed;
-                cts = new CancellationTokenSource();
+                var thiscts = cts = new CancellationTokenSource();
 
                 Task.Run(() =>
                 {
-                    if (cts.Token.WaitHandle.WaitOne(timeout))
+                    if (thiscts.Token.WaitHandle.WaitOne(timeout))
                     {
                         cts = null;
                         return;
@@ -248,12 +248,22 @@ namespace Ao3TrackReader.Data
                                 last_sync = item.Value.timestamp;
                             }
 
-                            if (!storage.ContainsKey(item.Key) || storage[item.Key].IsNewerOrSame(item.Value))
+                            Work old = null;
+                            if (!storage.ContainsKey(item.Key) || (old = storage[item.Key]).IsNewerOrSame(item.Value))
                             {
                                 // Remove from unsynced list (if it exists)
                                 if (unsynced.ContainsKey(item.Key)) { unsynced.Remove(item.Key); }
                                 // Grab the new details
                                 newitems[item.Key] = storage[item.Key] = item.Value;
+
+                                if (old == null || item.Value.location == null || item.Value.location == 0 || (old != null && item.Value.number > old.number))
+                                {
+                                    WorkEvents.TryGetEvent(item.Key)?.OnChapterNumChanged(this, item.Value);
+                                }
+                                else
+                                {
+                                    WorkEvents.TryGetEvent(item.Key)?.OnLocationChanged(this, item.Value);
+                                }
                             }
                             // This kinda shouldn't happen, but apparently it did... we can deal with it though
                             else
@@ -372,12 +382,12 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        public Task<IDictionary<long, WorkChapter>> getWorkChaptersAsync(ICollection<long> works)
+        public Task<IDictionary<long, WorkChapter>> getWorkChaptersAsync(IEnumerable<long> works)
         {
             return Task.Run(() =>
             {
                 ManualResetEventSlim handle = null;
-                IDictionary<long, WorkChapter> r = new Dictionary<long, WorkChapter>(works.Count);
+                IDictionary<long, WorkChapter> r = new Dictionary<long, WorkChapter>();
 
                 EventHandler<bool> sendResponse = (sender, success) =>
                 {
@@ -424,12 +434,7 @@ namespace Ao3TrackReader.Data
                         Work old = null;
                         if (!storage.TryGetValue(work.Key, out old) || old.IsNewer(work.Value))
                         {
-                            // Do a delayed since if we finished a chapter, or started a new one 
-                            if (old == null || work.Value.location == null || work.Value.location == 0 || (old != null && work.Value.number > old.number))
-                            {
-                                do_delayed = true;
-                            }
-                            newitems[work.Key] = storage[work.Key] = new Work
+                            var w = new Work
                             {
                                 id = work.Key,
                                 number = work.Value.number,
@@ -438,7 +443,18 @@ namespace Ao3TrackReader.Data
                                 timestamp = time
                             };
 
-                            unsynced[work.Key] = storage[work.Key];
+                            unsynced[work.Key] = newitems[work.Key] = storage[work.Key] = w;
+
+                            // Do a delayed since if we finished a chapter, or started a new one 
+                            if (old == null || work.Value.location == null || work.Value.location == 0 || (old != null && work.Value.number > old.number))
+                            {
+                                do_delayed = true;
+                                WorkEvents.TryGetEvent(work.Key)?.OnChapterNumChanged(this, w);
+                            }
+                            else
+                            {
+                                WorkEvents.TryGetEvent(work.Key)?.OnLocationChanged(this, w);
+                            }
                         }
 
                     }

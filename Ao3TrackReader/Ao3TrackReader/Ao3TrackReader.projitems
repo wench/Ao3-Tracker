@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\HtmlConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\SyncedStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\WorkEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DisableableCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupList.cs" />
