@@ -218,7 +218,7 @@ namespace Ao3TrackReader
             }
         }
 
-        private void RemoveFromGroup(T item)
+        private bool RemoveFromGroup(T item)
         {
             lock (locker)
             {
@@ -228,9 +228,11 @@ namespace Ao3TrackReader
                 var g = IsHidden(item) ? hidden : this.Where((l) => l.Group == groupName).FirstOrDefault();
                 if (g != null)
                 {
-                    g.Remove(item);
+                    bool res = g.Remove(item);
                     if (g.Count == 0) Remove(g);
+                    return res;
                 }
+                return false;
             }
         }
 
@@ -241,8 +243,8 @@ namespace Ao3TrackReader
                 lock (locker)
                 {                
                     // Remove from group and put in updating
-                    RemoveFromGroup((T)sender);
-                    updating.Add((T)sender);
+                    if (RemoveFromGroup((T)sender) && !updating.Contains((T)sender))
+                        updating.Add((T)sender);
                 }
             }
         }

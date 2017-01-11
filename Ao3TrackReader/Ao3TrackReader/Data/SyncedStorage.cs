@@ -199,15 +199,27 @@ namespace Ao3TrackReader.Data
                 Task.Run(async () =>
                 {
                     //console.log("dosync: sending GET request");
-                    
-                    var response = await HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
 
-                    if (!response.IsSuccessStatusCode)
+                    var task = HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
+                    try
+                    {
+                        task.Wait();
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    var response = task.IsFaulted?null:task.Result;
+
+                    if (response == null || !response.IsSuccessStatusCode)
                     {
                         lock (locker)
                         {
                             //console.error("dosync: FAILED %s", response.ReasonPhrase);
-                            serversync = SyncState.Disabled;
+                            if (response != null && response.StatusCode == HttpStatusCode.Forbidden)
+                                serversync = SyncState.Disabled;
+                            else
+                                serversync = SyncState.Ready;
                             onSyncFromServer(false);
                             return;
                         }
@@ -216,12 +228,13 @@ namespace Ao3TrackReader.Data
                     var content = await response.Content.ReadAsStringAsync();
                     Dictionary<long, Work> current;
                     Dictionary<long, Work> items;
-                    long time;
+                    long time, old_sync;
                     var settings = new JsonSerializerSettings();
                     settings.MissingMemberHandling = MissingMemberHandling.Ignore;
 
                     lock (locker)
                     {
+                        old_sync = last_sync;
 
                         try
                         {
@@ -301,15 +314,33 @@ namespace Ao3TrackReader.Data
                     var json = JsonConvert.SerializeObject(current);
                     var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                    response = await HttpClient.PostAsync(new Uri(url_base, "Values"), postBody);
-                    if (!response.IsSuccessStatusCode)
+                    task = HttpClient.PostAsync(new Uri(url_base, "Values"), postBody);
+                    try
+                    {
+                        task.Wait();
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    response = task.IsFaulted ? null : task.Result;
+                    if (response == null || !response.IsSuccessStatusCode)
                     {
                         lock (locker)
                         {
                             //console.error("dosync: FAILED %s", response.ReasonPhrase);
-                            serversync = SyncState.Disabled;
-                            App.Database.SaveVariable("last_sync", 0L.ToString());
-                            last_sync = 0;
+                            if (response != null && response.StatusCode == HttpStatusCode.Forbidden)
+                            {
+                                last_sync = 0;
+                                serversync = SyncState.Disabled;
+                            }
+                            else
+                            {
+                                last_sync = old_sync;
+                                serversync = SyncState.Ready;
+                                unsynced = current;
+                            }
+                            App.Database.SaveVariable("last_sync", last_sync.ToString());
                             onSyncFromServer(false);
                             return;
                         }
@@ -501,7 +532,13 @@ namespace Ao3TrackReader.Data
 
                 var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                var response = await HttpClient.PostAsync(new Uri(url_base, "User/Login"), postBody);
+                var task = HttpClient.PostAsync(new Uri(url_base, "User/Login"), postBody);
+                task.Wait();
+                if (task.IsFaulted) return new Dictionary<string, string>
+                {
+                    {  "exception", task.Exception.Message }
+                };
+                var response = task.Result;
                 if (!response.IsSuccessStatusCode)
                 {
                     errors = new Dictionary<string, string> {
@@ -559,7 +596,17 @@ namespace Ao3TrackReader.Data
                 var json = JsonConvert.SerializeObject(srl);
                 var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                var response = await HttpClient.PostAsync(new Uri(url_base, "ReadingList"), postBody);
+                var task = HttpClient.PostAsync(new Uri(url_base, "ReadingList"), postBody);
+                try
+                {
+                    task.Wait();
+                }
+                catch (Exception)
+                {
+
+                }
+                if (task.IsFaulted) return null;
+                var response = task.Result;
                 if (!response.IsSuccessStatusCode)
                     return null;
 
