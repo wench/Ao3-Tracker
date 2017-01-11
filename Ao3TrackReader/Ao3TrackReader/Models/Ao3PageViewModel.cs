@@ -8,6 +8,7 @@ using UriImageSource = Xamarin.Forms.UriImageSource;
 using System.Linq;
 using Ao3TrackReader.Resources;
 using Ao3TrackReader.Data;
+using System.Threading.Tasks;
 
 namespace Ao3TrackReader.Models
 {
@@ -263,18 +264,39 @@ namespace Ao3TrackReader.Models
 
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
-                OnPropertyChanging("");
-                try
+                RecalculateChaptersAsync().ContinueWith((task) =>
                 {
-                    RecalculateChapters();
-                    UpdateTitle();
-                    UpdateDetails();
-                    UpdateSummary();
-                }
-                finally
-                {
-                    OnPropertyChanged("");
-                }
+                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                    {
+                        OnPropertyChanging("Unread");
+                        OnPropertyChanging("ChaptersRead");
+
+                        int? newunread = ChaptersRead = task.Result;
+                        if (newunread != null)
+                        {
+                            newunread = baseData.Details.Chapters.Available - newunread;
+
+                        }
+                        if (Unread != newunread)
+                        {
+                            Unread = newunread;
+                        }
+
+                        OnPropertyChanging("Title");
+                        UpdateTitle();
+                        OnPropertyChanged("Title");
+                        OnPropertyChanging("Details");
+                        UpdateDetails();
+                        OnPropertyChanged("Details");
+                        OnPropertyChanging("Summary");
+                        UpdateSummary();
+                        OnPropertyChanged("Summary");
+
+                        OnPropertyChanged("ChaptersRead");
+                        OnPropertyChanged("Unread");
+
+                    });
+                });
             });
         }
 
@@ -288,85 +310,105 @@ namespace Ao3TrackReader.Models
                 if (baseData == value) return;
 
                 OnPropertyChanging("");
-                try
+                Deregister();
+                baseData = value;
+                Unread = null;
+                ChaptersRead = null;
+
+                // Generate everything from Ao3PageModel 
+                string newGroup = baseData.PrimaryTag ?? "";
+                if (Group != newGroup)
                 {
-                    Deregister();
-                    baseData = value;
-                    Register();
+                    Group = newGroup;
+                }
 
-                    RecalculateChapters();
-
-                    // Generate everything from Ao3PageModel 
-                    string newGroup = baseData.PrimaryTag ?? "";
-                    if (Group != newGroup)
+                if (!string.IsNullOrWhiteSpace(newGroup))
+                {
+                    string newgrouptype = baseData.PrimaryTagType.ToString().TrimEnd('s');
+                    if (newgrouptype != GroupType)
                     {
-                        Group = newGroup;
+                        GroupType = newgrouptype;
                     }
+                }
 
-                    if (!string.IsNullOrWhiteSpace(newGroup))
+                imageRatingUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Rating);
+                imageWarningsUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Warnings);
+                imageCategoryUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Category);
+                imageCompleteUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Complete);
+
+                Uri = baseData.Uri;
+
+                Date = baseData.Details?.LastUpdated ?? "";
+
+                Subtitle = "";
+                if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
+
+                tags = baseData.Tags;
+
+                OnPropertyChanged("");
+
+                RecalculateChaptersAsync().ContinueWith((task) =>
+                {
+                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                     {
-                        string newgrouptype = baseData.PrimaryTagType.ToString().TrimEnd('s');
-                        if (newgrouptype != GroupType)
+                        if (baseData != value)
+                            return;
+
+                        Register();
+
+                        OnPropertyChanging("Unread");
+                        OnPropertyChanging("ChaptersRead");
+
+                        int? newunread = ChaptersRead = task.Result;
+                        if (newunread != null)
                         {
-                            GroupType = newgrouptype;
+                            newunread = baseData.Details.Chapters.Available - newunread;
+
                         }
-                    }
+                        if (Unread != newunread)
+                        {
+                            Unread = newunread;
+                        }
 
-                    imageRatingUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Rating);
-                    imageWarningsUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Warnings);
-                    imageCategoryUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Category);
-                    imageCompleteUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Complete);
+                        OnPropertyChanging("Title");
+                        UpdateTitle();
+                        OnPropertyChanged("Title");
+                        OnPropertyChanging("Details");
+                        UpdateDetails();
+                        OnPropertyChanged("Details");
+                        OnPropertyChanging("Summary");
+                        UpdateSummary();
+                        OnPropertyChanged("Summary");
 
-                    Uri = baseData.Uri;
-
-                    UpdateTitle();
-
-                    Date = baseData.Details?.LastUpdated ?? "";
-
-                    Subtitle = "";
-                    if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
-
-                    UpdateDetails();
-
-                    UpdateSummary();
-
-                    tags = baseData.Tags;
-                }
-                finally
-                {
-                    OnPropertyChanged("");
-                }
-
+                        OnPropertyChanged("ChaptersRead");
+                        OnPropertyChanged("Unread");
+                    });
+                });
             }
         }
 
         public IDictionary<long, Helper.WorkChapter> WorkChapters { get; private set; }
-        void RecalculateChapters()
+        async Task<int?> RecalculateChaptersAsync()
         {
             if (baseData?.Details?.Chapters == null)
             {
-                Unread = null;
-                ChaptersRead = null;
-                return;
+                return null;
             }
 
+            int? newread = null;
             try
             {
                 if (baseData.Type == Ao3PageType.Work)
                 {
-                    var task = App.Storage.getWorkChaptersAsync(new[] { baseData.Details.WorkId });
-                    task.Wait();
-                    WorkChapters = task.Result;
+                    WorkChapters = await App.Storage.getWorkChaptersAsync(new[] { baseData.Details.WorkId });
                     var workchap = WorkChapters.FirstOrDefault().Value;
                     long chapters_finished = workchap?.number ?? 0;
                     if (workchap?.location != null) { chapters_finished--; }
-                    ChaptersRead = (int)chapters_finished;
+                    newread = (int)chapters_finished;
                 }
                 else if (baseData.Type == Ao3PageType.Series)
                 {
-                    var task = App.Storage.getWorkChaptersAsync(baseData.SeriesWorks.Select(pm => pm.Details.WorkId));
-                    task.Wait();
-                    WorkChapters = task.Result;
+                    WorkChapters = await App.Storage.getWorkChaptersAsync(baseData.SeriesWorks.Select(pm => pm.Details.WorkId));
                     long chapters_finished = 0;
                     foreach (var workchap in WorkChapters.Values)
                     {
@@ -374,31 +416,21 @@ namespace Ao3TrackReader.Models
                         if (workchap.location != null) { chapters_finished--; }
 
                     }
-                    ChaptersRead = (int)chapters_finished;
+                    newread = (int)chapters_finished;
                 }
                 else
                 {
                     WorkChapters = null;
-                    ChaptersRead = null;
+                    newread = null;
                 }
             }
             catch (Exception)
             {
                 WorkChapters = null;
-                ChaptersRead = null;
+                newread = null;
             }
 
-            int? newunread = ChaptersRead;
-            if (newunread != null)
-            {
-                newunread = baseData.Details.Chapters.Available - newunread;
-
-            }
-            if (Unread != newunread)
-            {
-                Unread = newunread;
-            }
-
+            return newread;
         }
 
         void UpdateTitle()

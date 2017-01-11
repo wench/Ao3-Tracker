@@ -48,6 +48,10 @@ namespace Ao3TrackReader
             int i = 0;
             for (; i < Count; i++)
             {
+                if (Object.ReferenceEquals(item,this[i]))
+                {
+                    throw new ArgumentException("Attempting to add item already in group", "iten");
+                }
                 if (item.CompareTo(this[i]) <= 0)
                 {
                     break;
@@ -72,6 +76,7 @@ namespace Ao3TrackReader
         where T : IGroupable<T>, INotifyPropertyChanged, INotifyPropertyChanging
     {
         GroupSubList<T> hidden = new GroupSubList<T>("<Hidden>");
+        GroupSubList<T> updating = new GroupSubList<T>("<Updating>");
         private object locker = new object();
 
         public void Add(T item)
@@ -231,9 +236,14 @@ namespace Ao3TrackReader
 
         private void Item_PropertyChanging(object sender, PropertyChangingEventArgs e)
         {
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread") {
-                // Remove from its group
-                RemoveFromGroup((T)sender);
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread")
+            {
+                lock (locker)
+                {                
+                    // Remove from group and put in updating
+                    RemoveFromGroup((T)sender);
+                    updating.Add((T)sender);
+                }
             }
         }
 
@@ -241,8 +251,12 @@ namespace Ao3TrackReader
         {
             if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread")
             {
-                // Add into group
-                AddToGroup((T)sender);
+                lock (locker)
+                {
+                    // Remove from updating and add into group
+                    updating.Remove((T)sender);
+                    AddToGroup((T)sender);
+                }
             }
             if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "GroupType")
             {
@@ -262,7 +276,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                return this.Concat(new[] { hidden });
+                return this.Concat(new[] { hidden, updating });
             }
         }
 

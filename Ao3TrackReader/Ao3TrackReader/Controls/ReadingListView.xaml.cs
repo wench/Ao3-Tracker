@@ -44,7 +44,7 @@ namespace Ao3TrackReader.Controls
             }
 
             List<Task> tasks = new List<Task>();
-            var semaphore = new SemaphoreSlim(4);
+            var semaphore = new SemaphoreSlim(10);
             var vms = new List<Models.Ao3PageViewModel>();
 
             if (items.Count == 0)

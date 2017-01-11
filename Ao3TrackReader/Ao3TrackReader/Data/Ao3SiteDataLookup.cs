@@ -83,7 +83,7 @@ namespace Ao3TrackReader.Data
                 App.Database.SaveVariable("UseHttps", use_https.ToString());
             }
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
-            httpSemaphore = new SemaphoreSlim(10);
+            httpSemaphore = new SemaphoreSlim(20);
         }
 
         static SemaphoreSlim httpSemaphore;
