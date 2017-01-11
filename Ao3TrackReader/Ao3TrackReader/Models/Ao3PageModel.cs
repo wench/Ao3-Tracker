@@ -88,7 +88,11 @@ namespace Ao3TrackReader.Models
         public Dictionary<Ao3RequiredTag, Ao3RequredTagData> RequiredTags { get; set; }
         public Uri GetRequiredTagUri(Ao3RequiredTag tag) {
             Ao3RequredTagData rt = null;
-            if (RequiredTags == null || !RequiredTags.TryGetValue(tag, out rt) || rt == null)
+
+            if (RequiredTags == null || RequiredTags.Count == 0)
+                return null;
+
+            if (!RequiredTags.TryGetValue(tag, out rt) || rt == null)
             {
                 if (tag == Ao3RequiredTag.Category) rt = new Ao3RequredTagData("category-none", "None");
                 else if (tag == Ao3RequiredTag.Complete) rt = new Ao3RequredTagData("category-none", "None");

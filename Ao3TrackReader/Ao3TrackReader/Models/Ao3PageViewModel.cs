@@ -96,16 +96,36 @@ namespace Ao3TrackReader.Models
         public int? Unread { get; private set; }
 
         private Uri imageRatingUri;
-        public ImageSource ImageRating { get { return new UriImageSource { Uri = imageRatingUri }; } }
+        public ImageSource ImageRating {
+            get {
+                if (imageRatingUri == null) return null;
+                return new UriImageSource { Uri = imageRatingUri, CachingEnabled = true, CacheValidity = TimeSpan.FromDays(14) };
+            }
+        }
 
         private Uri imageWarningsUri;
-        public ImageSource ImageWarnings { get { return new UriImageSource { Uri = imageWarningsUri }; } }
+        public ImageSource ImageWarnings {
+            get {
+                if (imageWarningsUri == null) return null;
+                return new UriImageSource { Uri = imageWarningsUri, CachingEnabled = true, CacheValidity = TimeSpan.FromDays(14) };
+            }
+        }
 
         private Uri imageCategoryUri;
-        public ImageSource ImageCategory { get { return new UriImageSource { Uri = imageCategoryUri }; } }
+        public ImageSource ImageCategory {
+            get {
+                if (imageCategoryUri == null) return null;
+                return new UriImageSource { Uri = imageCategoryUri, CachingEnabled = true, CacheValidity = TimeSpan.FromDays(14) };
+            }
+        }
 
         private Uri imageCompleteUri;
-        public ImageSource ImageComplete { get { return new UriImageSource { Uri = imageCompleteUri }; } }
+        public ImageSource ImageComplete {
+            get {
+                if (imageCompleteUri == null) return null;
+                return new UriImageSource { Uri = imageCompleteUri, CachingEnabled = true, CacheValidity = TimeSpan.FromDays(14) };
+            }
+        }
 
 
         public TextTree Summary { get; private set; }
@@ -285,12 +305,17 @@ namespace Ao3TrackReader.Models
                         OnPropertyChanging("Title");
                         UpdateTitle();
                         OnPropertyChanged("Title");
+
                         OnPropertyChanging("Details");
                         UpdateDetails();
                         OnPropertyChanged("Details");
-                        OnPropertyChanging("Summary");
-                        UpdateSummary();
-                        OnPropertyChanged("Summary");
+
+                        if (baseData.Type == Ao3PageType.Series)
+                        {
+                            OnPropertyChanging("Summary");
+                            UpdateSummary();
+                            OnPropertyChanged("Summary");
+                        }
 
                         OnPropertyChanged("ChaptersRead");
                         OnPropertyChanged("Unread");
@@ -345,6 +370,10 @@ namespace Ao3TrackReader.Models
 
                 tags = baseData.Tags;
 
+                UpdateTitle();
+                UpdateSummary();
+                UpdateDetails();
+
                 OnPropertyChanged("");
 
                 RecalculateChaptersAsync().ContinueWith((task) =>
@@ -373,12 +402,17 @@ namespace Ao3TrackReader.Models
                         OnPropertyChanging("Title");
                         UpdateTitle();
                         OnPropertyChanged("Title");
+
                         OnPropertyChanging("Details");
                         UpdateDetails();
                         OnPropertyChanged("Details");
-                        OnPropertyChanging("Summary");
-                        UpdateSummary();
-                        OnPropertyChanged("Summary");
+
+                        if (baseData.Type == Ao3PageType.Series)
+                        {
+                            OnPropertyChanging("Summary");
+                            UpdateSummary();
+                            OnPropertyChanged("Summary");
+                        }
 
                         OnPropertyChanged("ChaptersRead");
                         OnPropertyChanged("Unread");
