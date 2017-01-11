@@ -2,10 +2,10 @@ namespace Ao3Track {
     const $ = jQuery;
 
     // Enable swipe left to go to next page
-    let $next = $('head link[rel=next], .chapter.next > a, .pagination > .next > a');
+    let $next = $('head link[rel=next], .chapter.next > a, .pagination > .next > a, #series a:contains(\xBB)');
     if ($next.length > 0) { SetNextPage($next.attr('href')); }
 
-    let $prev = $('.head link[rel=prev], chapter.previous > a, .pagination > .previous > a');
+    let $prev = $('.head link[rel=prev], chapter.previous > a, .pagination > .previous > a, #series a:contains(\xAB)');
     if ($prev.length > 0) { SetPrevPage($next.attr('href')); }
 
     const LOC_PARA_MULTIPLIER = 1000000000;
