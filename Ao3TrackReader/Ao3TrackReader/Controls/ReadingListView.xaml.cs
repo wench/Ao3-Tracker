@@ -24,6 +24,7 @@ namespace Ao3TrackReader.Controls
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
         private readonly WebViewPage wpv;
+        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(10);
 
         public ReadingListView(WebViewPage wpv)
         {
@@ -44,7 +45,6 @@ namespace Ao3TrackReader.Controls
             }
 
             List<Task> tasks = new List<Task>();
-            var semaphore = new SemaphoreSlim(10);
             var vms = new List<Models.Ao3PageViewModel>();
 
             if (items.Count == 0)
@@ -92,11 +92,11 @@ namespace Ao3TrackReader.Controls
             {
                 foreach (var viewmodel in vms)
                 {
-                    await semaphore.WaitAsync();
+                    await RefreshSemaphore.WaitAsync();
 
                     tasks.Add(Task.Run(async () => {
                         await RefreshAsync(viewmodel);
-                        semaphore.Release();
+                        RefreshSemaphore.Release();
                     }));
 
                 }
@@ -135,15 +135,13 @@ namespace Ao3TrackReader.Controls
                 {
                     workid = workmodel.Details.WorkId;
                     Helper.WorkChapter workchap;
+                    int chapters_finished = 0;
                     if (item.WorkChapters.TryGetValue(workid, out workchap))
                     {
-                        int chapters_finished = (int)workchap.number;
+                        chapters_finished = (int)workchap.number;
                         if (workchap.location != null) { chapters_finished--; }
-
-                        int unread = workmodel.Details.Chapters.Available - chapters_finished;
-
-                        if (unread < workmodel.Details.Chapters.Available) break;
                     }
+                    if (chapters_finished < workmodel.Details.Chapters.Available) break;
                 }
 
                 if (workid != 0) wpv.NavigateToLast(workid);
@@ -258,10 +256,16 @@ namespace Ao3TrackReader.Controls
             Task.Run(async () =>
             {
                 List<Task> tasks = new List<Task>();
-                foreach (var i in readingListBacking.AllSafe)
+                foreach (var viewmodel in readingListBacking.AllSafe)
                 {
-                    tasks.Add(RefreshAsync(i));
+                    await RefreshSemaphore.WaitAsync();
+
+                    tasks.Add(Task.Run(async () => {
+                        await RefreshAsync(viewmodel);
+                        RefreshSemaphore.Release();
+                    }));
                 }
+
 
                 await Task.WhenAll(tasks);
 
@@ -301,17 +305,25 @@ namespace Ao3TrackReader.Controls
             srl = await App.Storage.SyncReadingListAsync(srl);
             if (srl != null)
             {
+                List<Task> tasks = new List<Task>();
                 foreach (var item in srl.paths)
                 {
-                    if (item.Value == -1)
-                    {
-                        RemoveAsyncImpl(item.Key);
-                    }
-                    else
-                    {
-                        AddAsyncImpl(item.Key, item.Value);
-                    }
+                    await RefreshSemaphore.WaitAsync();
+
+                    tasks.Add(Task.Run(() => {
+                        if (item.Value == -1)
+                        {
+                            RemoveAsyncImpl(item.Key);
+                        }
+                        else
+                        {
+                            AddAsyncImpl(item.Key, item.Value);
+                        }
+                        RefreshSemaphore.Release();
+                    }));
+
                 }
+                await Task.WhenAll(tasks);
                 App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
             }
             PageChange(wpv.Current);
@@ -354,7 +366,12 @@ namespace Ao3TrackReader.Controls
             {
                 var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
                 readingListBacking.Add(viewmodel);
-                RefreshAsync(viewmodel);
+                Task.Run(async () =>
+                {
+                    await RefreshSemaphore.WaitAsync();
+                    await RefreshAsync(viewmodel);
+                    RefreshSemaphore.Release();
+                });
             });
         }
 
