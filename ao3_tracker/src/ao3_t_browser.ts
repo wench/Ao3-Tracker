@@ -66,7 +66,7 @@ namespace Ao3Track {
             $('<li><a href="#" id="ao3t-last-loc">Jump to previous</a></li>').appendTo($actions_ul).click((eventObject) => {
                 eventObject.preventDefault();
                 eventObject.stopImmediatePropagation();
-                if (curLastLoc !== null) { scrollToLocation(curLastLoc); }
+                if (curLastLoc !== null) { scrollToLocation(curLastLoc, true); }
             });
         }
         curLastLoc = lastloc;

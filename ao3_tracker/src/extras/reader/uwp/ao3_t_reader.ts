@@ -43,7 +43,10 @@ namespace Ao3Track {
     }
 
     export function EnableLastLocationJump(lastloc: IWorkChapter) {
-        Ao3TrackHelper.onjumptolastlocationevent = (ev) => { Ao3Track.scrollToLocation(lastloc); }
+        Ao3TrackHelper.onjumptolastlocationevent = (ev) => {
+            let jumpPage = Boolean(ev); 
+            Ao3Track.scrollToLocation(lastloc,jumpPage); 
+        }
         Ao3TrackHelper.jumpToLastLocationEnabled = true;
     }
 

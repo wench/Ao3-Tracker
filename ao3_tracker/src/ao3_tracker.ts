@@ -20,7 +20,7 @@ namespace Ao3Track {
         history.replaceState({}, document.title, window.location.href.substr(0,window.location.href.indexOf('#')));
     }
 
-    export function scrollToLocation (workchap: IWorkChapter, isOnLoad? : boolean) {
+    export function scrollToLocation (workchap: IWorkChapter, dojump? : boolean) {
         if (!$chapter_text) { return; }
 
         let had_chapter = false;
@@ -80,7 +80,7 @@ namespace Ao3Track {
         });
 
         // Change page!
-        if (!had_chapter && !isOnLoad) {
+        if (!had_chapter && dojump) {
             window.location.replace('/works/' + workid + (workchap.chapterid ? '/chapters/' + workchap.chapterid.toString() : '') + "#ao3t:jump");
         }
     };
@@ -283,7 +283,7 @@ namespace Ao3Track {
                 let workchap = it[works[i]];
                 if (works[i] === workid) {
                     EnableLastLocationJump(workchap);
-                    if (jumpnow) { scrollToLocation(workchap, true); }
+                    if (jumpnow) { scrollToLocation(workchap, false); }
                 }
 
                 ExtendWorkSummary($($works[i]), works[i], workchap);
