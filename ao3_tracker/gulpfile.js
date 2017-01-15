@@ -6,6 +6,7 @@ var imagemin = require('gulp-imagemin');
 var less = require('gulp-less');
 var preprocess = require('gulp-preprocess');
 var merge = require('merge-stream');
+const url = require('url');
 
 var tsOptions = {
     module: "none",
@@ -53,14 +54,14 @@ var reader = {
             return gulp.src(uwp_scripts)
                 .pipe(sourcemaps.init())
                 .pipe(ts(tsOptions_ES6))
-                .pipe(sourcemaps.write('src-maps'))
+                .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
                 .pipe(gulp.dest('build/reader/uwp'));
         },
         webkit: function reader_scripts_webkit() {
            return gulp.src(webkit_scripts)
             .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES6))
-            .pipe(sourcemaps.write('src-maps'))
+            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/webkit/src-maps/' + file.basename + ".map").href; }}))
             .pipe(gulp.dest('build/reader/webkit'));
         },
     },
