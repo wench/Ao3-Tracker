@@ -58,6 +58,7 @@ namespace Ao3TrackReader.Models
         public string LastUpdated { get; set; }
         public int? Words { get; set; }
         public Ao3ChapterDetails Chapters { get; set; }
+        public bool? IsComplete { get { return Chapters != null ? Chapters.Available == Chapters.Total : (bool?)null; } }
         public int? Collections { get; set; }
         public int? Comments { get; set; }
         public int? Kudos { get; set; }

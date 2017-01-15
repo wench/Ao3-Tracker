@@ -73,7 +73,7 @@ namespace Ao3TrackReader
     }
 
     public class GroupList<T> : ObservableCollection<GroupSubList<T>>
-        where T : IGroupable<T>, INotifyPropertyChanged, INotifyPropertyChanging
+        where T : Models.Ao3PageViewModel, IGroupable<T>, INotifyPropertyChanged, INotifyPropertyChanging
     {
         GroupSubList<T> hidden = new GroupSubList<T>("<Hidden>");
         GroupSubList<T> updating = new GroupSubList<T>("<Updating>");
@@ -130,7 +130,7 @@ namespace Ao3TrackReader
         bool hide_nounread = true;
         private bool IsHidden(T item)
         {
-            return (hide_nounread && item.Unread == 0);
+            return (hide_nounread && item.Unread == 0 && item.BaseData?.Details?.IsComplete == false);
         }
 
         private void ResortHidden()

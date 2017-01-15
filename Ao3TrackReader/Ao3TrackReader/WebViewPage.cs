@@ -424,7 +424,7 @@ namespace Ao3TrackReader
         {
             Task.Run(() =>
             {
-                helper.OnJumpToLastLocation(false);
+                helper.OnJumpToLastLocation(true);
             });
         }
 

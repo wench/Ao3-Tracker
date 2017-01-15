@@ -794,14 +794,19 @@ namespace Ao3TrackReader.Data
                     {
                         var reluri = new Uri(baseuri, href.Value.HtmlDecode());
                         var m = regexTag.Match(reluri.LocalPath);
+                        string tag;
                         if (m.Success)
                         {
-                            var tag = m.Groups["TAGNAME"].Value;
+                            tag = m.Groups["TAGNAME"].Value;
+                        }
+                        else
+                        {
+                            tag = a.InnerText.HtmlDecode();
+                        }
 
-                            List<string> list;
+                        List<string> list;
                             if (!tags.TryGetValue(type, out list)) tags[type] = list = new List<string>();
                             list.Add(UnescapeTag(tag));
-                        }
                     }
                 }
             }
@@ -820,14 +825,15 @@ namespace Ao3TrackReader.Data
                     {
                         var reluri = new Uri(baseuri, href.Value.HtmlDecode());
                         var m = regexTag.Match(reluri.LocalPath);
+                        string tag;
                         if (m.Success)
-                        {
-                            var tag = m.Groups["TAGNAME"].Value;
-                            List<string> list;
-                            if (!tags.TryGetValue(Ao3TagType.Fandoms, out list)) tags[Ao3TagType.Fandoms] = list = new List<string>();
-                            list.Add(UnescapeTag(tag));
+                            tag = m.Groups["TAGNAME"].Value;
+                        else
+                            tag = a.InnerText.HtmlDecode();
 
-                        }
+                        List<string> list;
+                        if (!tags.TryGetValue(Ao3TagType.Fandoms, out list)) tags[Ao3TagType.Fandoms] = list = new List<string>();
+                        list.Add(UnescapeTag(tag));
                     }
                 }
             }
@@ -1077,7 +1083,7 @@ namespace Ao3TrackReader.Data
 
             bool complete = false;
             var meta = main.ElementByClass("div", "wrapper")?.ElementByClass("dl", "meta");
-            model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(1);
+            model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             if (meta != null)
             {
                 foreach (var dt in meta.Elements("dt"))
@@ -1162,7 +1168,7 @@ namespace Ao3TrackReader.Data
             Dictionary<string, int> primaries = new Dictionary<string, int>();
             Dictionary<string, Ao3TagType> tagtypes = new Dictionary<string, Ao3TagType>();
             HashSet<string> languages = new HashSet<string>();
-            Dictionary<string, string> rectag = new Dictionary<string, string>();
+            Dictionary<string, string> reqtags = new Dictionary<string, string>();
 
             int chapsavail = 0;
             int? chapstotal = complete?new int?(0):null;
@@ -1190,12 +1196,16 @@ namespace Ao3TrackReader.Data
                         List<string> list;
                         if (!tags.TryGetValue(kvp.Value, out list))
                         {
-                            rectag[reqTag.Label] = reqTag.Tag;
+                            reqtags[reqTag.Label] = reqTag.Tag;
                             tags[kvp.Value] = list = new List<string>();
                         }
 
-                        if (!list.Contains(reqTag.Label)) 
-                            list.Add(reqTag.Label);
+                        foreach(var separated in reqTag.Label.Split(','))
+                        {
+                            var s = separated.Trim();
+                            if (s != "" && !list.Contains(s))
+                                list.Add(s);
+                        }
                     }
                 }
 
@@ -1217,7 +1227,7 @@ namespace Ao3TrackReader.Data
             if (tags.TryGetValue(Ao3TagType.Warnings, out req))
             {
                 string sclass;
-                if (req.Count == 1 && rectag.TryGetValue(req[0], out sclass))
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out sclass))
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
@@ -1225,7 +1235,7 @@ namespace Ao3TrackReader.Data
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
                 string sclass;
-                if (req.Count == 1 && rectag.TryGetValue(req[0], out sclass))
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out sclass))
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
@@ -1233,7 +1243,7 @@ namespace Ao3TrackReader.Data
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
                 string sclass;
-                if (req.Count == 1 && rectag.TryGetValue(req[0], out sclass))
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out sclass))
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
@@ -1242,7 +1252,7 @@ namespace Ao3TrackReader.Data
             model.Details.Chapters = new Ao3ChapterDetails(chapsavail, chapstotal);
             model.Language = string.Join(", ", languages);
 
-            model.PrimaryTag = primaries.Select(kvp => kvp).OrderBy(kvp => kvp.Value).First().Key;
+            model.PrimaryTag = primaries.OrderByDescending(kvp => kvp.Value).First().Key;
             model.PrimaryTagType = tagtypes[model.PrimaryTag];
         }
 

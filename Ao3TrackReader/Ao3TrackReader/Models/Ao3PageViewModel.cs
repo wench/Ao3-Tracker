@@ -43,12 +43,23 @@ namespace Ao3TrackReader.Models
                     yc = y.baseData.Details.Chapters.Available - yc;
                     c = xc.Value.CompareTo(yc.Value);
                     if (c != 0) return -c; // higher numbers of unread chapters first
+
+                    // Completed works when we've read all the chapters get put bottom
+                    if (xc == 0)
+                    {
+                        bool xf = baseData.Details.Chapters.Available == baseData.Details.Chapters.Total;
+                        bool yf = y.baseData.Details.Chapters.Available == y.baseData.Details.Chapters.Total;
+                        c = xf.CompareTo(yf);
+                        if (c != 0) return c;
+                    }
                 }
             }
-
-            // Sort based on the page type
-            c = baseData.Type.CompareTo(y.baseData.Type);
-            if (c != 0) return c;
+            else
+            {
+                // Sort based on the page type
+                c = baseData.Type.CompareTo(y.baseData.Type);
+                if (c != 0) return c;
+            }
 
             // Sort based on title
             string tx = Title?.ToString();
