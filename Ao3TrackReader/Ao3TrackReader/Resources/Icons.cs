@@ -62,6 +62,9 @@ namespace Ao3TrackReader.Resources
         {
             get { return App.PlatformIcon("redo") + ".png"; }
         }
-
+        public static string Tag
+        {
+            get { return App.PlatformIcon("tag") + ".png"; }
+        }
     }
 }

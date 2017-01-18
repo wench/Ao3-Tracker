@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 
 using Xamarin.Forms;
+using Button = Ao3TrackReader.Controls.Button;
 
 namespace Ao3TrackReader
 {
@@ -39,6 +40,8 @@ namespace Ao3TrackReader
             string dl = "_" + Theme;
             return Device.OnPlatform(name + dl, name + dl, "Assets/" + name + dl);
         }
+
+        WebViewPage wvp;
 
         public App()
         {
@@ -89,8 +92,20 @@ namespace Ao3TrackReader
                 Resources.Add(prop.Name+ "Icon", icon);
             }
 
+
+            Resources.Add("PaneImageButton", new Style(typeof(Button))
+            {
+                Setters = {
+                    new Setter{ Property = Button.BorderWidthProperty, Value = 2.0 },
+                    new Setter{ Property = Button.WidthRequestProperty, Value = 40.0 },
+                    new Setter{ Property = Button.HeightRequestProperty, Value = 40.0 },
+                    new Setter{ Property = Button.ImageWidthProperty, Value = 20.0 },
+                    new Setter{ Property = Button.ImageHeightProperty, Value = 20.0 },
+                }
+            });
+
             // The root page of your application
-            MainPage = new NavigationPage(new WebViewPage());
+            MainPage = new WVPNavigationPage(wvp = new WebViewPage()); 
         }
 
         protected override void OnStart()
@@ -101,11 +116,13 @@ namespace Ao3TrackReader
         protected override void OnSleep()
         {
             // Handle when your app sleeps
+            wvp.OnSleep();
         }
 
         protected override void OnResume()
         {
             // Handle when your app resumes
+            wvp.OnResume();
         }
     }
 }

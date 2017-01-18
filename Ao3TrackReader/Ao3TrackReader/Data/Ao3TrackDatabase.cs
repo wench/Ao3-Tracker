@@ -151,23 +151,30 @@ namespace Ao3TrackReader
 			}
 		}
 
-		public void SaveVariable(string name, string value)
-		{
-			lock (locker)
-			{
-				var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-				if (row != null)
-				{
-					database.Update(new Variable { name = name, value = value });
-				}
-				else
-				{
-					database.Insert(new Variable { name = name, value = value });
-				}
-			}
-		}
+        public void SaveVariable(string name, string value)
+        {
+            lock (locker)
+            {
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    database.Update(new Variable { name = name, value = value });
+                }
+                else
+                {
+                    database.Insert(new Variable { name = name, value = value });
+                }
+            }
+        }
+        public void DeleteVariable(string name)
+        {
+            lock (locker)
+            {
+                database.Delete<Variable>(name);
+            }
+        }
 
-		public string GetTag(int id)
+        public string GetTag(int id)
 		{
 			lock (locker)
 			{

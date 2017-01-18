@@ -99,7 +99,7 @@ namespace Ao3TrackReader.Models
         public string Group { get; private set; }
         public string GroupType { get; private set; }
         public TextTree Title { get; private set; }
-        public string Date { get; private set; }
+        public DateTime? Date { get; private set; }
         public string Subtitle { get; private set; }
         public string Details { get; private set; }
 
@@ -192,12 +192,12 @@ namespace Ao3TrackReader.Models
             }
         }
 
+        bool tags_visible = true;
         public bool TagsVisible
         {
             get
             {
-
-                if (tags != null)
+                if (tags_visible && tags != null)
                 {
                     foreach (var t in tags)
                     {
@@ -207,6 +207,15 @@ namespace Ao3TrackReader.Models
                     }
                 }
                 return false;
+            }
+            set
+            {
+                if (tags_visible != value && (BaseData.Type == Ao3PageType.Work || BaseData.Type == Ao3PageType.Series))
+                {
+                    OnPropertyChanging("TagsVisible");
+                    tags_visible = value;
+                    OnPropertyChanged("TagsVisible");
+                }
             }
         }
 
@@ -374,7 +383,7 @@ namespace Ao3TrackReader.Models
 
                 Uri = baseData.Uri;
 
-                Date = baseData.Details?.LastUpdated ?? "";
+                Date = baseData.Details?.LastUpdated;// baseData.Details?.LastUpdated?.ToString("d MMM yyyy") ?? "";
 
                 Subtitle = "";
                 if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));

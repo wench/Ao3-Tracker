@@ -57,20 +57,27 @@ namespace Ao3TrackReader
             Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;            
 #endif
 
-            ToolbarItems.Add(new ToolbarItem
+            prevPageButton = new DisableableCommand(GoBack, false);
+            if (ShowBackOnToolbar)
             {
-                Text = "Back",
-                Icon = Icons.Back,
-                Order = ToolbarItemOrder.Primary,
-                Command = prevPageButton = new DisableableCommand(GoBack, false)
-            });
+                ToolbarItems.Add(new ToolbarItem
+                {
+                    Text = "Back",
+                    Icon = Icons.Back,
+                    Order = ToolbarItemOrder.Primary,
+                    Command = prevPageButton = new DisableableCommand(GoBack, false)
+                });
+            }
+
+            nextPageButton = new DisableableCommand(GoForward, false);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Forward",
                 Icon = Icons.Forward,
                 Order = ToolbarItemOrder.Primary,
-                Command = nextPageButton = new DisableableCommand(GoForward, false)
+                Command = nextPageButton
             });
+
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Refresh",
@@ -78,13 +85,16 @@ namespace Ao3TrackReader
                 Order = ToolbarItemOrder.Primary,
                 Command = new Command(Refresh)
             });
+
+            jumpButton = new DisableableCommand(OnJumpClicked, false);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Jump",
                 Icon = Icons.Redo,
                 Order = ToolbarItemOrder.Primary,
-                Command = jumpButton = new DisableableCommand(OnJumpClicked, false)
+                Command = jumpButton
             });
+
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Reading List",
@@ -96,6 +106,7 @@ namespace Ao3TrackReader
                     SettingsPane.IsOnScreen = false;
                 })
             });
+
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Add to Reading List",
@@ -106,23 +117,29 @@ namespace Ao3TrackReader
                     ReadingList.AddAsync(Current.AbsoluteUri);
                 })
             });
+
+            incFontSizeButton = new DisableableCommand(() => FontSize += 10);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Font Increase",
                 Icon = Icons.FontUp,
-                Command = incFontSizeButton = new DisableableCommand(() => FontSize += 10)
+                Command = incFontSizeButton
             });
+
+            decFontSizeButton = new DisableableCommand(() => FontSize -= 10);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Font Decrease",
                 Icon = Icons.FontDown,
-                Command = decFontSizeButton = new DisableableCommand(() => FontSize -= 10)
+                Command = decFontSizeButton
             });
+
+            syncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Sync",
                 Icon = Icons.Sync,
-                Command = syncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync)
+                Command = syncButton
             });
             App.Storage.BeginSyncEvent += Storage_BeginSyncEvent;
             App.Storage.EndSyncEvent += Storage_EndSyncEvent;
@@ -178,7 +195,20 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            Navigate(new Uri("http://archiveofourown.org/"));
+
+            string url = App.Database.GetVariable("Sleep:URI");
+            App.Database.DeleteVariable("Sleep:URI");
+
+            Uri uri = null;
+            try {
+                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(url));
+            }
+            catch(Exception) {
+
+            }
+
+            if (uri== null) uri = new Uri("http://archiveofourown.org/");
+            Navigate(uri);
 
             // retore font size!
             FontSize = 100;
@@ -210,7 +240,7 @@ namespace Ao3TrackReader
 
             urlBar.Children.Add(urlEntry);
 
-            var urlButton = new Button()
+            var urlButton = new Xamarin.Forms.Button()
             {
                 Text = "Go",
                 VerticalOptions = LayoutOptions.Center,
@@ -218,7 +248,7 @@ namespace Ao3TrackReader
             };
             urlButton.Clicked += UrlButton_Clicked;
 
-            var urlCancel = new Button()
+            var urlCancel = new Xamarin.Forms.Button()
             {
                 Image = Icons.Close,
                 VerticalOptions = LayoutOptions.Center,
@@ -249,6 +279,16 @@ namespace Ao3TrackReader
             AbsoluteLayout.SetLayoutFlags(mainlayout, AbsoluteLayoutFlags.All);
 
             Content = mainlayout;
+        }
+
+        public virtual void OnSleep()
+        {
+            App.Database.SaveVariable("Sleep:URI", Current.AbsoluteUri);
+        }
+
+        public virtual void OnResume()
+        {
+            App.Database.DeleteVariable("Sleep:URI");
         }
 
         private void Storage_EndSyncEvent(object sender, bool e)
@@ -514,6 +554,13 @@ namespace Ao3TrackReader
         {
             if (App.Database.GetVariable("siteCookies") != cookies)
                 App.Database.SaveVariable("siteCookies", cookies);
+        }
+
+        protected override bool OnBackButtonPressed()
+        {
+            if (!canGoBack) return false;
+            GoBack();
+            return true;
         }
     }
 }

@@ -177,6 +177,28 @@ namespace Ao3TrackReader
             }
         }
 
+        bool tags_visible = false;
+        public bool TagsVisible
+        {
+            get { return tags_visible; }
+            set
+            {
+                if (tags_visible != value)
+                {
+                    tags_visible = value;
+                    lock (locker)
+                    {
+                        foreach (var item in All)
+                        {
+                            item.TagsVisible = tags_visible;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         private void AddToGroup(T item)
         {
             lock (locker)
@@ -184,6 +206,8 @@ namespace Ao3TrackReader
                 string groupName = item.Group;
                 if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
                 GroupSubList<T> g = null;
+
+                item.TagsVisible = tags_visible;
 
                 int i = 0;
                 if (IsHidden(item))

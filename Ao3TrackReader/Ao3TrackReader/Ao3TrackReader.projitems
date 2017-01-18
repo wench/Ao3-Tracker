@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PaneView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PaneContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListView.xaml.cs">
@@ -41,6 +42,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Colors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Icons.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WVPNavigationPage.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Controls\ReadingListView.xaml">

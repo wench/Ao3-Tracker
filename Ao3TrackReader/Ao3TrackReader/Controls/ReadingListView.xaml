@@ -4,10 +4,11 @@
     <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton"/>
-                <Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton"/>
-                <Button Image="{StaticResource FilterIcon}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton"/>
-                <Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+                <local:Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton" Style="{StaticResource PaneImageButton}" />
+                <local:Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton" Style="{StaticResource PaneImageButton}" />
+                <local:Button Image="{StaticResource TagIcon}" Clicked="OnShowTags" HorizontalOptions="Start" x:Name="ShowTagsButton" Style="{StaticResource PaneImageButton}" />
+                <local:Button Image="{StaticResource FilterIcon}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton" Style="{StaticResource PaneImageButton}" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" Style="{StaticResource PaneImageButton}" />
             </StackLayout>
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" ItemSelected="OnSelection" Margin="4,0,0,0" x:Name="ListView">
                 <ListView.ItemTemplate>
@@ -39,7 +40,7 @@
                                     <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill"/>
                                     <Label Text="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" />
                                 </StackLayout>
-                                <Label Text="{Binding Date}" FontSize="12" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
+                                <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="12" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
                                 <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,13,0">
                                     <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand"/>
                                     <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" />

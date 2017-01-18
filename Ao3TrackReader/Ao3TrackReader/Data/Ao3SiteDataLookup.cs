@@ -929,7 +929,12 @@ namespace Ao3TrackReader.Data
 
             var stats = worknode?.ElementByClass("dl", "stats");
 
-            model.Details.LastUpdated = headernode?.ElementByClass("p", "datetime")?.InnerText?.HtmlDecode()?.Trim();
+            DateTime datetime;
+            var updatedate = headernode?.ElementByClass("p", "datetime")?.InnerText?.HtmlDecode()?.Trim();
+            if (!string.IsNullOrEmpty(updatedate) && DateTime.TryParseExact(updatedate, "d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out datetime))
+            {
+                model.Details.LastUpdated = datetime;
+            }
 
             model.Language = stats?.ElementByClass("dd", "language")?.InnerText?.HtmlDecode()?.Trim();
 
@@ -1105,7 +1110,14 @@ namespace Ao3TrackReader.Data
                             break;
 
                         case "Series Updated:":
-                            model.Details.LastUpdated = dd.InnerText?.HtmlDecode()?.Trim();
+                            {
+                                DateTime datetime;
+                                var updatedate = dd.InnerText?.HtmlDecode()?.Trim();
+                                if (!string.IsNullOrEmpty(updatedate) && DateTime.TryParseExact(updatedate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out datetime))
+                                {
+                                    model.Details.LastUpdated = datetime;
+                                }
+                            }
                             break;
 
                         case "Stats:":

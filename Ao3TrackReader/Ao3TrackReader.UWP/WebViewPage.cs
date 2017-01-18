@@ -12,6 +12,7 @@ using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
 using System.Threading;
 using Ao3TrackReader.Data;
+using Windows.Foundation.Metadata;
 
 namespace Ao3TrackReader
 {
@@ -63,6 +64,27 @@ namespace Ao3TrackReader
             WebView.GotFocus += WebView_GotFocus;
 
             return WebView.ToView();
+        }
+
+        bool ShowBackOnToolbar
+        {
+            get
+            {
+                try {
+                    Windows.Phone.UI.Input.HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+                    Windows.Phone.UI.Input.HardwareButtons.BackPressed -= HardwareButtons_BackPressed;
+                    return false;
+                }
+                catch (Exception)
+                {
+
+                }
+                return true;
+            }
+        }
+
+        private void HardwareButtons_BackPressed(object sender, Windows.Phone.UI.Input.BackPressedEventArgs e)
+        {
         }
 
         private void WebView_GotFocus(object sender, RoutedEventArgs e)

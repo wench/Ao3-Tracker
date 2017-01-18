@@ -11,7 +11,7 @@
     <AssemblyName>Ao3TrackReader.UWP</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.15003.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
@@ -102,6 +102,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ButtonRenderer.cs" />
     <Compile Include="TextViewRenderer.cs" />
     <Compile Include="WebViewPage.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -117,172 +118,184 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Icons\addpage_dark.png">
-      <Link>Assets\addpage_dark.scale-100.png</Link>
+      <Link>Assets\addpage_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\addpage_dark.png">
+    <Content Include="..\Icons\200\addpage_dark.scale-200.png">
       <Link>Assets\addpage_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\addpage_light.png">
-      <Link>Assets\addpage_light.scale-100.png</Link>
+      <Link>Assets\addpage_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\addpage_light.png">
+    <Content Include="..\Icons\200\addpage_light.scale-200.png">
       <Link>Assets\addpage_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\back_dark.png">
-      <Link>Assets\back_dark.scale-100.png</Link>
+      <Link>Assets\back_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\back_dark.png">
+    <Content Include="..\Icons\200\back_dark.scale-200.png">
       <Link>Assets\back_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\back_light.png">
-      <Link>Assets\back_light.scale-100.png</Link>
+      <Link>Assets\back_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\back_light.png">
+    <Content Include="..\Icons\200\back_light.scale-200.png">
       <Link>Assets\back_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\bookmarks_dark.png">
-      <Link>Assets\bookmarks_dark.scale-100.png</Link>
+      <Link>Assets\bookmarks_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\bookmarks_dark.png">
+    <Content Include="..\Icons\200\bookmarks_dark.scale-200.png">
       <Link>Assets\bookmarks_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\bookmarks_light.png">
-      <Link>Assets\bookmarks_light.scale-100.png</Link>
+      <Link>Assets\bookmarks_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\bookmarks_light.png">
+    <Content Include="..\Icons\200\bookmarks_light.scale-200.png">
       <Link>Assets\bookmarks_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\close_dark.png">
-      <Link>Assets\close_dark.scale-100.png</Link>
+      <Link>Assets\close_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\close_dark.png">
+    <Content Include="..\Icons\200\close_dark.scale-200.png">
       <Link>Assets\close_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\close_light.png">
-      <Link>Assets\close_light.scale-100.png</Link>
+      <Link>Assets\close_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\close_light.png">
+    <Content Include="..\Icons\200\close_light.scale-200.png">
       <Link>Assets\close_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\filter_dark.png">
-      <Link>Assets\filter_dark.scale-100.png</Link>
+      <Link>Assets\filter_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\filter_dark.png">
+    <Content Include="..\Icons\200\filter_dark.scale-200.png">
       <Link>Assets\filter_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\filter_light.png">
-      <Link>Assets\filter_light.scale-100.png</Link>
+      <Link>Assets\filter_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\filter_light.png">
+    <Content Include="..\Icons\200\filter_light.scale-200.png">
       <Link>Assets\filter_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\fontdown_dark.png">
-      <Link>Assets\fontdown_dark.scale-100.png</Link>
+      <Link>Assets\fontdown_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontdown_dark.png">
+    <Content Include="..\Icons\200\fontdown_dark.scale-200.png">
       <Link>Assets\fontdown_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\fontdown_light.png">
-      <Link>Assets\fontdown_light.scale-100.png</Link>
+      <Link>Assets\fontdown_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontdown_light.png">
+    <Content Include="..\Icons\200\fontdown_light.scale-200.png">
       <Link>Assets\fontdown_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\fontup_dark.png">
-      <Link>Assets\fontup_dark.scale-100.png</Link>
+      <Link>Assets\fontup_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontup_dark.png">
+    <Content Include="..\Icons\200\fontup_dark.scale-200.png">
       <Link>Assets\fontup_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\fontup_light.png">
-      <Link>Assets\fontup_light.scale-100.png</Link>
+      <Link>Assets\fontup_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontup_light.png">
+    <Content Include="..\Icons\200\fontup_light.scale-200.png">
       <Link>Assets\fontup_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\font_dark.png">
-      <Link>Assets\font_dark.scale-100.png</Link>
+      <Link>Assets\font_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\font_dark.png">
+    <Content Include="..\Icons\200\font_dark.scale-200.png">
       <Link>Assets\font_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\font_light.png">
-      <Link>Assets\font_light.scale-100.png</Link>
+      <Link>Assets\font_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\font_light.png">
+    <Content Include="..\Icons\200\font_light.scale-200.png">
       <Link>Assets\font_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\forward_dark.png">
-      <Link>Assets\forward_dark.scale-100.png</Link>
+      <Link>Assets\forward_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\forward_dark.png">
+    <Content Include="..\Icons\200\forward_dark.scale-200.png">
       <Link>Assets\forward_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\forward_light.png">
-      <Link>Assets\forward_light.scale-100.png</Link>
+      <Link>Assets\forward_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\forward_light.png">
+    <Content Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Assets\forward_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\redo_dark.png">
-      <Link>Assets\redo_dark.scale-100.png</Link>
+      <Link>Assets\redo_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\redo_dark.png">
+    <Content Include="..\Icons\200\redo_dark.scale-200.png">
       <Link>Assets\redo_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\redo_light.png">
-      <Link>Assets\redo_light.scale-100.png</Link>
+      <Link>Assets\redo_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\redo_light.png">
+    <Content Include="..\Icons\200\redo_light.scale-200.png">
       <Link>Assets\redo_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\refresh_dark.png">
-      <Link>Assets\refresh_dark.scale-100.png</Link>
+      <Link>Assets\refresh_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\refresh_dark.png">
+    <Content Include="..\Icons\200\refresh_dark.scale-200.png">
       <Link>Assets\refresh_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\refresh_light.png">
-      <Link>Assets\refresh_light.scale-100.png</Link>
+      <Link>Assets\refresh_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\refresh_light.png">
+    <Content Include="..\Icons\200\refresh_light.scale-200.png">
       <Link>Assets\refresh_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\rename_dark.png">
-      <Link>Assets\rename_dark.scale-100.png</Link>
+      <Link>Assets\rename_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\rename_dark.png">
+    <Content Include="..\Icons\200\rename_dark.scale-200.png">
       <Link>Assets\rename_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\rename_light.png">
-      <Link>Assets\rename_light.scale-100.png</Link>
+      <Link>Assets\rename_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\rename_light.png">
+    <Content Include="..\Icons\200\rename_light.scale-200.png">
       <Link>Assets\rename_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\settings_dark.png">
-      <Link>Assets\settings_dark.scale-100.png</Link>
+      <Link>Assets\settings_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\settings_dark.png">
+    <Content Include="..\Icons\200\settings_dark.scale-200.png">
       <Link>Assets\settings_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\settings_light.png">
-      <Link>Assets\settings_light.scale-100.png</Link>
+      <Link>Assets\settings_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\settings_light.png">
+    <Content Include="..\Icons\200\settings_light.scale-200.png">
       <Link>Assets\settings_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\sync_dark.png">
-      <Link>Assets\sync_dark.scale-100.png</Link>
+      <Link>Assets\sync_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\sync_dark.png">
+    <Content Include="..\Icons\200\sync_dark.scale-200.png">
       <Link>Assets\sync_dark.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\sync_light.png">
-      <Link>Assets\sync_light.scale-100.png</Link>
+      <Link>Assets\sync_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\sync_light.png">
+    <Content Include="..\Icons\200\sync_light.scale-200.png">
       <Link>Assets\sync_light.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\tag_dark.png">
+      <Link>Assets\tag_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\tag_dark.scale-200.png">
+      <Link>Assets\tag_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\tag_light.png">
+      <Link>Assets\tag_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\tag_light.scale-200.png">
+      <Link>Assets\tag_light.scale-200.png</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -335,6 +348,9 @@
   <ItemGroup>
     <SDKReference Include="Microsoft.VCLibs, Version=14.0">
       <Name>Visual C++ 2015 Runtime for Universal Windows Platform Apps</Name>
+    </SDKReference>
+    <SDKReference Include="WindowsMobile, Version=10.0.15003.0">
+      <Name>Windows Mobile Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
   <ItemGroup>

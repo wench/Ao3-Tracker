@@ -36,6 +36,7 @@ namespace Ao3TrackReader.Controls
             BackgroundColor = Colors.Alt.Trans.High;
 
             ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ShowTagsButton.BackgroundColor = readingListBacking.TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
 
             // Restore the reading list contents!
             Task.Run(async () =>
@@ -286,6 +287,12 @@ namespace Ao3TrackReader.Controls
         {
             readingListBacking.HideNoUnread = !readingListBacking.HideNoUnread;
             ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
+        }
+
+        public void OnShowTags(object sender, EventArgs e)
+        {
+            readingListBacking.TagsVisible = !readingListBacking.TagsVisible;
+            ShowTagsButton.BackgroundColor = readingListBacking.TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
         }
 
         public void OnClose(object sender, EventArgs e)

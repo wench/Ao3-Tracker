@@ -55,7 +55,7 @@ namespace Ao3TrackReader.Models
         public IReadOnlyDictionary<string,string> Authors { get; set; }
         public IReadOnlyDictionary<string, string> Recipiants { get; set; }
         public IReadOnlyDictionary<string, Ao3SeriesLink> Series { get; set; }
-        public string LastUpdated { get; set; }
+        public DateTime? LastUpdated { get; set; }
         public int? Words { get; set; }
         public Ao3ChapterDetails Chapters { get; set; }
         public bool? IsComplete { get { return Chapters != null ? Chapters.Available == Chapters.Total : (bool?)null; } }

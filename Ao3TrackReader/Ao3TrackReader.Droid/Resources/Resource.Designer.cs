@@ -2255,8 +2255,8 @@ namespace Ao3TrackReader.Droid
 			// aapt resource value: 0x7f0200b2
 			public const int mr_ic_play_light = 2130837682;
 			
-			// aapt resource value: 0x7f0200bd
-			public const int notification_template_icon_bg = 2130837693;
+			// aapt resource value: 0x7f0200bf
+			public const int notification_template_icon_bg = 2130837695;
 			
 			// aapt resource value: 0x7f0200b3
 			public const int redo_dark = 2130837683;
@@ -2287,6 +2287,12 @@ namespace Ao3TrackReader.Droid
 			
 			// aapt resource value: 0x7f0200bc
 			public const int sync_light = 2130837692;
+			
+			// aapt resource value: 0x7f0200bd
+			public const int tag_dark = 2130837693;
+			
+			// aapt resource value: 0x7f0200be
+			public const int tag_light = 2130837694;
 			
 			static Drawable()
 			{

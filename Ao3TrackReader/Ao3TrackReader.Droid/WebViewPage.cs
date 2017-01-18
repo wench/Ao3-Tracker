@@ -63,6 +63,9 @@ namespace Ao3TrackReader
         WebView WebView { get; set; }
         WebClient webClient;
 
+        bool ShowBackOnToolbar { get {
+                return true;
+            } }
         private Xamarin.Forms.View CreateWebView()
         {
             WebView = new WebView(Forms.Context);
