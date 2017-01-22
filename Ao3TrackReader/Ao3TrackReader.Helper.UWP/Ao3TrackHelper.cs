@@ -9,6 +9,7 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace Ao3TrackReader.Helper
 {
+    public delegate IWorkChapter GetCurrentLocationDel();
 
     [AllowForWeb]
     public sealed class Ao3TrackHelper
@@ -46,10 +47,12 @@ namespace Ao3TrackReader.Helper
                 AlterFontSizeEvent?.Invoke(this, null);
             });
         }
-        public void ClearEvents()
+        public void Reset()
         {
             JumpToLastLocationEvent = null;
             AlterFontSizeEvent = null;
+            CurrentWorkId = 0;
+            CurrentLocation = null;
         }
 
         public IAsyncOperation<object> getWorkChaptersAsync([ReadOnlyArray] long[] works)
@@ -65,13 +68,14 @@ namespace Ao3TrackReader.Helper
             return new Dictionary<long, WorkChapter>();
         }
 
-        public IWorkChapter createWorkChapter(long number, long chapterid, long? location)
+        public IWorkChapter createWorkChapter(long number, long chapterid, long? location, long? seq)
         {
             return new WorkChapter
             {
                 number = number,
                 chapterid = chapterid,
-                location = location
+                location = location,
+                seq = seq
             };
 
         }
@@ -161,5 +165,8 @@ namespace Ao3TrackReader.Helper
             get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
+
+        public IWorkChapter CurrentLocation { get; set; }
+        public long CurrentWorkId { get; set; }
     }
 }

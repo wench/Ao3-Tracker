@@ -12,6 +12,7 @@ interface IWorkChapter {
     number: number;
     chapterid: number;
     location: number | null;
+    seq: number | null;
 }
  
 interface IWorkChapterTS extends IWorkChapter {

@@ -1,6 +1,17 @@
 /// <reference path="../../../../typings/globals/winjs/index.d.ts" />
 
 declare namespace Ao3TrackHelper {
+    interface Native {
+        native: never;   
+    }
+
+    interface WorkChapterNative extends Native, IWorkChapter {
+        number: number;
+        chapterid: number;
+        location: number | null;
+        seq: number | null;     
+    }
+     
     interface IKeyValuePair<K, V>{
         key : K;
         value : V;
@@ -33,13 +44,13 @@ declare namespace Ao3TrackHelper {
         size: number;
     }
 
-    function getWorkChaptersAsync(works: number[]) : WinJS.Promise<IMap<number,IWorkChapter>>;
+    function getWorkChaptersAsync(works: number[]) : WinJS.Promise<IMap<number,WorkChapterNative>>;
 
-    function setWorkChapters(workchapters: IMap<number,IWorkChapter>): void;
+    function setWorkChapters(workchapters: IMap<number,WorkChapterNative>): void;
 
-    function createWorkChapterMap() : IMap<number,IWorkChapter>;
+    function createWorkChapterMap() : IMap<number,WorkChapterNative>;
 
-    function createWorkChapter(number: number, chapterid: number, location: number | null) : IWorkChapter;
+    function createWorkChapter(number: number, chapterid: number, location: number | null, seq:number | null) : WorkChapterNative;
 
     var onjumptolastlocationevent : ((pagejump : boolean)=>void) | null;
     
@@ -63,4 +74,7 @@ declare namespace Ao3TrackHelper {
     function addToReadingList(href: string) : void;
     function copyToClipboard(str: string, type:string) : void; 
     function setCookies(cookies: string) : void;
+
+    var currentLocation : WorkChapterNative|null;
+    var currentWorkId : number;
 }

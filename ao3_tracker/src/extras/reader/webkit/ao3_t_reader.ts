@@ -28,8 +28,18 @@ namespace Ao3Track {
         Ao3TrackHelper.set_JumpToLastLocationCallback(0);
     }
 
-    export function EnableLastLocationJump(lastloc: IWorkChapter) {
-        let hCallback = Ao3TrackCallbacks.AddPermanent((ev:boolean) => { Ao3Track.scrollToLocation(lastloc); });
+    export function EnableLastLocationJump(workid: number, lastloc: IWorkChapter) {
+        let hCallback = Ao3TrackCallbacks.AddPermanent((ev:boolean) => { 
+            if (Boolean(ev)) {
+                GetWorkChapters([workid], (workchaps) => { 
+                    lastloc = workchaps[workid];
+                    Ao3Track.scrollToLocation(workid,lastloc,true); 
+                });
+            }
+            else {
+                Ao3Track.scrollToLocation(workid,lastloc,false); 
+            }
+        });
         Ao3TrackHelper.set_JumpToLastLocationCallback(hCallback);
         Ao3TrackHelper.set_JumpToLastLocationEnabled(true);
     }
@@ -43,6 +53,16 @@ namespace Ao3Track {
     };
     Ao3TrackHelper.set_AlterFontSizeCallback(Ao3TrackCallbacks.AddPermanent(updatefontsize));
     updatefontsize();
+
+    export function SetCurrentLocation(current : IWorkChapter)
+    {
+        Ao3TrackHelper.set_CurrentLocation(JSON.stringify(current));
+    }
+
+    export function SetCurrentWorkId(current : number)
+    {
+        Ao3TrackHelper.set_CurrentWorkId(current);
+    }
 
     // Nonsense to allow for swiping back and foward between pages 
 

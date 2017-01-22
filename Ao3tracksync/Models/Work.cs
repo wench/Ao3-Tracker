@@ -20,5 +20,6 @@ namespace Ao3tracksync.Models
         public long number { get; set; }
         public long timestamp { get; set; }
         public Nullable<long> location { get; set; }
+        public long seq { get; set; }
     }
 }

@@ -78,10 +78,12 @@ namespace Ao3TrackReader.Droid
             set { handler.DoOnMainThread(() => handler.FontSize = value); }
         }
 
-        public void ClearEvents()
+        public void Reset()
         {
             JumpToLastLocationCallback = 0;
             AlterFontSizeCallback = 0;
+            CurrentWorkId = 0;
+            CurrentLocation = null;
         }
 
 
@@ -205,6 +207,20 @@ namespace Ao3TrackReader.Droid
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
 
+
+        public IWorkChapter CurrentLocation {
+            [JavascriptInterface, Export("get_CurrentLocation")]
+            get;
+            [JavascriptInterface, Export("set_CurrentLocation")]
+            set;
+        }
+
+        public long CurrentWorkId {
+            [JavascriptInterface, Export("get_CurrentWorkId")]
+            get;
+            [JavascriptInterface, Export("set_CurrentWorkId")]
+            set;
+        }
     }
 }
 

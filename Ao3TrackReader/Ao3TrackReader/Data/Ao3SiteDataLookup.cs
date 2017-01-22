@@ -1120,6 +1120,13 @@ namespace Ao3TrackReader.Data
                             }
                             break;
 
+                        case "Description:":
+                            {
+                                var blockquote = dd.Element("blockquote");
+                                if (blockquote != null) model.Details.Summary = HtmlConverter.ConvertNode(blockquote);
+                            }
+                            break;
+
                         case "Stats:":
                             foreach (var sdt in dd.ElementByClass("dl", "stats").Elements("dt"))
                             {

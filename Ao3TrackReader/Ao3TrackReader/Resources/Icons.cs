@@ -66,5 +66,9 @@ namespace Ao3TrackReader.Resources
         {
             get { return App.PlatformIcon("tag") + ".png"; }
         }
+        public static string ForceLoc
+        {
+            get { return App.PlatformIcon("forceloc") + ".png"; }
+        }
     }
 }

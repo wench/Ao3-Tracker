@@ -9,7 +9,7 @@
         {
         }
 
-        public Work(long userid, long id, long chapterid, long number, long? location, long timestamp)
+        public Work(long userid, long id, long chapterid, long number, long? location, long timestamp, long seq)
         {
             this.userid = userid;
             this.id = id;
@@ -17,6 +17,7 @@
             this.number = number;
             this.location = location;
             this.timestamp = timestamp;
+            this.seq = seq;
         }
 
     }

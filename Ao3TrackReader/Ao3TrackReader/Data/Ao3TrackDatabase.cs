@@ -42,17 +42,14 @@ namespace Ao3TrackReader
 		public Ao3TrackDatabase()
 		{
 			database = new SQLiteConnection (DatabasePath);
-			// create the tables
-			database.CreateTable<Work>();
+            // create the tables
+            database.CreateTable<Work>();
 			database.CreateTable<Variable>();
-            var ti = database.GetTableInfo("TagCache");
-            if (ti != null && ti.Exists((ci) => ci.Name == "merger"))
-            {
-                database.DropTable<TagCache>();
-            }
             database.CreateTable<TagCache>();
             database.CreateTable<LanguageCache>();
-            database.CreateTable<ReadingList>();            
+            database.CreateTable<ReadingList>();
+
+            database.Query<Work>("UPDATE Work SET seq=0 WHERE seq IS NULL");
         }
 
 		public IEnumerable<Work> GetItems ()

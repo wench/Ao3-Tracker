@@ -37,6 +37,8 @@ namespace Ao3TrackReader.Controls
 
             ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ShowTagsButton.BackgroundColor = readingListBacking.TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ListView.ItemAppearing += ListView_ItemAppearing;
+
 
             // Restore the reading list contents!
             Task.Run(async () =>
@@ -115,6 +117,18 @@ namespace Ao3TrackReader.Controls
             });
         }
 
+        private void ListView_ItemAppearing(object sender, ItemVisibilityEventArgs e)
+        {
+            var item = e.Item as Models.Ao3PageViewModel;
+            if (item == null) return;
+            Uri uri = Data.Ao3SiteDataLookup.ReadingListlUri(wpv.Current.AbsoluteUri);
+            if (uri != null && item.HasUri(uri))
+            {
+                ListView.SelectedItem = null;
+                ListView.SelectedItem = item;
+            }
+        }
+
         protected override void OnIsOnScreenChanging(bool newValue)
         {
             if (newValue == true)
@@ -172,8 +186,10 @@ namespace Ao3TrackReader.Controls
 
         public void PageChange(Uri uri)
         {
+            ListView.SelectedItem = null;
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
-            wpv.DoOnMainThread(() => ListView.SelectedItem = readingListBacking.Find((m) => m.Uri.AbsoluteUri == uri?.AbsoluteUri));
+            if (uri == null) return;
+            wpv.DoOnMainThread(() => ListView.SelectedItem = readingListBacking.Find((m) => m.HasUri(uri)));
         }
 
         public void OnSelection(object sender, SelectedItemChangedEventArgs e)

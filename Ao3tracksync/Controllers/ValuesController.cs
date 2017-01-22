@@ -27,11 +27,27 @@ namespace Ao3tracksync.Controllers
 
         public new User User { get { return (base.User as Auth.UserPrincipal)?.User; } }
 
+        /// <summary>
+        /// Current chapter and location information for a work
+        /// </summary>
+        /// <remarks>
+        /// When comparing chapters current location is considered to be the workchapter with:
+        /// 1) highest seq
+        /// 2) highest chapter number
+        /// 3) highest location value
+        /// </remarks>
         public class WorkChapter
         {
+            /// <summary>
+            /// Defaut constructor
+            /// </summary>
             public WorkChapter()
             {
             }
+            /// <summary>
+            /// Construct from a Database Model Work
+            /// </summary>
+            /// <param name="work">Work from database</param>
             public WorkChapter(Work work)
             {
                 if (work != null)
@@ -40,12 +56,35 @@ namespace Ao3tracksync.Controllers
                     number = work.number;
                     location = work.location;
                     timestamp = work.timestamp;
+                    seq = work.seq;
                 }
             }
+            /// <summary>Id of current chapter</summary>
             public long chapterid { get; set; }
+            /// <summary>Oridinal number of current chapter</summary>
             public long number { get; set; }
+            /// <summary>
+            /// Current location in chapter
+            /// </summary>
+            /// <remarks>
+            /// Start of chapter: <c>location = 0;</c>
+            /// End of chapter: <c>location = null;</c>
+            /// Start of paragraph: <c>location = paragraph * 1000000000;</c>
+            /// Part way through paragraph: <c>location = paragraph * 1000000000 + frac * 479001600;</c>
+            /// End of paragraph: <c>location = paragraph * 1000000000 + 500000000;</c>
+            /// </remarks>
             public long? location { get; set; }
+            /// <summary>
+            /// Timestamp when chapter or location last updated.
+            /// </summary>
             public long timestamp { get; set; }
+            /// <summary>
+            /// Sequence number
+            /// </summary>
+            /// <remarks>
+            /// WorkChapters with higher sequences always replace ones with lower 
+            /// </remarks>
+            public long seq { get; set; }
         };
 
         #region GET api/User/Init
@@ -65,7 +104,11 @@ namespace Ao3tracksync.Controllers
         }
         #endregion
 
-        // GET api/values
+        /// <summary>
+        /// GET api/values
+        /// Get all of logged in user's work chapters
+        /// </summary>
+        /// <returns>[workid]: WorkChapter</returns>
         public IDictionary<long, WorkChapter> Get()
         {
             Int64 timestamp = 0;
@@ -86,7 +129,12 @@ namespace Ao3tracksync.Controllers
             }
         }
 
-        // GET api/values/5
+        /// <summary>
+        /// GET api/values/5
+        /// Get single Work Chapter
+        /// </summary>
+        /// <param name="id">Workid</param>
+        /// <returns>[workid]: WorkChapter</returns>
         public IDictionary<long, WorkChapter> Get(long id)
         {
             Int64 timestamp = 0;
@@ -112,7 +160,11 @@ namespace Ao3tracksync.Controllers
         }
 
 
-        // POST api/values
+        /// <summary>
+        /// POST api/values
+        /// </summary>
+        /// <param name="values">WorkChapterse to add and/or update</param>
+        /// <returns>Existing items if there are conflicts</returns>
         public IDictionary<long, WorkChapter> Post([FromBody]IDictionary<long, WorkChapter> values)
         {
             Dictionary<long, WorkChapter> conflicts = new Dictionary<long, WorkChapter>();
@@ -128,12 +180,13 @@ namespace Ao3tracksync.Controllers
 
                     if (item != null)
                     {
-                        if (item.timestamp < v.Value.timestamp)
+                        if (item.timestamp < v.Value.timestamp || item.seq < v.Value.seq)
                         {
                             item.chapterid = v.Value.chapterid;
                             item.number = v.Value.number;
                             item.location = v.Value.location;
                             item.timestamp = v.Value.timestamp;
+                            item.seq = v.Value.seq;
                         }
                         else
                         {
@@ -142,7 +195,7 @@ namespace Ao3tracksync.Controllers
                     }
                     else
                     {
-                        table.Add(new Work (User.id, v.Key, v.Value.chapterid, v.Value.number, v.Value.location, v.Value.timestamp));
+                        table.Add(new Work (User.id, v.Key, v.Value.chapterid, v.Value.number, v.Value.location, v.Value.timestamp, v.Value.seq));
                     }
                 }
                 ctx.SaveChanges();
@@ -150,13 +203,25 @@ namespace Ao3tracksync.Controllers
             return conflicts;
         }
 
-        // PUT api/values/5
+        /// <summary>
+        /// PUT api/values/5
+        /// Put a single WorkChapter
+        /// </summary>
+        /// <param name="id">Work id</param>
+        /// <param name="value">WorkChapter to set</param>
+        /// <returns>Existing item in case of conflict</returns>
         public IDictionary<long, WorkChapter> Put(long id, [FromBody]WorkChapter value)
         {
             return Post(new Dictionary<long, WorkChapter> { [id] = value});
         }
 
-        // DELETE api/values/5
+        /// <summary>
+        /// DELETE api/values/5
+        /// Delete a single workchapter from the data
+        /// </summary>
+        /// <param name="id">Workid</param>
+        /// <remarks>Warning there is no way for clients to detect deletions so this wont work as expected.
+        /// The next time the clients sync the workchapter will be readded to the database.</remarks>
         public void Delete(long id)
         {
             using (var ctx = new Models.Ao3TrackEntities())

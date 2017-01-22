@@ -61,14 +61,22 @@ namespace Ao3Track {
     }
 
     let curLastLoc: IWorkChapter | null = null;
-    export function EnableLastLocationJump(lastloc: IWorkChapter) {
+    export function EnableLastLocationJump(workid: number, lastloc: IWorkChapter) {
         if (curLastLoc === null) {
             $('<li><a href="#" id="ao3t-last-loc">Jump to previous</a></li>').appendTo($actions_ul).click((eventObject) => {
                 eventObject.preventDefault();
                 eventObject.stopImmediatePropagation();
-                if (curLastLoc !== null) { scrollToLocation(curLastLoc, true); }
+                if (curLastLoc !== null) { scrollToLocation(workid, curLastLoc, true); }
             });
         }
         curLastLoc = lastloc;
     }
+
+    export function SetCurrentLocation(current : IWorkChapter)
+    {
+    }
+
+    export function SetCurrentWorkId(current : number)
+    {
+    }    
 }

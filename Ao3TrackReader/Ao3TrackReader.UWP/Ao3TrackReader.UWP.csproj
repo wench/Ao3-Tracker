@@ -297,6 +297,18 @@
     <Content Include="..\Icons\200\tag_light.scale-200.png">
       <Link>Assets\tag_light.scale-200.png</Link>
     </Content>
+    <Content Include="..\Icons\forceloc_dark.png">
+      <Link>Assets\forceloc_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\forceloc_dark.scale-200.png">
+      <Link>Assets\forceloc_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\forceloc_light.png">
+      <Link>Assets\forceloc_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\forceloc_light.scale-200.png">
+      <Link>Assets\forceloc_light.scale-200.png</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\Default.rd.xml">

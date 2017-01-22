@@ -128,7 +128,7 @@ namespace Ao3TrackReader
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
             nextPageButton.IsEnabled = canGoForward;
-            helper?.ClearEvents();
+            helper?.Reset();
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
@@ -139,7 +139,7 @@ namespace Ao3TrackReader
             NextPageIndicator.IsVisible = false;
             WebView.RenderTransform = null;
             WebView.Opacity = 1;
-            helper?.ClearEvents();
+            helper?.Reset();
         }
 
         Regex chapter_view_split_regex = new Regex(@"^(.* - Chapter \d+) - (.*)$");
@@ -154,7 +154,7 @@ namespace Ao3TrackReader
             Title = t;
 
             // Inject JS script
-            helper?.ClearEvents();
+            helper?.Reset();
             Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();           
         }
 
@@ -170,7 +170,7 @@ namespace Ao3TrackReader
         {
             uri = Ao3SiteDataLookup.CheckUri(uri);
             if (uri == null) return;
-            helper?.ClearEvents();
+            helper?.Reset();
             WebView.Navigate(uri);
         }
 

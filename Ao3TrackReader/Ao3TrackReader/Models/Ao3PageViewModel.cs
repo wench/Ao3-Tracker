@@ -572,13 +572,12 @@ namespace Ao3TrackReader.Models
 
         void UpdateSummary()
         {
-            if (baseData.Details?.Summary != null)
-            {
-                Summary = baseData.Details?.Summary;
-            }
-            else if (baseData.Type == Ao3PageType.Series)
+            if (baseData.Type == Ao3PageType.Series)
             {
                 var summary = new Block();
+                if (baseData.Details?.Summary != null) {
+                    summary.Nodes.Add(baseData.Details.Summary);
+                }
                 if (baseData.SeriesWorks != null) foreach (var workmodel in baseData.SeriesWorks)
                 {
                     Helper.WorkChapter workchap;
@@ -640,10 +639,25 @@ namespace Ao3TrackReader.Models
             }
             else
             {
-                Summary = null;
+                Summary = baseData.Details?.Summary;
             }
         }
 
+        public bool HasUri(Uri check)
+        {
+            if (Uri == check) return true;
+
+            if (baseData?.SeriesWorks != null)
+            {
+                foreach(var workmodel in baseData.SeriesWorks)
+                {
+                    if (workmodel.Uri == check)
+                        return true;
+                }
+            }
+
+            return false;
+        }
 
     }
 }

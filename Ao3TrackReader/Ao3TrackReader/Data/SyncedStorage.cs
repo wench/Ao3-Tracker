@@ -462,22 +462,27 @@ namespace Ao3TrackReader.Data
 
                     foreach (var work in works)
                     {
-                        Work old = null;
-                        if (!storage.TryGetValue(work.Key, out old) || old.IsNewer(work.Value))
+                        if (!storage.TryGetValue(work.Key, out var old) || old.IsNewer(work.Value))
                         {
+                            var seq  = work.Value.seq;
+                            if (seq == null && old != null) { 
+                                seq = old.seq;
+                            }
+
                             var w = new Work
                             {
                                 id = work.Key,
                                 number = work.Value.number,
                                 chapterid = work.Value.chapterid,
                                 location = work.Value.location,
-                                timestamp = time
+                                timestamp = time,
+                                seq = seq ?? 0,
                             };
 
                             unsynced[work.Key] = newitems[work.Key] = storage[work.Key] = w;
 
                             // Do a delayed since if we finished a chapter, or started a new one 
-                            if (old == null || work.Value.location == null || work.Value.location == 0 || (old != null && work.Value.number > old.number))
+                            if (old == null || work.Value.location == null || work.Value.location == 0 || work.Value.number > old.number || work.Value.seq > old.seq)
                             {
                                 do_delayed = true;
                                 WorkEvents.TryGetEvent(work.Key)?.OnChapterNumChanged(this, w);
@@ -498,7 +503,7 @@ namespace Ao3TrackReader.Data
                         {
                             if (do_delayed)
                             {
-                                delayedsync(20 * 1000);
+                                delayedsync(10 * 1000);
                             }
                             else
                             {

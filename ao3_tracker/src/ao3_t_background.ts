@@ -15,19 +15,24 @@ namespace Ao3Track {
         chapterid: number;
         location: number | null;
         timestamp: number;
+        seq: number;
 
-        constructor(num: number, chapid: number, loc: number | null, ts: number) {
+        constructor(num: number, chapid: number, loc: number | null, ts: number, seq: number) {
             this.number = num;
             this.chapterid = chapid;
             this.location = loc;
             this.timestamp = ts;
+            this.seq = seq;
         }
 
         static Create(other: IWorkChapterTS): WorkChapter {
-            return new this(other.number, other.chapterid, other.location, other.timestamp);
+            return new this(other.number, other.chapterid, other.location, other.timestamp, other.seq || 0);
         }
 
         IsNewer(newitem: IWorkChapter): boolean {
+
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
@@ -39,6 +44,8 @@ namespace Ao3Track {
         }
 
         IsNewerOrSame(newitem: IWorkChapter): boolean {
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
@@ -281,7 +288,8 @@ namespace Ao3Track {
                     parseInt(items[key].number),
                     parseInt(items[key].chapterid),
                     loc,
-                    parseInt(items[key].timestamp)
+                    parseInt(items[key].timestamp),
+                    parseInt(items[key].seq || "0"),
                 );
 
                 if (storage[k].timestamp > last_sync) {
@@ -350,14 +358,21 @@ namespace Ao3Track {
                     for (let id in request.data) {
                         if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
                             // Do a delayed since if we finished a chapter, or started a new one 
-                            if (!(id in storage) || request.data[id].location === null || request.data[id].location === 0 || (id in storage && request.data[id].chapterid !== storage[id].chapterid)) {
+                            if (!(id in storage) || request.data[id].location === null || request.data[id].location === 0 ||
+                                 request.data[id].chapterid > storage[id].chapterid || request.data[id].seq > storage[id].seq) {
                                 do_delayed = true;
                             }
+                            let seq  = request.data[id].seq;
+                            if (seq === null && id in storage) { 
+                                seq = storage[id].seq;
+                            }
+
                             newitems[id] = storage[id] = new WorkChapter(
                                 request.data[id].number,
                                 request.data[id].chapterid,
                                 request.data[id].location,
-                                time
+                                time,
+                                seq || 0
                             );
 
                             unsynced[id] = storage[id];
@@ -367,7 +382,7 @@ namespace Ao3Track {
                         chrome.storage.local.set(newitems);
                         if (serversync === SyncState.Ready || serversync === SyncState.Delayed) {
                             if (do_delayed) {
-                                delayedsync(20 * 1000);
+                                delayedsync(10 * 1000);
                             }
                             else {
                                 dosync();

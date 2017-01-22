@@ -34,6 +34,7 @@ namespace Ao3TrackReader
         DisableableCommand nextPageButton { get; set; }
         DisableableCommand prevPageButton { get; set; }
         DisableableCommand syncButton { get; set; }
+        DisableableCommand forceSetLocationButton { get; set; }
 
         Label PrevPageIndicator;
         Label NextPageIndicator;
@@ -141,9 +142,17 @@ namespace Ao3TrackReader
                 Icon = Icons.Sync,
                 Command = syncButton
             });
-            App.Storage.BeginSyncEvent += Storage_BeginSyncEvent;
-            App.Storage.EndSyncEvent += Storage_EndSyncEvent;
+            App.Storage.BeginSyncEvent += (sender,e) => DoOnMainThread(() => syncButton.IsEnabled = false);
+            App.Storage.EndSyncEvent += (sender,e) => DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
             syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
+
+            forceSetLocationButton = new DisableableCommand(ForceSetLocation);
+            ToolbarItems.Add(new ToolbarItem
+            {
+                Text = "Force set location",
+                Icon = Icons.ForceLoc,
+                Command = forceSetLocationButton
+            });
 
             ToolbarItems.Add(new ToolbarItem
             {
@@ -195,23 +204,6 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-
-            string url = App.Database.GetVariable("Sleep:URI");
-            App.Database.DeleteVariable("Sleep:URI");
-
-            Uri uri = null;
-            try {
-                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(url));
-            }
-            catch(Exception) {
-
-            }
-
-            if (uri== null) uri = new Uri("http://archiveofourown.org/");
-            Navigate(uri);
-
-            // retore font size!
-            FontSize = 100;
 
             var panes = new PaneContainer
             {
@@ -278,6 +270,25 @@ namespace Ao3TrackReader
             AbsoluteLayout.SetLayoutBounds(mainlayout, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(mainlayout, AbsoluteLayoutFlags.All);
 
+            string url = App.Database.GetVariable("Sleep:URI");
+            App.Database.DeleteVariable("Sleep:URI");
+
+            Uri uri = null;
+            try
+            {
+                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(new Uri(url), "#ao3t:jump"));
+            }
+            catch (Exception)
+            {
+
+            }
+
+            if (uri == null) uri = new Uri("http://archiveofourown.org/");
+            Navigate(uri);
+
+            // retore font size!
+            FontSize = 100;
+
             Content = mainlayout;
         }
 
@@ -289,17 +300,6 @@ namespace Ao3TrackReader
         public virtual void OnResume()
         {
             App.Database.DeleteVariable("Sleep:URI");
-        }
-
-        private void Storage_EndSyncEvent(object sender, bool e)
-        {
-            DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
-
-        }
-
-        private void Storage_BeginSyncEvent(object sender, EventArgs e)
-        {
-            DoOnMainThread(() => syncButton.IsEnabled = false);
         }
 
         public void NavigateToLast(long workid)
@@ -561,6 +561,22 @@ namespace Ao3TrackReader
             if (!canGoBack) return false;
             GoBack();
             return true;
+        }
+
+        public void ForceSetLocation()
+        {
+            var workid = helper.CurrentWorkId;
+            var iworkchap = helper.CurrentLocation;
+
+            if (workid != 0 && iworkchap != null)
+            {
+                Task.Run(async () =>
+                {
+                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                    var workchap = new WorkChapter(iworkchap) { seq = (db_workchap?.seq + 1) ?? 0 };
+                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [workid] = workchap });
+                });
+            }
         }
     }
 }

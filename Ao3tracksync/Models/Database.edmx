@@ -35,6 +35,7 @@
           <Property Name="number" Type="bigint" Nullable="false" />
           <Property Name="location" Type="bigint" />
           <Property Name="timestamp" Type="bigint" Nullable="false" />
+          <Property Name="seq" Type="bigint" Nullable="false" />
         </EntityType>
         <Association Name="FK_ReadingList_Users">
           <End Role="Users" Type="Self.Users" Multiplicity="1">
@@ -102,6 +103,7 @@
           <Property Name="number" Type="Int64" Nullable="false" />
           <Property Name="timestamp" Type="Int64" Nullable="false" />
           <Property Name="location" Type="Int64" />
+          <Property Name="seq" Type="Int64" Nullable="false" />
         </EntityType>
         <Association Name="FK_Works_Users">
           <End Role="Users" Type="Self.User" Multiplicity="1">
@@ -173,6 +175,7 @@
           <EntitySetMapping Name="Works">
             <EntityTypeMapping TypeName="Ao3TrackModel.Work">
               <MappingFragment StoreEntitySet="Works">
+                <ScalarProperty Name="seq" ColumnName="seq" />
                 <ScalarProperty Name="location" ColumnName="location" />
                 <ScalarProperty Name="userid" ColumnName="userid" />
                 <ScalarProperty Name="id" ColumnName="id" />
@@ -207,7 +210,7 @@
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
         <DesignerProperty Name="EnablePluralization" Value="true" />
-        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="False" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
       </DesignerInfoPropertySet>

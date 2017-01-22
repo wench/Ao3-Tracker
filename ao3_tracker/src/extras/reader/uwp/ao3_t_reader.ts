@@ -22,7 +22,7 @@ namespace Ao3Track {
     export function SetWorkChapters(workchapters: { [key: number]: IWorkChapter; }) {
         var m = Ao3TrackHelper.createWorkChapterMap();
         for (let key in workchapters) {
-            m.insert(key as any, Ao3TrackHelper.createWorkChapter(workchapters[key].number, workchapters[key].chapterid, workchapters[key].location));
+            m.insert(key as any, Ao3TrackHelper.createWorkChapter(workchapters[key].number, workchapters[key].chapterid, workchapters[key].location, workchapters[key].seq));
         }
         Ao3TrackHelper.setWorkChapters(m);
     }
@@ -42,10 +42,17 @@ namespace Ao3Track {
         Ao3TrackHelper.onjumptolastlocationevent = null;
     }
 
-    export function EnableLastLocationJump(lastloc: IWorkChapter) {
+    export function EnableLastLocationJump(workid: number, lastloc: IWorkChapter) {
         Ao3TrackHelper.onjumptolastlocationevent = (ev) => {
-            let jumpPage = Boolean(ev); 
-            Ao3Track.scrollToLocation(lastloc,jumpPage); 
+            if (Boolean(ev)) {
+                GetWorkChapters([workid], (workchaps) => { 
+                    lastloc = workchaps[workid];
+                    Ao3Track.scrollToLocation(workid,lastloc,true); 
+                });
+            }
+            else {
+                Ao3Track.scrollToLocation(workid,lastloc,false); 
+            }
         }
         Ao3TrackHelper.jumpToLastLocationEnabled = true;
     }
@@ -59,6 +66,16 @@ namespace Ao3Track {
     };
     Ao3TrackHelper.onalterfontsizeevent = updatefontsize;
     updatefontsize();
+
+    export function SetCurrentLocation(current : IWorkChapter)
+    {
+        Ao3TrackHelper.currentLocation = Ao3TrackHelper.createWorkChapter(current.number,current.chapterid,current.location,current.seq);
+    }
+
+    export function SetCurrentWorkId(current : number)
+    {
+        Ao3TrackHelper.currentWorkId = current;
+    }
 
     // Nonsense to allow for swiping back and foward between pages 
 

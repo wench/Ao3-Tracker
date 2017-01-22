@@ -16,6 +16,7 @@ namespace Ao3TrackReader.Helper
         long number { get; set; }
         long chapterid { get; set; }
         long? location { get; set; }
+        long? seq { get; set; }
     }
 
 #if WINDOWS_UWP
@@ -32,11 +33,13 @@ namespace Ao3TrackReader.Helper
             number = toCopy.number;
             chapterid = toCopy.chapterid;
             location = toCopy.location;
+            seq = toCopy.seq;
         }
 
         public long number { get; set; }
         public long chapterid { get; set; }
         public long? location { get; set; }
+        public long? seq { get; set; }
     }
 
     public delegate void MainThreadAction();
