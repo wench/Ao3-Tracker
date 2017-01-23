@@ -19,34 +19,51 @@ using System.Web.Http.Controllers;
 
 namespace Ao3tracksync.Controllers
 {
+    /// <summary>
+    /// Attribute to add to classes or methods to allow CORS access
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
     public class AllowCrossSiteAttribute : ActionFilterAttribute
     {
+        /// <summary>
+        /// On execution of action, check and add required headers
+        /// </summary>
+        /// <param name="ActionContext"></param>
         public override void OnActionExecuted(HttpActionExecutedContext ActionContext)
         {
-            try
+            var origin = "https://wenchy.net";
+            if (ActionContext.Request.Headers.Contains("Origin"))
             {
-                if (ActionContext.Request.Headers.Contains("Origin"))
+                var url = ActionContext.Request.Headers.GetValues("Origin").FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out var uri))
                 {
-                    Uri uri = new Uri(ActionContext.Request.Headers.GetValues("Origin").First());
-                    if (uri.Scheme.Contains("extension"))
-                        ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", uri.OriginalString);
+                    if (uri.Host == "wenchy.net" || uri.Scheme.Contains("extension"))
+                        origin = url;
                 }
             }
-            catch
-            {
-            }
+            if (ActionContext.Response.Headers.Contains("Access-Control-Allow-Origin"))
+                ActionContext.Response.Headers.Remove("Access-Control-Allow-Origin");
+            ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", origin);
             ActionContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
 
             base.OnActionExecuted(ActionContext);
         }
     }
 
+    /// <summary>
+    /// Attribute for options method containing allowed CORS access typtes
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
     public class CrossSiteOptionsAttribute : ActionFilterAttribute
     {
+        /// <summary>
+        /// On execution of action, add required headers
+        /// </summary>
+        /// <param name="ActionContext"></param>
         public override void OnActionExecuted(HttpActionExecutedContext ActionContext)
         {
+            if (!ActionContext.Response.Headers.Contains("Access-Control-Allow-Origin"))
+                ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", "https://wenchy.net");
             ActionContext.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, Content-Type");
             ActionContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE");
             ActionContext.Response.Headers.Add("Access-Control-Max-Age", "604800"); // 1 week

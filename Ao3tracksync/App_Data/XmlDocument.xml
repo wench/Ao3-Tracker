@@ -481,6 +481,28 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="T:Ao3tracksync.Controllers.AllowCrossSiteAttribute">
+            <summary>
+            Attribute to add to classes or methods to allow CORS access
+            </summary>
+        </member>
+        <member name="M:Ao3tracksync.Controllers.AllowCrossSiteAttribute.OnActionExecuted(System.Web.Http.Filters.HttpActionExecutedContext)">
+            <summary>
+            On execution of action, check and add required headers
+            </summary>
+            <param name="ActionContext"></param>
+        </member>
+        <member name="T:Ao3tracksync.Controllers.CrossSiteOptionsAttribute">
+            <summary>
+            Attribute for options method containing allowed CORS access typtes
+            </summary>
+        </member>
+        <member name="M:Ao3tracksync.Controllers.CrossSiteOptionsAttribute.OnActionExecuted(System.Web.Http.Filters.HttpActionExecutedContext)">
+            <summary>
+            On execution of action, add required headers
+            </summary>
+            <param name="ActionContext"></param>
+        </member>
         <member name="T:Ao3tracksync.Controllers.ValuesController.WorkChapter">
             <summary>
             Current chapter and location information for a work
