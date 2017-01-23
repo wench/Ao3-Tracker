@@ -84,7 +84,7 @@ namespace Ao3TrackReader.Controls
                             if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
                             {
                                 var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
-                                //readingListBacking.Add(viewmodel);
+                                readingListBacking.Add(viewmodel);
                                 vms.Add(viewmodel);
                             }
                         }
@@ -154,9 +154,8 @@ namespace Ao3TrackReader.Controls
                 foreach (var workmodel in item.BaseData.SeriesWorks)
                 {
                     workid = workmodel.Details.WorkId;
-                    Helper.WorkChapter workchap;
                     int chapters_finished = 0;
-                    if (item.WorkChapters.TryGetValue(workid, out workchap))
+                    if (item.WorkChapters.TryGetValue(workid, out var workchap))
                     {
                         chapters_finished = (int)workchap.number;
                         if (workchap.location != null) { chapters_finished--; }
@@ -186,10 +185,12 @@ namespace Ao3TrackReader.Controls
 
         public void PageChange(Uri uri)
         {
-            ListView.SelectedItem = null;
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
-            if (uri == null) return;
-            wpv.DoOnMainThread(() => ListView.SelectedItem = readingListBacking.Find((m) => m.HasUri(uri)));
+            wpv.DoOnMainThread(() => {
+                ListView.SelectedItem = null;
+                if (uri == null) return;
+                ListView.SelectedItem = readingListBacking.Find((m) => m.HasUri(uri));
+            });
         }
 
         public void OnSelection(object sender, SelectedItemChangedEventArgs e)
@@ -433,8 +434,8 @@ namespace Ao3TrackReader.Controls
                 wpv.DoOnMainThread(() =>
                 {
                     viewmodel.BaseData = model.Value;
-                    if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == viewmodel.Uri.AbsoluteUri) == null)
-                        readingListBacking.Add(viewmodel);
+                    //if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == viewmodel.Uri.AbsoluteUri) == null)
+                    //    readingListBacking.Add(viewmodel);
                 });
             });
         }

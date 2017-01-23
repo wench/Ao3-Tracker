@@ -65,7 +65,6 @@ namespace Ao3TrackReader
                 {
                     Text = "Back",
                     Icon = Icons.Back,
-                    Order = ToolbarItemOrder.Primary,
                     Command = prevPageButton = new DisableableCommand(GoBack, false)
                 });
             }
@@ -75,7 +74,6 @@ namespace Ao3TrackReader
             {
                 Text = "Forward",
                 Icon = Icons.Forward,
-                Order = ToolbarItemOrder.Primary,
                 Command = nextPageButton
             });
 
@@ -83,7 +81,6 @@ namespace Ao3TrackReader
             {
                 Text = "Refresh",
                 Icon = Icons.Refresh,
-                Order = ToolbarItemOrder.Primary,
                 Command = new Command(Refresh)
             });
 
@@ -92,7 +89,6 @@ namespace Ao3TrackReader
             {
                 Text = "Jump",
                 Icon = Icons.Redo,
-                Order = ToolbarItemOrder.Primary,
                 Command = jumpButton
             });
 
@@ -100,7 +96,6 @@ namespace Ao3TrackReader
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
-                Order = ToolbarItemOrder.Primary,
                 Command = new Command(() =>
                 {
                     ReadingList.IsOnScreen = !ReadingList.IsOnScreen;
@@ -112,7 +107,6 @@ namespace Ao3TrackReader
             {
                 Text = "Add to Reading List",
                 Icon = Icons.AddPage,
-                Order = ToolbarItemOrder.Primary,
                 Command = new Command(() =>
                 {
                     ReadingList.AddAsync(Current.AbsoluteUri);
@@ -178,14 +172,12 @@ namespace Ao3TrackReader
             {
                 Text = "Reset Font Size",
                 Icon = Icons.Font,
-                Order = ToolbarItemOrder.Secondary,
                 Command = new Command(() => FontSize = 100)
             });
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Settings",
                 Icon = Icons.Settings,
-                Order = ToolbarItemOrder.Secondary,
                 Command = new Command(() =>
                 {
                     SettingsPane.IsOnScreen = !SettingsPane.IsOnScreen;
@@ -208,8 +200,8 @@ namespace Ao3TrackReader
             var panes = new PaneContainer
             {
                 Children = {
-                    (ReadingList = new ReadingListView(this)),
-                    (SettingsPane = new SettingsView(this))
+                    (SettingsPane = new SettingsView(this)),
+                    (ReadingList = new ReadingListView(this))
                 }
             };
             AbsoluteLayout.SetLayoutBounds(panes, new Rectangle(0, 0, 1, 1));
@@ -274,14 +266,8 @@ namespace Ao3TrackReader
             App.Database.DeleteVariable("Sleep:URI");
 
             Uri uri = null;
-            try
-            {
-                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(new Uri(url), "#ao3t:jump"));
-            }
-            catch (Exception)
-            {
-
-            }
+            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url,UriKind.Absolute,out uri))
+                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(uri, "#ao3t:jump"));
 
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
             Navigate(uri);
@@ -290,6 +276,29 @@ namespace Ao3TrackReader
             FontSize = 100;
 
             Content = mainlayout;
+        }
+
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height);
+
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                int onscreen = ((int)width - 60) / 68;
+                var items = ToolbarItems;
+
+                for (var i = 0; i < onscreen && i < ToolbarItems.Count; i++)
+                {
+                    items[i].Order = ToolbarItemOrder.Primary;
+                }
+                for (var i = onscreen; i < ToolbarItems.Count; i++)
+                {
+                    items[i].Order = ToolbarItemOrder.Secondary;
+                }
+                var item = items[items.Count - 1];
+                items.RemoveAt(items.Count - 1);
+                items.Add(item);
+            });
         }
 
         public virtual void OnSleep()
@@ -558,9 +567,22 @@ namespace Ao3TrackReader
 
         protected override bool OnBackButtonPressed()
         {
-            if (!canGoBack) return false;
-            GoBack();
-            return true;
+            if (SettingsPane.IsOnScreen)
+            {
+                SettingsPane.IsOnScreen = false;
+                return true;
+            }
+            else if (ReadingList.IsOnScreen)
+            {
+                ReadingList.IsOnScreen = false;
+                return true;
+            }
+            else if (canGoBack)
+            {
+                GoBack();
+                return true;
+            }
+            return false;
         }
 
         public void ForceSetLocation()

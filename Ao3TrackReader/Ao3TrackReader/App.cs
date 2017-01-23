@@ -48,7 +48,7 @@ namespace Ao3TrackReader
             Resources = new ResourceDictionary();
 #if !WINDOWS_UWP
             // Andriod and iOS uses Xamarin Forms theme           
-            switch (Theme)
+            switch (Theme)  
             {
                 default:
                 case "light":

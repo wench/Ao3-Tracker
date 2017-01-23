@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using Xamarin.Forms;
+#if WINDOWS_UWP
+using Xamarin.Forms.PlatformConfiguration;
+using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
+#endif
 
 namespace Ao3TrackReader
 {
@@ -9,7 +13,9 @@ namespace Ao3TrackReader
     {
         public WVPNavigationPage(WebViewPage page) : base(page)
         {
-
+#if WINDOWS_UWP
+            On<Xamarin.Forms.PlatformConfiguration.Windows>().SetToolbarPlacement(ToolbarPlacement.Bottom);
+#endif
         }
 
         protected override bool OnBackButtonPressed()

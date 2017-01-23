@@ -70,6 +70,9 @@ namespace Ao3TrackReader.UWP
 
                 Xamarin.Forms.Forms.Init(e);
 
+                var md = new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") };
+                Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(md);
+
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application

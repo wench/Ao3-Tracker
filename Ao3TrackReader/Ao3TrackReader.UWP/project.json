@@ -3,7 +3,7 @@
     "HtmlAgilityPack": "1.4.9.5",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
     "Newtonsoft.Json": "9.0.1",
-    "sqlite-net-pcl": "1.2.1",
+    "sqlite-net-pcl": "1.3.1",
     "SQLitePCLRaw.bundle_green": "1.1.2",
     "SQLitePCLRaw.core": "1.1.2",
     "SQLitePCLRaw.lib.e_sqlite3.v140": "1.1.2",
