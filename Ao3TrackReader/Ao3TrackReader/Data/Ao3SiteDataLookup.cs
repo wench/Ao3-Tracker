@@ -938,59 +938,19 @@ namespace Ao3TrackReader.Data
 
             model.Language = stats?.ElementByClass("dd", "language")?.InnerText?.HtmlDecode()?.Trim();
 
-            try
-            {
-                if (stats != null) model.Details.Words = int.Parse(stats.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""));
-            }
-            catch
-            {
-
-            }
-
-            try
-            {
-                if (stats != null) model.Details.Collections = int.Parse(stats.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode());
-            }
-            catch
-            {
-
-            }
-
-            try
-            {
-                if (stats != null) model.Details.Comments = int.Parse(stats.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode());
-            }
-            catch
-            {
-
-            }
-
-            try
-            {
-                if (stats != null) model.Details.Kudos = int.Parse(stats.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode());
-            }
-            catch
-            {
-
-            }
-
-            try
-            {
-                if (stats != null) model.Details.Bookmarks = int.Parse(stats.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode());
-            }
-            catch
-            {
-
-            }
-
-            try
-            {
-                if (stats != null) model.Details.Hits = int.Parse(stats.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode());
-            }
-            catch
-            {
-
-            }
+            int intval;
+            if (stats != null && int.TryParse(stats.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""), out intval))
+                model.Details.Words = intval;
+            if (stats != null && int.TryParse(stats.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode(), out intval))
+                model.Details.Collections = intval;
+            if (stats != null && int.TryParse(stats.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode(), out intval))
+                model.Details.Comments = intval;
+            if (stats != null && int.TryParse(stats.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode(), out intval))
+                model.Details.Kudos = intval;
+            if (stats != null && int.TryParse(stats.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode(), out intval))
+                model.Details.Bookmarks = intval;
+            if (stats != null && int.TryParse(stats.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode(), out intval))
+                model.Details.Hits = intval;
 
             // Series
 
@@ -1010,14 +970,8 @@ namespace Ao3TrackReader.Data
                     var part = n.Element("strong")?.InnerText?.HtmlDecode();
                     if (String.IsNullOrWhiteSpace(part)) continue;
 
-                    try
-                    {
-                        series[uri.AbsoluteUri] = new Ao3SeriesLink(int.Parse(part), link.InnerText?.HtmlDecode());
-                    }
-                    catch
-                    {
-
-                    }
+                    if (int.TryParse(part, out intval))
+                        series[uri.AbsoluteUri] = new Ao3SeriesLink(intval, link.InnerText?.HtmlDecode());
 
                 }
                 if (series.Count > 0) model.Details.Series = series;
@@ -1026,18 +980,12 @@ namespace Ao3TrackReader.Data
             var chapters = stats?.ElementByClass("dd", "chapters")?.InnerText?.Trim()?.Split('/');
             if (chapters != null)
             {
-                try
-                {
                     int? total;
                     if (chapters[1] == "?") total = null;
                     else total = int.Parse(chapters[1]);
 
-                    model.Details.Chapters = new Ao3ChapterDetails(int.Parse(chapters[0]), total);
-                }
-                catch
-                {
-
-                }
+                    if (int.TryParse(chapters[0],out intval))
+                        model.Details.Chapters = new Ao3ChapterDetails(intval, total);
             }
 
             // Horrible horrible dirty grabbing of the summary
@@ -1049,7 +997,7 @@ namespace Ao3TrackReader.Data
                 {
                     model.Details.Summary = HtmlConverter.ConvertNode(summarynode);
                 }
-                catch
+                catch (Exception)
                 {
 
                 }
@@ -1135,43 +1083,41 @@ namespace Ao3TrackReader.Data
                                 while (sdd.Name == "#text") sdd = sdd.NextSibling;
                                 if (sdd.Name != "dd") continue;
 
-                                try
+                                int intval;
+                                switch (sdt.InnerText.HtmlDecode().Trim())
                                 {
-                                    switch (sdt.InnerText.HtmlDecode().Trim())
-                                    {
-                                        case "Words:":
-                                            model.Details.Words = int.Parse(sdd.InnerText.HtmlDecode().Replace(",", ""));
-                                            break;
+                                    case "Words:":
+                                        if (int.TryParse(sdd.InnerText.HtmlDecode().Replace(",", ""), out intval))
+                                            model.Details.Words = intval;
+                                        break;
 
-                                        case "Works:":
-                                            model.Details.Works = int.Parse(sdd.InnerText.HtmlDecode());
-                                            break;
+                                    case "Works:":
+                                        if (int.TryParse(sdd.InnerText.HtmlDecode(), out intval))
+                                            model.Details.Works = intval;
+                                        break;
 
-                                        case "Complete:":
-                                            switch (sdd.InnerText.HtmlDecode().Trim())
-                                            {
-                                                case "Yes":
-                                                    complete = true;
-                                                    model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-yes", "Complete");
-                                                    break;
+                                    case "Complete:":
+                                        switch (sdd.InnerText.HtmlDecode().Trim())
+                                        {
+                                            case "Yes":
+                                                complete = true;
+                                                model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-yes", "Complete");
+                                                break;
 
-                                                case "No":
-                                                    model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-no", "Incomplete");
-                                                    break;
+                                            case "No":
+                                                model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-no", "Incomplete");
+                                                break;
 
-                                                default:
-                                                    break;
-                                            }
+                                            default:
+                                                break;
+                                        }
 
-                                            break;
+                                        break;
 
-                                        case "Bookmarks:":
-                                            model.Details.Bookmarks = int.Parse(sdd.InnerText.HtmlDecode());
-                                            break;
-                                    }
-                                }
-                                catch (Exception)
-                                {
+                                    case "Bookmarks:":
+                                        if (int.TryParse(sdd.InnerText.HtmlDecode(),out intval))
+                                            model.Details.Bookmarks = intval;
+                                        break;
                                 }
                             }
                             break;
@@ -1197,8 +1143,7 @@ namespace Ao3TrackReader.Data
                 // Coalate tags
                 foreach (var kvp in workmodel.Tags)
                 {
-                    List<string> list;
-                    if (!tags.TryGetValue(kvp.Key, out list)) tags[kvp.Key] = list = new List<string>();
+                    if (!tags.TryGetValue(kvp.Key, out var list)) tags[kvp.Key] = list = new List<string>();
 
                     foreach (var tag in kvp.Value)
                     {
@@ -1209,8 +1154,7 @@ namespace Ao3TrackReader.Data
                 // Coalate required tags
                 foreach (var kvp in RequiredTagToType)
                 {
-                    Ao3RequredTagData reqTag;
-                    if (workmodel.RequiredTags.TryGetValue(kvp.Key, out reqTag))
+                    if (workmodel.RequiredTags.TryGetValue(kvp.Key, out var reqTag))
                     {
                         List<string> list;
                         if (!tags.TryGetValue(kvp.Value, out list))
@@ -1245,24 +1189,21 @@ namespace Ao3TrackReader.Data
             List<string> req;
             if (tags.TryGetValue(Ao3TagType.Warnings, out req))
             {
-                string sclass;
-                if (req.Count == 1 && reqtags.TryGetValue(req[0], out sclass))
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
-                string sclass;
-                if (req.Count == 1 && reqtags.TryGetValue(req[0], out sclass))
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
-                string sclass;
-                if (req.Count == 1 && reqtags.TryGetValue(req[0], out sclass))
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
@@ -1298,9 +1239,8 @@ namespace Ao3TrackReader.Data
 
             foreach (var i in Enum.GetValues(typeof(Ao3TagType)))
             {
-                List<string> tagids;
                 var name = "work_search[" + i.ToString().ToLowerInvariant().TrimEnd('s') + "_ids][]";
-                if (query.TryGetValue(name, out tagids))
+                if (query.TryGetValue(name, out var tagids))
                 {
                     foreach (var s in tagids)
                     {
@@ -1332,8 +1272,7 @@ namespace Ao3TrackReader.Data
 
             if (query.ContainsKey("work_search[language_id]"))
             {
-                int id;
-                if (int.TryParse(query["work_search[language_id]"][0], out id))
+                if (int.TryParse(query["work_search[language_id]"][0], out int id))
                 {
                     tasks.Add(Task.Run(async () =>
                     {
@@ -1397,8 +1336,7 @@ namespace Ao3TrackReader.Data
 
                 if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;
 
-                List<string> list;
-                if (!tags.TryGetValue(t.Key, out list))
+                if (!tags.TryGetValue(t.Key, out var list))
                 {
                     tags[t.Key] = list = new List<string>();
                 }
@@ -1410,27 +1348,21 @@ namespace Ao3TrackReader.Data
             List<string> req;
             if (tags.TryGetValue(Ao3TagType.Warnings, out req))
             {
-                int id = 0;
-                string sclass;
-                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
-                int id = 0;
-                string sclass;
-                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
-                int id = 0;
-                string sclass;
-                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
