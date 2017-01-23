@@ -14,7 +14,7 @@ namespace Ao3Track {
                 srl.paths[uri] = rle.timestamp;
             }
 
-            SyncReadingListAsync(srl).then((srl) => {
+            Ao3Track.SyncReadingListAsync(srl).then((srl) => {
                 if (srl === null) {
                     return;
                 }
