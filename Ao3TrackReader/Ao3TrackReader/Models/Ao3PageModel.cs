@@ -12,6 +12,7 @@ namespace Ao3TrackReader.Models
         Work,
         Bookmarks,
         Series,
+        Collection,
         Other,
         Unknown
     }

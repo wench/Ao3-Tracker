@@ -20,7 +20,7 @@ namespace Ao3Track {
         history.replaceState({}, document.title, window.location.href.substr(0,window.location.href.indexOf('#')));
     }
 
-    let regex_work_url = /^\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
+    let regex_work_url = /^(?:\/collections\/[^\/?#]+)?\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
     let work_chapter = window.location.pathname.match(regex_work_url);
     let workid = 0;
     let works: number[] = [];

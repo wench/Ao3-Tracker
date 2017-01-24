@@ -31,7 +31,7 @@ namespace Ao3TrackReader.Models
             int c;
 
             // Sort based on chapters remaining
-            if ((baseData.Type == Ao3PageType.Work || baseData.Type == Ao3PageType.Series) && (y.baseData.Type == Ao3PageType.Work || y.baseData.Type == Ao3PageType.Series))
+            if ((baseData.Type == Ao3PageType.Work || baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection) && (y.baseData.Type == Ao3PageType.Work || y.baseData.Type == Ao3PageType.Series || y.baseData.Type == Ao3PageType.Collection))
             {
                 int? xc = ChaptersRead;
                 int? yc = y.ChaptersRead;
@@ -164,14 +164,16 @@ namespace Ao3TrackReader.Models
                             s.Foreground = Colors.Base.High;
                             s.Bold = true;
                         }
+                        else if (t.Key == Ao3TagType.Rating || t.Key == Ao3TagType.Category)
+                            s.Foreground = Colors.Base.High;
                         else if (t.Key == Ao3TagType.Relationships)
                             s.Foreground = Colors.Base.MediumHigh;
                         else if (t.Key == Ao3TagType.Characters)
                         {
-                            s.Foreground = Colors.Base.MediumLow;
+                            s.Foreground = Colors.Base.Medium;
                         }
                         else
-                            s.Foreground = Colors.Base.Low;
+                            s.Foreground = Colors.Base.MediumLow;
 
                         foreach (var tag in t.Value)
                         {
@@ -210,7 +212,7 @@ namespace Ao3TrackReader.Models
             }
             set
             {
-                if (tags_visible != value && (BaseData.Type == Ao3PageType.Work || BaseData.Type == Ao3PageType.Series))
+                if (tags_visible != value && (BaseData.Type == Ao3PageType.Work || BaseData.Type == Ao3PageType.Series || BaseData.Type == Ao3PageType.Collection))
                 {
                     OnPropertyChanging("TagsVisible");
                     tags_visible = value;
@@ -245,7 +247,7 @@ namespace Ao3TrackReader.Models
                     workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
                 }
             }
-            else if (baseData.Type == Ao3PageType.Series)
+            else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
             {
                 if (baseData.SeriesWorks != null)
                 {
@@ -260,7 +262,7 @@ namespace Ao3TrackReader.Models
 
         void Deregister()
         {
-            if (baseData == null || baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series)
+            if (baseData == null || (baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series && baseData.Type != Ao3PageType.Collection))
                 return;
 
             if (ChapterNumberChangedDelegate == null)
@@ -277,7 +279,7 @@ namespace Ao3TrackReader.Models
                     if (workevents != null) workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
                 }
             }
-            else if (baseData.Type == Ao3PageType.Series)
+            else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
             {
                 if (baseData.SeriesWorks != null)
                 {
@@ -299,7 +301,7 @@ namespace Ao3TrackReader.Models
 
         void ChapterNumberChanged(object sender, Work workchap)
         {
-            if (baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series)
+            if (baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series && baseData.Type != Ao3PageType.Collection)
                 return;
 
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
@@ -330,7 +332,7 @@ namespace Ao3TrackReader.Models
                         UpdateDetails();
                         OnPropertyChanged("Details");
 
-                        if (baseData.Type == Ao3PageType.Series)
+                        if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
                         {
                             OnPropertyChanging("Summary");
                             UpdateSummary();
@@ -427,7 +429,7 @@ namespace Ao3TrackReader.Models
                         UpdateDetails();
                         OnPropertyChanged("Details");
 
-                        if (baseData.Type == Ao3PageType.Series)
+                        if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
                         {
                             OnPropertyChanging("Summary");
                             UpdateSummary();
@@ -460,7 +462,7 @@ namespace Ao3TrackReader.Models
                     if (workchap?.location != null) { chapters_finished--; }
                     newread = (int)chapters_finished;
                 }
-                else if (baseData.Type == Ao3PageType.Series)
+                else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
                 {
                     WorkChapters = await App.Storage.getWorkChaptersAsync(baseData.SeriesWorks.Select(pm => pm.Details.WorkId));
                     long chapters_finished = 0;
@@ -501,11 +503,22 @@ namespace Ao3TrackReader.Models
             }
 
             if (baseData.Type == Ao3PageType.Series) ts.Nodes.Add(new TextNode { Text = "Series ", Foreground = Colors.Base });
+            else if (baseData.Type == Ao3PageType.Collection) ts.Nodes.Add(new TextNode { Text = "Collection ", Foreground = Colors.Base });
 
             if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(baseData.Title);
+
+            if (baseData.Type == Ao3PageType.Collection && Unread != null && Unread > 0)
+            {
+                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
+            }
+
             if (baseData.Details?.Authors != null && baseData.Details.Authors.Count != 0)
             {
-                ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Colors.Base });
+                if (baseData.Type == Ao3PageType.Collection)
+                    ts.Nodes.Add(new TextNode { Text = "\nMaintainers: ", Foreground = Colors.Base });
+                else
+                    ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Colors.Base });
+
                 bool first = true;
                 foreach (var user in baseData.Details.Authors)
                 {
@@ -532,7 +545,7 @@ namespace Ao3TrackReader.Models
                 }
             }
 
-            if (Unread != null && Unread > 0)
+            if (baseData.Type != Ao3PageType.Collection && Unread != null && Unread > 0)
             {
                 ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
             }
@@ -572,7 +585,7 @@ namespace Ao3TrackReader.Models
 
         void UpdateSummary()
         {
-            if (baseData.Type == Ao3PageType.Series)
+            if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
             {
                 var summary = new Block();
                 if (baseData.Details?.Summary != null) {
@@ -594,17 +607,17 @@ namespace Ao3TrackReader.Models
                      }
                     var worksummary = new Span();
 
-                    var ts = new Span { Foreground = Resources.Colors.Highlight.Low };
+                    var ts = new Span { Foreground = Resources.Colors.Highlight.Medium };
 
                     if (!string.IsNullOrWhiteSpace(workmodel.Title)) ts.Nodes.Add(new TextNode { Text = workmodel.Title, Foreground = Resources.Colors.Highlight.MediumHigh });
                     if (workmodel.Details?.Authors != null && workmodel.Details.Authors.Count != 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Resources.Colors.Base.MediumLow });
+                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Resources.Colors.Base.Medium });
                         bool first = true;
                         foreach (var user in workmodel.Details.Authors)
                         {
                             if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.MediumLow });
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.Medium });
                             else
                                 first = false;
 
@@ -613,12 +626,12 @@ namespace Ao3TrackReader.Models
                     }
                     if (workmodel.Details?.Recipiants != null && workmodel.Details.Recipiants.Count != 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Resources.Colors.Base.MediumLow });
+                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Resources.Colors.Base.Medium });
                         bool first = true;
                         foreach (var user in workmodel.Details.Recipiants)
                         {
                             if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.MediumLow });
+                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.Medium });
                             else
                                 first = false;
 

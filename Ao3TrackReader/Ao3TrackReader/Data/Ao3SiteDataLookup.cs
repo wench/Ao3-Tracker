@@ -68,6 +68,7 @@ namespace Ao3TrackReader.Data
         static Regex regexWork = new Regex(@"^/works/(?<WORKID>\d+)(/chapters/(?<CHAPTERID>\d+))?$", RegexOptions.ExplicitCapture);
         static Regex regexWorkComment = new Regex(@"^/works/(?<WORKID>\d+)/comments/(?<COMMENTID>\d+)$", RegexOptions.ExplicitCapture);
         static Regex regexSeries = new Regex(@"^/series/(?<WORKID>\d+)$", RegexOptions.ExplicitCapture);
+        static Regex regexCollection = new Regex(@"^/collections/(?<COLID>[^/?#]+)(/.*)?$", RegexOptions.ExplicitCapture);
         static Regex regexRSSTagTitle = new Regex(@"AO3 works tagged '(?<TAGNAME>.*)'$", RegexOptions.ExplicitCapture);
         static Regex regexTagCategory = new Regex(@"This tag belongs to the (?<CATEGORY>\w*) Category\.", RegexOptions.ExplicitCapture);
         static Regex regexPageQuery = new Regex(@"(?<PAGE>&?page=\d+&?)");
@@ -83,6 +84,8 @@ namespace Ao3TrackReader.Data
                 App.Database.SaveVariable("UseHttps", use_https.ToString());
             }
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
+            HtmlNode.ElementsFlags["dd"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
+            HtmlNode.ElementsFlags["dt"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             httpSemaphore = new SemaphoreSlim(20);
         }
 
@@ -431,6 +434,11 @@ namespace Ao3TrackReader.Data
                 var sWORKID = match.Groups["WORKID"].Value;
                 uri = new Uri(uri, "/works/" + sWORKID);
             }
+            else if ((match = regexCollection.Match(uri.LocalPath)).Success)
+            {
+                var sCOLID = match.Groups["COLID"].Value;
+                uri = new Uri(uri, "/collections/" + sCOLID);
+            }
 
             return uri;
         }
@@ -557,6 +565,15 @@ namespace Ao3TrackReader.Data
                     model.PrimaryTag = "<Series>";
                     model.PrimaryTagType = Ao3TagType.Other;
 
+                }
+                else if ((match = regexCollection.Match(uri.LocalPath)).Success)
+                {
+                    var sCOLID = match.Groups["COLID"].Value;
+                    model.Uri = uri = new Uri(uri, "/collections/" + sCOLID);
+                    model.Type = Ao3PageType.Collection;
+                    model.Title = sCOLID;
+                    model.PrimaryTag = "<Collection>";
+                    model.PrimaryTagType = Ao3TagType.Other;
                 }
                 else
                 {
@@ -745,6 +762,33 @@ namespace Ao3TrackReader.Data
                                 await FillSeriesAsync(uri, main, model);
                             }
                         }
+                    }
+                    else if ((match = regexCollection.Match(uri.LocalPath)).Success)
+                    {
+                        var sCOLID = match.Groups["COLID"].Value;
+                        model.Uri = new Uri(uri, "/collections/" + sCOLID);
+                        uri = new Uri(uri, "/collections/" + sCOLID + "/");
+                        model.Type = Ao3PageType.Collection;
+
+                        // Only way to get data is from the page itself
+                        var response = await HttpRequestAsync(new Uri(uri,"profile"));
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
+
+                            var colnode = doc.GetElementbyId("main")?.ElementByClass("div","collection");
+
+                            if (colnode != null)
+                            {
+                                var title = colnode.ElementByClass("div","header")?.ElementByClass("h2", "heading");
+                                model.Title = title?.InnerText?.HtmlDecode()?.Trim();
+
+                                model.Details = new Ao3WorkDetails();
+                                await FillCollectionAsync(uri, colnode, model);
+                            }
+                        }
+
                     }
                     else
                     {
@@ -1004,11 +1048,8 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        private static async Task FillSeriesAsync(Uri baseuri, HtmlNode main, Ao3PageModel model)
+        private static List<Task<Ao3PageModel>> GatherWorksAsync(Uri baseuri, HtmlNode workstag, Ao3PageModel model)
         {
-            var authors = new Dictionary<string, string>(1);
-
-            var workstag = main.ElementByClass("ul", "work");
             var worktasks = new List<Task<Ao3PageModel>>(workstag.ChildNodes.Count);
             foreach (var worknode in workstag.ChildNodes)
             {
@@ -1033,8 +1074,121 @@ namespace Ao3TrackReader.Data
                     return workmodel;
                 }));
             }
+            return worktasks;
+        }
 
-            bool complete = false;
+        private static void FillInfoFromWorkModels(Ao3PageModel model)
+        {
+            // Gather all tags
+            SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
+            Dictionary<string, int> primaries = new Dictionary<string, int>();
+            Dictionary<string, Ao3TagType> tagtypes = new Dictionary<string, Ao3TagType>();
+            HashSet<string> languages = new HashSet<string>();
+            Dictionary<string, string> reqtags = new Dictionary<string, string>();
+
+            if (model.RequiredTags == null) model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
+
+            DateTime updated = DateTime.MinValue;
+            int words = 0;
+            int chapsavail = 0;
+            int? chapstotal = null;
+            if (model.RequiredTags.TryGetValue(Ao3RequiredTag.Complete, out var crt) && crt.Tag == "complete-yes")
+                chapstotal = 0;
+
+            foreach (var workmodel in model.SeriesWorks)
+            {
+                // Coalate tags
+                foreach (var kvp in workmodel.Tags)
+                {
+                    if (!tags.TryGetValue(kvp.Key, out var list)) tags[kvp.Key] = list = new List<string>();
+
+                    foreach (var tag in kvp.Value)
+                    {
+                        if (!list.Contains(tag))
+                            list.Add(tag);
+                    }
+                }
+                // Coalate required tags
+                foreach (var kvp in RequiredTagToType)
+                {
+                    if (workmodel.RequiredTags.TryGetValue(kvp.Key, out var reqTag))
+                    {
+                        List<string> list;
+                        if (!tags.TryGetValue(kvp.Value, out list))
+                        {
+                            reqtags[reqTag.Label] = reqTag.Tag;
+                            tags[kvp.Value] = list = new List<string>();
+                        }
+
+                        foreach (var separated in reqTag.Label.Split(','))
+                        {
+                            var s = separated.Trim();
+                            if (s != "" && !list.Contains(s))
+                                list.Add(s);
+                        }
+                    }
+                }
+
+                // Count each primary tag
+                int ptc = 1;
+                if (primaries.TryGetValue(workmodel.PrimaryTag, out ptc)) ptc++;
+                primaries[workmodel.PrimaryTag] = ptc;
+                tagtypes[workmodel.PrimaryTag] = workmodel.PrimaryTagType;
+
+                languages.Add(workmodel.Language);
+
+                chapsavail += workmodel.Details.Chapters.Available;
+                if (workmodel.Details.Chapters.Total == null) chapstotal = null;
+                else if (chapstotal != null) chapstotal += workmodel.Details.Chapters.Total;
+
+                if (workmodel.Details.Words != null) words += (int)workmodel.Details.Words;
+
+                if (workmodel.Details.LastUpdated != null && updated < workmodel.Details.LastUpdated) updated = (DateTime) workmodel.Details.LastUpdated;
+            }
+
+            // Generate required tags
+            List<string> req;
+            if (tags.TryGetValue(Ao3TagType.Warnings, out req))
+            {
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
+                else
+                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
+            }
+            if (tags.TryGetValue(Ao3TagType.Category, out req))
+            {
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
+                else
+                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
+            }
+            if (tags.TryGetValue(Ao3TagType.Rating, out req))
+            {
+                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
+                else
+                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
+            }
+
+            if (model.Details.Words == null) model.Details.Words = words;
+
+            model.Details.Chapters = new Ao3ChapterDetails(chapsavail, chapstotal);
+            model.Language = string.Join(", ", languages);
+
+            model.PrimaryTag = primaries.OrderByDescending(kvp => kvp.Value).First().Key;
+            model.PrimaryTagType = tagtypes[model.PrimaryTag];
+
+            if (model.Details.LastUpdated != null && updated > DateTime.MinValue)
+                model.Details.LastUpdated = updated;
+        }
+
+        private static async Task FillSeriesAsync(Uri baseuri, HtmlNode main, Ao3PageModel model)
+        {
+            var authors = new Dictionary<string, string>(1);
+
+            var workstag = main.ElementByClass("ul", "work");
+            var worktasks = GatherWorksAsync(baseuri, workstag, model);
+
             var meta = main.ElementByClass("div", "wrapper")?.ElementByClass("dl", "meta");
             model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             if (meta != null)
@@ -1059,9 +1213,8 @@ namespace Ao3TrackReader.Data
 
                         case "Series Updated:":
                             {
-                                DateTime datetime;
                                 var updatedate = dd.InnerText?.HtmlDecode()?.Trim();
-                                if (!string.IsNullOrEmpty(updatedate) && DateTime.TryParseExact(updatedate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out datetime))
+                                if (!string.IsNullOrEmpty(updatedate) && DateTime.TryParseExact(updatedate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var datetime))
                                 {
                                     model.Details.LastUpdated = datetime;
                                 }
@@ -1071,7 +1224,17 @@ namespace Ao3TrackReader.Data
                         case "Description:":
                             {
                                 var blockquote = dd.Element("blockquote");
-                                if (blockquote != null) model.Details.Summary = HtmlConverter.ConvertNode(blockquote);
+                                if (blockquote != null)
+                                {
+                                    try
+                                    {
+                                        model.Details.Summary = HtmlConverter.ConvertNode(blockquote);
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
+                                }
                             }
                             break;
 
@@ -1100,7 +1263,6 @@ namespace Ao3TrackReader.Data
                                         switch (sdd.InnerText.HtmlDecode().Trim())
                                         {
                                             case "Yes":
-                                                complete = true;
                                                 model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("complete-yes", "Complete");
                                                 break;
 
@@ -1128,92 +1290,84 @@ namespace Ao3TrackReader.Data
 
             model.SeriesWorks = await Task.WhenAll(worktasks);
 
-            // Gather all tags
-            SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
-            Dictionary<string, int> primaries = new Dictionary<string, int>();
-            Dictionary<string, Ao3TagType> tagtypes = new Dictionary<string, Ao3TagType>();
-            HashSet<string> languages = new HashSet<string>();
-            Dictionary<string, string> reqtags = new Dictionary<string, string>();
+            FillInfoFromWorkModels(model);
+        }
+        
+        private static async Task FillCollectionAsync(Uri baseuri, HtmlNode colnode, Ao3PageModel model)
+        {
+            var header = colnode.ElementByClass("div", "header");
 
-            int chapsavail = 0;
-            int? chapstotal = complete?new int?(0):null;
+            var userstuff = header?.ElementByClass("blockquote", "userstuff");
 
-            foreach (var workmodel in model.SeriesWorks)
+            try
             {
-                // Coalate tags
-                foreach (var kvp in workmodel.Tags)
-                {
-                    if (!tags.TryGetValue(kvp.Key, out var list)) tags[kvp.Key] = list = new List<string>();
+                model.Details.Summary = HtmlConverter.ConvertNode(userstuff);
+            }
+            catch (Exception)
+            {
 
-                    foreach (var tag in kvp.Value)
+            }
+
+            var mods = new Dictionary<string, string>(1);
+            var meta = colnode.ElementByClass("div", "wrapper")?.ElementByClass("dl","meta");
+            if (meta != null)
+            {
+                foreach (var dt in meta.Elements("dt"))
+                {
+                    var dd = dt.NextSibling;
+                    if (dd == null) continue;
+                    while (dd.Name == "#text") dd = dd.NextSibling;
+                    if (dd.Name != "dd") continue;
+
+                    switch (dt.InnerText.HtmlDecode().Trim())
                     {
-                        if (!list.Contains(tag))
-                            list.Add(tag);
+                        case "Maintainers:":
+                            foreach (var a in dd.Descendants("a"))
+                            {
+                                var href = a.Attributes["href"];
+                                var uri = new Uri(baseuri, href.Value.HtmlDecode());
+                                mods[uri.AbsoluteUri] = a.InnerText.HtmlDecode().Trim();
+                            }
+                            break;
                     }
                 }
-                // Coalate required tags
-                foreach (var kvp in RequiredTagToType)
+            }
+            model.Details.Authors = mods;
+
+            // Get the collections works!
+            var worksuri = new Uri(baseuri, "works");
+            List<Ao3PageModel> works = new List<Ao3PageModel>();
+            while (worksuri != null)
+            {
+                var response = await HttpRequestAsync(worksuri);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    if (workmodel.RequiredTags.TryGetValue(kvp.Key, out var reqTag))
+                    HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
+
+                    var main = doc.GetElementbyId("main");
+
+                    if (main != null)
                     {
-                        List<string> list;
-                        if (!tags.TryGetValue(kvp.Value, out list))
+                        var workstag = main.ElementByClass("ol", "work");
+                        works.AddRange(await Task.WhenAll(GatherWorksAsync(worksuri, workstag, model)));
+
+                        var nextpage = main.ElementByClass("ol", "pagination")?.ElementByClass("li", "next")?.Element("a")?.Attributes["href"]?.Value?.HtmlDecode();
+                        if (!string.IsNullOrWhiteSpace(nextpage))
                         {
-                            reqtags[reqTag.Label] = reqTag.Tag;
-                            tags[kvp.Value] = list = new List<string>();
+                            worksuri = new Uri(worksuri, nextpage);
+                            continue;
                         }
 
-                        foreach(var separated in reqTag.Label.Split(','))
-                        {
-                            var s = separated.Trim();
-                            if (s != "" && !list.Contains(s))
-                                list.Add(s);
-                        }
                     }
                 }
-
-                // Count each primary tag
-                int ptc = 1;
-                if (primaries.TryGetValue(workmodel.PrimaryTag, out ptc)) ptc++;
-                primaries[workmodel.PrimaryTag] = ptc;
-                tagtypes[workmodel.PrimaryTag] = workmodel.PrimaryTagType;
-
-                languages.Add(workmodel.Language);
-
-                chapsavail += workmodel.Details.Chapters.Available;
-                if (workmodel.Details.Chapters.Total == null) chapstotal = null;
-                else if (chapstotal != null) chapstotal += workmodel.Details.Chapters.Total;
+                worksuri = null;
+                break;
             }
 
-            // Generate required tags
-            List<string> req;
-            if (tags.TryGetValue(Ao3TagType.Warnings, out req))
-            {
-                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
-                else
-                    model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
-            }
-            if (tags.TryGetValue(Ao3TagType.Category, out req))
-            {
-                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
-                else
-                    model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
-            }
-            if (tags.TryGetValue(Ao3TagType.Rating, out req))
-            {
-                if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
-                else
-                    model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
-            }
+            model.SeriesWorks = works;
 
-            model.Details.Chapters = new Ao3ChapterDetails(chapsavail, chapstotal);
-            model.Language = string.Join(", ", languages);
-
-            model.PrimaryTag = primaries.OrderByDescending(kvp => kvp.Value).First().Key;
-            model.PrimaryTagType = tagtypes[model.PrimaryTag];
+            FillInfoFromWorkModels(model);
         }
 
         private static async Task FillModelFromSearchQueryAsync(Uri uri, Ao3PageModel model)
