@@ -224,17 +224,19 @@ namespace Ao3TrackReader
 
             urlBar.Children.Add(urlEntry);
 
-            var urlButton = new Xamarin.Forms.Button()
+            var urlButton = new Ao3TrackReader.Controls.Button()
             {
                 Text = "Go",
+                StyleId = "PaneImageButton",
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.End
             };
             urlButton.Clicked += UrlButton_Clicked;
 
-            var urlCancel = new Xamarin.Forms.Button()
+            var urlCancel = new Ao3TrackReader.Controls.Button()
             {
                 Image = Icons.Close,
+                StyleId = "PaneImageButton",
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.End
             };
@@ -243,7 +245,7 @@ namespace Ao3TrackReader
             urlBar.Children.Add(urlEntry);
             urlBar.Children.Add(urlButton);
             urlBar.Children.Add(urlCancel);
-            urlBar.BackgroundColor = Color.Black;
+            urlBar.BackgroundColor = Colors.Alt.MediumHigh;
             urlBar.IsVisible = false;
 
             mainlayout.Children.Add(new AbsoluteLayout

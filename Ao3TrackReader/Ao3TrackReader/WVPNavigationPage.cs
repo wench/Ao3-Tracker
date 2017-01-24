@@ -16,6 +16,7 @@ namespace Ao3TrackReader
 #if WINDOWS_UWP
             On<Xamarin.Forms.PlatformConfiguration.Windows>().SetToolbarPlacement(ToolbarPlacement.Bottom);
 #endif
+            BarBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.Solid.MediumHigh;
         }
 
         protected override bool OnBackButtonPressed()

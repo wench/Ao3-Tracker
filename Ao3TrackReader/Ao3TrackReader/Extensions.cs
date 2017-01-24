@@ -113,7 +113,7 @@ namespace Ao3TrackReader
         }
 
         /// <summary>
-        /// Gamma correct blend a color with another color
+        /// Blend a color with another color
         /// </summary>
         /// <param name="color">Foreground color</param>
         /// <param name="behind">Background color</param>
@@ -122,11 +122,16 @@ namespace Ao3TrackReader
         {
             if (behind.A != 1) behind = behind.Blend(Xamarin.Forms.Color.Black);
 
+            //return new Xamarin.Forms.Color(
+            //        Math.Pow(Math.Pow(color.R, 2.2) * color.A + Math.Pow(behind.R, 2.2) * (1 - color.A), 1 / 2.2),
+            //        Math.Pow(Math.Pow(color.G, 2.2) * color.A + Math.Pow(behind.G, 2.2) * (1 - color.A), 1 / 2.2),
+            //        Math.Pow(Math.Pow(color.B, 2.2) * color.A + Math.Pow(behind.B, 2.2) * (1 - color.A), 1 / 2.2)
+            //    );
             return new Xamarin.Forms.Color(
-                    Math.Pow(Math.Pow(color.R, 2.2) * color.A + Math.Pow(behind.R, 2.2) * (1 - color.A), 1 / 2.2),
-                    Math.Pow(Math.Pow(color.G, 2.2) * color.A + Math.Pow(behind.G, 2.2) * (1 - color.A), 1 / 2.2),
-                    Math.Pow(Math.Pow(color.B, 2.2) * color.A + Math.Pow(behind.B, 2.2) * (1 - color.A), 1 / 2.2)
-                );
+                    color.R * color.A + behind.R * (1 - color.A),
+                    color.G * color.A + behind.G * (1 - color.A),
+                    color.B * color.A + behind.B * (1 - color.A)
+                    );
         }
 
 
