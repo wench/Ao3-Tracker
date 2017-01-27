@@ -85,7 +85,7 @@ namespace Ao3Track {
             return false;
         });
 
-        if (had_chapter) { SetCurrentLocation(workchap); }
+        if (had_chapter) { SetCurrentLocation(Object.assign({workid:workid},workchap)); }
 
         // Change page!
         if (!had_chapter && dojump) {
@@ -171,7 +171,6 @@ namespace Ao3Track {
 
     if (work_chapter && work_chapter.length === 3) {
         workid = parseInt(work_chapter[1]);
-        SetCurrentWorkId(workid);
         let $chapter = $('#chapters .chapter[id]');
 
         // Multichapter fic
@@ -210,7 +209,7 @@ namespace Ao3Track {
         }
 
         let last_location = updateLocation();
-        if (last_location !== null) { SetCurrentLocation(last_location); }
+        if (last_location !== null) { SetCurrentLocation(Object.assign({workid:workid},last_location)); }
         let last_set_location = last_location;
         if (last_set_location) {
             SetWorkChapters({ [workid]: last_set_location });
@@ -218,7 +217,7 @@ namespace Ao3Track {
 
         $(window).scroll((eventObject) => {
             let new_location = updateLocation();
-            if (new_location !== null) { SetCurrentLocation(new_location); }
+            if (new_location !== null) { SetCurrentLocation(Object.assign({workid:workid},new_location)); }
             if (new_location && (!last_location || new_location.number > last_location.number ||
                  (new_location.number === last_location.number && last_location.location !== null && 
                   (new_location.location === null || new_location.location > last_location.location))))

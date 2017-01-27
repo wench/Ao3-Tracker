@@ -469,6 +469,28 @@ namespace Ao3TrackReader
         public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             App.Storage.setWorkChapters(works);
+            if (currentSavedLocation != null && currentLocation != null) {
+                if (works.TryGetValue(currentSavedLocation.workid, out var workchap))
+                {
+                    workchap.workid = currentSavedLocation.workid;
+                    if (currentSavedLocation.IsNewer(workchap))
+                    {
+                        bool prev = currentLocation.IsNewer(currentSavedLocation);
+                        currentSavedLocation = workchap;
+                        bool cur = currentLocation.IsNewer(currentSavedLocation);
+                        if (prev != cur)
+                        {
+                            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                            {
+                                if (currentSavedLocation == null || forceSetLocationButton == null)
+                                    forceSetLocationButton.IsEnabled = false;
+                                else if (currentLocation.workid == currentSavedLocation?.workid)
+                                    forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                            });
+                        }
+                    }
+                }
+            }
         }
 
         public void OnJumpClicked()
@@ -587,18 +609,49 @@ namespace Ao3TrackReader
             return false;
         }
 
+        IWorkChapterEx currentLocation;
+        WorkChapter currentSavedLocation;
+        public IWorkChapterEx CurrentLocation {
+            get { return currentLocation; }
+            set {
+                currentLocation = value;
+                if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
+                {
+                    if (forceSetLocationButton.IsEnabled == currentLocation.IsNewer(currentSavedLocation))
+                        return;
+                }
+                Task.Run(async () =>
+                {
+                    if (currentLocation == null)
+                    {
+                        currentSavedLocation = null;
+                    }
+                    else if (currentLocation.workid != currentSavedLocation?.workid)
+                    {
+                        currentSavedLocation = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.workid })).Select(kvp=>kvp.Value).FirstOrDefault();
+                    }
+
+                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                    {
+                        if (currentSavedLocation == null || forceSetLocationButton == null)
+                            forceSetLocationButton.IsEnabled = false;
+                        else if (currentLocation.workid == currentSavedLocation?.workid)
+                            forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                    });
+                });
+            }
+        }
+
+
         public void ForceSetLocation()
         {
-            var workid = helper.CurrentWorkId;
-            var iworkchap = helper.CurrentLocation;
-
-            if (workid != 0 && iworkchap != null)
+            if (currentLocation != null)
             {
                 Task.Run(async () =>
                 {
-                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { workid })).Select((kp)=>kp.Value).FirstOrDefault();
-                    var workchap = new WorkChapter(iworkchap) { seq = (db_workchap?.seq + 1) ?? 0 };
-                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [workid] = workchap });
+                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                    currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
+                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation });
                 });
             }
         }

@@ -72,11 +72,8 @@ namespace Ao3Track {
         curLastLoc = lastloc;
     }
 
-    export function SetCurrentLocation(current : IWorkChapter)
+    export function SetCurrentLocation(current : IWorkChapterEx)
     {
     }
 
-    export function SetCurrentWorkId(current : number)
-    {
-    }    
 }

@@ -128,6 +128,9 @@ namespace Ao3TrackReader
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
             nextPageButton.IsEnabled = canGoForward;
+            currentLocation = null;
+            currentSavedLocation = null;
+            forceSetLocationButton.IsEnabled = false;
             helper?.Reset();
         }
 
@@ -139,6 +142,9 @@ namespace Ao3TrackReader
             NextPageIndicator.IsVisible = false;
             WebView.RenderTransform = null;
             WebView.Opacity = 1;
+            currentLocation = null;
+            currentSavedLocation = null;
+            forceSetLocationButton.IsEnabled = false;
             helper?.Reset();
         }
 

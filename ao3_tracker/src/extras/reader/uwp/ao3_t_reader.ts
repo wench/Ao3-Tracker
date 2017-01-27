@@ -67,14 +67,9 @@ namespace Ao3Track {
     Ao3TrackHelper.onalterfontsizeevent = updatefontsize;
     updatefontsize();
 
-    export function SetCurrentLocation(current : IWorkChapter)
+    export function SetCurrentLocation(current : IWorkChapterEx)
     {
-        Ao3TrackHelper.currentLocation = Ao3TrackHelper.createWorkChapter(current.number,current.chapterid,current.location,current.seq);
-    }
-
-    export function SetCurrentWorkId(current : number)
-    {
-        Ao3TrackHelper.currentWorkId = current;
+        Ao3TrackHelper.currentLocation = Ao3TrackHelper.createWorkChapterEx(current.workid,current.number,current.chapterid,current.location,current.seq);
     }
 
     // Nonsense to allow for swiping back and foward between pages 

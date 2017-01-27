@@ -1,7 +1,7 @@
 declare namespace Ao3TrackHelper {
     type jsonNumberArray = string;
     type jsonStringArray = string;
-    type jsonWorkChap = string;
+    type jsonWorkChapEx = string;
     type jsonWorkChapList = string;
     type hCallback<T> = number
 
@@ -45,9 +45,7 @@ declare namespace Ao3TrackHelper {
     function set_ShowPrevPageIndicator(value : boolean) : void;
     function set_ShowNextPageIndicator(value : boolean) : void;
 
-    function get_CurrentLocation() : jsonWorkChap;
-    function set_CurrentLocation(value: jsonWorkChap) : void;
+    function get_CurrentLocation() : jsonWorkChapEx;
+    function set_CurrentLocation(value: jsonWorkChapEx) : void;
 
-    function get_CurrentWorkId() : number;
-    function set_CurrentWorkId(value: number) : void;
 }

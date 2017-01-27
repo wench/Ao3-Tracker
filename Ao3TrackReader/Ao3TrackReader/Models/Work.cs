@@ -4,14 +4,14 @@ using Ao3TrackReader.Helper;
 
 namespace Ao3TrackReader
 {
-    public class Work : IWorkChapter
+    public class Work : IWorkChapterEx
     {
         public Work()
         {
         }
 
-        [PrimaryKey]
-        public long id { get; set; }
+        [PrimaryKey, Column("id")]
+        public long workid { get; set; }
         public long chapterid { get; set; }
         public long number { get; set; }
         public long timestamp { get; set; }
@@ -22,7 +22,7 @@ namespace Ao3TrackReader
         
         public bool IsNewer(Work newitem)
         {
-            if (newitem.id != id) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
             if (newitem.seq > this.seq) { return true; }
             else if (newitem.seq < this.seq) { return false; }
@@ -48,10 +48,24 @@ namespace Ao3TrackReader
 
             return newitem.location > this.location;
         }
+        public bool IsNewer(IWorkChapterEx newitem)
+        {
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
+
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
+
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
+
+            return newitem.location > this.location;
+        }
         public bool IsNewerOrSame(Work newitem)
         {
-            if (newitem.id != id) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
             if (newitem.seq > this.seq) { return true; }
             else if (newitem.seq < this.seq) { return false; }
@@ -67,6 +81,21 @@ namespace Ao3TrackReader
 
         public bool IsNewerOrSame(IWorkChapter newitem)
         {
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
+
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
+
+            if (newitem.location == null) { return true; }
+            if (this.location == null) { return false; }
+
+            return newitem.location >= this.location;
+        }
+        public bool IsNewerOrSame(IWorkChapterEx newitem)
+        {
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+
             if (newitem.seq > this.seq) { return true; }
             else if (newitem.seq < this.seq) { return false; }
 

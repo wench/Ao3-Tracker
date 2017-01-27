@@ -52,7 +52,7 @@ namespace Ao3TrackReader.Data
 
         public bool CanSync
         {
-            get { return serversync != SyncState.Delayed; }
+            get { return serversync != SyncState.Disabled; }
         }
 
         public string Username
@@ -99,11 +99,11 @@ namespace Ao3TrackReader.Data
 
             foreach (var it in database.GetItems())
             {
-                storage[it.id] = it;
+                storage[it.workid] = it;
 
-                if (storage[it.id].timestamp > last_sync)
+                if (storage[it.workid].timestamp > last_sync)
                 {
-                    unsynced[it.id] = storage[it.id];
+                    unsynced[it.workid] = storage[it.workid];
                 }
             }
             dosync();
@@ -254,7 +254,7 @@ namespace Ao3TrackReader.Data
                         Dictionary<long, Work> newitems = new Dictionary<long, Work>();
                         foreach (var item in items)
                         {
-                            item.Value.id = item.Key;
+                            item.Value.workid = item.Key;
                             // Highest time value of incoming item is our new sync time
                             if (item.Value.timestamp > last_sync)
                             {
@@ -471,7 +471,7 @@ namespace Ao3TrackReader.Data
 
                             var w = new Work
                             {
-                                id = work.Key,
+                                workid = work.Key,
                                 number = work.Value.number,
                                 chapterid = work.Value.chapterid,
                                 location = work.Value.location,

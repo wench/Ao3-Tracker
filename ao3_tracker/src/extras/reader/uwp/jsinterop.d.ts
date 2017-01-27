@@ -6,10 +6,8 @@ declare namespace Ao3TrackHelper {
     }
 
     interface WorkChapterNative extends Native, IWorkChapter {
-        number: number;
-        chapterid: number;
-        location: number | null;
-        seq: number | null;     
+    }
+    interface WorkChapterExNative extends WorkChapterNative, IWorkChapterEx {
     }
      
     interface IKeyValuePair<K, V>{
@@ -51,6 +49,7 @@ declare namespace Ao3TrackHelper {
     function createWorkChapterMap() : IMap<number,WorkChapterNative>;
 
     function createWorkChapter(number: number, chapterid: number, location: number | null, seq:number | null) : WorkChapterNative;
+    function createWorkChapterEx(workid : number, number: number, chapterid: number, location: number | null, seq:number | null) : WorkChapterExNative;
 
     var onjumptolastlocationevent : ((pagejump : boolean)=>void) | null;
     
@@ -75,6 +74,5 @@ declare namespace Ao3TrackHelper {
     function copyToClipboard(str: string, type:string) : void; 
     function setCookies(cookies: string) : void;
 
-    var currentLocation : WorkChapterNative|null;
-    var currentWorkId : number;
+    var currentLocation : WorkChapterExNative|null;
 }

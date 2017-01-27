@@ -14,7 +14,9 @@ interface IWorkChapter {
     location: number | null;
     seq: number | null;
 }
- 
+ interface IWorkChapterEx extends IWorkChapter {
+    workid: number;
+} 
 interface IWorkChapterTS extends IWorkChapter {
     timestamp: timestamp;
 }

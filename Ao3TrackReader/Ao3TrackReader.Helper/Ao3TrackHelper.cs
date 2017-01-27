@@ -17,29 +17,110 @@ namespace Ao3TrackReader.Helper
         long chapterid { get; set; }
         long? location { get; set; }
         long? seq { get; set; }
+        bool IsNewer(IWorkChapter newitem);
+        bool IsNewerOrSame(IWorkChapter newitem);
+    }
+    public interface IWorkChapterEx : IWorkChapter
+    {
+        long workid { get; set; }
+        bool IsNewer(IWorkChapterEx newitem);
+        bool IsNewerOrSame(IWorkChapterEx newitem);
     }
 
 #if WINDOWS_UWP
     [AllowForWeb]
 #endif
-    public sealed class WorkChapter : IWorkChapter
+    public sealed class WorkChapter : IWorkChapterEx
     {
         public WorkChapter()
         {
 
         }
-        public WorkChapter(IWorkChapter toCopy)
+        //public WorkChapter(IWorkChapter toCopy)
+        //{
+        //    workid = 0;
+        //    number = toCopy.number;
+        //    chapterid = toCopy.chapterid;
+        //    location = toCopy.location;
+        //    seq = toCopy.seq;
+        //}
+        public WorkChapter(IWorkChapterEx toCopy)
         {
+            workid = toCopy.workid; 
             number = toCopy.number;
             chapterid = toCopy.chapterid;
             location = toCopy.location;
             seq = toCopy.seq;
         }
 
+        public long workid { get; set; }
         public long number { get; set; }
         public long chapterid { get; set; }
         public long? location { get; set; }
         public long? seq { get; set; }
+
+        bool IWorkChapter.IsNewer(IWorkChapter newitem)
+        {
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
+
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
+
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
+
+            return newitem.location > this.location;
+        }
+#if WINDOWS_UWP
+        [DefaultOverload]
+#endif
+        public bool IsNewer(IWorkChapterEx newitem)
+        {
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
+
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
+
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
+
+            return newitem.location > this.location;
+        }
+        bool IWorkChapter.IsNewerOrSame(IWorkChapter newitem)
+        {
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
+
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
+
+            if (newitem.location == null) { return true; }
+            if (this.location == null) { return false; }
+
+            return newitem.location >= this.location;
+        }
+#if WINDOWS_UWP
+        [DefaultOverload]
+#endif
+        public bool IsNewerOrSame(IWorkChapterEx newitem)
+        {
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+
+            if (newitem.seq > this.seq) { return true; }
+            else if (newitem.seq < this.seq) { return false; }
+
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
+
+            if (newitem.location == null) { return true; }
+            if (this.location == null) { return false; }
+
+            return newitem.location >= this.location;
+        }
     }
 
     public delegate void MainThreadAction();
@@ -75,7 +156,7 @@ namespace Ao3TrackReader.Helper
         int FontSizeMax { get; }
         int FontSizeMin { get; }
         int FontSize { get; set; }
-
+        IWorkChapterEx CurrentLocation { get; set; }
 #if WINDOWS_UWP
         IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
 #else

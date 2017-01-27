@@ -54,15 +54,11 @@ namespace Ao3Track {
     Ao3TrackHelper.set_AlterFontSizeCallback(Ao3TrackCallbacks.AddPermanent(updatefontsize));
     updatefontsize();
 
-    export function SetCurrentLocation(current : IWorkChapter)
+    export function SetCurrentLocation(current : IWorkChapterEx)
     {
         Ao3TrackHelper.set_CurrentLocation(JSON.stringify(current));
     }
 
-    export function SetCurrentWorkId(current : number)
-    {
-        Ao3TrackHelper.set_CurrentWorkId(current);
-    }
 
     // Nonsense to allow for swiping back and foward between pages 
 

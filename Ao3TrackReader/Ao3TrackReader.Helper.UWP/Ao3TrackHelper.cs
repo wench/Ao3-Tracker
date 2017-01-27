@@ -51,8 +51,6 @@ namespace Ao3TrackReader.Helper
         {
             JumpToLastLocationEvent = null;
             AlterFontSizeEvent = null;
-            CurrentWorkId = 0;
-            CurrentLocation = null;
         }
 
         public IAsyncOperation<object> getWorkChaptersAsync([ReadOnlyArray] long[] works)
@@ -72,6 +70,18 @@ namespace Ao3TrackReader.Helper
         {
             return new WorkChapter
             {
+                number = number,
+                chapterid = chapterid,
+                location = location,
+                seq = seq
+            };
+
+        }
+        public IWorkChapterEx createWorkChapterEx(long workid, long number, long chapterid, long? location, long? seq)
+        {
+            return new WorkChapter
+            {
+                workid = workid,
                 number = number,
                 chapterid = chapterid,
                 location = location,
@@ -166,7 +176,6 @@ namespace Ao3TrackReader.Helper
             set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
         }
 
-        public IWorkChapter CurrentLocation { get; set; }
-        public long CurrentWorkId { get; set; }
+        public IWorkChapterEx CurrentLocation { get { return handler.CurrentLocation; } set { handler.CurrentLocation = value; } }
     }
 }
