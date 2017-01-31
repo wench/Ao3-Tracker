@@ -15,11 +15,11 @@
             "js": [
                 "lib/jquery-3.1.1.min.js",
                 //@if BROWSER='Edge'
-                "ao3_t_edge.js",
+                "edge.js",
                 //@endif
-                "ao3_t_browser.js",
+                "browser.js",
                 "ao3_tracker.js",
-                "ao3_t_unitconv.js"
+                "unitconv.js"
             ],
             "css": [
                 "ao3_tracker.css"

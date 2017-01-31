@@ -1,4 +1,4 @@
-/// <reference path="../typings/globals/chrome/index.d.ts" />
+/// <reference path="../../typings/globals/chrome/index.d.ts" />
 
 namespace Ao3Track {
     export function GetWorkChapters(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void) {

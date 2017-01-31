@@ -326,14 +326,20 @@
     <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_tracker.css">
       <Link>Content\ao3_tracker.css</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\platform.js">
+      <Link>Content\platform.js</Link>
+    </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_tracker.js">
       <Link>Content\ao3_tracker.js</Link>
     </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_t_reader.js">
-      <Link>Content\ao3_t_reader.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\reader.js">
+      <Link>Content\reader.js</Link>
     </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_t_unitconv.js">
-      <Link>Content\ao3_t_unitconv.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\touch.js">
+      <Link>Content\touch.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\unitconv.js">
+      <Link>Content\unitconv.js</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>

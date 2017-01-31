@@ -386,17 +386,26 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_tracker.css">
       <Link>Assets\ao3_tracker.css</Link>
     </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\jsinterop.js">
+      <Link>Assets\jsinterop.js</Link>
+    </AndroidAsset>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_tracker.js">
       <Link>Assets\ao3_tracker.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_callbacks.js">
-      <Link>Assets\ao3_t_callbacks.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\callbacks.js">
+      <Link>Assets\callbacks.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_reader.js">
-      <Link>Assets\ao3_t_reader.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\reader.js">
+      <Link>Assets\reader.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_t_unitconv.js">
-      <Link>Assets\ao3_t_unitconv.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\touch.js">
+      <Link>Assets\touch.js</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\touch.js">
+      <Link>Assets\touch.js</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\unitconv.js">
+      <Link>Assets\unitconv.js</Link>
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>

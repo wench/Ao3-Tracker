@@ -128,7 +128,7 @@ namespace Ao3TrackReader
         {
             if (urlEntry != null) urlEntry.Text = WebView.Url;
             ReadingList?.PageChange(Current);
-            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelper");
+            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelperBase");
             PrevPageIndicator.IsVisible = false;
             NextPageIndicator.IsVisible = false;
             //WebView.RenderTransform = null;

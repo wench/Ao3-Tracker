@@ -24,8 +24,23 @@ var tsOptions_ES6 = Object.assign({
     target: "ES6" 
 },tsOptions);
 
+var browser_scripts = [
+    'src/*.ts',
+    'src/browser/*.ts'
+];
+var uwp_scripts = [
+    'src/*.ts',
+    'src/reader/uwp/*.ts',
+    'src/reader/*.ts'
+];
+var webkit_scripts = [
+    'src/*.ts',
+    'src/reader/webkit/*.ts',
+    'src/reader/*.ts'
+];
+
 function scripts() {
-    return gulp.src('src/*.ts')
+    return gulp.src(browser_scripts)
         .pipe(sourcemaps.init())
         .pipe(ts(tsOptions_ES6))
         .pipe(sourcemaps.write('src-maps'))
@@ -33,20 +48,6 @@ function scripts() {
         .pipe(gulp.dest('build/edge'));
 }
 gulp.task('scripts', scripts);
-
-var uwp_scripts = [
-    'src/global.d.ts',
-    'src/ao3_tracker.ts',
-    'src/ao3_t_unitconv.ts',
-    'src/extras/reader/uwp/ao3_t_reader.ts'
-];
-var webkit_scripts = [
-    'src/global.d.ts',
-    'src/ao3_tracker.ts',
-    'src/ao3_t_unitconv.ts',
-    'src/extras/reader/webkit/ao3_t_callbacks.ts',
-    'src/extras/reader/webkit/ao3_t_reader.ts'
-];
 
 var reader = {
     scripts: {
@@ -126,10 +127,10 @@ function pages() {
 gulp.task('pages', pages);
 
 function extras() {
-    var edge = gulp.src('src/extras/edge/**/*')
+    var edge = gulp.src('src/browser/edge/**/*')
         .pipe(gulp.dest('build/edge'));
 
-    var chrome = gulp.src('src/extras/chrome/**/*')
+    var chrome = gulp.src('src/browser/chrome/**/*')
         .pipe(gulp.dest('build/chrome'));
 
     return merge(edge, chrome);
