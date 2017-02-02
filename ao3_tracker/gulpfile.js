@@ -61,7 +61,7 @@ var reader = {
         webkit: function reader_scripts_webkit() {
            return gulp.src(webkit_scripts)
             .pipe(sourcemaps.init())
-            .pipe(ts(tsOptions_ES6))
+            .pipe(ts(tsOptions_ES5))
             .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/webkit/src-maps/' + file.basename + ".map").href; }}))
             .pipe(gulp.dest('build/reader/webkit'));
         },
@@ -106,7 +106,7 @@ function styles() {
 gulp.task('styles', styles);
 
 function images() {
-    return gulp.src('src/*.png')
+    return gulp.src('src/browser/*.png')
         .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
         .pipe(gulp.dest('build/edge'))
         .pipe(gulp.dest('build/chrome'));
@@ -114,11 +114,11 @@ function images() {
 gulp.task('images', images);
 
 function pages() {
-    var edge = gulp.src('src/*.html')
+    var edge = gulp.src('src/browser/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' } }))
         .pipe(gulp.dest('build/edge'));
 
-    var chrome = gulp.src('src/*.html')
+    var chrome = gulp.src('src/browser/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Chrome' } }))
         .pipe(gulp.dest('build/chrome'));
 
@@ -145,11 +145,11 @@ function libs() {
 gulp.task('libs', libs);
 
 function json() {
-    var edge = gulp.src('src/*.json')
+    var edge = gulp.src('src/browser/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' }, extension: 'js' }))
         .pipe(gulp.dest('build/edge'));
 
-    var chrome = gulp.src('src/*.json')
+    var chrome = gulp.src('src/browser/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Chrome' }, extension: 'js' }))
         .pipe(gulp.dest('build/chrome'));
 

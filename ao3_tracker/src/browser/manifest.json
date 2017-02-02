@@ -18,11 +18,11 @@
                 "edge.js",
                 //@endif
                 "browser.js",
-                "ao3_tracker.js",
+                "tracker.js",
                 "unitconv.js"
             ],
             "css": [
-                "ao3_tracker.css"
+                "tracker.css"
             ],
             "matches": [
                 "*://archiveofourown.org/*"
