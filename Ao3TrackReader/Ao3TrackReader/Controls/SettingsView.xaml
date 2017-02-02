@@ -4,8 +4,8 @@
     <local:PaneView.Content>
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <Label Text="Settings" FontSize="Large" />
-                <Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+                <Label Text="Settings" FontSize="Medium" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 
             <StackLayout Spacing="12" Margin="4,0,12,0">
@@ -27,19 +27,19 @@
 
                     <Label Text="Username" FontSize="Small" />
                     <Entry Placeholder="Enter your username" HorizontalOptions="Fill" x:Name="username" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" FontAttributes="Bold" x:Name="usernameErrors" />
+                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="usernameErrors" />
 
                     <Label Text="Password" FontSize="Small" />
                     <Entry Placeholder="Enter your password" IsPassword="True" HorizontalOptions="Fill" x:Name="password" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" FontAttributes="Bold" x:Name="passwordErrors" />
+                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="passwordErrors" />
 
                     <Label Text="Verify Password" FontSize="Small" x:Name="verifyLabel" />
                     <Entry Placeholder="Enter your password again" IsPassword="True" HorizontalOptions="Fill" x:Name="verify" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" FontAttributes="Bold" x:Name="verifyErrors" />
+                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="verifyErrors" />
 
                     <Label Text="Email (optional)" FontSize="Small" x:Name="emailLabel" />
                     <Entry Placeholder="Enter your email" Keyboard="Email" HorizontalOptions="Fill" x:Name="email" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" FontAttributes="Bold" x:Name="emailErrors" />
+                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="emailErrors" />
 
                     <StackLayout Orientation="Horizontal">
                         <Button Text="Submit" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>

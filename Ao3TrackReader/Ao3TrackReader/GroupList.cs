@@ -12,7 +12,7 @@ namespace Ao3TrackReader
     {
         string Group { get; }
         string GroupType { get; }
-        int? Unread { get; }
+        bool ShouldHide { get; }
     }
 
     public class GroupSubList<T> : ObservableCollection<T>, INotifyPropertyChanged, INotifyPropertyChanging
@@ -52,13 +52,43 @@ namespace Ao3TrackReader
                 {
                     throw new ArgumentException("Attempting to add item already in group", "iten");
                 }
-                if (item.CompareTo(this[i]) <= 0)
+                else if(item.CompareTo(this[i]) < 0)
                 {
                     break;
                 }
             }
 
             InsertItem(i, item);
+        }
+
+        public void ResortItem(T item)
+        {
+            int oldindex = -1;
+            int newindex = -1;            
+            for (int i = 0; i < Count && (newindex == -1 || oldindex == -1); i++)
+            {
+                if (oldindex == -1 && Object.ReferenceEquals(item, this[i]))
+                {
+                    oldindex = i;
+                }
+                else if (newindex == -1 && item.CompareTo(this[i]) < 0)
+                {
+                    newindex = i;
+                }
+            }
+            if (oldindex == -1)
+            {
+                InsertItem(newindex, item);
+                return;
+            }
+            if (newindex == -1)
+            {
+                newindex = Count;
+            }
+
+            if (newindex > oldindex) newindex--;
+            if (newindex == oldindex) return;
+            MoveItem(oldindex, newindex);
         }
 
         protected override void InsertItem(int index, T item)
@@ -73,16 +103,16 @@ namespace Ao3TrackReader
     }
 
     public class GroupList<T> : ObservableCollection<GroupSubList<T>>
-        where T : Models.Ao3PageViewModel, IGroupable<T>, INotifyPropertyChanged, INotifyPropertyChanging
+        where T :  IGroupable<T>, INotifyPropertyChanged
     {
         GroupSubList<T> hidden = new GroupSubList<T>("<Hidden>");
-        GroupSubList<T> updating = new GroupSubList<T>("<Updating>");
+        Dictionary<T, GroupSubList<T>> allItems = new Dictionary<T, GroupSubList<T>>();
+
         private object locker = new object();
 
         public void Add(T item)
         {
             // Add the item to the correct list
-            item.PropertyChanging += Item_PropertyChanging;
             item.PropertyChanged += Item_PropertyChanged;
 
             AddToGroup(item);
@@ -91,7 +121,6 @@ namespace Ao3TrackReader
         public void Remove(T item)
         {
             item.PropertyChanged -= Item_PropertyChanged;
-            item.PropertyChanging -= Item_PropertyChanging;
 
             RemoveFromGroup(item);
         }
@@ -115,22 +144,42 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                foreach (var g in AllGroups)
+                foreach (var e in allItems.Keys)
                 {
-                    foreach (var e in g)
-                    {
-                        if (pred(e))
-                            return e;
-                    }
+                    if (pred(e))
+                        return e;
                 }
                 return default(T);
             }
         }
+        public void ForEach(Action<T> action)
+        {
+            lock (locker)
+            {
+                foreach (var g in this)
+                {
+                    foreach (var e in g)
+                    {
+                        action(e);
+                    }
+                }
+            }
+        }
+        public void ForEachInAll(Action<T> action)
+        {
+            lock (locker)
+            {
+                foreach (var e in allItems.Keys)
+                {
+                    action(e);
+                }
+            }
+        }
 
-        bool hide_nounread = true;
+        bool show_hidden = false;
         private bool IsHidden(T item)
         {
-            return (hide_nounread && item.Unread == 0 && item.BaseData?.Details?.IsComplete == false);
+            return (!show_hidden && item.ShouldHide);
         }
 
         private void ResortHidden()
@@ -160,85 +209,76 @@ namespace Ao3TrackReader
                 }
                 foreach (var e in toHide)
                 {
+                    allItems[e] = hidden;
                     hidden.Add(e);
-
                 }
             }
         }
 
-        public bool HideNoUnread {
-            get { return hide_nounread; }
+        public bool ShowHidden {
+            get { return show_hidden; }
             set {
-                if (hide_nounread != value)
+                if (show_hidden != value)
                 {
-                    hide_nounread = value;
+                    show_hidden = value;
                     ResortHidden();
                 }
             }
         }
 
-        bool tags_visible = false;
-        public bool TagsVisible
+        private GroupSubList<T> GetGroupForItem(T item)
         {
-            get { return tags_visible; }
-            set
+            string groupName = item.Group;
+            if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
+            GroupSubList<T> g = null;
+
+            int i = 0;
+
+            if (IsHidden(item))
             {
-                if (tags_visible != value)
+                g = hidden;
+            }
+            else for (; i < Count; i++)
+            {
+                int c = String.Compare(this[i].Group, groupName);
+                if (c == 0)
                 {
-                    tags_visible = value;
-                    lock (locker)
-                    {
-                        foreach (var item in All)
-                        {
-                            item.TagsVisible = tags_visible;
-                        }
-                    }
+                    g = this[i];
+                    break;
+                }
+                else if (c > 0 && groupName != "<Other>")
+                {
+                    break;
                 }
             }
+
+            if (g == null)
+            {
+                g = new GroupSubList<T>(groupName);
+                if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
+                Insert(i, g);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
+            }
+            return g;
         }
-
-
 
         private void AddToGroup(T item)
         {
             lock (locker)
             {
-                string groupName = item.Group;
-                if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
-                GroupSubList<T> g = null;
+                var g = GetGroupForItem(item);
 
-                item.TagsVisible = tags_visible;
+                if (allItems.TryGetValue(item, out var oldgroup))
+                {
+                    if (oldgroup == g) return;
+                    RemoveFromGroup(item);
+                }
 
-                int i = 0;
-                if (IsHidden(item))
-                {
-                    g = hidden;
-                }
-                else for (; i < Count; i++)
-                    {
-                        int c = String.Compare(this[i].Group, groupName);
-                        if (c == 0)
-                        {
-                            g = this[i];
-                            break;
-                        }
-                        else if (c > 0 && groupName != "<Other>")
-                        {
-                            break;
-                        }
-                    }
-                if (g == null)
-                {
-                    g = new GroupSubList<T>(groupName);
-                    if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
-                    g.AddSorted(item);
-                    Insert(i, g);
-                }
-                else
-                {
-                    g.AddSorted(item);
-                    if (!string.IsNullOrWhiteSpace(item.GroupType)) g.GroupType = item.GroupType;
-                }
+                g.AddSorted(item);
+                allItems[item] = g;
             }
         }
 
@@ -246,47 +286,39 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                string groupName = item.Group;
-                if (string.IsNullOrWhiteSpace(groupName)) groupName = "<Other>";
+                if (!allItems.TryGetValue(item, out var g))
+                    return false;
 
-                var g = IsHidden(item) ? hidden : this.Where((l) => l.Group == groupName).FirstOrDefault();
-                if (g != null)
-                {
-                    bool res = g.Remove(item);
-                    if (g.Count == 0) Remove(g);
-                    return res;
-                }
-                return false;
-            }
-        }
+                allItems.Remove(item);
 
-        private void Item_PropertyChanging(object sender, PropertyChangingEventArgs e)
-        {
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread")
-            {
-                lock (locker)
-                {                
-                    // Remove from group and put in updating
-                    if (RemoveFromGroup((T)sender) && !updating.Contains((T)sender))
-                        updating.Add((T)sender);
-                }
+                bool res = g.Remove(item);
+                if (g.Count == 0) Remove(g);
+                return res;
             }
         }
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "Unread")
+            var item = (T)sender;
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "SortOrder")
             {
                 lock (locker)
                 {
-                    // Remove from updating and add into group
-                    updating.Remove((T)sender);
-                    AddToGroup((T)sender);
+                    if (allItems.TryGetValue(item, out var oldgroup))
+                    {
+                        var g = GetGroupForItem(item);
+                        if (oldgroup != g) {
+                            AddToGroup(item);
+                        }
+                        else
+                        {
+                            g.ResortItem(item);
+                        }
+                    }
                 }
             }
             if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "GroupType")
             {
-                var item = (T)sender;
                 if (!IsHidden(item) && !string.IsNullOrWhiteSpace(item.GroupType))
                 {
                     string groupName = item.Group;
@@ -297,12 +329,11 @@ namespace Ao3TrackReader
             }
         }
 
-
         IEnumerable<GroupSubList<T>> AllGroups
         {
             get
             {
-                return this.Concat(new[] { hidden, updating });
+                return this.Concat(new[] { hidden });
             }
         }
 
@@ -310,7 +341,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                return AllGroups.SelectMany(group => group);
+                return allItems.Keys;
             }
         }
         public IEnumerable<T> AllSafe
@@ -319,7 +350,7 @@ namespace Ao3TrackReader
             {
                 lock (locker)
                 {
-                    return All.ToList();
+                    return allItems.Keys.ToList();
                 }
             }
         }

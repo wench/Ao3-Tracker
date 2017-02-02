@@ -15,6 +15,7 @@ namespace Ao3TrackReader.Controls
 		{
             TranslationX = old_width = 480;
             WidthRequest = old_width;
+            IsVisible = false;
         }
 
         public bool IsOnScreen
@@ -25,14 +26,21 @@ namespace Ao3TrackReader.Controls
             }
             set
             {
+                IsVisible = true;
                 if (value == false)
                 {
                     ViewExtensions.CancelAnimations(this);
-                    this.TranslateTo(Width, 0, 100, Easing.CubicIn);
+                    this.TranslateTo(Width, 0, 100, Easing.CubicOut).ContinueWith((task)=> {
+                        if (task.IsCompleted && !task.IsFaulted && !task.IsCanceled)
+                        {
+                            Device.BeginInvokeOnMainThread(() => IsVisible = false);
+                        }
+                    });
                 }
                 else
                 {
                     ViewExtensions.CancelAnimations(this);
+                    IsVisible = true;
                     this.TranslateTo(0, 0, 100, Easing.CubicIn);
                 }
                 OnIsOnScreenChanging(value);

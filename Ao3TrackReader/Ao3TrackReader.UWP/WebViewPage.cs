@@ -40,14 +40,14 @@ namespace Ao3TrackReader
             get { return new[] {
                 "ms-appx-web:///Content/platform.js",
                 "ms-appx-web:///Content/reader.js",
-                "ms-appx-web:///Content/ao3_tracker.js",
+                "ms-appx-web:///Content/tracker.js",
                 "ms-appx-web:///Content/touch.js",
                 "ms-appx-web:///Content/unitconv.js"
             }; }
         }
         public string[] cssToInject
         {
-            get { return new[] { "ms-appx-web:///Content/ao3_tracker.css" }; }
+            get { return new[] { "ms-appx-web:///Content/tracker.css" }; }
 
         }
 

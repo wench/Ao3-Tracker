@@ -323,14 +323,14 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_tracker.css">
-      <Link>Content\ao3_tracker.css</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.css">
+      <Link>Content\tracker.css</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\platform.js">
       <Link>Content\platform.js</Link>
     </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\uwp\ao3_tracker.js">
-      <Link>Content\ao3_tracker.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.js">
+      <Link>Content\tracker.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\reader.js">
       <Link>Content\reader.js</Link>

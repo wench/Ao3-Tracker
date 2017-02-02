@@ -67,6 +67,10 @@ namespace Ao3TrackReader.Controls
             syncSubmitButton.IsEnabled = false;
             syncIndicator.IsRunning = true;
             syncIndicator.IsVisible = true;
+            usernameErrors.IsVisible = false;
+            passwordErrors.IsVisible = false;
+            verifyErrors.IsVisible = false;
+            emailErrors.IsVisible = false;
 
             Task.Run(async () =>
             {
@@ -80,8 +84,35 @@ namespace Ao3TrackReader.Controls
                 }
                 wpv.DoOnMainThread(() => 
                 { 
-                    if (errors != null && errors.Count > 0)
+                    if (errors?.Count > 0)
                     {
+                        foreach (var error in errors)
+                        {
+                            switch (error.Key)
+                            {
+                                case "username":
+                                    usernameErrors.Text = error.Value;
+                                    usernameErrors.IsVisible = true;
+                                    break;
+
+                                case "password":
+                                    passwordErrors.Text = error.Value;
+                                    passwordErrors.IsVisible = true;
+                                    break;
+
+                                case "verify":
+                                    if (isCreateUser) break;
+                                    verifyErrors.Text = error.Value;
+                                    verifyErrors.IsVisible = true;
+                                    break;
+
+                                case "email":
+                                    if (isCreateUser) break;
+                                    emailErrors.Text = error.Value;
+                                    emailErrors.IsVisible = true;
+                                    break;
+                            }
+                        }
                     }
                     else
                     {

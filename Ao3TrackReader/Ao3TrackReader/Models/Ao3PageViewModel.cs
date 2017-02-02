@@ -62,8 +62,8 @@ namespace Ao3TrackReader.Models
             }
 
             // Sort based on title
-            string tx = Title?.ToString();
-            string ty = y.Title?.ToString();
+            string tx = baseData.Title;
+            string ty = y.baseData.Title;
 
             if (tx != ty)
             {
@@ -141,7 +141,7 @@ namespace Ao3TrackReader.Models
 
         public TextTree Summary { get; private set; }
 
-        public bool SummaryVisible { get { return Summary != null; } }
+        public bool SummaryVisible { get { return Summary != null && !Summary.IsEmpty; } }
 
 
         SortedDictionary<Ao3TagType, List<string>> tags;
@@ -194,11 +194,17 @@ namespace Ao3TrackReader.Models
             }
         }
 
+        public bool ShouldHide { get { return Unread == 0 && BaseData?.Details?.IsComplete == false; } }
+
+
         bool tags_visible = true;
         public bool TagsVisible
         {
             get
             {
+                if (BaseData.Type == Ao3PageType.Work && tags != null && !SummaryVisible)
+                    return true;
+
                 if (tags_visible && tags != null)
                 {
                     foreach (var t in tags)
@@ -212,7 +218,7 @@ namespace Ao3TrackReader.Models
             }
             set
             {
-                if (tags_visible != value && (BaseData.Type == Ao3PageType.Work || BaseData.Type == Ao3PageType.Series || BaseData.Type == Ao3PageType.Collection))
+                if (tags_visible != value)
                 {
                     OnPropertyChanging("TagsVisible");
                     tags_visible = value;
@@ -310,6 +316,7 @@ namespace Ao3TrackReader.Models
                 {
                     Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                     {
+                        OnPropertyChanging("SortOrder");
                         OnPropertyChanging("Unread");
                         OnPropertyChanging("ChaptersRead");
 
@@ -341,6 +348,7 @@ namespace Ao3TrackReader.Models
 
                         OnPropertyChanged("ChaptersRead");
                         OnPropertyChanged("Unread");
+                        OnPropertyChanged("SortOrder");
 
                     });
                 });
@@ -407,6 +415,7 @@ namespace Ao3TrackReader.Models
 
                         Register();
 
+                        OnPropertyChanging("SortOrder");
                         OnPropertyChanging("Unread");
                         OnPropertyChanging("ChaptersRead");
 
@@ -438,6 +447,7 @@ namespace Ao3TrackReader.Models
 
                         OnPropertyChanged("ChaptersRead");
                         OnPropertyChanged("Unread");
+                        OnPropertyChanged("SortOrder");
                     });
                 });
             }

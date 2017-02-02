@@ -51,6 +51,8 @@ namespace Ao3TrackReader.Models
         public abstract override string ToString();
 
         public abstract ICollection<TextNode> Flatten(StateNode state);
+
+        public abstract bool IsEmpty { get; }
     }
 
     public class StateNode : TextTree
@@ -58,6 +60,11 @@ namespace Ao3TrackReader.Models
         public override ICollection<TextNode> Flatten(StateNode state)
         {
             return new TextNode[] { };
+        }
+
+        public override bool IsEmpty
+        {
+            get { return true; }
         }
 
         public override string ToString()
@@ -83,6 +90,11 @@ namespace Ao3TrackReader.Models
             TextNode res = (TextNode) this.MemberwiseClone();
             res.ApplyState(state);
             return new[] { res };
+        }
+
+        public override bool IsEmpty
+        {
+            get { return String.IsNullOrEmpty(Text); }
         }
     }
 
@@ -112,6 +124,17 @@ namespace Ao3TrackReader.Models
             }
 
             return res;
+        }
+
+        public override bool IsEmpty
+        {
+            get
+            {
+                foreach (var node in Nodes)
+                    if (!node.IsEmpty)
+                        return false;
+                return true;
+            }
         }
     }
 

@@ -37,14 +37,14 @@
                                 <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" />
                                 <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" />
                                 <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
-                                    <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill"/>
-                                    <Label Text="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" />
+                                    <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0,0,0,0"/>
+                                    <Label Text="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0,0,0,0"/>
                                 </StackLayout>
                                 <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="12" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
-                                <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,13,0">
-                                    <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand"/>
-                                    <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" />
-                                    <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" />
+                                <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,0,0">
+                                    <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
+                                    <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
+                                    <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
                                 </StackLayout>
                             </Grid>
                         </ViewCell>

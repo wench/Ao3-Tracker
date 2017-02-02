@@ -35,10 +35,9 @@ namespace Ao3TrackReader.Controls
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
             BackgroundColor = Colors.Alt.Trans.High;
 
-            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
-            ShowTagsButton.BackgroundColor = readingListBacking.TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ListView.ItemAppearing += ListView_ItemAppearing;
-
 
             // Restore the reading list contents!
             Task.Run(async () =>
@@ -84,6 +83,7 @@ namespace Ao3TrackReader.Controls
                             if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
                             {
                                 var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+                                viewmodel.TagsVisible = tags_visible;
                                 readingListBacking.Add(viewmodel);
                                 vms.Add(viewmodel);
                             }
@@ -302,15 +302,30 @@ namespace Ao3TrackReader.Controls
 
         public void OnShowHidden(object sender, EventArgs e)
         {
-            readingListBacking.HideNoUnread = !readingListBacking.HideNoUnread;
-            ShowHiddenButton.BackgroundColor = readingListBacking.HideNoUnread ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            readingListBacking.ShowHidden = !readingListBacking.ShowHidden;
+            ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
         }
 
         public void OnShowTags(object sender, EventArgs e)
         {
-            readingListBacking.TagsVisible = !readingListBacking.TagsVisible;
-            ShowTagsButton.BackgroundColor = readingListBacking.TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            TagsVisible = !TagsVisible;
+            ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
         }
+
+        bool tags_visible = false;
+        public bool TagsVisible
+        {
+            get { return tags_visible; }
+            set
+            {
+                if (tags_visible != value)
+                {
+                    tags_visible = value;
+                    readingListBacking.ForEachInAll((item) => item.TagsVisible = tags_visible);
+                }
+            }
+        }
+
 
         public void OnClose(object sender, EventArgs e)
         {
@@ -394,6 +409,7 @@ namespace Ao3TrackReader.Controls
             wpv.DoOnMainThread(() =>
             {
                 var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+                viewmodel.TagsVisible = tags_visible;
                 readingListBacking.Add(viewmodel);
                 Task.Run(async () =>
                 {

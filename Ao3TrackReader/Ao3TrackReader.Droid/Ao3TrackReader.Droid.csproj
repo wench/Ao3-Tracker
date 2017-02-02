@@ -383,14 +383,14 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_tracker.css">
-      <Link>Assets\ao3_tracker.css</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\tracker.css">
+      <Link>Assets\tracker.css</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\jsinterop.js">
-      <Link>Assets\jsinterop.js</Link>
+      <Link>Assets\platform.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\ao3_tracker.js">
-      <Link>Assets\ao3_tracker.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\tracker.js">
+      <Link>Assets\tracker.js</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\callbacks.js">
       <Link>Assets\callbacks.js</Link>

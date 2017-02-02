@@ -50,11 +50,15 @@ namespace Ao3TrackReader.UWP
         void UpdateControl(TextView view)
         {
             if (view.TextTree == null) return;
+            Control.TextWrapping = Windows.UI.Xaml.TextWrapping.WrapWholeWords;
             Control.Inlines.Clear();
+            Control.Margin = new Windows.UI.Xaml.Thickness(0.0, 0.0, 12.0, 0.0);
             var flat = view.TextTree.Flatten(new StateNode());
             flat = flat.TrimNewLines();
             var inlines = Convert(flat);
-            Control.Inlines.Add(inlines);                        
+            Control.Inlines.Add(inlines);
+            Control.InvalidateArrange();
+            Control.InvalidateMeasure();
         }
 
 
@@ -76,13 +80,14 @@ namespace Ao3TrackReader.UWP
                     (byte)(n.Foreground.Value.B * 255)
                 )
             );
+            i.TextDecorations = TextDecorations.None;
+            if (n.Underline == true)
+            {
+                i.TextDecorations = i.TextDecorations | TextDecorations.Underline;
+            }
             if (n.Strike == true)
             {
-                if (i.Foreground == null)
-                {
-                    i.Foreground = new SolidColorBrush();
-                }
-                i.Foreground.Opacity = 0.25;
+                i.TextDecorations = i.TextDecorations | TextDecorations.Strikethrough;
             }
         }
 
@@ -94,12 +99,6 @@ namespace Ao3TrackReader.UWP
 
                 Inline i = new Windows.UI.Xaml.Documents.Run { Text = tn.Text };
                 ApplyStyles(tn, i);
-                if (tn.Underline == true)
-                {
-                    var u = new Windows.UI.Xaml.Documents.Underline();
-                    u.Inlines.Add(i);
-                    i = u;
-                }
                 return i;
             }
             else 
@@ -110,12 +109,6 @@ namespace Ao3TrackReader.UWP
                 {
                     Inline i = new Windows.UI.Xaml.Documents.Run { Text = tn.Text };
                     ApplyStyles(tn, i);
-                    if (tn.Underline == true)
-                    {
-                        var u = new Windows.UI.Xaml.Documents.Underline();
-                        u.Inlines.Add(i);
-                        i = u;
-                    }
                     s.Inlines.Add(i);
                 }
 
