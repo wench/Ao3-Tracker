@@ -7,7 +7,6 @@
 
     <Style TargetType="uwp:PageControl">
         <Setter Property="ContentMargin" Value="0" />
-        <Setter Property="TitleBrush" Value="{ThemeResource DefaultTextForegroundThemeBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="uwp:PageControl">
@@ -21,8 +20,8 @@
 
                         <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch">
 
-                            <Border Height="{ThemeResource TitleBarHeight}" RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea"   Visibility="{TemplateBinding TitleVisibility}">
-                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,0,0,0" Foreground="{TemplateBinding TitleBrush}" Style="{ThemeResource MainTitleTextBlockStyle}" />
+                            <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" Visibility="{TemplateBinding TitleVisibility}">
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,2,0,2" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
                             </Border>
 
                             <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True"></Border>

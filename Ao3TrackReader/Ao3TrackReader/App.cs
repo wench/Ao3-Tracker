@@ -59,8 +59,12 @@ namespace Ao3TrackReader
                     Resources.MergedWith = typeof(Xamarin.Forms.Themes.DarkThemeResources);
                     break;
             }
-
-            
+#else
+            if (!Windows.UI.Xaml.Application.Current.Resources.ThemeDictionaries.TryGetValue("Default", out var omd))
+            {
+                Windows.UI.Xaml.Application.Current.Resources.ThemeDictionaries.Add("Default", omd = new Windows.UI.Xaml.ResourceDictionary());
+            }
+            var md = (Windows.UI.Xaml.ResourceDictionary)omd;
 #endif
             var sets = new Dictionary<string, BaseColorSet>();
             foreach (var cat in typeof(Resources.Colors).GetProperties(BindingFlags.Public | BindingFlags.Static))
@@ -74,14 +78,36 @@ namespace Ao3TrackReader
                     if (subset != null) sets.Add(cat.Name + prop.Name, subset);
                 }
 
-                Resources.Add(cat.Name + "Color", (Color)set);
+                var color = (Color)set;
+                Resources.Add(cat.Name + "Color", color);
+#if WINDOWS_UWP
+                md[cat.Name + "Color"] = new Windows.UI.Xaml.Media.SolidColorBrush(color.ToWindows());
+#endif
             }
 
             foreach (var kp in sets)
             {
                 foreach (var prop in kp.Value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
                 {
-                    Resources.Add(kp.Key+prop.Name + "Color", prop.GetValue(kp.Value));
+                    object o = prop.GetValue(kp.Value);
+                    Color color;
+                    if (o.GetType() == typeof(ColorSet))
+                    {
+                        color = (Color)(ColorSet)o;
+                    }
+                    else if (o.GetType() == typeof(Color))
+                    {
+                        color = (Color)o;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    Resources.Add(kp.Key + prop.Name + "Color", color);
+#if WINDOWS_UWP
+                    md[kp.Key + prop.Name] = new Windows.UI.Xaml.Media.SolidColorBrush(color.ToWindows());
+#endif
                 }
 
             }
@@ -89,9 +115,11 @@ namespace Ao3TrackReader
             foreach (var prop in typeof(Resources.Icons).GetProperties(BindingFlags.Public | BindingFlags.Static))
             {
                 var icon = (string)prop.GetValue(null);
-                Resources.Add(prop.Name+ "Icon", icon);
+                Resources.Add(prop.Name + "Icon", icon);
+#if WINDOWS_UWP
+                md[prop.Name + "Icon"] = icon;
+#endif
             }
-
 
             Resources.Add("PaneImageButton", new Style(typeof(Button))
             {

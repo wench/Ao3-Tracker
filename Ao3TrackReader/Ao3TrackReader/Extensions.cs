@@ -142,5 +142,12 @@ namespace Ao3TrackReader
             if (!String.IsNullOrWhiteSpace(content)) doc.Load(new System.IO.StringReader(content));
             return doc;
         }
+
+#if WINDOWS_UWP
+        public static Windows.UI.Color ToWindows(this Xamarin.Forms.Color color)
+        {
+            return Windows.UI.Color.FromArgb((byte)(color.A * 255), (byte)(color.R * 255), (byte)(color.G * 255), (byte)(color.B * 255));
+        }
+#endif
     }
 }

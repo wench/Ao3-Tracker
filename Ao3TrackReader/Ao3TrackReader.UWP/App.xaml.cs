@@ -42,6 +42,8 @@ namespace Ao3TrackReader.UWP
             }
         }
 
+        public Ao3TrackReader.App XApp { get; private set; }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
@@ -69,6 +71,7 @@ namespace Ao3TrackReader.UWP
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
                 Xamarin.Forms.Forms.Init(e);
+                XApp = new Ao3TrackReader.App();
 
                 var md = new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") };
                 Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(md);

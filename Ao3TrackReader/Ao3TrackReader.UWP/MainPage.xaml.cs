@@ -21,7 +21,7 @@ namespace Ao3TrackReader.UWP
         {
             this.InitializeComponent();
 
-            LoadApplication(new Ao3TrackReader.App());
+            LoadApplication((App.Current as App).XApp);
         }
     }
 }

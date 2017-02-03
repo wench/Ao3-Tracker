@@ -4,12 +4,10 @@
     xmlns:local="using:Ao3TrackReader.UWP"
 	xmlns:uwp="using:Xamarin.Forms.Platform.UWP"
     >
-
     <Style x:Key="MainTitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
-        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="TextWrapping" Value="WrapWholeWords" />
         <Setter Property="MaxLines" Value="2" />
     </Style>
-
-
 </ResourceDictionary>

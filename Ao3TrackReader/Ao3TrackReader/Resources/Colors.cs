@@ -73,8 +73,8 @@ namespace Ao3TrackReader.Resources
                     a = Color.Black;
                     break;
             }
-            h = new Color(((int)(b.R * 255) ^ 0x90) / 255.0, ((int)(b.G * 255) ^ 0) / 510.0, ((int)(b.B * 255) ^ 0) / 255.0);
-            i = new Color(((int)(a.R * 255) ^ 0x90) / 255.0, ((int)(a.G * 255) ^ 0) / 510.0, ((int)(a.B * 255) ^ 0) / 255.0);
+            h = new Color(((int)(b.R * 255) ^ 165) / 255.0, ((int)(b.G * 255) ^ 0) / 430.0, ((int)(b.B * 255) ^ 0) / 300.0);
+            i = new Color(((int)(a.R * 255) ^ 165) / 255.0, ((int)(a.G * 255) ^ 0) / 430.0, ((int)(a.B * 255) ^ 0) / 300.0);
 
             Base = new ColorSet(b, a);
             Alt = new ColorSet(a, b);
