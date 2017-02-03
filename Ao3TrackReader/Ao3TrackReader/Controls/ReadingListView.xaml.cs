@@ -24,7 +24,7 @@ namespace Ao3TrackReader.Controls
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
         private readonly WebViewPage wpv;
-        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(5);
+        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(10);
 
         public ReadingListView(WebViewPage wpv)
         {
@@ -73,17 +73,20 @@ namespace Ao3TrackReader.Controls
                                 if (tagdata != null) model.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
                                 else model.Value.PrimaryTagType = Models.Ao3TagType.Other;
                             }
+                            if (model.Value.Details != null && model.Value.Details.Summary == null && !string.IsNullOrEmpty(item.Summary))
+                                model.Value.Details.Summary = item.Summary;
 
                             if (model.Value.Uri.AbsoluteUri != model.Key)
                             {
                                 App.Database.DeleteReadingListItems(model.Key);
-                                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp });
+                                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = item.Unread });
                             }
 
                             if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
                             {
-                                var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+                                var viewmodel = new Models.Ao3PageViewModel(model.Value, item.Unread);
                                 viewmodel.TagsVisible = tags_visible;
+                                viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                                 readingListBacking.Add(viewmodel);
                                 vms.Add(viewmodel);
                             }
@@ -376,11 +379,12 @@ namespace Ao3TrackReader.Controls
         void RemoveAsyncImpl(string href)
         {
             App.Database.DeleteReadingListItems(href);
-            var model = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href);
-            if (model == null) return;
+            var viewmodel = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href);
+            if (viewmodel == null) return;
+            viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
             wpv.DoOnMainThread(() =>
             {
-                readingListBacking.Remove(model);
+                readingListBacking.Remove(viewmodel);
             });
         }
 
@@ -405,11 +409,12 @@ namespace Ao3TrackReader.Controls
             if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
                 return;
 
-            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp });
+            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = null });
             wpv.DoOnMainThread(() =>
             {
-                var viewmodel = new Models.Ao3PageViewModel { BaseData = model.Value };
+                var viewmodel = new Models.Ao3PageViewModel(model.Value, null);
                 viewmodel.TagsVisible = tags_visible;
+                viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                 readingListBacking.Add(viewmodel);
                 Task.Run(async () =>
                 {
@@ -418,6 +423,36 @@ namespace Ao3TrackReader.Controls
                     RefreshSemaphore.Release();
                 });
             });
+        }
+
+        private void Viewmodel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            var viewmodel = (Models.Ao3PageViewModel)sender;
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Unread" || e.PropertyName == "Summary")
+            {
+                bool changed = false;
+                var dbentry = App.Database.GetReadingListItem(viewmodel.Uri.AbsoluteUri);
+                if (dbentry != null)
+                {
+                    if (dbentry.Unread != viewmodel.Unread)
+                    {
+                        changed = true;
+                        dbentry.Unread = viewmodel.Unread;
+                    }
+
+                    if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Summary")
+                    {
+                        string summary = viewmodel.Summary?.ToString();
+                        if (summary != null && dbentry.Summary != summary)
+                        {
+                            changed = true;
+                            dbentry.Summary = summary;
+                        }
+                    }
+
+                    if (changed) App.Database.SaveReadingListItems(dbentry);
+                }
+            }
         }
 
         public Task AddAsync(string href)
@@ -445,7 +480,7 @@ namespace Ao3TrackReader.Controls
                         var pvm = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
                         if (pvm != null) readingListBacking.Remove(pvm);
                     }
-                    App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title });
+                    App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Unread = viewmodel.Unread });
                 }
                 wpv.DoOnMainThread(() =>
                 {

@@ -1080,11 +1080,11 @@ namespace Ao3TrackReader.Data
         private static void FillInfoFromWorkModels(Ao3PageModel model)
         {
             // Gather all tags
-            SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
-            Dictionary<string, int> primaries = new Dictionary<string, int>();
-            Dictionary<string, Ao3TagType> tagtypes = new Dictionary<string, Ao3TagType>();
-            HashSet<string> languages = new HashSet<string>();
-            Dictionary<string, string> reqtags = new Dictionary<string, string>();
+            var tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
+            var primaries = new Dictionary<string, double>();
+            var tagtypes = new Dictionary<string, Ao3TagType>();
+            var languages = new HashSet<string>();
+            var reqtags = new Dictionary<string, string>();
 
             if (model.RequiredTags == null) model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
 
@@ -1130,8 +1130,8 @@ namespace Ao3TrackReader.Data
                 }
 
                 // Count each primary tag
-                int ptc = 1;
-                if (primaries.TryGetValue(workmodel.PrimaryTag, out ptc)) ptc++;
+                primaries.TryGetValue(workmodel.PrimaryTag, out var ptc);
+                ptc += workmodel.PrimaryTag.Contains("/") ? 1.1 : 1.0;
                 primaries[workmodel.PrimaryTag] = ptc;
                 tagtypes[workmodel.PrimaryTag] = workmodel.PrimaryTagType;
 

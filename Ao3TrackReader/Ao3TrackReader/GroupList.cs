@@ -226,6 +226,17 @@ namespace Ao3TrackReader
             }
         }
 
+        int GroupCompare(string left,string right)
+        {
+            bool lb = left.StartsWith("<");
+            bool rb = right.StartsWith("<");
+            if (lb != rb)
+            {
+                return lb.CompareTo(rb);
+            }
+            return String.Compare(left, right);
+        }
+
         private GroupSubList<T> GetGroupForItem(T item)
         {
             string groupName = item.Group;
@@ -240,13 +251,13 @@ namespace Ao3TrackReader
             }
             else for (; i < Count; i++)
             {
-                int c = String.Compare(this[i].Group, groupName);
+                int c = GroupCompare(this[i].Group, groupName);
                 if (c == 0)
                 {
                     g = this[i];
                     break;
                 }
-                else if (c > 0 && groupName != "<Other>")
+                else if (c > 0)
                 {
                     break;
                 }

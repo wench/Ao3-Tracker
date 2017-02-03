@@ -18,5 +18,7 @@ namespace Ao3TrackReader.Models
         public string PrimaryTag { get; set; }
         public string Title { get; set; }
         public long Timestamp { get; set; }
+        public int? Unread { get; set; }
+        public string Summary { get; set; }
     }
 }

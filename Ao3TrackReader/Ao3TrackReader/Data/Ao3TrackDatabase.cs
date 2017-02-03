@@ -269,6 +269,14 @@ namespace Ao3TrackReader
             }
         }
 
+        public ReadingList GetReadingListItem(string uri)
+        {
+            lock (locker)
+            {
+                return database.Table<ReadingList>().FirstOrDefault(x => x.Uri == uri);
+            }
+        }
+
         public void SaveReadingListItems(params ReadingList[] items)
         {
             SaveReadingListItems(items as IReadOnlyCollection<ReadingList>);

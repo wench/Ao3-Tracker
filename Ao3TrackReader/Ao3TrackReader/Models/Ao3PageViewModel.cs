@@ -21,6 +21,12 @@ namespace Ao3TrackReader.Models
 
     public class Ao3PageViewModel : IGroupable<Ao3PageViewModel>, INotifyPropertyChanged, INotifyPropertyChanging
     {
+        public Ao3PageViewModel(Ao3PageModel baseData, int? unread)
+        {
+            this.Unread = unread;
+            this.BaseData = baseData;
+        }
+
         public int CompareTo(Ao3PageViewModel y)
         {
             // Pages with no base data go last
@@ -33,19 +39,17 @@ namespace Ao3TrackReader.Models
             // Sort based on chapters remaining
             if ((baseData.Type == Ao3PageType.Work || baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection) && (y.baseData.Type == Ao3PageType.Work || y.baseData.Type == Ao3PageType.Series || y.baseData.Type == Ao3PageType.Collection))
             {
-                int? xc = ChaptersRead;
-                int? yc = y.ChaptersRead;
+                int? xc = Unread;
+                int? yc = y.Unread;
                 if (xc != null || yc != null)
                 {
                     if (xc == null) return 1;
                     if (yc == null) return -1;
-                    xc = baseData.Details.Chapters.Available - xc;
-                    yc = y.baseData.Details.Chapters.Available - yc;
                     c = xc.Value.CompareTo(yc.Value);
                     if (c != 0) return -c; // higher numbers of unread chapters first
 
                     // Completed works when we've read all the chapters get put bottom
-                    if (xc == 0)
+                    if (xc == 0 && baseData?.Details?.Chapters != null && y.baseData?.Details?.Chapters != null)
                     {
                         bool xf = baseData.Details.Chapters.Available == baseData.Details.Chapters.Total;
                         bool yf = y.baseData.Details.Chapters.Available == y.baseData.Details.Chapters.Total;
@@ -194,7 +198,7 @@ namespace Ao3TrackReader.Models
             }
         }
 
-        public bool ShouldHide { get { return Unread == 0 && BaseData?.Details?.IsComplete == false; } }
+        public bool ShouldHide { get { return Unread == 0 && BaseData?.Details?.IsComplete != true; } }
 
 
         bool tags_visible = true;
@@ -320,15 +324,10 @@ namespace Ao3TrackReader.Models
                         OnPropertyChanging("Unread");
                         OnPropertyChanging("ChaptersRead");
 
-                        int? newunread = ChaptersRead = task.Result;
-                        if (newunread != null)
+                        ChaptersRead = task.Result;
+                        if (ChaptersRead != null && baseData?.Details?.Chapters?.Available != null)
                         {
-                            newunread = baseData.Details.Chapters.Available - newunread;
-
-                        }
-                        if (Unread != newunread)
-                        {
-                            Unread = newunread;
+                            Unread = baseData.Details.Chapters.Available - ChaptersRead;
                         }
 
                         OnPropertyChanging("Title");
@@ -367,7 +366,7 @@ namespace Ao3TrackReader.Models
                 OnPropertyChanging("");
                 Deregister();
                 baseData = value;
-                Unread = null;
+                //Unread = null;
                 ChaptersRead = null;
 
                 // Generate everything from Ao3PageModel 
@@ -419,15 +418,10 @@ namespace Ao3TrackReader.Models
                         OnPropertyChanging("Unread");
                         OnPropertyChanging("ChaptersRead");
 
-                        int? newunread = ChaptersRead = task.Result;
-                        if (newunread != null)
+                        ChaptersRead = task.Result;
+                        if (ChaptersRead != null && baseData?.Details?.Chapters?.Available != null)
                         {
-                            newunread = baseData.Details.Chapters.Available - newunread;
-
-                        }
-                        if (Unread != newunread)
-                        {
-                            Unread = newunread;
+                            Unread = baseData.Details.Chapters.Available - ChaptersRead;
                         }
 
                         OnPropertyChanging("Title");
@@ -563,7 +557,6 @@ namespace Ao3TrackReader.Models
             var oldtitle = Title;
             if (ts.Nodes.Count == 0) Title = Uri.PathAndQuery;
             else Title = ts;
-
         }
 
         void UpdateDetails()

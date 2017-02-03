@@ -41,7 +41,10 @@ namespace Ao3TrackReader.Controls
                 {
                     ViewExtensions.CancelAnimations(this);
                     IsVisible = true;
-                    this.TranslateTo(0, 0, 100, Easing.CubicIn);
+                    this.TranslateTo(0, 0, 100, Easing.CubicIn).ContinueWith((task) =>
+                    {
+                        Device.BeginInvokeOnMainThread(() => IsVisible = true);
+                    });
                 }
                 OnIsOnScreenChanging(value);
             }
