@@ -31,8 +31,11 @@ namespace Ao3Track {
 
         IsNewer(newitem: IWorkChapter): boolean {
 
-            if (newitem.seq > this.seq) { return true; }
-            else if (newitem.seq < this.seq) { return false; }
+            if (newitem.seq !== null)
+            {
+                if (newitem.seq > this.seq) { return true; }
+                else if (newitem.seq < this.seq) { return false; }
+            }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
@@ -44,8 +47,11 @@ namespace Ao3Track {
         }
 
         IsNewerOrSame(newitem: IWorkChapter): boolean {
-            if (newitem.seq > this.seq) { return true; }
-            else if (newitem.seq < this.seq) { return false; }
+            if (newitem.seq !== null)
+            {
+                if (newitem.seq > this.seq) { return true; }
+                else if (newitem.seq < this.seq) { return false; }
+            }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
@@ -359,7 +365,7 @@ namespace Ao3Track {
                         if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
                             // Do a delayed since if we finished a chapter, or started a new one 
                             if (!(id in storage) || request.data[id].location === null || request.data[id].location === 0 ||
-                                 request.data[id].chapterid > storage[id].chapterid || request.data[id].seq > storage[id].seq) {
+                                 request.data[id].chapterid > storage[id].chapterid || (request.data[id].seq||0) > storage[id].seq) {
                                 do_delayed = true;
                             }
                             let seq  = request.data[id].seq;
