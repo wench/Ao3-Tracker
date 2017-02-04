@@ -30,19 +30,19 @@ namespace Ao3TrackReader.Droid
             get { return JsonConvert.SerializeObject(handler.cssToInject); }
         }
 
-        public int JumpToLastLocationCallback
+        public int JumpToLastLocationEvemt
         {
-            [JavascriptInterface, Export("get_JumpToLastLocationCallback")]
+            [JavascriptInterface, Export("get_onjumptolastlocationevent")]
             get;
-            [JavascriptInterface, Export("set_JumpToLastLocationCallback")]
+            [JavascriptInterface, Export("set_onjumptolastlocationevent")]
             set;
         }
         public void OnJumpToLastLocation(bool pagejump)
         {
             Task<object>.Run(() =>
             {
-                if (JumpToLastLocationCallback != 0)
-                    handler.CallJavascript("Ao3TrackCallbacks.Call" + JumpToLastLocationCallback, pagejump);
+                if (JumpToLastLocationEvemt != 0)
+                    handler.CallJavascript("Ao3TrackCallbacks.Call" + JumpToLastLocationEvemt, pagejump);
             });
         }
         public bool jumpToLastLocationEnabled
@@ -54,19 +54,19 @@ namespace Ao3TrackReader.Droid
         }
 
 
-        public int AlterFontSizeCallback
+        public int AlterFontSizeEvent
         {
-            [JavascriptInterface, Export("get_AlterFontSizeCallback")]
+            [JavascriptInterface, Export("get_onalterfontsizeevent")]
             get;
-            [JavascriptInterface, Export("set_AlterFontSizeCallback")]
+            [JavascriptInterface, Export("set_onalterfontsizeevent")]
             set;
         }
         public void OnAlterFontSize()
         {
             Task<object>.Run(() =>
             {
-                if (AlterFontSizeCallback != 0)
-                    handler.CallJavascript("Ao3TrackCallbacks.CallVoid", AlterFontSizeCallback);
+                if (AlterFontSizeEvent != 0)
+                    handler.CallJavascript("Ao3TrackCallbacks.CallVoid", AlterFontSizeEvent);
             });
         }
 
@@ -80,8 +80,8 @@ namespace Ao3TrackReader.Droid
 
         public void Reset()
         {
-            JumpToLastLocationCallback = 0;
-            AlterFontSizeCallback = 0;
+            JumpToLastLocationEvemt = 0;
+            AlterFontSizeEvent = 0;
             CurrentWorkId = 0;
             CurrentLocation = null;
         }
@@ -208,19 +208,24 @@ namespace Ao3TrackReader.Droid
         }
 
 
-        public IWorkChapter CurrentLocation {
+        public string CurrentLocation {
             [JavascriptInterface, Export("get_CurrentLocation")]
-            get;
+            get
+            {
+                var loc = handler.CurrentLocation;
+                if (loc == null) return null;
+                return JsonConvert.SerializeObject(loc);
+            }
             [JavascriptInterface, Export("set_CurrentLocation")]
-            set;
+            set
+            {
+                if (value == null || value == "(null)" || value == "null")
+                    handler.CurrentLocation = null;
+                else
+                    handler.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
+            }
         }
 
-        public long CurrentWorkId {
-            [JavascriptInterface, Export("get_CurrentWorkId")]
-            get;
-            [JavascriptInterface, Export("set_CurrentWorkId")]
-            set;
-        }
     }
 }
 
