@@ -1,7 +1,7 @@
 {
   "globalDependencies": {
-    "chrome": "registry:dt/chrome#0.0.0+20160724063844",
+    "chrome": "registry:dt/chrome#0.0.0+20170105222330",
     "jquery": "registry:dt/jquery#1.10.0+20160929162922",
-    "winjs": "registry:dt/winjs#2.1.0+20160417153052"
+    "winjs": "registry:dt/winjs#4.4.0+20170106203657"
   }
 }
