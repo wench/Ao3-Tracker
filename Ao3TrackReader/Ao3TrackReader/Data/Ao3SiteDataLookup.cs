@@ -78,8 +78,11 @@ namespace Ao3TrackReader.Data
         {
             HttpClientHandler httpClientHandler = new HttpClientHandler();
             httpClientHandler.AllowAutoRedirect = false;
+            httpClientHandler.UseCookies = false;
+            httpClientHandler.MaxConnectionsPerServer = 8;
+            httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
             HttpClient = new HttpClient(httpClientHandler);
-            if (!bool.TryParse(App.Database.GetVariable("UseHttps"), out use_https))
+            if (!App.Database.TryGetVariable("UseHttps", bool.TryParse, out use_https))
             {
                 App.Database.SaveVariable("UseHttps", use_https.ToString());
             }
@@ -138,7 +141,7 @@ namespace Ao3TrackReader.Data
                 if (use_https != value)
                 {
                     use_https = value;
-                    App.Database.SaveVariable("UseHttps", use_https.ToString());
+                    App.Database.SaveVariable("UseHttps", use_https);
                 }
             }
         }

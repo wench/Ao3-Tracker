@@ -143,10 +143,52 @@ namespace Ao3TrackReader
 				else
 				{
 					return null;
-
 				}
 			}
 		}
+
+        public delegate bool TryParseDelegate<T>(string s, out T result);
+
+        public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T result)
+        {
+            lock (locker)
+            {
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    if (row.value != null) return tryparse(row.value, out result);
+                }
+                result = default(T);
+                return false;
+            }
+        }
+
+        public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T? result)
+            where T : struct
+        {
+            lock (locker)
+            {
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    if (row.value != null) 
+                    {
+                        if (!tryparse(row.value, out T res))
+                        {
+                            result = res;
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        result = null;
+                        return true;
+                    }
+                }
+                result = null;
+                return false;
+            }
+        }
 
         public void SaveVariable(string name, string value)
         {
@@ -163,6 +205,39 @@ namespace Ao3TrackReader
                 }
             }
         }
+        public void SaveVariable<T>(string name, T value)
+        {
+            lock (locker)
+            {
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    database.Update(new Variable { name = name, value = value.ToString() });
+                }
+                else
+                {
+                    database.Insert(new Variable { name = name, value = value.ToString() });
+                }
+            }
+        }
+        public void SaveVariable<T>(string name, T? value)
+            where T : struct
+        {
+            lock (locker)
+            {
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                string v = value.HasValue ? value.ToString() : null;
+                if (row != null)
+                {
+                    database.Update(new Variable { name = name, value = v });
+                }
+                else
+                {
+                    database.Insert(new Variable { name = name, value = v });
+                }
+            }
+        }
+
         public void DeleteVariable(string name)
         {
             lock (locker)

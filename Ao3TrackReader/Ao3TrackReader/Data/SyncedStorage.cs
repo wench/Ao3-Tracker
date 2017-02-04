@@ -68,6 +68,10 @@ namespace Ao3TrackReader.Data
         public SyncedStorage()
         {
             HttpClientHandler httpClientHandler = new HttpClientHandler();
+            httpClientHandler.AllowAutoRedirect = false;
+            httpClientHandler.UseCookies = false;
+            httpClientHandler.MaxConnectionsPerServer = 2;
+            httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
             HttpClient = new HttpClient(httpClientHandler);
 
             storage = new Dictionary<long, Work>();
@@ -75,14 +79,7 @@ namespace Ao3TrackReader.Data
 
             var database = App.Database;
 
-            try
-            {
-                last_sync = Convert.ToInt64(database.GetVariable("last_sync"));
-            }
-            catch
-            {
-                last_sync = 0;
-            }
+            database.TryGetVariable("last_sync", long.TryParse, out last_sync);
 
             Authorization authorization;
             authorization.username = database.GetVariable("authorization.username") ?? "";

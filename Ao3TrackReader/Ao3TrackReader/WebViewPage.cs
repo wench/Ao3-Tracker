@@ -272,12 +272,16 @@ namespace Ao3TrackReader
                 uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(uri, "#ao3t:jump"));
 
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
-            Navigate(uri);
 
             // retore font size!
-            FontSize = 100;
+            if (!App.Database.TryGetVariable("FontSize", int.TryParse, out font_size)) FontSize = 100;
 
             Content = mainlayout;
+
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                Navigate(uri);
+            });
         }
 
         protected override void OnSizeAllocated(double width, double height)
@@ -366,12 +370,20 @@ namespace Ao3TrackReader
 
         public int FontSizeMax { get { return 300; } }
         public int FontSizeMin { get { return 10; } }
-        private int font_size = 100;
+        private int font_size = 0;
         public int FontSize
         {
             get { return font_size; }
             set
             {
+                if (font_size != value) 
+                {
+                    Task.Run(() =>
+                    {
+                        App.Database.SaveVariable("FontSize", value);
+                    });
+                }
+
                 font_size = value;
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
