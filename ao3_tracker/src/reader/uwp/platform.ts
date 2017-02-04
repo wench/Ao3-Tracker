@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/globals/winjs/index.d.ts" />
 
-declare var Ao3TrackHelper: Ao3Track.UWP.IAo3TrackHelper;
+var Ao3TrackHelper: Ao3Track.UWP.IAo3TrackHelper;
 
 namespace Ao3Track {
     export namespace UWP {
@@ -55,7 +55,6 @@ namespace Ao3Track {
             setWorkChapters(workchapters: IMap<number, WorkChapterNative>): void;
 
             onjumptolastlocationevent: ((pagejump: boolean) => void) | null;
-
             jumpToLastLocationEnabled: boolean;
 
             nextPage: string;
@@ -112,7 +111,7 @@ namespace Ao3Track {
             set currentLocation(value : IWorkChapterEx | null)  { 
                 if (value === null) { Ao3TrackHelper.currentLocation = null; }
                 else { Ao3TrackHelper.currentLocation =  Ao3TrackHelper.createWorkChapterEx(value.workid,value.number,value.chapterid,value.location,value.seq);  }
-            }
+            },
         };
 
         for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelper)))
@@ -147,6 +146,6 @@ namespace Ao3Track {
             Object.defineProperty(Marshalled,name,newprop);
         }
     }
-    export var Helper: Ao3Track.IAo3TrackHelper = Ao3Track.UWP.Marshalled as Ao3Track.IAo3TrackHelper;
+    Helper = Ao3Track.UWP.Marshalled as Ao3Track.IAo3TrackHelper;
 }
 
