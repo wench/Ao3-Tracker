@@ -27,7 +27,20 @@
             "matches": [
                 "*://archiveofourown.org/*"
             ]
-        }
+        },
+        {
+            "all_frames": true,
+            "run_at": "document_end",
+            "js": [
+                "cleanlinks.js"      
+            ],
+            "exclude_matches": [
+                "*://archiveofourown.org/*"
+            ],
+            "matches": [
+                "*://*/*"
+            ]
+          }
     ],
     "options_page": "options.html",
     "manifest_version": 2,
@@ -38,6 +51,8 @@
     "version": "1",
     "permissions": [
         "*://archiveofourown.org/*",
+        "*://tumblr.com/*",
+        "*://*.tumblr.com/*",
         "unlimitedStorage",
         "storage",
         "contextMenus"

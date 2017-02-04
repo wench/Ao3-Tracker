@@ -60,25 +60,11 @@ namespace Ao3Track {
                 id: "Ao3Track-RL-Add",
                 title: "Add To Reading List",
                 contexts: ["link"],
-                targetUrlPatterns: ["*://archiveofourown.org/*", "*://*.archiveofourown.org/*", "*://t.umblr.com/redirect?z=http%3A%2F%2Farchiveofourown.org%2F*"],
+                targetUrlPatterns: ["*://archiveofourown.org/*", "*://*.archiveofourown.org/*"],
                 onclick: (info, tab) => {
                     if (info.linkUrl) {
                         let url = new URL(info.linkUrl);
-                        if (url.hostname === "t.umblr.com" && url.pathname === "/redirect") {
-                            let search = url.search;
-                            if (search[0] === '?') { search = search.substr(1); }
-                            for (let comp of search.split(/[;&]/))
-                            {
-                                let kvp = comp.split("=", 2);
-                                if (kvp[0] === "z") {
-                                    add(decodeURIComponent(kvp[1]));
-                                    return;
-                                }
-                            }
-                        }
-                        else {
-                            add(url);
-                        }
+                        add(url);
                     }
                 }
             });
