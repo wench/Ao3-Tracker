@@ -5,7 +5,7 @@
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Settings" FontSize="Medium" />
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" Style="{StaticResource PaneImageButton}" />
             </StackLayout>
 
             <StackLayout Spacing="12" Margin="4,0,12,0">

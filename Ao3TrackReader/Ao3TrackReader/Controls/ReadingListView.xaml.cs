@@ -39,84 +39,86 @@ namespace Ao3TrackReader.Controls
             ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ListView.ItemAppearing += ListView_ItemAppearing;
 
+            Device.BeginInvokeOnMainThread(() =>Task.Run(async () => { await RestoreReadingList(); }));            
+        }
+
+        async Task RestoreReadingList()
+        { 
             // Restore the reading list contents!
-            Task.Run(async () =>
+            var items = new Dictionary<string, Models.ReadingList>();
+            foreach (var i in App.Database.GetReadingListItems())
             {
-                var items = new Dictionary<string, Models.ReadingList>();
-                foreach (var i in App.Database.GetReadingListItems())
-                {
-                    items[i.Uri] = i;
-                }
+                items[i.Uri] = i;
+            }
 
-                List<Task> tasks = new List<Task>();
-                var vms = new List<Models.Ao3PageViewModel>();
+            List<Task> tasks = new List<Task>();
+            var vms = new List<Models.Ao3PageViewModel>();
 
-                if (items.Count == 0)
+            if (items.Count == 0)
+            {
+                tasks.Add(AddAsync("http://archiveofourown.org/"));
+            }
+            else
+            {
+                var timestamp = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000L;
+                var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
+                foreach (var model in models)
                 {
-                    tasks.Add(AddAsync("http://archiveofourown.org/"));
-                }
-                else
-                {
-                    var timestamp = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000L;
-                    var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
-                    foreach (var model in models)
+                    if (model.Value != null)
                     {
-                        if (model.Value != null)
+                        var item = items[model.Key];
+                        if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
+                            model.Value.Title = item.Title;
+                        if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
                         {
-                            var item = items[model.Key];
-                            if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
-                                model.Value.Title = item.Title;
-                            if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
-                            {
-                                model.Value.PrimaryTag = item.PrimaryTag;
-                                var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                                if (tagdata != null) model.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
-                                else model.Value.PrimaryTagType = Models.Ao3TagType.Other;
-                            }
-                            if (model.Value.Details != null && model.Value.Details.Summary == null && !string.IsNullOrEmpty(item.Summary))
-                                model.Value.Details.Summary = item.Summary;
+                            model.Value.PrimaryTag = item.PrimaryTag;
+                            var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
+                            if (tagdata != null) model.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                            else model.Value.PrimaryTagType = Models.Ao3TagType.Other;
+                        }
+                        if (model.Value.Details != null && model.Value.Details.Summary == null && !string.IsNullOrEmpty(item.Summary))
+                            model.Value.Details.Summary = item.Summary;
 
-                            if (model.Value.Uri.AbsoluteUri != model.Key)
-                            {
-                                App.Database.DeleteReadingListItems(model.Key);
-                                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = item.Unread });
-                            }
+                        if (model.Value.Uri.AbsoluteUri != model.Key)
+                        {
+                            App.Database.DeleteReadingListItems(model.Key);
+                            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = item.Unread });
+                        }
 
-                            if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
-                            {
-                                var viewmodel = new Models.Ao3PageViewModel(model.Value, item.Unread);
-                                viewmodel.TagsVisible = tags_visible;
-                                viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                                readingListBacking.Add(viewmodel);
-                                vms.Add(viewmodel);
-                            }
+                        if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
+                        {
+                            var viewmodel = new Models.Ao3PageViewModel(model.Value, item.Unread);
+                            viewmodel.TagsVisible = tags_visible;
+                            viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                            readingListBacking.Add(viewmodel);
+                            vms.Add(viewmodel);
                         }
                     }
                 }
-                SyncToServerAsync();
+            }
+            SyncToServerAsync();
 
-                wpv.DoOnMainThread(() =>
+            wpv.DoOnMainThread(() =>
+            {
+                ListView.ItemsSource = readingListBacking;
+            });
+
+            foreach (var viewmodel in vms)
+            {
+                await RefreshSemaphore.WaitAsync();
+
+                tasks.Add(Task.Run(async () =>
                 {
-                    ListView.ItemsSource = readingListBacking;
-                });
+                    await RefreshAsync(viewmodel);
+                    RefreshSemaphore.Release();
+                }));
 
-                foreach (var viewmodel in vms)
-                {
-                    await RefreshSemaphore.WaitAsync();
+            }
+            await Task.WhenAll(tasks);
 
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        await RefreshAsync(viewmodel);
-                        RefreshSemaphore.Release();
-                    }));
-
-                }
-                await Task.WhenAll(tasks);
-
-                wpv.DoOnMainThread(() =>
-                {
-                    RefreshButton.IsEnabled = true;
-                });
+            wpv.DoOnMainThread(() =>
+            {
+                RefreshButton.IsEnabled = true;
             });
         }
 

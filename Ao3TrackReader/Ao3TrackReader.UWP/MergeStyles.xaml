@@ -21,10 +21,10 @@
                         <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch">
 
                             <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" Visibility="{TemplateBinding TitleVisibility}">
-                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,2,0,2" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,4,0,4" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
                             </Border>
 
-                            <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True"></Border>
+                            <Border x:Name="TopCommandBarArea" MinHeight="1" MinWidth="1" RelativePanel.AlignRightWithPanel="True"></Border>
                         </RelativePanel>
 
                         <ContentPresenter Margin="{TemplateBinding ContentMargin}" ContentTransitions="{TemplateBinding ContentTransitions}" x:Name="presenter" Grid.Row="1" />
