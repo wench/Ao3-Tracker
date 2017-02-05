@@ -53,67 +53,9 @@ namespace Ao3TrackReader.UWP
             Control.TextWrapping = Windows.UI.Xaml.TextWrapping.WrapWholeWords;
             Control.Inlines.Clear();
             Control.Margin = new Windows.UI.Xaml.Thickness(0.0, 0.0, 12.0, 0.0);
-            var flat = view.TextTree.Flatten(new StateNode());
-            flat = flat.TrimNewLines();
-            var inlines = Convert(flat);
-            Control.Inlines.Add(inlines);
+            Control.Inlines.Add(view.TextTree.FlattenToSpan());
             Control.InvalidateArrange();
             Control.InvalidateMeasure();
-        }
-
-
-        void ApplyStyles(TextTree n, Inline i)
-        {
-            if (n.Bold == true) i.FontWeight = FontWeights.Bold;
-            else if (n.Bold == false) i.FontWeight = FontWeights.Normal;
-
-            if (n.Italic == true) i.FontStyle = FontStyle.Italic;
-            else if (n.Italic == false) i.FontStyle = FontStyle.Normal;
-
-            if (n.FontSize != null) i.FontSize = (double)n.FontSize;
-            
-            if (n.Foreground != null) i.Foreground = new SolidColorBrush(
-                Color.FromArgb(
-                    (byte)(n.Foreground.Value.A * 255),
-                    (byte)(n.Foreground.Value.R * 255),
-                    (byte)(n.Foreground.Value.G * 255),
-                    (byte)(n.Foreground.Value.B * 255)
-                )
-            );
-            i.TextDecorations = TextDecorations.None;
-            if (n.Underline == true)
-            {
-                i.TextDecorations = i.TextDecorations | TextDecorations.Underline;
-            }
-            if (n.Strike == true)
-            {
-                i.TextDecorations = i.TextDecorations | TextDecorations.Strikethrough;
-            }
-        }
-
-        Inline Convert(ICollection<TextNode> n)
-        {
-            if (n.Count == 1)
-            {
-                var tn = n.First();
-
-                Inline i = new Windows.UI.Xaml.Documents.Run { Text = tn.Text };
-                ApplyStyles(tn, i);
-                return i;
-            }
-            else 
-            {
-                Windows.UI.Xaml.Documents.Span s = new Windows.UI.Xaml.Documents.Span();
-
-                foreach (var tn in n)
-                {
-                    Inline i = new Windows.UI.Xaml.Documents.Run { Text = tn.Text };
-                    ApplyStyles(tn, i);
-                    s.Inlines.Add(i);
-                }
-
-                return s;
-            }
         }
     }
 }

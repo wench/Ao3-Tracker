@@ -1,10 +1,10 @@
 ﻿<ResourceDictionary
+    x:Class="Ao3TrackReader.UWP.MergeStyles"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Ao3TrackReader.UWP"
 	xmlns:uwp="using:Xamarin.Forms.Platform.UWP"
     >
-
     <Style TargetType="uwp:PageControl">
         <Setter Property="ContentMargin" Value="0" />
         <Setter Property="Template">
@@ -18,24 +18,23 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch">
+                        <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch" MinHeight="27">
 
-                            <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" Visibility="{TemplateBinding TitleVisibility}">
-                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,4,0,4" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
+                            <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" MinHeight="27" MinWidth="1">
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,5,0,5" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
                             </Border>
 
-                            <Border x:Name="TopCommandBarArea" MinHeight="1" MinWidth="1" RelativePanel.AlignRightWithPanel="True"></Border>
+                            <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True" MinHeight="27"></Border>
                         </RelativePanel>
 
-                        <ContentPresenter Margin="{TemplateBinding ContentMargin}" ContentTransitions="{TemplateBinding ContentTransitions}" x:Name="presenter" Grid.Row="1" />
+                        <ContentPresenter Margin="{TemplateBinding ContentMargin}" ContentTransitions="{TemplateBinding ContentTransitions}" x:Name="presenter" Grid.Row="1" MinHeight="4"  />
 
-                        <Border x:Name="BottomCommandBarArea" Grid.Row="2" HorizontalAlignment="Stretch">
-                            <uwp:FormsCommandBar x:Name="CommandBar" Background="{TemplateBinding ToolbarBackground}" />
+                        <Border x:Name="BottomCommandBarArea" Grid.Row="2" HorizontalAlignment="Stretch" MinHeight="48">
+                            <local:FormsCommandBar x:Name="CommandBar" Background="{TemplateBinding ToolbarBackground}"/>
                         </Border>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
 </ResourceDictionary>

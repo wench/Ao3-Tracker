@@ -22,7 +22,7 @@ namespace Ao3TrackReader.Models
     }
 
 
-    public abstract class TextTree
+    public abstract partial class TextTree
     {
         public double? FontSize { get; set; }
         public bool? Bold { get; set; }
@@ -51,8 +51,15 @@ namespace Ao3TrackReader.Models
         public abstract override string ToString();
 
         public abstract ICollection<TextNode> Flatten(StateNode state);
+        public Span FlattenToSpan(StateNode state = null)
+        {
+            var flat = Flatten(state ?? new StateNode());
+            return new Span(flat.TrimNewLines());
+        }
 
         public abstract bool IsEmpty { get; }
+
+
     }
 
     public class StateNode : TextTree
@@ -73,7 +80,7 @@ namespace Ao3TrackReader.Models
         }
     }
 
-    public class TextNode : TextTree
+    public partial class TextNode : TextTree
     {
         public TextNode()
         {
@@ -98,11 +105,15 @@ namespace Ao3TrackReader.Models
         }
     }
 
-    public class Span : TextTree
+    public partial class Span : TextTree
     {
         public Span()
         {
             Nodes = new List<TextTree>();
+        }
+        public Span(IEnumerable<TextTree> from)
+        {
+            Nodes = new List<TextTree>(from);
         }
 
         public IList<TextTree> Nodes { get; private set; }
@@ -138,7 +149,7 @@ namespace Ao3TrackReader.Models
         }
     }
 
-    public class Block : Span
+    public partial class Block : Span
     {
         public override string ToString()
         {

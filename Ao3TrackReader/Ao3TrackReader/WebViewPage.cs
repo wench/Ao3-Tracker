@@ -287,7 +287,7 @@ namespace Ao3TrackReader
         protected override void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
-
+#if !WINDOWS_UWP
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 int onscreen = ((int)width - 60) / 68;
@@ -305,6 +305,7 @@ namespace Ao3TrackReader
                 items.RemoveAt(items.Count - 1);
                 items.Add(item);
             });
+#endif
         }
 
         public virtual void OnSleep()

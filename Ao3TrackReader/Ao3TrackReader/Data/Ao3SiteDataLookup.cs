@@ -98,7 +98,7 @@ namespace Ao3TrackReader.Data
         {
             HttpRequestMessage message = new HttpRequestMessage(method ?? HttpMethod.Get, uri);
             if (!string.IsNullOrEmpty(mediaType)) message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(mediaType));
-            message.Headers.Add("Cookie", cookies ?? "");
+            if (!string.IsNullOrWhiteSpace(cookies)) message.Headers.Add("Cookie", cookies);
 
             return Task.Run(() =>
             {

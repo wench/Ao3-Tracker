@@ -12,7 +12,14 @@
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Styles.xaml" />
+                <ResourceDictionary >
+                    <Style x:Key="MainTitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
+                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="TextWrapping" Value="WrapWholeWords" />
+                        <Setter Property="MaxLines" Value="2" />
+                    </Style>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

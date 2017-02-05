@@ -73,8 +73,7 @@ namespace Ao3TrackReader.UWP
                 Xamarin.Forms.Forms.Init(e);
                 XApp = new Ao3TrackReader.App();
 
-                var md = new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") };
-                Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(md);
+                Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(new MergeStyles());
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
