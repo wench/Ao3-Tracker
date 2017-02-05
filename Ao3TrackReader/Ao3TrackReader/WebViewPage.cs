@@ -369,6 +369,14 @@ namespace Ao3TrackReader
 
         }
 
+        public Models.TextTree TitleEx
+        {
+            get
+            {
+                return WVPNavigationPage.GetTitleEx(this);
+            }
+        }
+
         public int FontSizeMax { get { return 300; } }
         public int FontSizeMin { get { return 10; } }
         private int font_size = 0;

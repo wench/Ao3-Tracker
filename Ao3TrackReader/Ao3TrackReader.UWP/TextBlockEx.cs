@@ -10,30 +10,31 @@ namespace Ao3TrackReader.UWP
 {
     class TextBlockEx : DependencyObject
     {
-        public static readonly DependencyProperty InlinesExProperty =
-            DependencyProperty.RegisterAttached("InlinesEx", typeof(IList<Windows.UI.Xaml.Documents.Inline>), typeof(TextBlockEx), new PropertyMetadata(null, InlinesExChanged));
+        public static readonly DependencyProperty TextExProperty =
+            DependencyProperty.RegisterAttached("TextEx", typeof(Models.TextTree), typeof(TextBlockEx), new PropertyMetadata(null, TextExChanged));
 
-        private static void InlinesExChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void TextExChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var textblock = d as TextBlock;
-            var value = e.NewValue as IList<Windows.UI.Xaml.Documents.Inline>;
+            var value = e.NewValue as Models.TextTree;
             if (textblock != null)
             {
                 textblock.Inlines.Clear();
-                if (value != null) foreach (var i in value)
-                    {
+                if (value != null)
+                {
+                    foreach (var i in value.Flatten(new Models.StateNode()))
                         textblock.Inlines.Add(i);
-                    }
+                }
             }
         }
-        public static void SetInlinesEx(UIElement element, IList<Windows.UI.Xaml.Documents.Inline> value)
+        public static void SetTextEx(UIElement element, Models.TextTree value)
         {
-            element.SetValue(InlinesExProperty, value);
+            element.SetValue(TextExProperty, value);
 
         }
-        public static IList<Windows.UI.Xaml.Documents.Inline> GetInlinesEx(UIElement element)
+        public static Models.TextTree GetTextEx(UIElement element)
         {
-            return (IList <Windows.UI.Xaml.Documents.Inline>) element.GetValue(InlinesExProperty);
+            return (Models.TextTree) element.GetValue(TextExProperty);
         }
     }
 }

@@ -55,14 +55,6 @@ namespace Ao3TrackReader
 
         WebView WebView { get; set; }
 
-        public IList<Windows.UI.Xaml.Documents.Inline> TitleEx
-        {
-            get
-            {
-                return new[] { WVPNavigationPage.GetTitleEx(this)?.ConvertToInline() };
-            }
-        }
-
         private Xamarin.Forms.View CreateWebView()
         {
             WebView = new WebView()

@@ -52,11 +52,11 @@ namespace Ao3TrackReader
         {
             view.SetValue(TitleExProperty, value);
         }
-        public Windows.UI.Xaml.Documents.Inline TitleEx
+        public Models.TextTree TitleEx
         {
             get
             {
-                return WVPNavigationPage.GetTitleEx(this)?.ConvertToInline();
+                return WVPNavigationPage.GetTitleEx(this);
             }
         }
     }
