@@ -21,7 +21,7 @@
                         <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch" MinHeight="27">
 
                             <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" MinHeight="27" MinWidth="1">
-                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,5,0,5" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
+                                <TextBlock local:TextBlockEx.InlinesEx="{Binding TitleEx}" VerticalAlignment="Center" Padding="10,5,0,5" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
                             </Border>
 
                             <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True" MinHeight="27"></Border>

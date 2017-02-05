@@ -54,7 +54,15 @@ namespace Ao3TrackReader
         Ao3TrackHelper helper;
 
         WebView WebView { get; set; }
-        
+
+        public IList<Windows.UI.Xaml.Documents.Inline> TitleEx
+        {
+            get
+            {
+                return new[] { WVPNavigationPage.GetTitleEx(this)?.ConvertToInline() };
+            }
+        }
+
         private Xamarin.Forms.View CreateWebView()
         {
             WebView = new WebView()
@@ -111,7 +119,6 @@ namespace Ao3TrackReader
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
         {
             jumpButton.IsEnabled = false;
-            Title = "Loading...";
 
             var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
             if (uri == null)
@@ -126,6 +133,8 @@ namespace Ao3TrackReader
                 WebView.Navigate(uri);
                 return;
             }
+
+            WVPNavigationPage.SetTitleEx(this, "Loading...");
 
             if (urlEntry != null) urlEntry.Text = args.Uri.AbsoluteUri;
             ReadingList?.PageChange(args.Uri);
@@ -163,7 +172,15 @@ namespace Ao3TrackReader
             t = t.EndsWith(" [Archive of Our Own]") ? t.Substring(0, t.Length - 21) : t;
 
             //t = chapter_view_split_regex.Replace(t,"$1\n$2", 1, 0);
-            Title = t;
+            var span = new Models.Span();
+            bool first = true;
+            foreach(var s in t.Split('-'))
+            {
+                if (!first) span.Nodes.Add(new Models.TextNode { Text = "-", Foreground = Ao3TrackReader.Resources.Colors.Base });
+                else first = false;
+                span.Nodes.Add(s);
+            }
+            WVPNavigationPage.SetTitleEx(this,span);
 
             // Inject JS script
             helper?.Reset();

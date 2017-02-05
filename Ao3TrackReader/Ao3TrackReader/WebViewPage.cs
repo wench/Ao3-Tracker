@@ -45,7 +45,7 @@ namespace Ao3TrackReader
 
         public WebViewPage()
         {
-            Title = "Ao3Track Reader";
+            WVPNavigationPage.SetTitleEx(this, "Ao3Track Reader");
 
             var mainlayout = new StackLayout
             {
