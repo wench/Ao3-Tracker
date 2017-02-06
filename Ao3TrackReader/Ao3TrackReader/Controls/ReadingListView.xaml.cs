@@ -119,6 +119,8 @@ namespace Ao3TrackReader.Controls
             wpv.DoOnMainThread(() =>
             {
                 RefreshButton.IsEnabled = true;
+                SyncIndicator.IsRunning = false;
+                SyncIndicator.IsVisible = false;
             });
         }
 
@@ -281,6 +283,8 @@ namespace Ao3TrackReader.Controls
         {
             ListView.Focus();
             RefreshButton.IsEnabled = false;
+            SyncIndicator.IsRunning = true;
+            SyncIndicator.IsVisible = true;
             Task.Run(async () =>
             {
                 List<Task> tasks = new List<Task>();
@@ -300,6 +304,8 @@ namespace Ao3TrackReader.Controls
                 wpv.DoOnMainThread(() =>
                 {
                     RefreshButton.IsEnabled = true;
+                    SyncIndicator.IsRunning = false;
+                    SyncIndicator.IsVisible = false;
                     PageChange(wpv.Current);
                 });
             });
