@@ -512,7 +512,81 @@ namespace Ao3TrackReader.Data
             });
         }
 
-        public Task<Dictionary<string, string>> Login(string username, string password)
+        public Task<Dictionary<string, string>> UserCreate(string username, string password, string email)
+        {
+            return Task.Run(async () =>
+            {
+                Dictionary<string, string> errors = null;
+
+                lock (locker)
+                {
+                    serversync = SyncState.Disabled;
+                    HttpClient.DefaultRequestHeaders.Authorization = null;
+                    App.Database.SaveVariable("authorization.username", "");
+                    App.Database.SaveVariable("authorization.credential", "");
+                }
+
+                var json = JsonConvert.SerializeObject(new
+                {
+                    username = username,
+                    password = password,
+                    email = email
+                });
+
+                var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                var task = HttpClient.PostAsync(new Uri(url_base, "User/Create"), postBody);
+                task.Wait();
+                if (task.IsFaulted) return new Dictionary<string, string>
+                {
+                    {  "exception", task.Exception.Message }
+                };
+                var response = task.Result;
+                if (!response.IsSuccessStatusCode)
+                {
+                    errors = new Dictionary<string, string> {
+                        {  "server", response.ReasonPhrase }
+                    };
+                    return errors;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    errors = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
+                    return errors;
+                }
+                catch (Newtonsoft.Json.JsonException)
+                {
+                }
+
+                try
+                {
+                    string cred = JsonConvert.DeserializeObject<string>(content);
+                    lock (locker)
+                    {
+                        Authorization authorization;
+                        authorization.credential = cred;
+                        authorization.username = username;
+                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
+                        last_sync = 0;
+                        App.Database.SaveVariable("authorization.username", authorization.username);
+                        App.Database.SaveVariable("authorization.credential", authorization.credential);
+                        App.Database.SaveVariable("last_sync", last_sync.ToString());
+                        serversync = SyncState.Syncing;
+                        dosync(true);
+                    }
+                    errors = new Dictionary<string, string>();
+                }
+                catch (Newtonsoft.Json.JsonException)
+                {
+                }
+
+                return errors;
+            });
+        }
+        public Task<Dictionary<string, string>> UserLogin(string username, string password)
         {
             return Task.Run(async () =>
             {

@@ -74,13 +74,28 @@ namespace Ao3TrackReader.Controls
 
             Task.Run(async () =>
             {
-                Dictionary<string, string> errors = null;
-                if (isCreateUser)
+                var errors = new Dictionary<string, string>();
+
+                if (string.IsNullOrEmpty(username.Text)) errors["username"] = "You must enter a username";
+                if (string.IsNullOrEmpty(password.Text)) errors["username"] = "You must enter a password";
+
+                if (errors.Count > 0)
                 {
-                }
-                else
-                {
-                    errors = await App.Storage.Login(username.Text, password.Text);
+                    if (isCreateUser)
+                    {
+                        if (password.Text != verify.Text)
+                        {
+                            errors["verify"] = "Passwords do not match";
+                        }
+                        else
+                        {
+                            errors = await App.Storage.UserCreate(username.Text, password.Text, email.Text);
+                        }
+                    }
+                    else
+                    {
+                        errors = await App.Storage.UserLogin(username.Text, password.Text);
+                    }
                 }
                 wpv.DoOnMainThread(() => 
                 { 
