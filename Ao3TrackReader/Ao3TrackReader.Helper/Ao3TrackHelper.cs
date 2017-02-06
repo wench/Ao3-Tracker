@@ -123,6 +123,20 @@ namespace Ao3TrackReader.Helper
         }
     }
 
+#if WINDOWS_UWP
+    [AllowForWeb]
+#endif
+    public sealed class PageTitle
+    {
+        public string Title { get; set; }
+        public string Chapter { get; set; }
+        public string Chaptername { get; set; }
+        public string[] Authors { get; set; }
+        public string[] Fandoms { get; set; }
+        public string Primarytag { get; set; }
+    }
+
+
     public delegate void MainThreadAction();
     public delegate object MainThreadFunc();
 
@@ -157,6 +171,7 @@ namespace Ao3TrackReader.Helper
         int FontSizeMin { get; }
         int FontSize { get; set; }
         IWorkChapterEx CurrentLocation { get; set; }
+        PageTitle PageTitle { get; set; }
 #if WINDOWS_UWP
         IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
 #else

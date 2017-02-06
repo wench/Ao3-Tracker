@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/globals/winjs/index.d.ts" />
 
-var Ao3TrackHelper: Ao3Track.UWP.IAo3TrackHelper;
+var Ao3TrackHelperUWP: Ao3Track.UWP.IAo3TrackHelperUWP;
 
 namespace Ao3Track {
     export namespace UWP {
@@ -12,6 +12,9 @@ namespace Ao3Track {
         }
         interface WorkChapterExNative extends WorkChapterNative, IWorkChapterEx {
         }
+        interface PageTitleNative extends Native, IPageTitle
+        {
+        }        
 
         interface IKeyValuePair<K, V> {
             key: K;
@@ -45,11 +48,17 @@ namespace Ao3Track {
             size: number;
         }
 
-        export interface IAo3TrackHelper {
-            // Create native objects to pass back
-            createWorkChapterMap(): IMap<number, WorkChapterNative>;
-            createWorkChapter(number: number, chapterid: number, location: number | null, seq: number | null): WorkChapterNative;
-            createWorkChapterEx(workid: number, number: number, chapterid: number, location: number | null, seq: number | null): WorkChapterExNative;
+        interface ClassNameMap
+        {
+            "WorkChapter" : WorkChapterNative;
+            "WorkChapterEx" : WorkChapterExNative;
+            "WorkChapterMap" : IMap<number, WorkChapterNative>;
+            "PageTitle" : PageTitleNative;
+        }
+
+        export interface IAo3TrackHelperUWP {
+            // Create native objects to pass back           
+            createObject<K extends keyof ClassNameMap>(classname: K): ClassNameMap[K];
 
             getWorkChaptersAsync(works: number[]): WinJS.Promise<IMap<number, WorkChapterNative>>;
             setWorkChapters(workchapters: IMap<number, WorkChapterNative>): void;
@@ -77,6 +86,7 @@ namespace Ao3Track {
             setCookies(cookies: string): void;
 
             currentLocation: WorkChapterExNative | null;
+            pageTitle : PageTitleNative | null;
         }
 
         export function ToAssocArray<V>(map: IIterable<IKeyValuePair<number, V>>): { [key: number]: V } {
@@ -90,39 +100,59 @@ namespace Ao3Track {
 
         export var Marshalled = {
             getWorkChaptersAsync(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void): void {
-                Ao3TrackHelper.getWorkChaptersAsync(works).then((result) => {
+                Ao3TrackHelperUWP.getWorkChaptersAsync(works).then((result) => {
                     callback(ToAssocArray<IWorkChapter>(result));
                 });
             },
 
             setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void {
-                var m = Ao3TrackHelper.createWorkChapterMap();
+                var m = Ao3TrackHelperUWP.createObject("WorkChapterMap");
                 for (let key in workchapters) {
-                    m.insert(key as any, Ao3TrackHelper.createWorkChapter(workchapters[key].number, workchapters[key].chapterid, workchapters[key].location, workchapters[key].seq));
+                    var obj = Ao3TrackHelperUWP.createObject("WorkChapter");
+                    Object.assign(obj,workchapters[key]);
+                    m.insert(key as any, obj);
                 }
-                Ao3TrackHelper.setWorkChapters(m);
+                Ao3TrackHelperUWP.setWorkChapters(m);
             },
 
             showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void {
-                Ao3TrackHelper.showContextMenu(x,y,menuItems).then((selected)=> { callback(selected); } );
+                Ao3TrackHelperUWP.showContextMenu(x,y,menuItems).then((selected)=> { callback(selected); } );
             },
 
-            get currentLocation() : IWorkChapterEx | null { return Ao3TrackHelper.currentLocation; },
+            get currentLocation() : IWorkChapterEx | null { return Ao3TrackHelperUWP.currentLocation; },
             set currentLocation(value : IWorkChapterEx | null)  { 
-                if (value === null) { Ao3TrackHelper.currentLocation = null; }
-                else { Ao3TrackHelper.currentLocation =  Ao3TrackHelper.createWorkChapterEx(value.workid,value.number,value.chapterid,value.location,value.seq);  }
+                if (value === null) { 
+                    Ao3TrackHelperUWP.currentLocation = null; 
+                }
+                else { 
+                    var obj = Ao3TrackHelperUWP.createObject("WorkChapterEx");
+                    Object.assign(obj,value);                                    
+                    Ao3TrackHelperUWP.currentLocation = obj;  
+                }
             },
+
+            get pageTitle(): IPageTitle | null { return Ao3TrackHelperUWP.pageTitle; },
+            set pageTitle(value :IPageTitle | null) { 
+                if (value === null) { 
+                    Ao3TrackHelperUWP.pageTitle = null; 
+                }
+                else { 
+                    var obj = Ao3TrackHelperUWP.createObject("PageTitle");
+                    Object.assign(obj,value);                                    
+                    Ao3TrackHelperUWP.pageTitle = obj;  
+                }                
+            }
         };
 
-        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelper)))
+        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelperUWP)))
         {
             if (Object.getOwnPropertyDescriptor(Marshalled,name)) { continue; }
-            let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelper),name);
+            let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperUWP),name);
             let newprop : PropertyDescriptor = { enumerable : prop.enumerable || false };
             if (typeof prop.value === "function")
             {
                 newprop.value =  ()=>{
-                    prop.value.apply(Ao3TrackHelper, arguments);
+                    prop.value.apply(Ao3TrackHelperUWP, arguments);
                 };
             }
             else if ((typeof prop.value !== "null" && typeof prop.value !== "undefined") || prop.get || prop.set) 
@@ -130,13 +160,13 @@ namespace Ao3Track {
                 if (prop.get || !prop.set)
                 {
                     newprop.get = ()=>{
-                        return (Ao3TrackHelper as any)[name];
+                        return (Ao3TrackHelperUWP as any)[name];
                     };
                 }
                 if (!prop.get || prop.set)
                 {
                     newprop.set = (value: any)=>{
-                        return (Ao3TrackHelper as any)[name] = value;
+                        return (Ao3TrackHelperUWP as any)[name] = value;
                     };
                 }
             }
@@ -146,6 +176,6 @@ namespace Ao3Track {
             Object.defineProperty(Marshalled,name,newprop);
         }
     }
-    Helper = Ao3Track.UWP.Marshalled as Ao3Track.IAo3TrackHelper;
+    Helper = Ao3Track.UWP.Marshalled as any as Ao3Track.IAo3TrackHelper;
 }
 

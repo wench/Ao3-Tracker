@@ -21,6 +21,15 @@ interface IWorkChapterTS extends IWorkChapter {
     timestamp: timestamp;
 }
 
+interface IPageTitle
+{
+    title: string;
+    chapter?: string | null;
+    chaptername?: string | null;
+    authors?: string[]  | null;
+    fandoms?: string[] | null;
+    primarytag?: string | null;
+}
 
 interface IUserCreateData {
     username: string;

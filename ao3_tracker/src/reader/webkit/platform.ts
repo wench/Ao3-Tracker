@@ -1,13 +1,15 @@
-type jsonNumberArray = string;
-type jsonStringArray = string;
-type jsonWorkChapEx = string;
-type jsonWorkChapList = string;
-type hCallback<T> = number;
-var Ao3TrackHelper: Ao3Track.Webkit.IAo3TrackHelper;
+var Ao3TrackHelperWebkit: Ao3Track.Webkit.IAo3TrackHelperWebkit;
 
 namespace Ao3Track {
     export namespace Webkit {
-        export interface IAo3TrackHelper {
+        type jsonNumberArray = string;
+        type jsonStringArray = string;
+        type jsonWorkChapEx = string;
+        type jsonWorkChapList = string;
+        type jsonPageTitle = string;
+        type hCallback<T> = number;
+        
+        export interface IAo3TrackHelperWebkit {
             getWorkChaptersAsync(works: jsonNumberArray, callback: hCallback<jsonWorkChapList>): void;
             setWorkChapters(workchapters: jsonWorkChapList): void;
 
@@ -47,47 +49,60 @@ namespace Ao3Track {
 
             get_CurrentLocation(): jsonWorkChapEx|null;
             set_CurrentLocation(value: jsonWorkChapEx|null): void;
+
+            get_PageTitle(): jsonPageTitle|null;
+            set_PageTitle(value: jsonPageTitle|null): void;            
         }
 
         export var Marshalled = {           
             getWorkChaptersAsync(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void): void {
                 let hCallback = Ao3TrackCallbacks.Add(callback);
-                Ao3TrackHelper.getWorkChaptersAsync(JSON.stringify(works),hCallback);
+                Ao3TrackHelperWebkit.getWorkChaptersAsync(JSON.stringify(works),hCallback);
             },
 
             setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void {
-                Ao3TrackHelper.setWorkChapters(JSON.stringify(workchapters));
+                Ao3TrackHelperWebkit.setWorkChapters(JSON.stringify(workchapters));
             },
 
             set onjumptolastlocationevent(handler : ((pagejump : boolean) => void) | null)
             {
-                if (handler === null) { Ao3TrackHelper.set_onjumptolastlocationevent(0); }
-                else { Ao3TrackHelper.set_onjumptolastlocationevent(Ao3TrackCallbacks.AddPermanent(handler)); }
+                if (handler === null) { Ao3TrackHelperWebkit.set_onjumptolastlocationevent(0); }
+                else { Ao3TrackHelperWebkit.set_onjumptolastlocationevent(Ao3TrackCallbacks.AddPermanent(handler)); }
             },
             
             set onalterfontsizeevent(handler : ((ev:any) => void) | null)
             {
-                if (handler === null) { Ao3TrackHelper.set_onalterfontsizeevent(0); }
-                else { Ao3TrackHelper.set_onalterfontsizeevent(Ao3TrackCallbacks.AddPermanent(handler)); }
+                if (handler === null) { Ao3TrackHelperWebkit.set_onalterfontsizeevent(0); }
+                else { Ao3TrackHelperWebkit.set_onalterfontsizeevent(Ao3TrackCallbacks.AddPermanent(handler)); }
             },
             
             showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void {
                 let hCallback = Ao3TrackCallbacks.Add(callback);
-                Ao3TrackHelper.showContextMenu(x, y, JSON.stringify(menuItems), hCallback);                
+                Ao3TrackHelperWebkit.showContextMenu(x, y, JSON.stringify(menuItems), hCallback);                
             },
 
             get currentLocation() : IWorkChapterEx | null {
-                let value = Ao3TrackHelper.get_CurrentLocation();
+                let value = Ao3TrackHelperWebkit.get_CurrentLocation();
                 if (value === null) { return null; }
                 return JSON.parse(value); 
             },
             set currentLocation(value : IWorkChapterEx | null)  { 
-                if (value === null) { Ao3TrackHelper.set_CurrentLocation(null); }
-                else { Ao3TrackHelper.set_CurrentLocation(JSON.stringify(value));  }
-            }
+                if (value === null) { Ao3TrackHelperWebkit.set_CurrentLocation(null); }
+                else { Ao3TrackHelperWebkit.set_CurrentLocation(JSON.stringify(value));  }
+            },
+
+            get pageTitle(): IPageTitle | null {
+                let value = Ao3TrackHelperWebkit.get_PageTitle();
+                if (value === null) { return null; }
+                return JSON.parse(value); 
+                },
+            set pageTitle(value :IPageTitle | null) { 
+                if (value === null) { Ao3TrackHelperWebkit.set_PageTitle(null); }
+                else { Ao3TrackHelperWebkit.set_PageTitle(JSON.stringify(value)); }             
+            }      
         };
 
-        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelper)))
+        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelperWebkit)))
         {
             if (name.startsWith("get_") || name.startsWith("get_"))
             {
@@ -99,21 +114,21 @@ namespace Ao3Track {
                 let gname = "get_" + pname;
                 let sname = "set_" + pname;
 
-                let getter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelper),gname);
-                let setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelper),sname);
+                let getter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperWebkit),gname);
+                let setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperWebkit),sname);
                 
                 let newprop : PropertyDescriptor = { enumerable : true };
 
                 if (getter && typeof getter.value === "function")
                 {
                     newprop.get = ()=>{
-                        return (Ao3TrackHelper as any)[gname]();
+                        return (Ao3TrackHelperWebkit as any)[gname]();
                     };
                 }
                 if (setter && typeof setter.value === "function")
                 {
                     newprop.set = (value: any)=>{
-                        (Ao3TrackHelper as any)[sname](value);
+                        (Ao3TrackHelperWebkit as any)[sname](value);
                     };
                 }
                 if (!newprop.get && !newprop.set)
@@ -127,19 +142,19 @@ namespace Ao3Track {
             {
                 if (Object.getOwnPropertyDescriptor(Marshalled,name)) { continue; }
 
-                let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelper),name);
+                let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperWebkit),name);
     
                 if (typeof prop.value === "function")
                 {
                     let newprop : PropertyDescriptor = { enumerable : prop.enumerable || false };
                     newprop.value =  function(){
-                        prop.value.apply(Ao3TrackHelper, arguments);
+                        prop.value.apply(Ao3TrackHelperWebkit, arguments);
                     };
                     Object.defineProperty(Marshalled,name,newprop);   
                 }
             }            
         }
     }
-    Helper = Ao3Track.Webkit.Marshalled as Ao3Track.IAo3TrackHelper;
+    Helper = Ao3Track.Webkit.Marshalled as any as Ao3Track.IAo3TrackHelper;
 }
 

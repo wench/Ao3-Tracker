@@ -28,6 +28,7 @@ namespace Ao3Track {
         setCookies(cookies: string): void;
 
         currentLocation: IWorkChapterEx | null;
+        pageTitle : IPageTitle | null;
     }
 
     export declare var Helper : Ao3Track.IAo3TrackHelper;

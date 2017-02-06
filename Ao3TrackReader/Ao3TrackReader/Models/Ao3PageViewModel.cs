@@ -531,7 +531,7 @@ namespace Ao3TrackReader.Models
                     else
                         first = false;
 
-                    ts.Nodes.Add(user.Value);
+                    ts.Nodes.Add(user.Value.Replace(' ', '\xA0'));
                 }
             }
             if (baseData.Details?.Recipiants != null && baseData.Details.Recipiants.Count != 0)
@@ -545,7 +545,7 @@ namespace Ao3TrackReader.Models
                     else
                         first = false;
 
-                    ts.Nodes.Add(user.Value);
+                    ts.Nodes.Add(user.Value.Replace(' ', '\xA0'));
                 }
             }
 

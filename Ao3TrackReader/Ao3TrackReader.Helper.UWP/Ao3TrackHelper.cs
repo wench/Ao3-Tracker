@@ -61,35 +61,25 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
-        public IDictionary<long, WorkChapter> createWorkChapterMap()
+        public object createObject(string classname)
         {
-            return new Dictionary<long, WorkChapter>();
-        }
-
-        public IWorkChapter createWorkChapter(long number, long chapterid, long? location, long? seq)
-        {
-            return new WorkChapter
+            switch (classname)
             {
-                number = number,
-                chapterid = chapterid,
-                location = location,
-                seq = seq
-            };
+                case "WorkChapter":
+                    return new WorkChapter();
 
+                case "WorkChapterEx":
+                    return new WorkChapter();
+
+                case "WorkChapterMap":
+                    return new Dictionary<long, WorkChapter>();
+
+                case "PageTitle":
+                    return new PageTitle();
+            }
+
+            return null;
         }
-        public IWorkChapterEx createWorkChapterEx(long workid, long number, long chapterid, long? location, long? seq)
-        {
-            return new WorkChapter
-            {
-                workid = workid,
-                number = number,
-                chapterid = chapterid,
-                location = location,
-                seq = seq
-            };
-
-        }
-
         public void setWorkChapters(IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
@@ -177,5 +167,6 @@ namespace Ao3TrackReader.Helper
         }
 
         public IWorkChapterEx CurrentLocation { get { return handler.CurrentLocation; } set { handler.CurrentLocation = value; } }
+        public PageTitle PageTitle { get { return handler.PageTitle; } set { handler.PageTitle = value; } }
     }
 }

@@ -20,17 +20,17 @@ namespace Ao3TrackReader
     {
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];
-            for (var i = 0; i< Ao3TrackHelper.cssToInject.length; i++) {                    
+            for (var i = 0; i< Ao3TrackHelperUWP.cssToInject.length; i++) {                    
                 var link = document.createElement('link');
                 link.type = 'text/css';
                 link.rel = 'stylesheet';
-                link.href = Ao3TrackHelper.cssToInject[i];
+                link.href = Ao3TrackHelperUWP.cssToInject[i];
                 head.appendChild(link);
             }
-            for (var i = 0; i< Ao3TrackHelper.scriptsToInject.length; i++) {                    
+            for (var i = 0; i< Ao3TrackHelperUWP.scriptsToInject.length; i++) {                    
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
-                script.src = Ao3TrackHelper.scriptsToInject[i];
+                script.src = Ao3TrackHelperUWP.scriptsToInject[i];
                 head.appendChild(script);
             }
         })();";
@@ -126,11 +126,11 @@ namespace Ao3TrackReader
                 return;
             }
 
-            WVPNavigationPage.SetTitleEx(this, "Loading...");
+            TitleEx = "Loading...";
 
             if (urlEntry != null) urlEntry.Text = args.Uri.AbsoluteUri;
             ReadingList?.PageChange(args.Uri);
-            WebView.AddWebAllowedObject("Ao3TrackHelper", helper = new Ao3TrackHelper(this));
+            WebView.AddWebAllowedObject("Ao3TrackHelperUWP", helper = new Ao3TrackHelper(this));
             nextPage = null;
             prevPage = null;
             prevPageButton.IsEnabled = canGoBack;
@@ -158,25 +158,9 @@ namespace Ao3TrackReader
         Regex chapter_view_split_regex = new Regex(@"^(.*(?: - Chapter \d+)?) - ([^-]* - [^-]*)$");
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
-            var t = WebView.DocumentTitle;
-
-            t = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length - 21) : t;
-            t = t.EndsWith(" [Archive of Our Own]") ? t.Substring(0, t.Length - 21) : t;
-
-            //t = chapter_view_split_regex.Replace(t,"$1\n$2", 1, 0);
-            var span = new Models.Span();
-            bool first = true;
-            foreach(var s in t.Split('-'))
-            {
-                if (!first) span.Nodes.Add(new Models.TextNode { Text = "-", Foreground = Ao3TrackReader.Resources.Colors.Base });
-                else first = false;
-                span.Nodes.Add(s);
-            }
-            WVPNavigationPage.SetTitleEx(this,span);
-
             // Inject JS script
             helper?.Reset();
-            Task<string> task = WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();           
+            WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();
         }
 
         public Uri Current {

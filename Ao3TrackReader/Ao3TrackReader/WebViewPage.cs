@@ -23,7 +23,7 @@ using Android.OS;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : ContentPage, IEventHandler
+    public partial class WebViewPage : ContentPage, IEventHandler, IPageEx
     {
 #if WINDOWS_UWP
         public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
@@ -45,7 +45,7 @@ namespace Ao3TrackReader
 
         public WebViewPage()
         {
-            WVPNavigationPage.SetTitleEx(this, "Ao3Track Reader");
+            Title = "Ao3Track Reader";
 
             var mainlayout = new StackLayout
             {
@@ -55,7 +55,7 @@ namespace Ao3TrackReader
             };
 
 #if WINDOWS_UWP
-            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;            
+            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
 #endif
 
             prevPageButton = new DisableableCommand(GoBack, false);
@@ -136,8 +136,8 @@ namespace Ao3TrackReader
                 Icon = Icons.Sync,
                 Command = syncButton
             });
-            App.Storage.BeginSyncEvent += (sender,e) => DoOnMainThread(() => syncButton.IsEnabled = false);
-            App.Storage.EndSyncEvent += (sender,e) => DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
+            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = false);
+            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
             syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
 
             forceSetLocationButton = new DisableableCommand(ForceSetLocation);
@@ -268,7 +268,7 @@ namespace Ao3TrackReader
             App.Database.DeleteVariable("Sleep:URI");
 
             Uri uri = null;
-            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url,UriKind.Absolute,out uri))
+            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out uri))
                 uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(uri, "#ao3t:jump"));
 
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
@@ -368,12 +368,95 @@ namespace Ao3TrackReader
             }
 
         }
-
+        public new string Title
+        {
+            get
+            {
+                return TitleEx?.ToString();
+            }
+            set
+            {
+                TitleEx = value;
+            }
+        }
         public Models.TextTree TitleEx
         {
             get
             {
-                return WVPNavigationPage.GetTitleEx(this);
+                return PageEx.GetTitleEx(this);
+            }
+            set
+            {
+                PageEx.SetTitleEx(this, value);
+            }
+        }
+
+        PageTitle pageTitle = null;
+        public PageTitle PageTitle {
+            get { return pageTitle; }
+            set {
+                pageTitle = value;
+
+                // Title by Author,Author - Chapter N: Title - Relationship - Fandoms
+
+                var ts = new Models.Span();
+
+                ts.Nodes.Add(pageTitle.Title);
+
+                if (pageTitle.Authors != null && pageTitle.Authors.Length != 0)
+                {
+                    ts.Nodes.Add(new Models.TextNode { Text = " by ", Foreground = Colors.Base });
+
+                    bool first = true;
+                    foreach (var user in pageTitle.Authors)
+                    {
+                        if (!first)
+                            ts.Nodes.Add(new Models.TextNode { Text = ", ", Foreground = Colors.Base });
+                        else
+                            first = false;
+
+                        ts.Nodes.Add(user.Replace(' ', '\xA0'));
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(pageTitle.Chapter) || !string.IsNullOrWhiteSpace(pageTitle.Chaptername))
+                {
+                    ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
+
+                    if (!string.IsNullOrWhiteSpace(pageTitle.Chapter))
+                    {
+                        ts.Nodes.Add(pageTitle.Chapter.Replace(' ', '\xA0'));
+
+                        if (!string.IsNullOrWhiteSpace(pageTitle.Chaptername))
+                            ts.Nodes.Add(new Models.TextNode { Text = ": ", Foreground = Colors.Base });
+                    }
+                    if (!string.IsNullOrWhiteSpace(pageTitle.Chaptername))
+                        ts.Nodes.Add(pageTitle.Chaptername.Replace(' ', '\xA0'));
+                }
+
+                if (!string.IsNullOrWhiteSpace(pageTitle.Primarytag))
+                {
+                    ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
+                    ts.Nodes.Add(pageTitle.Primarytag.Replace(' ', '\xA0'));
+                }
+
+                if (pageTitle.Fandoms != null && pageTitle.Fandoms.Length != 0)
+                {
+                    ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
+                    
+                    bool first = true;
+                    foreach (var fandom in pageTitle.Fandoms)
+                    {
+                        if (!first)
+                            ts.Nodes.Add(new Models.TextNode { Text = ", ", Foreground = Colors.Base });
+                        else
+                            first = false;
+
+                        ts.Nodes.Add(fandom.Replace(' ', '\xA0'));
+                    }
+                }
+
+                TitleEx = ts;
             }
         }
 

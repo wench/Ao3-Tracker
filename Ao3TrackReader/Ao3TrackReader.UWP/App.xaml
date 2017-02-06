@@ -15,7 +15,7 @@
                 <ResourceDictionary >
                     <Style x:Key="MainTitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
                         <Setter Property="FontSize" Value="14" />
-                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="FontWeight" Value="Normal" />
                         <Setter Property="TextWrapping" Value="WrapWholeWords" />
                         <Setter Property="MaxLines" Value="2" />
                     </Style>

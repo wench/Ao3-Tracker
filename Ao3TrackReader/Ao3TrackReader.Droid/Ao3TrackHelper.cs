@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Ao3TrackReader.Droid
 {
-    public class Ao3TrackHelper : Java.Lang.Object
+    public class Ao3TrackHelper : Java.Lang.Object, IEventHandler
     {
         WebViewPage handler;
 
@@ -208,7 +208,9 @@ namespace Ao3TrackReader.Droid
         }
 
 
-        public string CurrentLocation {
+        public WorkChapter CurrentLocation { get { return handler.CurrentLoation; } set { handler.CurrentLocation = value; } }
+
+        public string str_CurrentLocation {
             [JavascriptInterface, Export("get_CurrentLocation")]
             get
             {
@@ -223,6 +225,21 @@ namespace Ao3TrackReader.Droid
                     handler.CurrentLocation = null;
                 else
                     handler.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
+            }
+        }
+
+        public string PageTitle
+        {
+            [JavascriptInterface, Export("get_PageTitle")]
+            get {
+                if (handler.PageTitle == null) return null;
+                return JsonConvert.SerializeObject(handler.PageTitle);
+            }
+            [JavascriptInterface, Export("set_PageTitle")]
+            set
+            {
+                if (value == null || value == "(null)" || value == "null") handler.PageTitle == null;
+                else handler.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
             }
         }
 

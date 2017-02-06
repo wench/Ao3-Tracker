@@ -31,7 +31,7 @@ namespace Ao3TrackReader
     {
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];
-            var toInject = JSON.parse(Ao3TrackHelper.get_CssToInject());
+            var toInject = JSON.parse(Ao3TrackHelperWebkit.get_CssToInject());
             for (var i = 0; i< toInject.length; i++) {                    
                 var link = document.createElement('link');
                 link.type = 'text/css';
@@ -39,7 +39,7 @@ namespace Ao3TrackReader
                 link.href = toInject[i];
                 head.appendChild(link);
             }
-            toInject = JSON.parse(Ao3TrackHelper.get_ScriptsToInject());
+            toInject = JSON.parse(Ao3TrackHelperWebkit.get_ScriptsToInject());
             for (var i = 0; i< toInject.length; i++) {                    
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
@@ -101,7 +101,7 @@ namespace Ao3TrackReader
         private bool ShouldOverrideUrlLoading(WebView sender, Uri args)
         {
             jumpButton.IsEnabled = false;
-            Title = "Loading...";
+            TitleEx = "Loading...";
 
             var uri = Ao3SiteDataLookup.CheckUri(args);
             if (uri == null)
@@ -128,7 +128,7 @@ namespace Ao3TrackReader
         {
             if (urlEntry != null) urlEntry.Text = WebView.Url;
             ReadingList?.PageChange(Current);
-            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelperBase");
+            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelperWebkit");
             PrevPageIndicator.IsVisible = false;
             NextPageIndicator.IsVisible = false;
             //WebView.RenderTransform = null;
@@ -154,15 +154,10 @@ namespace Ao3TrackReader
 
         private void OnPageFinished(WebView sender)
         {
-            var t = WebView.Title;
-
-            t = t.EndsWith(" | Archive of Our Own") ? t.Substring(0, t.Length - 21) : t;
-            t = t.EndsWith(" [Archive of Our Own]") ? t.Substring(0, t.Length - 21) : t;
-            Title = t;
-
             // Inject JS script
             helper?.Reset();
             EvaluateJavascript(JavaScriptInject);
+            UpdateTitle();
         }
 
         public void EvaluateJavascript(string code)

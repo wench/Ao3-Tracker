@@ -11,11 +11,8 @@ using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 
 namespace Ao3TrackReader
 {
-    class WVPNavigationPage : NavigationPage
+    class WVPNavigationPage : NavigationPage, IPageEx
     {
-        public static readonly BindableProperty TitleExProperty =
-          BindableProperty.CreateAttached("TitleEx", typeof(Models.TextTree), typeof(WVPNavigationPage), null, propertyChanged: TitleExPropertChanged);
-
         public WVPNavigationPage(WebViewPage page) : base(page)
         {
 #if WINDOWS_UWP
@@ -32,31 +29,11 @@ namespace Ao3TrackReader
             return base.OnBackButtonPressed();
         }
 
-        private static void TitleExPropertChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            var val = newValue as Models.TextTree;
-            var page = bindable as Xamarin.Forms.Page;
-
-            if (page != null)
-            {
-                page.Title = val != null ? val.ToString() : null;
-            }
-        }
-
-        public static Models.TextTree GetTitleEx(BindableObject view)
-        {
-            return (Models.TextTree)view.GetValue(TitleExProperty);
-        }
-
-        public static void SetTitleEx(BindableObject view, Models.TextTree value)
-        {
-            view.SetValue(TitleExProperty, value);
-        }
         public Models.TextTree TitleEx
         {
             get
             {
-                return WVPNavigationPage.GetTitleEx(this);
+                return PageEx.GetTitleEx(this);
             }
         }
     }

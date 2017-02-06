@@ -39,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PageEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Colors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Icons.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
