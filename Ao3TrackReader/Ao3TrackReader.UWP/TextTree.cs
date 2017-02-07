@@ -12,9 +12,43 @@ namespace Ao3TrackReader.Models
 {
     public abstract partial class TextTree
     {
-        protected T ApplyStyles<T>(T i)
-            where T: Inline
+        static bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
+
+        protected Inline ApplyStyles(Inline i)
         {
+            if (isTextDecorationsAvailable)
+            {
+                i.TextDecorations = TextDecorations.None;
+                if (Underline == true)
+                {
+                    i.TextDecorations = i.TextDecorations | TextDecorations.Underline;
+                }
+                if (Strike == true)
+                {
+                    i.TextDecorations = i.TextDecorations | TextDecorations.Strikethrough;
+                }
+            }
+            else
+            {
+                if (Underline == true && !(i is Underline))
+                {
+                    var u = new Underline();
+                    var s = i as Windows.UI.Xaml.Documents.Span;
+                    if (s != null)
+                    {
+                        foreach (var e in s.Inlines) u.Inlines.Add(s);
+                        s.Inlines.Clear();
+                        return ApplyStyles(u);
+                    }
+                    u.Inlines.Add(i);
+                    i = u;
+                }
+                if (Strike == true)
+                {
+                    i.CharacterSpacing = -250;
+                }
+            }
+
             if (Bold == true) i.FontWeight = FontWeights.Bold;
             else if (Bold == false) i.FontWeight = FontWeights.Normal;
 
@@ -31,16 +65,6 @@ namespace Ao3TrackReader.Models
                     (byte)(Foreground.Value.B * 255)
                 )
             );
-            i.TextDecorations = TextDecorations.None;
-            if (Strike == true)
-            {
-                i.TextDecorations = i.TextDecorations | TextDecorations.Strikethrough;
-            }
-            if (Underline == true)
-            {
-                i.TextDecorations = i.TextDecorations | TextDecorations.Underline;
-            }
-
             return i;
         }
 
@@ -67,14 +91,14 @@ namespace Ao3TrackReader.Models
     {
         public override Inline ConvertToInline()
         {
-            Windows.UI.Xaml.Documents.Span s = ApplyStyles(new Windows.UI.Xaml.Documents.Span());
+            var s = new Windows.UI.Xaml.Documents.Span();
 
             foreach (var n in Nodes)
             {
                 s.Inlines.Add(n.ConvertToInline());
             }
 
-            return s;
+            return ApplyStyles(s);
         }
     }
 
@@ -82,7 +106,7 @@ namespace Ao3TrackReader.Models
     {
         public override Inline ConvertToInline()
         {
-            Windows.UI.Xaml.Documents.Span s = ApplyStyles(new Windows.UI.Xaml.Documents.Span());
+            var s = new Windows.UI.Xaml.Documents.Span();
 
             foreach (var n in Nodes)
             {
@@ -93,7 +117,7 @@ namespace Ao3TrackReader.Models
             {
                 s.Inlines.Add(new Run { Text = "\n\n" });
             }
-            return s;
+            return ApplyStyles(s);
         }
     }
 

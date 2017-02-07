@@ -77,9 +77,13 @@ namespace Ao3TrackReader
             get
             {
                 try {
-                    Windows.Phone.UI.Input.HardwareButtons.BackPressed += HardwareButtons_BackPressed;
-                    Windows.Phone.UI.Input.HardwareButtons.BackPressed -= HardwareButtons_BackPressed;
-                    return false;
+                    if (Windows.Foundation.Metadata.ApiInformation.IsEventPresent("Windows.Phone.UI.Input.HardwareButtons", "BackPressed"))
+                    {
+                        var eh = new EventHandler<Windows.Phone.UI.Input.BackPressedEventArgs>((sender, e) => { });
+                        Windows.Phone.UI.Input.HardwareButtons.BackPressed += eh;
+                        Windows.Phone.UI.Input.HardwareButtons.BackPressed -= eh;
+                        return false;
+                    }
                 }
                 catch (Exception)
                 {
@@ -87,10 +91,6 @@ namespace Ao3TrackReader
                 }
                 return true;
             }
-        }
-
-        private void HardwareButtons_BackPressed(object sender, Windows.Phone.UI.Input.BackPressedEventArgs e)
-        {
         }
 
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
