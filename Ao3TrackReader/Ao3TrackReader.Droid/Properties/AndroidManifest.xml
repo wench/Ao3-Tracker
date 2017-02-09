@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" package="Ao3TrackReader.Droid">
-	<uses-sdk android:minSdkVersion="14" />
+	<uses-sdk android:minSdkVersion="19" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<application android:label="Ao3TrackReader.Droid" android:icon="@drawable/Icon"></application>
 </manifest>

@@ -70,7 +70,7 @@ namespace Ao3TrackReader.Data
             HttpClientHandler httpClientHandler = new HttpClientHandler();
             httpClientHandler.AllowAutoRedirect = false;
             httpClientHandler.UseCookies = false;
-            httpClientHandler.MaxConnectionsPerServer = 2;
+            //httpClientHandler.MaxConnectionsPerServer = 2;
             httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
             HttpClient = new HttpClient(httpClientHandler);
 

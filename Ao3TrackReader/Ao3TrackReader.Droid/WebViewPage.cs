@@ -157,7 +157,6 @@ namespace Ao3TrackReader
             // Inject JS script
             helper?.Reset();
             EvaluateJavascript(JavaScriptInject);
-            UpdateTitle();
         }
 
         public void EvaluateJavascript(string code)

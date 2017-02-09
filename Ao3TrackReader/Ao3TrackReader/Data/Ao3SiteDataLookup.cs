@@ -79,7 +79,7 @@ namespace Ao3TrackReader.Data
             HttpClientHandler httpClientHandler = new HttpClientHandler();
             httpClientHandler.AllowAutoRedirect = false;
             httpClientHandler.UseCookies = false;
-            httpClientHandler.MaxConnectionsPerServer = 8;
+            //httpClientHandler.MaxConnectionsPerServer = 8;
             httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
             HttpClient = new HttpClient(httpClientHandler);
             if (!App.Database.TryGetVariable("UseHttps", bool.TryParse, out use_https))

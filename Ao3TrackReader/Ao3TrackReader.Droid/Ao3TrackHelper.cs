@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Ao3TrackReader.Droid
 {
-    public class Ao3TrackHelper : Java.Lang.Object, IEventHandler
+    public class Ao3TrackHelper : Java.Lang.Object
     {
         WebViewPage handler;
 
@@ -50,7 +50,7 @@ namespace Ao3TrackReader.Droid
             [JavascriptInterface, Export("get_JumpToLastLocationEnabled")]
             get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
             [JavascriptInterface, Export("set_JumpToLastLocationEnabled")]
-            set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
+            set { handler.DoOnMainThread(() => { handler.JumpToLastLocationEnabled = value; }); }
         }
 
 
@@ -75,15 +75,13 @@ namespace Ao3TrackReader.Droid
             [JavascriptInterface, Export("get_FontSize")]
             get { return (int)handler.DoOnMainThread(() => handler.FontSize); }
             [JavascriptInterface, Export("set_FontSize")]
-            set { handler.DoOnMainThread(() => handler.FontSize = value); }
+            set { handler.DoOnMainThread(() => { handler.FontSize = value; }); }
         }
 
         public void Reset()
         {
             JumpToLastLocationEvemt = 0;
             AlterFontSizeEvent = 0;
-            CurrentWorkId = 0;
-            CurrentLocation = null;
         }
 
 
@@ -151,14 +149,14 @@ namespace Ao3TrackReader.Droid
             [JavascriptInterface, Export("get_NextPage")]
             get { return handler.NextPage; }
             [JavascriptInterface, Export("set_NextPage")]
-            set { handler.DoOnMainThread(() => handler.NextPage = value); }
+            set { handler.DoOnMainThread(() => { handler.NextPage = value; }); }
         }
         public string prevPage
         {
             [JavascriptInterface, Export("get_PrevPage")]
             get { return handler.PrevPage; }
             [JavascriptInterface, Export("set_PrevPage")]
-            set { handler.DoOnMainThread(() => handler.PrevPage = value); }
+            set { handler.DoOnMainThread(() => { handler.PrevPage = value; }); }
         }
 
         public bool canGoBack
@@ -183,48 +181,46 @@ namespace Ao3TrackReader.Droid
             [JavascriptInterface, Export("get_LeftOffset")]
             get { return (double)handler.DoOnMainThread(() => handler.leftOffset); }
             [JavascriptInterface, Export("set_LeftOffset")]
-            set { handler.DoOnMainThread(() => handler.leftOffset = value); }
+            set { handler.DoOnMainThread(() => { handler.leftOffset = value; }); }
         }
         public double opacity
         {
             [JavascriptInterface, Export("get_Opacity")]
             get { return (double)handler.DoOnMainThread(() => handler.opacity); }
             [JavascriptInterface, Export("set_Opacity")]
-            set { handler.DoOnMainThread(() => handler.opacity = value); }
+            set { handler.DoOnMainThread(() => { handler.opacity = value; }); }
         }
         public bool showPrevPageIndicator
         {
             [JavascriptInterface, Export("get_ShowPrevPageIndicator")]
             get { return (bool)handler.DoOnMainThread(() => handler.showPrevPageIndicator); }
             [JavascriptInterface, Export("set_ShowPrevPageIndicator")]
-            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value); }
+            set { handler.DoOnMainThread(() => { handler.showPrevPageIndicator = value; }); }
         }
         public bool showNextPageIndicator
         {
             [JavascriptInterface, Export("get_ShowNextPageIndicator")]
             get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
             [JavascriptInterface, Export("set_ShowNextPageIndicator")]
-            set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
+            set { handler.DoOnMainThread(() => { handler.showNextPageIndicator = value; }); }
         }
 
-
-        public WorkChapter CurrentLocation { get { return handler.CurrentLoation; } set { handler.CurrentLocation = value; } }
-
-        public string str_CurrentLocation {
+        public string CurrentLocation {
             [JavascriptInterface, Export("get_CurrentLocation")]
             get
             {
-                var loc = handler.CurrentLocation;
+                var loc = handler.DoOnMainThread(() => handler.CurrentLocation );
                 if (loc == null) return null;
                 return JsonConvert.SerializeObject(loc);
             }
             [JavascriptInterface, Export("set_CurrentLocation")]
             set
             {
-                if (value == null || value == "(null)" || value == "null")
-                    handler.CurrentLocation = null;
-                else
-                    handler.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
+                handler.DoOnMainThread(() =>
+                {
+                    if (value == null || value == "(null)" || value == "null") handler.CurrentLocation = null;
+                    else handler.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
+                });
             }
         }
 
@@ -232,14 +228,18 @@ namespace Ao3TrackReader.Droid
         {
             [JavascriptInterface, Export("get_PageTitle")]
             get {
-                if (handler.PageTitle == null) return null;
-                return JsonConvert.SerializeObject(handler.PageTitle);
+                var pagetitle = handler.DoOnMainThread(() => handler.PageTitle);
+                if (pagetitle == null) return null;
+                return JsonConvert.SerializeObject(pagetitle);
             }
             [JavascriptInterface, Export("set_PageTitle")]
             set
             {
-                if (value == null || value == "(null)" || value == "null") handler.PageTitle == null;
-                else handler.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
+                handler.DoOnMainThread(() =>
+                {
+                    if (value == null || value == "(null)" || value == "null") handler.PageTitle = null;
+                    else handler.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
+                });
             }
         }
 
