@@ -35,7 +35,7 @@ namespace Ao3TrackReader.Helper
         public bool jumpToLastLocationEnabled
         {
             get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
-            set { handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled = value); }
+            set { handler.DoOnMainThread(() => { handler.JumpToLastLocationEnabled = value; }); }
         }
 
 
@@ -120,12 +120,12 @@ namespace Ao3TrackReader.Helper
         public string nextPage
         {
             get { return handler.NextPage; }
-            set { handler.DoOnMainThread(() => handler.NextPage = value); }
+            set { handler.DoOnMainThread(() => { handler.NextPage = value; }); }
         }
         public string prevPage
         {
             get { return handler.PrevPage; }
-            set { handler.DoOnMainThread(() => handler.PrevPage = value); }
+            set { handler.DoOnMainThread(() => { handler.PrevPage = value; }); }
         }
 
         public bool canGoBack
@@ -141,32 +141,32 @@ namespace Ao3TrackReader.Helper
         public double leftOffset
         {
             get { return (double)handler.DoOnMainThread(() => handler.leftOffset); }
-            set { handler.DoOnMainThread(() => handler.leftOffset = value); }
+            set { handler.DoOnMainThread(() => { handler.leftOffset = value; }); }
         }
         public double opacity
         {
             get { return (double)handler.DoOnMainThread(() => handler.opacity); }
-            set { handler.DoOnMainThread(() => handler.opacity = value); }
+            set { handler.DoOnMainThread(() => { handler.opacity = value; }); }
         }
         public int fontSizeMax { get { return handler.FontSizeMax; } }
         public int fontSizeMin { get { return handler.FontSizeMin; } }
         public int fontSize
         {
             get { return (int)handler.DoOnMainThread(() => handler.FontSize); }
-            set { handler.DoOnMainThread(() => handler.FontSize = value); }
+            set { handler.DoOnMainThread(() => { handler.FontSize = value; }); }
         }
         public bool showPrevPageIndicator
         {
             get { return (bool)handler.DoOnMainThread(() => handler.showPrevPageIndicator); }
-            set { handler.DoOnMainThread(() => handler.showPrevPageIndicator = value); }
+            set { handler.DoOnMainThread(() => { handler.showPrevPageIndicator = value; }); }
         }
         public bool showNextPageIndicator
         {
             get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
-            set { handler.DoOnMainThread(() => handler.showNextPageIndicator = value); }
+            set { handler.DoOnMainThread(() => { handler.showNextPageIndicator = value; }); }
         }
 
-        public IWorkChapterEx CurrentLocation { get { return handler.CurrentLocation; } set { handler.CurrentLocation = value; } }
-        public PageTitle PageTitle { get { return handler.PageTitle; } set { handler.PageTitle = value; } }
+        public IWorkChapterEx CurrentLocation { get { return (IWorkChapterEx) handler.DoOnMainThread(() => handler.CurrentLocation); } set { handler.DoOnMainThread(() => { handler.CurrentLocation = value; }); } }
+        public PageTitle PageTitle { get { return (PageTitle) handler.DoOnMainThread(() => handler.PageTitle); } set { handler.DoOnMainThread(() => { handler.PageTitle = value; }); } }
     }
 }
