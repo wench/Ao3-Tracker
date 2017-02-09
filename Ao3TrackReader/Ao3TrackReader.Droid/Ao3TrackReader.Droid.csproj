@@ -401,9 +401,6 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\touch.js">
       <Link>Assets\touch.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\touch.js">
-      <Link>Assets\touch.js</Link>
-    </AndroidAsset>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\webkit\unitconv.js">
       <Link>Assets\unitconv.js</Link>
     </AndroidAsset>

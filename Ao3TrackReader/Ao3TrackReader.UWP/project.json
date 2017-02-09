@@ -1,13 +1,13 @@
 ﻿{
   "dependencies": {
     "HtmlAgilityPack": "1.4.9.5",
+    "Microsoft.Data.SQLite": "1.1.0",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.0",
     "Newtonsoft.Json": "9.0.1",
     "sqlite-net-pcl": "1.3.1",
     "SQLitePCLRaw.bundle_green": "1.1.2",
     "SQLitePCLRaw.core": "1.1.2",
-    "SQLitePCLRaw.lib.e_sqlite3.v140": "1.1.2",
-    "SQLitePCLRaw.provider.e_sqlite3.uwp10": "1.1.2",
+    "SQLitePCLRaw.provider.winsqlite3.uwp10": "1.1.2",
     "Xamarin.Forms": "2.3.3.180"
   },
   "frameworks": {
