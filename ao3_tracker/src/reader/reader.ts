@@ -121,7 +121,7 @@ namespace Ao3Track {
                 let name = "";
                 
                 for (let node = $num[0].nextSibling; node !== null; node = node.nextSibling) {
-                    if (node.nodeType === node.TEXT_NODE)
+                    if (node.nodeType === Node.TEXT_NODE)
                     {
                         name += (node.textContent || "");
                     }
@@ -130,7 +130,7 @@ namespace Ao3Track {
                 name = name.trim();
                 if (name.startsWith(":")) { name = name.substr(1); }
                 name = name.trim();
-                if (name.length > 0) {
+                if (name.length > 0 && name !== pageTitle.chapter) {
                     pageTitle.chaptername = name;
                 }
             }
