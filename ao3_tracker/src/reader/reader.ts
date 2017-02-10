@@ -1,7 +1,5 @@
 
 namespace Ao3Track {
-
-
     export function GetWorkChapters(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void) {
         Ao3Track.Helper.getWorkChaptersAsync(works, callback);
     }
@@ -36,7 +34,7 @@ namespace Ao3Track {
             else {
                 Ao3Track.scrollToLocation(workid,lastloc,false); 
             }
-        }
+        };
         Ao3Track.Helper.jumpToLastLocationEnabled = true;
     }
 

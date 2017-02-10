@@ -1,5 +1,60 @@
+// tslint:disable-next-line:no-var-keyword
 var Ao3TrackHelperWebkit: Ao3Track.Webkit.IAo3TrackHelperWebkit;
 
+interface ObjectConstructor
+{
+    assign(target : any, varArgs : any) : any;
+}
+
+if (typeof Object.assign !== 'function') {
+  Object.assign = function(target : any, varArgs : any) { // .length of function is 2
+    'use strict';
+    if (target === null) { // TypeError if undefined or null
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+
+    let to = Object(target);
+
+    for (let index = 1; index < arguments.length; index++) {
+      let nextSource = arguments[index];
+
+      if (nextSource !== null) { // Skip over if undefined or null
+        for (let nextKey in nextSource) {
+          // Avoid bugs when hasOwnProperty is shadowed
+          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+    }
+    return to;
+  };
+}
+
+interface String
+{
+    endsWith(searchString: string, position?: number) : boolean;
+    startsWith(searchString: string, position?: number) : boolean;
+}
+
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(searchString: string, position?: number) {
+      let subjectString : string = this.toString();
+      if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+        position = subjectString.length;
+      }
+      position -= searchString.length;
+      let lastIndex = subjectString.lastIndexOf(searchString, position);
+      return lastIndex !== -1 && lastIndex === position;
+  };
+}
+
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function(searchString: string, position?: number){
+      position = position || 0;
+      return this.substr(position, searchString.length) === searchString;
+  };
+}
 namespace Ao3Track {
     export namespace Webkit {
         type jsonNumberArray = string;
@@ -9,52 +64,55 @@ namespace Ao3Track {
         type jsonPageTitle = string;
         type hCallback<T> = number;
         
-        export interface IAo3TrackHelperWebkit {
-            getWorkChaptersAsync(works: jsonNumberArray, callback: hCallback<jsonWorkChapList>): void;
-            setWorkChapters(workchapters: jsonWorkChapList): void;
+        export class IAo3TrackHelperWebkit {
+            constructor()
+            {
+            }
+            getWorkChaptersAsync(works: jsonNumberArray, callback: hCallback<jsonWorkChapList>): void { }
+            setWorkChapters(workchapters: jsonWorkChapList): void { }
 
-            set_onjumptolastlocationevent(callback: hCallback<boolean>): void;
-            get_JumpToLastLocationEnabled(): boolean;
-            set_JumpToLastLocationEnabled(value: boolean): void;
+            set_onjumptolastlocationevent(callback: hCallback<boolean>): void{ }
+            get_JumpToLastLocationEnabled(): boolean { return false; }
+            set_JumpToLastLocationEnabled(value: boolean): void { }
 
-            get_NextPage(): string;
-            set_NextPage(value: string): void;
+            get_NextPage(): string  {return "";}
+            set_NextPage(value: string): void {}
 
-            get_PrevPage(): string;
-            set_PrevPage(value: string): void;
+            get_PrevPage(): string { return ""; }
+            set_PrevPage(value: string): void{}
 
-            get_CanGoBack(): boolean;
-            get_CanGoForward(): boolean;
+            get_CanGoBack(): boolean { return false; }
+            get_CanGoForward(): boolean { return false; }
 
-            goBack(): void;
-            goForward(): void;
+            goBack(): void {}
+            goForward(): void {}
 
-            get_LeftOffset(): number;
-            set_LeftOffset(value: number): void;
+            get_LeftOffset(): number { return 0; }
+            set_LeftOffset(value: number): void {}
 
-            get_Opacity(): number;
-            set_Opacity(value: number): void;
+            get_Opacity(): number { return 0; }
+            set_Opacity(value: number): void {}
 
-            set_ShowPrevPageIndicator(value: boolean): void;
-            set_ShowNextPageIndicator(value: boolean): void;
+            set_ShowPrevPageIndicator(value: boolean): void {}
+            set_ShowNextPageIndicator(value: boolean): void {}
 
-            set_onalterfontsizeevent(callback: hCallback<any>): void;
-            get_FontSize(): number;
-            set_FontSize(value: number): void;
+            set_onalterfontsizeevent(callback: hCallback<any>): void {}
+            get_FontSize(): number { return 0; }
+            set_FontSize(value: number): void {}
 
-            showContextMenu(x: number, y: number, menuItems: jsonStringArray, callback: hCallback<string>): void;
-            addToReadingList(href: string): void;
-            copyToClipboard(str: string, type: string): void;
-            setCookies(cookies: string): void;
+            showContextMenu(x: number, y: number, menuItems: jsonStringArray, callback: hCallback<string>): void {}
+            addToReadingList(href: string): void {}
+            copyToClipboard(str: string, type: string): void {}
+            setCookies(cookies: string): void {}
 
-            get_CurrentLocation(): jsonWorkChapEx|null;
-            set_CurrentLocation(value: jsonWorkChapEx|null): void;
+            get_CurrentLocation(): jsonWorkChapEx|null { return null; }
+            set_CurrentLocation(value: jsonWorkChapEx|null): void {}
 
-            get_PageTitle(): jsonPageTitle|null;
-            set_PageTitle(value: jsonPageTitle|null): void;            
+            get_PageTitle(): jsonPageTitle|null { return null; }
+            set_PageTitle(value: jsonPageTitle|null): void {}
         }
 
-        export var Marshalled = {           
+        export let Marshalled = {           
             getWorkChaptersAsync(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void): void {
                 let hCallback = Ao3TrackCallbacks.Add(callback);
                 Ao3TrackHelperWebkit.getWorkChaptersAsync(JSON.stringify(works),hCallback);
@@ -101,10 +159,14 @@ namespace Ao3Track {
                 else { Ao3TrackHelperWebkit.set_PageTitle(JSON.stringify(value)); }             
             }      
         };
+        let helperobj = new IAo3TrackHelperWebkit();
 
-        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelperWebkit)))
+        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(helperobj)))
         {
-            if (name.startsWith("get_") || name.startsWith("get_"))
+            if (name === "constructor" || name.startsWith("_"))
+                continue;
+            
+            if (name.startsWith("get_") || name.startsWith("set_"))
             {
                 let pname = name.substr(4);
                 let mname = pname[0].toLowerCase() + pname.substr(1);
@@ -114,36 +176,38 @@ namespace Ao3Track {
                 let gname = "get_" + pname;
                 let sname = "set_" + pname;
 
-                let getter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperWebkit),gname);
-                let setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperWebkit),sname);
+                let getter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(helperobj),gname);
+                let setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(helperobj),sname);
                 
                 let newprop : PropertyDescriptor = { enumerable : true };
 
                 if (getter && typeof getter.value === "function")
                 {
-                    newprop.get = getter.value.bind(Ao3TrackHelperWebkit);
+                    let gfunc  = (Ao3TrackHelperWebkit as any)[gname] as Function;
+                    newprop.get = gfunc.bind(Ao3TrackHelperWebkit);
                 }
                 if (setter && typeof setter.value === "function")
                 {
-                    newprop.set = setter.value.bind(Ao3TrackHelperWebkit);
+                    let sfunc  = (Ao3TrackHelperWebkit as any)[sname] as Function;
+                    newprop.set = sfunc.bind(Ao3TrackHelperWebkit);
                 }
                 if (!newprop.get && !newprop.set)
                 {
                     continue;
                 }
-                
                 Object.defineProperty(Marshalled,mname,newprop);   
             }
             else
             {
                 if (Object.getOwnPropertyDescriptor(Marshalled,name)) { continue; }
 
-                let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperWebkit),name);
+                let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(helperobj),name);
     
                 if (typeof prop.value === "function")
                 {
                     let newprop : PropertyDescriptor = { enumerable : prop.enumerable || false };
-                    newprop.value = prop.value.bind(Ao3TrackHelperWebkit);
+                    let func  = (Ao3TrackHelperWebkit as any)[name] as Function;
+                    newprop.value = func.bind(Ao3TrackHelperWebkit);
                     Object.defineProperty(Marshalled,name,newprop);   
                 }
             }            

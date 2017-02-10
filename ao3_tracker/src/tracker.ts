@@ -285,7 +285,7 @@ namespace Ao3Track {
         }
     }
 
-    GetWorkChapters(works, (it) => {
+    Ao3Track.GetWorkChapters(works, (it) => {
         for (let i = 0; i < $works.length && i < works.length; i++) {
             if (works[i] in it) {
                 let workchap = it[works[i]];

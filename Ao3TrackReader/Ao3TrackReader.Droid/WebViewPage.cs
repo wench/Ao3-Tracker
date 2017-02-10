@@ -32,6 +32,7 @@ namespace Ao3TrackReader
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];
             var toInject = JSON.parse(Ao3TrackHelperWebkit.get_CssToInject());
+            console.log(toInject);
             for (var i = 0; i< toInject.length; i++) {                    
                 var link = document.createElement('link');
                 link.type = 'text/css';
@@ -40,6 +41,7 @@ namespace Ao3TrackReader
                 head.appendChild(link);
             }
             toInject = JSON.parse(Ao3TrackHelperWebkit.get_ScriptsToInject());
+            console.log(toInject);
             for (var i = 0; i< toInject.length; i++) {                    
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
@@ -50,7 +52,13 @@ namespace Ao3TrackReader
 
         public string[] scriptsToInject
         {
-            get { return new[] { "https://ao3track.wenchy.net/callbacks.js", "https://ao3track.wenchy.net/platform.js", "https://ao3track.wenchy.net/reader.js", "https://ao3track.wenchy.net/tracker.js", "https://ao3track.wenchy.net/unitconv.js", "https://ao3track.wenchy.net/touch.js" }; }
+            get { return new[] {
+                "https://ao3track.wenchy.net/callbacks.js",
+                "https://ao3track.wenchy.net/platform.js",
+                "https://ao3track.wenchy.net/reader.js",
+                "https://ao3track.wenchy.net/tracker.js",
+                "https://ao3track.wenchy.net/unitconv.js",
+                "https://ao3track.wenchy.net/touch.js" }; }
         }
         public string[] cssToInject
         {
@@ -165,6 +173,25 @@ namespace Ao3TrackReader
         }
         public void CallJavascript(string function, params object[] args)
         {
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (args[i] == null)
+                {
+                    args[i] = "null";
+                    continue;
+                }
+                var type = args[i].GetType();
+                if (type == typeof(bool))
+                    args[i] = args[i].ToString().ToLowerInvariant();
+                else if (type == typeof(double))
+                    args[i] = ((double)args[i]).ToString("r");
+                else if (type == typeof(float))
+                    args[i] = ((float)args[i]).ToString("r");
+                else if (type == typeof(int) || type == typeof(long) || type == typeof(short) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort))
+                    args[i] = args[i].ToString();
+                else
+                    args[i] = args[i].ToString().ToLiteral();
+            }
             DoOnMainThread(() => WebView.EvaluateJavascript(function + "(" + string.Join(",", args) + ");", new ValueCallback((value) => { })));
         }
 
@@ -342,7 +369,12 @@ namespace Ao3TrackReader
 
             public override bool OnConsoleMessage(ConsoleMessage consoleMessage)
             {
+                int lineNumber = consoleMessage.LineNumber();
                 string message = consoleMessage.Message();
+                var messageLevel = consoleMessage.InvokeMessageLevel();
+                var sourceId = consoleMessage.SourceId();
+                if (sourceId.StartsWith("https://ao3track.wenchy.net/")) sourceId = "Assets/"+sourceId.Substring(28);
+                System.Diagnostics.Debug.WriteLine(string.Format(" {0}({1}): {2}: {3}",sourceId,lineNumber,messageLevel.Name(),message));
                 return true;
             }
             [Obsolete]

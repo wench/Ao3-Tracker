@@ -30,7 +30,7 @@ namespace Ao3TrackReader.Droid
             get { return JsonConvert.SerializeObject(handler.cssToInject); }
         }
 
-        public int JumpToLastLocationEvemt
+        public int JumpToLastLocationEvent
         {
             [JavascriptInterface, Export("get_onjumptolastlocationevent")]
             get;
@@ -41,8 +41,8 @@ namespace Ao3TrackReader.Droid
         {
             Task<object>.Run(() =>
             {
-                if (JumpToLastLocationEvemt != 0)
-                    handler.CallJavascript("Ao3TrackCallbacks.Call" + JumpToLastLocationEvemt, pagejump);
+                if (JumpToLastLocationEvent != 0)
+                    handler.CallJavascript("Ao3TrackCallbacks.Call",JumpToLastLocationEvent, pagejump);
             });
         }
         public bool jumpToLastLocationEnabled
@@ -80,7 +80,7 @@ namespace Ao3TrackReader.Droid
 
         public void Reset()
         {
-            JumpToLastLocationEvemt = 0;
+            JumpToLastLocationEvent = 0;
             AlterFontSizeEvent = 0;
         }
 
@@ -92,7 +92,7 @@ namespace Ao3TrackReader.Droid
             {
                 var works = JsonConvert.DeserializeObject<long[]>(works_json);
                 var workchapters = await handler.GetWorkChaptersAsync(works);
-                handler.CallJavascript("Ao3TrackCallbacks.Call", hCallback, JsonConvert.SerializeObject(workchapters).ToLiteral());
+                handler.CallJavascript("Ao3TrackCallbacks.Call", hCallback, JsonConvert.SerializeObject(workchapters));
             });
         }
 
@@ -113,7 +113,7 @@ namespace Ao3TrackReader.Droid
             {
                 var menuItems = JsonConvert.DeserializeObject<string[]>(menuItems_json);
                 string result = await handler.showContextMenu(x, y, menuItems);
-                handler.CallJavascript("Ao3TrackCallbacks.Call", hCallback, result.ToLiteral());
+                handler.CallJavascript("Ao3TrackCallbacks.Call", hCallback, result);
             });
         }
 

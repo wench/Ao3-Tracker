@@ -61,7 +61,7 @@ var reader = {
         webkit: function reader_scripts_webkit() {
            return gulp.src(webkit_scripts)
             .pipe(sourcemaps.init())
-            .pipe(ts(tsOptions_ES6))
+            .pipe(ts(tsOptions_ES5))
             .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/webkit/src-maps/' + file.basename + ".map").href; }}))
             .pipe(gulp.dest('build/reader/webkit'));
         },

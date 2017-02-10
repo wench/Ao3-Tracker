@@ -1,5 +1,6 @@
 /// <reference path="../../../typings/globals/winjs/index.d.ts" />
 
+// tslint:disable-next-line:no-var-keyword
 var Ao3TrackHelperUWP: Ao3Track.UWP.IAo3TrackHelperUWP;
 
 namespace Ao3Track {
@@ -90,15 +91,15 @@ namespace Ao3Track {
         }
 
         export function ToAssocArray<V>(map: IIterable<IKeyValuePair<number, V>>): { [key: number]: V } {
-            var response: { [key: number]: V } = {};
-            for (var it = map.first(); it.hasCurrent; it.moveNext()) {
-                var i = it.current;
+            let response: { [key: number]: V } = {};
+            for (let it = map.first(); it.hasCurrent; it.moveNext()) {
+                let i = it.current;
                 response[i.key] = i.value;
             }
             return response;
         }
 
-        export var Marshalled = {
+        export let Marshalled = {
             getWorkChaptersAsync(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void): void {
                 Ao3TrackHelperUWP.getWorkChaptersAsync(works).then((result) => {
                     callback(ToAssocArray<IWorkChapter>(result));
@@ -106,9 +107,9 @@ namespace Ao3Track {
             },
 
             setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void {
-                var m = Ao3TrackHelperUWP.createObject("WorkChapterMap");
+                let m = Ao3TrackHelperUWP.createObject("WorkChapterMap");
                 for (let key in workchapters) {
-                    var obj = Ao3TrackHelperUWP.createObject("WorkChapter");
+                    let obj = Ao3TrackHelperUWP.createObject("WorkChapter");
                     Object.assign(obj,workchapters[key]);
                     m.insert(key as any, obj);
                 }
@@ -125,7 +126,7 @@ namespace Ao3Track {
                     Ao3TrackHelperUWP.currentLocation = null; 
                 }
                 else { 
-                    var obj = Ao3TrackHelperUWP.createObject("WorkChapterEx");
+                    let obj = Ao3TrackHelperUWP.createObject("WorkChapterEx");
                     Object.assign(obj,value);                                    
                     Ao3TrackHelperUWP.currentLocation = obj;  
                 }
@@ -137,7 +138,7 @@ namespace Ao3Track {
                     Ao3TrackHelperUWP.pageTitle = null; 
                 }
                 else { 
-                    var obj = Ao3TrackHelperUWP.createObject("PageTitle");
+                    let obj = Ao3TrackHelperUWP.createObject("PageTitle");
                     Object.assign(obj,value);                                    
                     Ao3TrackHelperUWP.pageTitle = obj;  
                 }                
