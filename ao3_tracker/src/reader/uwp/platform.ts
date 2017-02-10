@@ -151,9 +151,7 @@ namespace Ao3Track {
             let newprop : PropertyDescriptor = { enumerable : prop.enumerable || false };
             if (typeof prop.value === "function")
             {
-                newprop.value =  ()=>{
-                    prop.value.apply(Ao3TrackHelperUWP, arguments);
-                };
+                newprop.value =  prop.value.bind(Ao3TrackHelperUWP);
             }
             else if ((typeof prop.value !== "null" && typeof prop.value !== "undefined") || prop.get || prop.set) 
             {
@@ -166,7 +164,7 @@ namespace Ao3Track {
                 if (!prop.get || prop.set)
                 {
                     newprop.set = (value: any)=>{
-                        return (Ao3TrackHelperUWP as any)[name] = value;
+                        (Ao3TrackHelperUWP as any)[name] = value;
                     };
                 }
             }

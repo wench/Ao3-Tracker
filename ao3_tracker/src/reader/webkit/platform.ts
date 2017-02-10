@@ -121,15 +121,11 @@ namespace Ao3Track {
 
                 if (getter && typeof getter.value === "function")
                 {
-                    newprop.get = ()=>{
-                        return (Ao3TrackHelperWebkit as any)[gname]();
-                    };
+                    newprop.get = getter.value.bind(Ao3TrackHelperWebkit);
                 }
                 if (setter && typeof setter.value === "function")
                 {
-                    newprop.set = (value: any)=>{
-                        (Ao3TrackHelperWebkit as any)[sname](value);
-                    };
+                    newprop.set = setter.value.bind(Ao3TrackHelperWebkit);
                 }
                 if (!newprop.get && !newprop.set)
                 {
@@ -147,9 +143,7 @@ namespace Ao3Track {
                 if (typeof prop.value === "function")
                 {
                     let newprop : PropertyDescriptor = { enumerable : prop.enumerable || false };
-                    newprop.value =  function(){
-                        prop.value.apply(Ao3TrackHelperWebkit, arguments);
-                    };
+                    newprop.value = prop.value.bind(Ao3TrackHelperWebkit);
                     Object.defineProperty(Marshalled,name,newprop);   
                 }
             }            
