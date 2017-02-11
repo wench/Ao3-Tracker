@@ -16,10 +16,24 @@ namespace Ao3TrackReader.Droid
 		{
 			base.OnCreate (bundle);
 
-			global::Xamarin.Forms.Forms.Init (this, bundle);
-			LoadApplication (new Ao3TrackReader.App ());
+            switch (Ao3TrackReader.App.Theme)
+            {
+                case "light":
+                    SetTheme(Ao3TrackReader.Droid.Resource.Style.LightTheme);
+                    break;
 
-			var x = typeof(Xamarin.Forms.Themes.DarkThemeResources);
+                case "dark":
+                    SetTheme(Ao3TrackReader.Droid.Resource.Style.DarkTheme);
+                    break;
+            }
+            
+
+            global::Xamarin.Forms.Forms.Init (this, bundle);
+
+			LoadApplication (new Ao3TrackReader.App ());
+            
+
+            var x = typeof(Xamarin.Forms.Themes.DarkThemeResources);
 			x = typeof(Xamarin.Forms.Themes.LightThemeResources);
 			x = typeof(Xamarin.Forms.Themes.Android.UnderlineEffect);
 		}

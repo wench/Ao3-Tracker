@@ -383,6 +383,10 @@
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\values-v21\styles.xml" />
+  </ItemGroup>
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition="Exists('..\Ao3TrackReader\Ao3TrackReader.projitems')" />
   <Import Project="..\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
