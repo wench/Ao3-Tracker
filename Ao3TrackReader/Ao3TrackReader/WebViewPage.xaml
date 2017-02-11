@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
+             x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}">
+    <ContentPage.Content>
+        <StackLayout x:Name="MainLayout" Spacing="0">
+            <local:TextView TextTree="{Binding TitleEx}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}" FontSize="14" 
+                            LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
+                            HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
+            <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+                <AbsoluteLayout.Children>
+                    <Label x:Name="NextPageIndicator" Text="Next Page" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" IsVisible="False" 
+                           AbsoluteLayout.LayoutBounds=".98, .5, 100, 100" AbsoluteLayout.LayoutFlags="PositionProportional"/>
+                    <Label x:Name="PrevPageIndicator" Text="Previous Page" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" IsVisible="False" 
+                           AbsoluteLayout.LayoutBounds=".02, .5, 100, 100" AbsoluteLayout.LayoutFlags="PositionProportional"/>
+                    <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"/>
+                </AbsoluteLayout.Children>
+            </AbsoluteLayout>
+            <StackLayout x:Name="urlBar" Orientation="Horizontal" Spacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
+                         VerticalOptions="End" HorizontalOptions="Fill">
+                <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" HorizontalOptions="FillAndExpand" />
+                <local:Button Text="Go" Clicked="UrlButton_Clicked" Style="{StaticResource PaneImageButton}" VerticalOptions="Center" HorizontalOptions="End" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" Style="{StaticResource PaneImageButton}" VerticalOptions="Center" HorizontalOptions="End" />
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

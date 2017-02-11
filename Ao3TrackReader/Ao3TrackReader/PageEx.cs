@@ -9,18 +9,7 @@ namespace Ao3TrackReader
     public class PageEx : BindableObject
     {
         public static readonly BindableProperty TitleExProperty =
-          BindableProperty.CreateAttached("TitleEx", typeof(TextTree), typeof(WVPNavigationPage), null, propertyChanged: TitleExPropertChanged);
-
-        private static void TitleExPropertChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            var val = newValue as TextTree;
-            var page = bindable as Page;
-
-            if (page != null)
-            {
-                page.Title = val?.ToString();
-            }
-        }
+          BindableProperty.CreateAttached("TitleEx", typeof(TextTree), typeof(NavigationPage), null);
 
         public static TextTree GetTitleEx(BindableObject view)
         {

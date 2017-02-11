@@ -37,32 +37,33 @@ namespace Ao3TrackReader.Droid
         {
             var view = Element as TextView;
 
-            if (view != null && (e.PropertyName == Label.TextColorProperty.PropertyName || 
+            if (view != null && (e.PropertyName == Label.TextColorProperty.PropertyName ||
                 e.PropertyName == Label.FontProperty.PropertyName ||
                 e.PropertyName == Label.TextProperty.PropertyName ||
-                e.PropertyName == Label.FormattedTextProperty.PropertyName ||
-                e.PropertyName == TextView.TextTreeProperty.PropertyName))
+                e.PropertyName == Label.FormattedTextProperty.PropertyName))
             {
                 if (view.TextTree != null)
                 {
-                    if (view.FormattedText == null)
-                    {
-                        view.FormattedText = "";
-                        return;
-                    }
                     base.OnElementPropertyChanged(sender, e);
                     UpdateControl(view);
                     return;
                 }
             }
+            else if (e.PropertyName == TextView.TextTreeProperty.PropertyName)
+            {
+                if (view.TextTree != null)
+                {
+                    var tts = view.TextTree.ToString();
+                    view.FormattedText = tts;
+                }
 
-            base.OnElementPropertyChanged(sender, e);
+                base.OnElementPropertyChanged(sender, e);
+            }
         }
         
         void UpdateControl(TextView view)
         {
             if (view.TextTree == null) return;
-
             Control.TextFormatted = Convert(view.TextTree.Flatten(new StateNode { Foreground = view.TextColor }).TrimNewLines());
         }
 

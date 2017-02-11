@@ -72,7 +72,7 @@ namespace Ao3TrackReader
             return WebView.ToView();
         }
 
-        bool ShowBackOnToolbar
+        public bool ShowBackOnToolbar
         {
             get
             {

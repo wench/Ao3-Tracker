@@ -11,9 +11,9 @@ using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 
 namespace Ao3TrackReader
 {
-    class WVPNavigationPage : NavigationPage, IPageEx
+    class NavigationPage : Xamarin.Forms.NavigationPage, IPageEx
     {
-        public WVPNavigationPage(WebViewPage page) : base(page)
+        public NavigationPage(WebViewPage page) : base(page)
         {
 #if WINDOWS_UWP
             On<Xamarin.Forms.PlatformConfiguration.Windows>().SetToolbarPlacement(ToolbarPlacement.Bottom);

@@ -5,6 +5,7 @@
     xmlns:local="using:Ao3TrackReader.UWP"
 	xmlns:uwp="using:Xamarin.Forms.Platform.UWP"
     >
+
     <Style TargetType="uwp:PageControl">
         <Setter Property="ContentMargin" Value="0" />
         <Setter Property="Template">
@@ -18,13 +19,13 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch" MinHeight="27">
+                        <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch" >
 
-                            <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" MinHeight="27" MinWidth="1">
-                                <TextBlock local:TextBlockEx.TextEx="{Binding TitleEx}" VerticalAlignment="Center" Padding="10,5,0,5" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
+                            <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" MinWidth="1" Visibility="Collapsed">
+                                <TextBlock local:TextBlockEx.TextEx="{Binding Title}" VerticalAlignment="Center" Padding="10,5,0,5" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
                             </Border>
 
-                            <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True" MinHeight="27"></Border>
+                            <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True"></Border>
                         </RelativePanel>
 
                         <ContentPresenter Margin="{TemplateBinding ContentMargin}" ContentTransitions="{TemplateBinding ContentTransitions}" x:Name="presenter" Grid.Row="1" MinHeight="4"  />

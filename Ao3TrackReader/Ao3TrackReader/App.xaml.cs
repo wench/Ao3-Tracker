@@ -12,7 +12,7 @@ using Button = Ao3TrackReader.Controls.Button;
 
 namespace Ao3TrackReader
 {
-    public class App : Application
+    public partial class App : Application
     {
         public static Ao3TrackDatabase Database
         {
@@ -45,7 +45,7 @@ namespace Ao3TrackReader
 
         public App()
         {
-            Resources = new ResourceDictionary();
+            InitializeComponent();
 #if !WINDOWS_UWP
             // Andriod and iOS uses Xamarin Forms theme           
             switch (Theme)  
@@ -65,9 +65,11 @@ namespace Ao3TrackReader
                 Windows.UI.Xaml.Application.Current.Resources.ThemeDictionaries.Add("Default", omd = new Windows.UI.Xaml.ResourceDictionary());
             }
             var md = (Windows.UI.Xaml.ResourceDictionary)omd;
+            md["SystemAccentColor"] = Colors.Highlight.Solid.High.ToWindows();
 #endif
+
             var sets = new Dictionary<string, BaseColorSet>();
-            foreach (var cat in typeof(Resources.Colors).GetProperties(BindingFlags.Public | BindingFlags.Static))
+            foreach (var cat in typeof(Colors).GetProperties(BindingFlags.Public | BindingFlags.Static))
             {
                 ColorSet set = (ColorSet)cat.GetValue(null);
                 sets.Add(cat.Name, set);
@@ -112,7 +114,7 @@ namespace Ao3TrackReader
 
             }
 
-            foreach (var prop in typeof(Resources.Icons).GetProperties(BindingFlags.Public | BindingFlags.Static))
+            foreach (var prop in typeof(Icons).GetProperties(BindingFlags.Public | BindingFlags.Static))
             {
                 var icon = (string)prop.GetValue(null);
                 Resources.Add(prop.Name + "Icon", icon);
@@ -124,6 +126,7 @@ namespace Ao3TrackReader
             Resources.Add("PaneImageButton", new Style(typeof(Button))
             {
                 Setters = {
+                    new Setter{ Property = Button.BackgroundColorProperty, Value = Color.Transparent },
                     new Setter{ Property = Button.BorderWidthProperty, Value = 2.0 },
                     new Setter{ Property = Button.WidthRequestProperty, Value = 40.0 },
                     new Setter{ Property = Button.HeightRequestProperty, Value = 40.0 },
@@ -133,7 +136,7 @@ namespace Ao3TrackReader
             });
 
             // The root page of your application
-            MainPage = new WVPNavigationPage(wvp = new WebViewPage()); 
+            MainPage = new NavigationPage(wvp = new WebViewPage());
         }
 
         protected override void OnStart()

@@ -36,28 +36,49 @@ namespace Ao3TrackReader
         DisableableCommand syncButton { get; set; }
         DisableableCommand forceSetLocationButton { get; set; }
 
-        Label PrevPageIndicator;
-        Label NextPageIndicator;
         public ReadingListView ReadingList { get; private set; }
         public SettingsView SettingsPane { get; private set; }
-        Entry urlEntry;
-        StackLayout urlBar;
 
         public WebViewPage()
         {
-            Title = "Ao3Track Reader";
-
-            var mainlayout = new StackLayout
-            {
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                Spacing = 0
-            };
-
+            BindingContext = this;
+            TitleEx = "Loading...";
+            InitializeComponent();           
+                
 #if WINDOWS_UWP
             Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
 #endif
 
+            SetupToolbar();
+
+            Panes.Children.Add(SettingsPane = new SettingsView(this));
+            Panes.Children.Add(ReadingList = new ReadingListView(this));
+
+            var wv = CreateWebView();
+            AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
+            MainContent.Children.Insert(0, wv);
+
+            string url = App.Database.GetVariable("Sleep:URI");
+            App.Database.DeleteVariable("Sleep:URI");
+
+            Uri uri = null;
+            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out uri))
+                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(uri, "#ao3t:jump"));
+
+            if (uri == null) uri = new Uri("http://archiveofourown.org/");
+
+            // retore font size!
+            if (!App.Database.TryGetVariable("FontSize", int.TryParse, out font_size)) FontSize = 100;
+
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                Navigate(uri);
+            });
+        }
+
+        void SetupToolbar()
+        {
             prevPageButton = new DisableableCommand(GoBack, false);
             if (ShowBackOnToolbar)
             {
@@ -153,19 +174,19 @@ namespace Ao3TrackReader
                 Text = "Url Bar",
                 Icon = Icons.Rename,
                 Command = new Command(() =>
-                        {
-                            if (urlBar.IsVisible)
-                            {
-                                urlBar.IsVisible = false;
-                                urlBar.Unfocus();
-                            }
-                            else
-                            {
-                                urlEntry.Text = Current.AbsoluteUri;
-                                urlBar.IsVisible = true;
-                                urlEntry.Focus();
-                            }
-                        })
+                {
+                    if (urlBar.IsVisible)
+                    {
+                        urlBar.IsVisible = false;
+                        urlBar.Unfocus();
+                    }
+                    else
+                    {
+                        urlEntry.Text = Current.AbsoluteUri;
+                        urlBar.IsVisible = true;
+                        urlEntry.Focus();
+                    }
+                })
             });
 
             ToolbarItems.Add(new ToolbarItem
@@ -184,104 +205,6 @@ namespace Ao3TrackReader
                     ReadingList.IsOnScreen = false;
                 })
             });
-
-            NextPageIndicator = new Label { Text = "Next Page", Rotation = 90, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
-            AbsoluteLayout.SetLayoutBounds(NextPageIndicator, new Rectangle(.98, .5, 100, 100));
-            AbsoluteLayout.SetLayoutFlags(NextPageIndicator, AbsoluteLayoutFlags.PositionProportional);
-
-            PrevPageIndicator = new Label { Text = "Previous Page", Rotation = 270, VerticalTextAlignment = TextAlignment.Start, HorizontalTextAlignment = TextAlignment.Center, IsVisible = false };
-            AbsoluteLayout.SetLayoutBounds(PrevPageIndicator, new Rectangle(.02, .5, 100, 100));
-            AbsoluteLayout.SetLayoutFlags(PrevPageIndicator, AbsoluteLayoutFlags.PositionProportional);
-
-            var wv = CreateWebView();
-            AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-
-            var panes = new PaneContainer
-            {
-                Children = {
-                    (SettingsPane = new SettingsView(this)),
-                    (ReadingList = new ReadingListView(this))
-                }
-            };
-            AbsoluteLayout.SetLayoutBounds(panes, new Rectangle(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(panes, AbsoluteLayoutFlags.All);
-
-            urlBar = new StackLayout
-            {
-                Orientation = StackOrientation.Horizontal,
-                VerticalOptions = LayoutOptions.End,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                Spacing = 4
-            };
-            urlEntry = new Entry
-            {
-                VerticalOptions = LayoutOptions.Center,
-                HorizontalOptions = LayoutOptions.FillAndExpand
-            };
-            urlEntry.Completed += UrlButton_Clicked;
-            urlEntry.Keyboard = Keyboard.Url;
-
-            urlBar.Children.Add(urlEntry);
-
-            var urlButton = new Ao3TrackReader.Controls.Button()
-            {
-                Text = "Go",
-                StyleId = "PaneImageButton",
-                VerticalOptions = LayoutOptions.Center,
-                HorizontalOptions = LayoutOptions.End
-            };
-            urlButton.Clicked += UrlButton_Clicked;
-
-            var urlCancel = new Ao3TrackReader.Controls.Button()
-            {
-                Image = Icons.Close,
-                StyleId = "PaneImageButton",
-                VerticalOptions = LayoutOptions.Center,
-                HorizontalOptions = LayoutOptions.End
-            };
-            urlCancel.Clicked += UrlCancel_Clicked;
-
-            urlBar.Children.Add(urlEntry);
-            urlBar.Children.Add(urlButton);
-            urlBar.Children.Add(urlCancel);
-            urlBar.BackgroundColor = Colors.Alt.MediumHigh;
-            urlBar.IsVisible = false;
-
-            mainlayout.Children.Add(new AbsoluteLayout
-            {
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                Children = {
-                        wv,
-                        PrevPageIndicator,
-                        NextPageIndicator,
-                        panes
-                    }
-            });
-            mainlayout.Children.Add(urlBar);
-
-            AbsoluteLayout.SetLayoutBounds(mainlayout, new Rectangle(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(mainlayout, AbsoluteLayoutFlags.All);
-
-            string url = App.Database.GetVariable("Sleep:URI");
-            App.Database.DeleteVariable("Sleep:URI");
-
-            Uri uri = null;
-            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out uri))
-                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(uri, "#ao3t:jump"));
-
-            if (uri == null) uri = new Uri("http://archiveofourown.org/");
-
-            // retore font size!
-            if (!App.Database.TryGetVariable("FontSize", int.TryParse, out font_size)) FontSize = 100;
-
-            Content = mainlayout;
-
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-            {
-                Navigate(uri);
-            });
         }
 
         protected override void OnSizeAllocated(double width, double height)
@@ -290,7 +213,7 @@ namespace Ao3TrackReader
 #if !WINDOWS_UWP
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
-                int onscreen = ((int)width - 60) / 68;
+                int onscreen = ((int)width - 60) / 48;
                 var items = ToolbarItems;
 
                 for (var i = 0; i < onscreen && i < ToolbarItems.Count; i++)
