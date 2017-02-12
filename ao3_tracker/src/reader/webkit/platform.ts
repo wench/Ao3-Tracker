@@ -125,17 +125,17 @@ namespace Ao3Track {
             set onjumptolastlocationevent(handler : ((pagejump : boolean) => void) | null)
             {
                 if (handler === null) { Ao3TrackHelperWebkit.set_onjumptolastlocationevent(0); }
-                else { Ao3TrackHelperWebkit.set_onjumptolastlocationevent(Ao3TrackCallbacks.AddPermanent(handler)); }
+                else { Ao3TrackHelperWebkit.set_onjumptolastlocationevent(Ao3TrackCallbacks.AddPermanent(handler, false)); }
             },
             
             set onalterfontsizeevent(handler : ((ev:any) => void) | null)
             {
                 if (handler === null) { Ao3TrackHelperWebkit.set_onalterfontsizeevent(0); }
-                else { Ao3TrackHelperWebkit.set_onalterfontsizeevent(Ao3TrackCallbacks.AddPermanent(handler)); }
+                else { Ao3TrackHelperWebkit.set_onalterfontsizeevent(Ao3TrackCallbacks.AddPermanent(handler, false)); }
             },
             
             showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void {
-                let hCallback = Ao3TrackCallbacks.Add(callback);
+                let hCallback = Ao3TrackCallbacks.Add(callback, false);
                 Ao3TrackHelperWebkit.showContextMenu(x, y, JSON.stringify(menuItems), hCallback);                
             },
 

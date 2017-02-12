@@ -70,6 +70,7 @@ namespace Ao3TrackReader
 
         WebView WebView { get; set; }
         WebClient webClient;
+        Xamarin.Forms.View contextMenuPlaceholder;
 
         bool ShowBackOnToolbar { get {
                 return true;
@@ -86,14 +87,14 @@ namespace Ao3TrackReader
             WebView.Settings.AllowUniversalAccessFromFileURLs = true;
             WebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
 
+            contextMenuPlaceholder = (new Android.Views.View(Forms.Context)).ToView();
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(0, 0, 0, 0));
+            Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, AbsoluteLayoutFlags.None);
 
             //WebView.NewWindowRequested += WebView_NewWindowRequested; ??
             WebView.FocusChange += WebView_FocusChange;
 
-            var view = WebView.ToView();
-            view.VerticalOptions = LayoutOptions.FillAndExpand;
-            view.HorizontalOptions = LayoutOptions.FillAndExpand;
-            return view;
+            return WebView.ToView();
         }
 
         private void WebView_FocusChange(object sender, Android.Views.View.FocusChangeEventArgs e)
@@ -256,9 +257,52 @@ namespace Ao3TrackReader
             }
         }
 
-        public Task<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
+        public Task<string> showContextMenu(double x, double y, string[] menuItems)
         {
-            return Task.Run(() => (string)null);
+            var handle = new System.Threading.ManualResetEventSlim();
+            string result = null;
+
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x, y, 0, 0));
+                MainContent.Children.Add(contextMenuPlaceholder);
+                var renderer = Xamarin.Forms.Platform.Android.Platform.GetRenderer(contextMenuPlaceholder) as NativeViewWrapperRenderer;
+
+                var popupMenu = new Android.Widget.PopupMenu(Forms.Context, renderer.Control);
+                var menu = popupMenu.Menu;
+
+                for (int i = 0; i < menuItems.Length; i++)
+                {
+                    if (menuItems[i] == "-")
+                    {
+                        menu.Add(Menu.None, i, i, "-").SetEnabled(false);
+                    }
+                    else
+                    {
+                        menu.Add(Menu.None, i, i, menuItems[i]);
+                    }
+                }
+                menu.SetGroupEnabled(1, false);
+
+                popupMenu.MenuItemClick += (s1, arg1) =>
+                {
+                    result = menuItems[arg1.Item.ItemId];
+                };
+
+                popupMenu.DismissEvent += (s2, arg2) =>
+                {
+                    handle.Set();
+                    MainContent.Children.Remove(contextMenuPlaceholder);
+                };
+
+                popupMenu.Show();
+            });
+
+            return Task.Run(() =>
+            {
+                handle.Wait();
+                return result;
+            });
         }
 
         class WebClient : WebViewClient
