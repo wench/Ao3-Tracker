@@ -31,6 +31,13 @@ namespace Ao3TrackReader.UWP
             this.InitializeComponent();
             this.Suspending += OnSuspending;
 
+#if DEBUG && !DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
+            UnhandledException += (sender, e) =>
+            {
+                e.Handled = true;
+            };
+#endif
+
             switch (Ao3TrackReader.App.Theme) {
                 case "light":
                     RequestedTheme = ApplicationTheme.Light;

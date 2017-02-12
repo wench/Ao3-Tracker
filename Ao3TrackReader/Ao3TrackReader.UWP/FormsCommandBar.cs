@@ -13,11 +13,21 @@ namespace Ao3TrackReader.UWP
     {
         public FormsCommandBar() : base()
         {
+            IsDynamicOverflowEnabled = true;
         }
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            return base.MeasureOverride(availableSize);
+            Size res = availableSize;
+            try
+            {
+                res = base.MeasureOverride(availableSize);
+            }
+            catch(System.Runtime.InteropServices.COMException e)
+            {
+                res.Height = 48;
+            }
+            return res;
         }
     }
 }

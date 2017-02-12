@@ -49,6 +49,7 @@ namespace Ao3TrackReader
             Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
 #endif
 
+            SetupToolbarCommands();
             SetupToolbar();
 
             Panes.Children.Add(SettingsPane = new SettingsView(this));
@@ -77,20 +78,32 @@ namespace Ao3TrackReader
             });
         }
 
-        void SetupToolbar()
+        void SetupToolbarCommands()
         {
             prevPageButton = new DisableableCommand(GoBack, false);
+            nextPageButton = new DisableableCommand(GoForward, false);
+            jumpButton = new DisableableCommand(OnJumpClicked, false);
+            incFontSizeButton = new DisableableCommand(() => FontSize += 10);
+            decFontSizeButton = new DisableableCommand(() => FontSize -= 10);
+            syncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
+            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = false);
+            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
+            syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
+            forceSetLocationButton = new DisableableCommand(ForceSetLocation);
+        }
+
+        void SetupToolbar()
+        {
             if (ShowBackOnToolbar)
             {
                 ToolbarItems.Add(new ToolbarItem
                 {
                     Text = "Back",
                     Icon = Icons.Back,
-                    Command = prevPageButton = new DisableableCommand(GoBack, false)
+                    Command = prevPageButton
                 });
             }
 
-            nextPageButton = new DisableableCommand(GoForward, false);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Forward",
@@ -105,7 +118,6 @@ namespace Ao3TrackReader
                 Command = new Command(Refresh)
             });
 
-            jumpButton = new DisableableCommand(OnJumpClicked, false);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Jump",
@@ -134,7 +146,6 @@ namespace Ao3TrackReader
                 })
             });
 
-            incFontSizeButton = new DisableableCommand(() => FontSize += 10);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Font Increase",
@@ -142,7 +153,6 @@ namespace Ao3TrackReader
                 Command = incFontSizeButton
             });
 
-            decFontSizeButton = new DisableableCommand(() => FontSize -= 10);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Font Decrease",
@@ -150,18 +160,13 @@ namespace Ao3TrackReader
                 Command = decFontSizeButton
             });
 
-            syncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Sync",
                 Icon = Icons.Sync,
                 Command = syncButton
             });
-            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = false);
-            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
-            syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
 
-            forceSetLocationButton = new DisableableCommand(ForceSetLocation);
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Force set location",
@@ -210,25 +215,32 @@ namespace Ao3TrackReader
         protected override void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
-#if !WINDOWS_UWP
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
-                int onscreen = ((int)width - 60) / 48;
-                var items = ToolbarItems;
+                if (ToolbarItems.Count == 0)
+                {
+                    SetupToolbar();
+                }
+#if !WINDOWS_UWP
+                else 
+                {
+                    int onscreen = ((int)width - 60) / 48;
+                    var items = ToolbarItems;
 
-                for (var i = 0; i < onscreen && i < ToolbarItems.Count; i++)
-                {
-                    items[i].Order = ToolbarItemOrder.Primary;
+                    for (var i = 0; i < onscreen && i < ToolbarItems.Count; i++)
+                    {
+                        items[i].Order = ToolbarItemOrder.Primary;
+                    }
+                    for (var i = onscreen; i < ToolbarItems.Count; i++)
+                    {
+                        items[i].Order = ToolbarItemOrder.Secondary;
+                    }
+                    var item = items[items.Count - 1];
+                    items.RemoveAt(items.Count - 1);
+                    items.Add(item);
                 }
-                for (var i = onscreen; i < ToolbarItems.Count; i++)
-                {
-                    items[i].Order = ToolbarItemOrder.Secondary;
-                }
-                var item = items[items.Count - 1];
-                items.RemoveAt(items.Count - 1);
-                items.Add(item);
-            });
 #endif
+            });
         }
 
         public virtual void OnSleep()
