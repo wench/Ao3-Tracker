@@ -18,8 +18,8 @@
             <StackLayout x:Name="urlBar" Orientation="Horizontal" Spacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
                          VerticalOptions="End" HorizontalOptions="Fill">
                 <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" HorizontalOptions="FillAndExpand" />
-                <local:Button Text="Go" Clicked="UrlButton_Clicked" Style="{StaticResource PaneImageButton}" VerticalOptions="Center" HorizontalOptions="End" />
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" Style="{StaticResource PaneImageButton}" VerticalOptions="Center" HorizontalOptions="End" />
+                <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="-1" VerticalOptions="Center" HorizontalOptions="End" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" HorizontalOptions="End" />
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>

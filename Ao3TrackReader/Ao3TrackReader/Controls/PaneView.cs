@@ -16,6 +16,7 @@ namespace Ao3TrackReader.Controls
             TranslationX = old_width = 480;
             WidthRequest = old_width;
             IsVisible = false;
+            BackgroundColor = Ao3TrackReader.Resources.Colors.Alt.Trans.High;
         }
 
         public bool IsOnScreen

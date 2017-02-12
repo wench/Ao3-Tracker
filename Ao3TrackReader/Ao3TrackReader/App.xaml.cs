@@ -123,10 +123,11 @@ namespace Ao3TrackReader
 #endif
             }
 
-            Resources.Add("PaneImageButton", new Style(typeof(Button))
+            Resources.Add(new Style(typeof(Button))
             {
                 Setters = {
                     new Setter{ Property = Button.BackgroundColorProperty, Value = Color.Transparent },
+                    new Setter{ Property = Button.TextColorProperty, Value = Colors.Base.High },
                     new Setter{ Property = Button.BorderWidthProperty, Value = 2.0 },
                     new Setter{ Property = Button.WidthRequestProperty, Value = 40.0 },
                     new Setter{ Property = Button.HeightRequestProperty, Value = 40.0 },
@@ -134,6 +135,20 @@ namespace Ao3TrackReader
                     new Setter{ Property = Button.ImageHeightProperty, Value = 20.0 },
                 }
             });
+
+            Resources.Add(new Style(typeof(Label))
+            {
+                Setters = {
+                    new Setter{Property = Label.TextColorProperty, Value = Colors.Base.Medium }
+                }
+            });
+            Resources.Add(new Style(typeof(Controls.TextView))
+            {
+                Setters = {
+                    new Setter{Property = Controls.TextView.TextColorProperty, Value = Colors.Base.Medium }
+                }
+            });
+
 
             // The root page of your application
             MainPage = new NavigationPage(wvp = new WebViewPage());

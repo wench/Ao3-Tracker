@@ -13,6 +13,7 @@ namespace Ao3TrackReader.Resources
         public Color MediumLow { get; protected set; }
         public Color Low { get; protected set; }
         public Color VeryLow { get; protected set; }
+        public Color VeryVeryLow { get; protected set; }
     }
 
     public class TransColorSet : BaseColorSet
@@ -25,6 +26,7 @@ namespace Ao3TrackReader.Resources
             MediumLow = col.MultiplyAlpha(0.4);
             Low = col.MultiplyAlpha(0.2);
             VeryLow = col.MultiplyAlpha(0.1);
+            VeryVeryLow = col.MultiplyAlpha(0.05);
         }
 
     }
@@ -43,6 +45,7 @@ namespace Ao3TrackReader.Resources
             MediumLow = Trans.Medium.Blend(bg);
             Low = Trans.MediumLow.Blend(bg);
             VeryLow = Trans.Low.Blend(bg);
+            VeryVeryLow = Trans.VeryLow.Blend(bg);
 
         }
 

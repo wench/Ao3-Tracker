@@ -30,7 +30,7 @@
 
                         <ContentPresenter Margin="{TemplateBinding ContentMargin}" ContentTransitions="{TemplateBinding ContentTransitions}" x:Name="presenter" Grid.Row="1" MinHeight="4"  />
 
-                        <Border x:Name="BottomCommandBarArea" Grid.Row="2" HorizontalAlignment="Stretch" MinHeight="48">
+                        <Border x:Name="BottomCommandBarArea" Grid.Row="2" HorizontalAlignment="Stretch" Height="48">
                             <local:FormsCommandBar x:Name="CommandBar" Background="{TemplateBinding ToolbarBackground}"/>
                         </Border>
                     </Grid>

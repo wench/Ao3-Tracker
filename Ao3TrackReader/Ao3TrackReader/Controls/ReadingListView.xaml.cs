@@ -33,7 +33,6 @@ namespace Ao3TrackReader.Controls
             InitializeComponent();
 
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
-            BackgroundColor = Colors.Alt.Trans.High;
 
             ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
@@ -124,6 +123,24 @@ namespace Ao3TrackReader.Controls
             });
         }
 
+
+        Models.Ao3PageViewModel selectedItem;
+        private void UpdateSelectedItem(Models.Ao3PageViewModel newselected)
+        {
+            if (selectedItem != null)
+            {
+                if (newselected != selectedItem) selectedItem.IsSelected = false;
+                selectedItem = null;
+            }
+            if (newselected != null)
+            {
+                newselected.IsSelected = true;
+                selectedItem = newselected;
+            }
+            if (ListView.SelectedItem != newselected)
+                ListView.SelectedItem = newselected;
+        }
+
         private void ListView_ItemAppearing(object sender, ItemVisibilityEventArgs e)
         {
             var item = e.Item as Models.Ao3PageViewModel;
@@ -131,8 +148,7 @@ namespace Ao3TrackReader.Controls
             Uri uri = Data.Ao3SiteDataLookup.ReadingListlUri(wpv.Current.AbsoluteUri);
             if (uri != null && item.HasUri(uri))
             {
-                ListView.SelectedItem = null;
-                ListView.SelectedItem = item;
+                UpdateSelectedItem(item);
             }
         }
 
@@ -194,9 +210,9 @@ namespace Ao3TrackReader.Controls
         {
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
             wpv.DoOnMainThread(() => {
-                ListView.SelectedItem = null;
+                UpdateSelectedItem(null);
                 if (uri == null) return;
-                ListView.SelectedItem = readingListBacking.Find((m) => m.HasUri(uri));
+                UpdateSelectedItem(readingListBacking.Find((m) => m.HasUri(uri)));
             });
         }
 
@@ -207,6 +223,8 @@ namespace Ao3TrackReader.Controls
                 PageChange(wpv.Current);
                 return;
             }
+            else
+                UpdateSelectedItem(e.SelectedItem as Models.Ao3PageViewModel);
         }
 
         private bool MenuOpenLastFilter(RLMenuItem mi)

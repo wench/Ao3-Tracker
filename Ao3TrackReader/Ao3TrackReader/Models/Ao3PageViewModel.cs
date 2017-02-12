@@ -98,6 +98,19 @@ namespace Ao3TrackReader.Models
             PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangingEventArgs(propertyName));
         }
 
+        bool isSelected = false;
+        public bool IsSelected {
+            get { return isSelected; }
+            set
+            {
+                if (value == isSelected) return;
+                OnPropertyChanging("IsSelected");
+                isSelected = value;
+                OnPropertyChanged("IsSelected");
+            }
+        }
+
+
         public Uri Uri { get; private set; }
 
         public string Group { get; private set; }

@@ -17,10 +17,6 @@ namespace Ao3TrackReader.UWP
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            if (availableSize.Width == 0 || availableSize.Height == 0)
-            {
-                return new Size(0, 0);
-            }
             return base.MeasureOverride(availableSize);
         }
     }

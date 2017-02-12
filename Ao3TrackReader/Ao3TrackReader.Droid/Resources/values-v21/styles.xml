@@ -10,17 +10,17 @@
   <color name="DarkHighlightLow">#335998d6</color>
 
   <style name="LightTheme" parent="android:Theme.Material.Light">
-    <item name="android:colorPressedHighlight">@color/LightHighlightMediumLow</item>
-    <item name="android:colorLongPressedHighlight">@color/LightHighlightMediumLow</item>
-    <item name="android:colorFocusedHighlight">@color/LightHighlightMedium</item>
-    <item name="android:colorActivatedHighlight">@color/LightHighlightMediumLow</item>
-    <item name="android:activatedBackgroundIndicator">@color/LightHighlightMedium</item>
+    <item name="android:colorPressedHighlight">@color/LightHighlight</item>
+    <item name="android:colorLongPressedHighlight">@color/LightHighlight</item>
+    <item name="android:colorFocusedHighlight">@color/LightHighlight</item>
+    <item name="android:colorActivatedHighlight">@color/LightHighlight</item>
+    <item name="android:activatedBackgroundIndicator">@color/LightHighlight</item>
   </style>
   <style name="DarkTheme" parent="android:Theme.Material">
-    <item name="android:colorPressedHighlight">@color/DarkHighlightMediumLow</item>
-    <item name="android:colorLongPressedHighlight">@color/DarkHighlightMediumLow</item>
-    <item name="android:colorFocusedHighlight">@color/DarkHighlightMedium</item>
-    <item name="android:colorActivatedHighlight">@color/DarkHighlightMediumLow</item>
-    <item name="android:activatedBackgroundIndicator">@color/DarkHighlightMedium</item>
+    <item name="android:colorPressedHighlight">@color/DarkHighlight</item>
+    <item name="android:colorLongPressedHighlight">@color/DarkHighlight</item>
+    <item name="android:colorFocusedHighlight">@color/DarkHighlight</item>
+    <item name="android:colorActivatedHighlight">@color/DarkHighlight</item>
+    <item name="android:activatedBackgroundIndicator">@color/DarkHighlight</item>
   </style>
 </resources>

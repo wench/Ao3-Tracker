@@ -4,14 +4,14 @@
     <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <local:Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton" Style="{StaticResource PaneImageButton}" />
-                <local:Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton" Style="{StaticResource PaneImageButton}" />
-                <local:Button Image="{StaticResource TagIcon}" Clicked="OnShowTags" HorizontalOptions="Start" x:Name="ShowTagsButton" Style="{StaticResource PaneImageButton}" />
-                <local:Button Image="{StaticResource FilterIcon}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton" Style="{StaticResource PaneImageButton}" />
+                <local:Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton" />
+                <local:Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton" />
+                <local:Button Image="{StaticResource TagIcon}" Clicked="OnShowTags" HorizontalOptions="Start" x:Name="ShowTagsButton" />
+                <local:Button Image="{StaticResource FilterIcon}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton" />
                 <ContentView HorizontalOptions="FillAndExpand" >
                     <ActivityIndicator IsRunning="True" IsVisible="True" HeightRequest="20" Color="{StaticResource HighlightColor}"  HorizontalOptions="FillAndExpand" x:Name="SyncIndicator" />
                 </ContentView>
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End" Style="{StaticResource PaneImageButton}" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End" />
             </StackLayout>
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" ItemSelected="OnSelection" Margin="4,0,0,0" x:Name="ListView">
                 <ListView.ItemTemplate>
@@ -23,32 +23,42 @@
                                 <MenuItem Text="Refresh" Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
                                 <MenuItem Text="Delete" Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
                             </ViewCell.ContextActions>
-                            <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,8,4" Padding="8" BackgroundColor="{StaticResource BaseTransVeryLowColor}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="25" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                            <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="25" />
-                                    <ColumnDefinition Width="25" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="4" />
                                 </Grid.ColumnDefinitions>
-                                <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" />
-                                <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" />
-                                <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" />
-                                <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" />
-                                <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
-                                    <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0,0,0,0"/>
-                                    <Label Text="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0,0,0,0"/>
-                                </StackLayout>
-                                <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="11" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
-                                <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,0,0">
-                                    <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
-                                    <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
-                                    <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
-                                </StackLayout>
+                                <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8"
+                                        local:BackgroundSwitch.Condition="{Binding Path=IsSelected}" 
+                                        local:BackgroundSwitch.ColorFalse="{StaticResource BaseTransVeryLowColor}" 
+                                        local:BackgroundSwitch.ColorTrue="{StaticResource BaseSolidVeryVeryLowColor}" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="25" />
+                                        <ColumnDefinition Width="25" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" />
+                                    <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" />
+                                    <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" />
+                                    <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" />
+                                    <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
+                                        <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0,0,0,0"/>
+                                        <Label Text="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0,0,0,0"/>
+                                    </StackLayout>
+                                    <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="11" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
+                                    <StackLayout Spacing="3" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="0,0,0,0">
+                                        <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
+                                        <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
+                                        <Label Text="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" MinimumHeightRequest="0" HorizontalOptions="Fill" VerticalOptions="StartAndExpand" Margin="0,0,0,0"/>
+                                    </StackLayout>
+                                </Grid>
+                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumHighColor}"/>
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

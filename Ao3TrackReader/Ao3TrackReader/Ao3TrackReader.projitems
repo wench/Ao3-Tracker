@@ -14,6 +14,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Button.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\BackgroundSwitch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PaneView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PaneContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListView.xaml.cs">

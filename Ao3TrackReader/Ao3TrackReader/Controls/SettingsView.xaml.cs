@@ -20,7 +20,6 @@ namespace Ao3TrackReader.Controls
             this.wpv = wpv;
             InitializeComponent();
 
-            BackgroundColor = Colors.Alt.Trans.High;
             isCreateUser = false;
 
             themes = new Dictionary<string, string> {
