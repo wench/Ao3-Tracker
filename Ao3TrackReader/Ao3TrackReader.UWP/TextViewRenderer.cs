@@ -52,7 +52,7 @@ namespace Ao3TrackReader.UWP
             if (view.TextTree == null) return;
             Control.TextWrapping = Windows.UI.Xaml.TextWrapping.WrapWholeWords;
             Control.Inlines.Clear();
-            Control.Margin = new Windows.UI.Xaml.Thickness(0.0, 0.0, 12.0, 0.0);
+            Control.Margin = new Windows.UI.Xaml.Thickness(0.0, 0.0, 12.0, 8.0);
             Control.Inlines.Add(view.TextTree.FlattenToSpan());
             Control.InvalidateArrange();
             Control.InvalidateMeasure();

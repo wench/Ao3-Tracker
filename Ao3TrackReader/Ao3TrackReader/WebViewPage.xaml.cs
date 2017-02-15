@@ -131,8 +131,8 @@ namespace Ao3TrackReader
                 Icon = Icons.Bookmarks,
                 Command = new Command(() =>
                 {
-                    ReadingList.IsOnScreen = !ReadingList.IsOnScreen;
                     SettingsPane.IsOnScreen = false;
+                    ReadingList.IsOnScreen = !ReadingList.IsOnScreen;
                 })
             });
 
@@ -206,8 +206,8 @@ namespace Ao3TrackReader
                 Icon = Icons.Settings,
                 Command = new Command(() =>
                 {
-                    SettingsPane.IsOnScreen = !SettingsPane.IsOnScreen;
                     ReadingList.IsOnScreen = false;
+                    SettingsPane.IsOnScreen = !SettingsPane.IsOnScreen;
                 })
             });
         }

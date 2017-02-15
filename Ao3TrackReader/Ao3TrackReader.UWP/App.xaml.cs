@@ -31,7 +31,7 @@ namespace Ao3TrackReader.UWP
             this.InitializeComponent();
             this.Suspending += OnSuspending;
 
-#if DEBUG && !DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
+#if DEBUG
             UnhandledException += (sender, e) =>
             {
                 e.Handled = true;

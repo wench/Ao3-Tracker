@@ -8,14 +8,13 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-	public class PaneView : ContentView
-	{
+    public class PaneView : ContentView
+    {
         double old_width;
         public PaneView()
-		{
+        {
             TranslationX = old_width = 480;
             WidthRequest = old_width;
-            IsVisible = false;
             BackgroundColor = Ao3TrackReader.Resources.Colors.Alt.Trans.High;
         }
 
@@ -27,25 +26,36 @@ namespace Ao3TrackReader.Controls
             }
             set
             {
-                IsVisible = true;
                 if (value == false)
                 {
-                    ViewExtensions.CancelAnimations(this);
-                    this.TranslateTo(Width, 0, 100, Easing.CubicOut).ContinueWith((task)=> {
-                        if (task.IsCompleted && !task.IsFaulted && !task.IsCanceled)
+                    this.AbortAnimation("OffOnAnim");
+                    if (TranslationX != Width)
+                    {
+                        this.Animate("OffOnAnim", new Animation((f) => TranslationX = f, 0, Width, Easing.CubicIn), 16, 100, finished: (f, cancelled) =>
                         {
-                            Device.BeginInvokeOnMainThread(() => IsVisible = false);
-                        }
-                    });
+                            if (!cancelled) IsVisible = false;
+                        });
+                    }
+                    else
+                    {
+                        IsVisible = false;
+                    }
                 }
                 else
                 {
-                    ViewExtensions.CancelAnimations(this);
+                    this.AbortAnimation("OffOnAnim");
                     IsVisible = true;
-                    this.TranslateTo(0, 0, 100, Easing.CubicIn).ContinueWith((task) =>
+                    if (TranslationX != 0)
                     {
-                        Device.BeginInvokeOnMainThread(() => IsVisible = true);
-                    });
+                        this.Animate("OffOnAnim", new Animation((f) => TranslationX = f, TranslationX, 0, Easing.CubicIn), 16, 100, finished: (f, cancelled) =>
+                        {
+                            if (!cancelled) IsVisible = true;
+                        });
+                    }
+                    else
+                    {
+                        IsVisible = true;
+                    }
                 }
                 OnIsOnScreenChanging(value);
             }
@@ -61,13 +71,21 @@ namespace Ao3TrackReader.Controls
             if (width > 0)
             {
                 bool wasshowing = TranslationX < old_width / 2;
+                if (old_width != width) this.AbortAnimation("OffOnAnim");
                 old_width = width;
 
                 base.OnSizeAllocated(width, height);
 
-                ViewExtensions.CancelAnimations(this);
-                if (wasshowing) TranslationX = 0.0;
-                else TranslationX = width;
+                if (wasshowing)
+                {
+                    TranslationX = 0.0;
+                    IsVisible = true;
+                }
+                else
+                {
+                    TranslationX = width;
+                    IsVisible = this.AnimationIsRunning("OffOnAnim");
+                }
             }
             else
             {
