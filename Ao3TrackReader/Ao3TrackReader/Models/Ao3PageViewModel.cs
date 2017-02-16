@@ -117,8 +117,8 @@ namespace Ao3TrackReader.Models
         public string GroupType { get; private set; }
         public TextTree Title { get; private set; }
         public DateTime? Date { get; private set; }
-        public string Subtitle { get; private set; }
-        public string Details { get; private set; }
+        public TextTree Subtitle { get; private set; }
+        public TextTree Details { get; private set; }
 
         public int? ChaptersRead { get; private set; }
         public int? Unread { get; private set; }
@@ -407,8 +407,8 @@ namespace Ao3TrackReader.Models
 
                 Date = baseData.Details?.LastUpdated;// baseData.Details?.LastUpdated?.ToString("d MMM yyyy") ?? "";
 
-                Subtitle = "";
                 if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
+                else Subtitle = null;
 
                 tags = baseData.Tags;
 
@@ -594,9 +594,10 @@ namespace Ao3TrackReader.Models
                 if (baseData.Details.Hits != null) d.Add("Hits:\xA0" + baseData.Details.Hits.ToString());
             }
 
-            Details = string.Join("   ", d);
-            if (!string.IsNullOrWhiteSpace(baseData.SearchQuery)) Details = ("Query: " + baseData.SearchQuery + "\n" + Details).Trim();
-            if (string.IsNullOrWhiteSpace(Details)) Details = ("Uri: " + Uri.AbsoluteUri).Trim();
+            string ds = string.Join("   ", d);
+            if (!string.IsNullOrWhiteSpace(baseData.SearchQuery)) ds = ("Query: " + baseData.SearchQuery + "\n" + ds).Trim();
+            if (string.IsNullOrWhiteSpace(ds)) ds = ("Uri: " + Uri.AbsoluteUri).Trim();
+            Details = ds;
         }
 
         void UpdateSummary()

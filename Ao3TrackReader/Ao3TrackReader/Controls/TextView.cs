@@ -18,12 +18,6 @@ namespace Ao3TrackReader.Controls
             set { SetValue(TextTreeProperty, value); }
         }
 
-        public new string Text
-        {
-            get { return ((Models.TextTree)GetValue(TextTreeProperty)).ToString(); }
-            set { SetValue(TextTreeProperty, (Models.TextTree) value); }
-        }
-
         public TextView()
         {
             FormattedText = "";
