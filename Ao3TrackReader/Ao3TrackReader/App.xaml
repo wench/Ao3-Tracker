@@ -1,8 +1,27 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Application xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-             x:Class="Ao3TrackReader.App">
+             xmlns:res="clr-namespace:Ao3TrackReader.Resources" x:Class="Ao3TrackReader.App">
     <Application.Resources>
-        <ResourceDictionary>
-        </ResourceDictionary>
+        <res:ResourceDictionary>
+            <Style TargetType="Entry">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="BackgroundColor" Value="{StaticResource AltHighColor}" />
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumColor}" />
+            </Style>
+            <Style TargetType="local:TextView">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumColor}" />
+            </Style>
+            <Style TargetType="local:Button">
+                <Setter Property="TextColor" Value="{StaticResource BaseHighColor}" />
+                <Setter Property="BackgroundColor"><Color>Transparent</Color></Setter>
+                <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="WidthRequest" Value="40" />
+                <Setter Property="HeightRequest" Value="40" />
+                <Setter Property="ImageWidth" Value="20" />
+                <Setter Property="ImageHeight" Value="20" />
+            </Style>
+        </res:ResourceDictionary>
     </Application.Resources>
 </Application>
