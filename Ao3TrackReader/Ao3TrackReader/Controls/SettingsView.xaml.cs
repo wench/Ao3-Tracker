@@ -71,29 +71,34 @@ namespace Ao3TrackReader.Controls
             verifyErrors.IsVisible = false;
             emailErrors.IsVisible = false;
 
+            string s_username = username.Text;
+            string s_password = password.Text;
+            string s_email = email.Text;
+            string s_verify = verify.Text;
+
             Task.Run(async () =>
             {
                 var errors = new Dictionary<string, string>();
 
-                if (string.IsNullOrEmpty(username.Text)) errors["username"] = "You must enter a username";
-                if (string.IsNullOrEmpty(password.Text)) errors["username"] = "You must enter a password";
+                if (string.IsNullOrEmpty(s_username)) errors["username"] = "You must enter a username";
+                if (string.IsNullOrEmpty(s_password)) errors["password"] = "You must enter a password";
 
-                if (errors.Count > 0)
+                if (errors.Count == 0)
                 {
                     if (isCreateUser)
                     {
-                        if (password.Text != verify.Text)
+                        if (s_password != s_verify)
                         {
                             errors["verify"] = "Passwords do not match";
                         }
                         else
                         {
-                            errors = await App.Storage.UserCreate(username.Text, password.Text, email.Text);
+                            errors = await App.Storage.UserCreate(s_username, s_password, s_email);
                         }
                     }
                     else
                     {
-                        errors = await App.Storage.UserLogin(username.Text, password.Text);
+                        errors = await App.Storage.UserLogin(s_username, s_password);
                     }
                 }
                 wpv.DoOnMainThread(() => 
@@ -143,6 +148,14 @@ namespace Ao3TrackReader.Controls
 
         public void OnSyncLogout(object sender, EventArgs e)
         {
+            Task.Run(async () =>
+            {
+                await App.Storage.UserLogout();
+                wpv.DoOnMainThread(() =>
+                {
+                    UpdateSyncForm();
+                });
+            });
         }
 
         void SelectCurrentTheme()
@@ -184,7 +197,7 @@ namespace Ao3TrackReader.Controls
                 syncForm.IsVisible = false;
                 var text = new FormattedString();
                 text.Spans.Add(new Span { Text = "Logged in as: " });
-                text.Spans.Add(new Span { Text = name, ForegroundColor = Colors.Highlight.Low });
+                text.Spans.Add(new Span { Text = name, ForegroundColor = Colors.Highlight.High });
                 syncLoggedInLabel.FormattedText = text;
             }
             else

@@ -293,7 +293,7 @@ namespace Ao3TrackReader.Data
 
                         if (current.Count == 0)
                         {
-                            App.Database.SaveVariable("last_sync", last_sync.ToString());
+                            App.Database.SaveVariable("last_sync", last_sync);
                             serversync = SyncState.Ready;
                             onSyncFromServer(true);
                             return;
@@ -337,7 +337,7 @@ namespace Ao3TrackReader.Data
                                 serversync = SyncState.Ready;
                                 unsynced = current;
                             }
-                            App.Database.SaveVariable("last_sync", last_sync.ToString());
+                            App.Database.SaveVariable("last_sync", last_sync);
                             onSyncFromServer(false);
                             return;
                         }
@@ -355,7 +355,7 @@ namespace Ao3TrackReader.Data
                         {
                             //console.error("dosync: FAILED %s", e.ToString());
                             serversync = SyncState.Disabled;
-                            App.Database.SaveVariable("last_sync", 0L.ToString());
+                            App.Database.SaveVariable("last_sync", 0L);
                             last_sync = 0;
                             onSyncFromServer(false);
                             return;
@@ -367,7 +367,7 @@ namespace Ao3TrackReader.Data
                     {
                         if (items.Count > 0)
                         {
-                            App.Database.SaveVariable("last_sync", 0L.ToString());
+                            App.Database.SaveVariable("last_sync", 0L);
                             last_sync = 0;
                             dosync(true);
                             return;
@@ -375,7 +375,7 @@ namespace Ao3TrackReader.Data
                         if (time > last_sync)
                         {
                             last_sync = time;
-                            App.Database.SaveVariable("last_sync", time.ToString());
+                            App.Database.SaveVariable("last_sync", time);
                         }
 
                         if (unsynced.Count > 0)
@@ -573,7 +573,7 @@ namespace Ao3TrackReader.Data
                         last_sync = 0;
                         App.Database.SaveVariable("authorization.username", authorization.username);
                         App.Database.SaveVariable("authorization.credential", authorization.credential);
-                        App.Database.SaveVariable("last_sync", last_sync.ToString());
+                        App.Database.SaveVariable("last_sync", last_sync);
                         serversync = SyncState.Syncing;
                         dosync(true);
                     }
@@ -586,6 +586,23 @@ namespace Ao3TrackReader.Data
                 return errors;
             });
         }
+        public async Task UserLogout()
+        {
+            await Task.Run(() =>
+                {
+                    lock (locker)
+                    {
+                        serversync = SyncState.Disabled;
+                        HttpClient.DefaultRequestHeaders.Authorization = null;
+                        last_sync = 0;
+                        App.Database.SaveVariable("authorization.username", "");
+                        App.Database.SaveVariable("authorization.credential", "");
+                        App.Database.SaveVariable("last_sync", last_sync);
+                    }
+                }
+            );
+        }
+
         public Task<Dictionary<string, string>> UserLogin(string username, string password)
         {
             return Task.Run(async () =>
@@ -646,7 +663,7 @@ namespace Ao3TrackReader.Data
                         last_sync = 0;
                         App.Database.SaveVariable("authorization.username", authorization.username);
                         App.Database.SaveVariable("authorization.credential", authorization.credential);
-                        App.Database.SaveVariable("last_sync", last_sync.ToString());
+                        App.Database.SaveVariable("last_sync", last_sync);
                         serversync = SyncState.Syncing;
                         dosync(true);
                     }

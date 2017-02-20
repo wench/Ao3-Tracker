@@ -8,66 +8,67 @@
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 
-            <StackLayout Spacing="12" Margin="4,0,12,0">
-                <Label Text="Cloud Sync" FontSize="Medium" />
+            <ScrollView Orientation="Vertical">
+                <StackLayout Spacing="12" Padding="4,0,12,0">
+                    <Label Text="Cloud Sync" FontSize="Medium" />
 
-                <Label Text="Login to your Ao3Track Sync account to syncronize work locations and reading lists across devices.&#xA;&#xA;This is not the same as your user account on Ao3. You must first create a separate Ao3Track Sync account" FontSize="Micro" />
+                    <Label Text="Login to your Ao3Track Sync account to syncronize work locations and reading lists across devices.&#xA;&#xA;This is not the same as your user account on Ao3. You must first create a separate Ao3Track Sync account" FontSize="Micro" />
 
-                <StackLayout Spacing="8" x:Name="syncLoggedIn">
-                    <Label Text="Logged in as: " x:Name="syncLoggedInLabel" FontSize="Micro" />
-                    <Button Text="Logout" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncLogout" HorizontalOptions="Start" />
-                </StackLayout>
-
-                <StackLayout Spacing="8" x:Name="syncForm">
-                    <StackLayout Orientation="Horizontal">
-                        <Button Text="Login" Clicked="OnSyncLogin" VerticalOptions="Center" x:Name="syncLoginButton"/>
-                        <Label Text=" or " FontSize="Micro" VerticalOptions="Center" />
-                        <Button Text="Create new user" Clicked="OnSyncCreate" VerticalOptions="Center" x:Name="syncCreateButton"/>
+                    <StackLayout Spacing="8" x:Name="syncLoggedIn">
+                        <Label Text="Logged in as: " x:Name="syncLoggedInLabel" FontSize="Micro" />
+                        <Button Text="Logout" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncLogout" HorizontalOptions="Start" />
                     </StackLayout>
 
-                    <Label Text="Username" FontSize="Small" />
-                    <Entry Placeholder="Enter your username" HorizontalOptions="Fill" x:Name="username" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="usernameErrors" />
+                    <StackLayout Spacing="8" x:Name="syncForm">
+                        <StackLayout Orientation="Horizontal">
+                            <Button Text="Login" Clicked="OnSyncLogin" VerticalOptions="Center" x:Name="syncLoginButton"/>
+                            <Label Text=" or " FontSize="Micro" VerticalOptions="Center" />
+                            <Button Text="Create new user" Clicked="OnSyncCreate" VerticalOptions="Center" x:Name="syncCreateButton"/>
+                        </StackLayout>
 
-                    <Label Text="Password" FontSize="Small" />
-                    <Entry Placeholder="Enter your password" IsPassword="True" HorizontalOptions="Fill" x:Name="password" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="passwordErrors" />
+                        <Label Text="Username" FontSize="Small" />
+                        <Entry Placeholder="Enter your username" HorizontalOptions="Fill" x:Name="username" />
+                        <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="usernameErrors" />
 
-                    <Label Text="Verify Password" FontSize="Small" x:Name="verifyLabel" />
-                    <Entry Placeholder="Enter your password again" IsPassword="True" HorizontalOptions="Fill" x:Name="verify" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="verifyErrors" />
+                        <Label Text="Password" FontSize="Small" />
+                        <Entry Placeholder="Enter your password" IsPassword="True" HorizontalOptions="Fill" x:Name="password" />
+                        <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="passwordErrors" />
 
-                    <Label Text="Email (optional)" FontSize="Small" x:Name="emailLabel" />
-                    <Entry Placeholder="Enter your email" Keyboard="Email" HorizontalOptions="Fill" x:Name="email" />
-                    <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="emailErrors" />
+                        <Label Text="Verify Password" FontSize="Small" x:Name="verifyLabel" />
+                        <Entry Placeholder="Enter your password again" IsPassword="True" HorizontalOptions="Fill" x:Name="verify" />
+                        <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="verifyErrors" />
 
-                    <StackLayout Orientation="Horizontal">
-                        <Button Text="Submit" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>
-                        <ActivityIndicator IsRunning="False" IsVisible="False"  x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                        <Label Text="Email (optional)" FontSize="Small" x:Name="emailLabel" />
+                        <Entry Placeholder="Enter your email" Keyboard="Email" HorizontalOptions="Fill" x:Name="email" />
+                        <Label Text="Text" TextColor="#990000" FontSize="Micro" x:Name="emailErrors" />
+
+                        <StackLayout Orientation="Horizontal">
+                            <Button Text="Submit" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <ActivityIndicator IsRunning="False" IsVisible="False"  x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                        </StackLayout>
                     </StackLayout>
+
+                    <Label Text="Secure Browsing" FontSize="Medium" Margin="0,12,0,0"/>
+                    <StackLayout Orientation="Horizontal">
+                        <Label Text="Using HTTPS for secure browing" FontSize="Micro" HorizontalOptions="StartAndExpand" />
+                        <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
+                    </StackLayout>
+
+                    <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
+                    <Label Text="You must restart the app to apply a new theme" FontSize="Micro" />
+                    <ListView x:Name="themeList" ItemSelected="OnThemeSelected" WidthRequest="100" HorizontalOptions="Start">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <AbsoluteLayout Margin="4,4,4,4" Padding="4" BackgroundColor="{StaticResource BaseTransVeryLowColor}">
+                                        <Label Text="{Binding .}" TextColor="{StaticResource BaseMediumColor}" FontSize="Micro" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" />
+                                    </AbsoluteLayout>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackLayout>
-
-                <Label Text="Secure Browsing" FontSize="Medium" Margin="0,12,0,0"/>
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Using HTTPS for secure browing" FontSize="Micro" HorizontalOptions="StartAndExpand" />
-                    <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
-                </StackLayout>
-
-                <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
-                <Label Text="You must restart the app to apply a new theme" FontSize="Micro" />
-                <ListView x:Name="themeList" ItemSelected="OnThemeSelected" WidthRequest="100" HorizontalOptions="Start">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <ViewCell>
-                                <AbsoluteLayout Margin="4,4,4,4" Padding="4" BackgroundColor="{StaticResource BaseTransVeryLowColor}">
-                                    <Label Text="{Binding .}" TextColor="{StaticResource BaseMediumColor}" FontSize="Micro" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" />
-                                </AbsoluteLayout>
-                            </ViewCell>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-
-            </StackLayout>
+            </ScrollView>
         </StackLayout>
     </local:PaneView.Content>
 </local:PaneView>
