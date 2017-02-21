@@ -50,7 +50,7 @@ namespace Ao3TrackReader
             }
         })();";
 
-        public string[] scriptsToInject
+        public string[] ScriptsToInject
         {
             get { return new[] {
                 "https://ao3track.wenchy.net/callbacks.js",
@@ -60,7 +60,7 @@ namespace Ao3TrackReader
                 "https://ao3track.wenchy.net/unitconv.js",
                 "https://ao3track.wenchy.net/touch.js" }; }
         }
-        public string[] cssToInject
+        public string[] CssToInject
         {
             get { return new[] { "https://ao3track.wenchy.net/tracker.css" }; }
 
@@ -127,8 +127,8 @@ namespace Ao3TrackReader
             ReadingList?.PageChange(args);
             nextPage = null;
             prevPage = null;
-            prevPageButton.IsEnabled = canGoBack;
-            nextPageButton.IsEnabled = canGoForward;
+            prevPageButton.IsEnabled = CanGoBack;
+            nextPageButton.IsEnabled = CanGoForward;
             helper?.Reset();
             return false;
         }
@@ -138,8 +138,8 @@ namespace Ao3TrackReader
             if (urlEntry != null) urlEntry.Text = WebView.Url;
             ReadingList?.PageChange(Current);
             WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelperWebkit");
-            PrevPageIndicator.IsVisible = false;
-            NextPageIndicator.IsVisible = false;
+            ShowPrevPageIndicator = false;
+            ShowNextPageIndicator = false;
             //WebView.RenderTransform = null;
             //WebView.Opacity = 1;
             helper?.Reset();
@@ -215,9 +215,9 @@ namespace Ao3TrackReader
             WebView.Reload();
         }
 
-        public bool canGoBack { get { return WebView.CanGoBack() || prevPage != null; } }
+        public bool CanGoBack { get { return WebView.CanGoBack() || prevPage != null; } }
 
-        public bool canGoForward { get { return WebView.CanGoForward() || nextPage != null; } }
+        public bool CanGoForward { get { return WebView.CanGoForward() || nextPage != null; } }
 
         public void GoBack()
         {
@@ -232,7 +232,7 @@ namespace Ao3TrackReader
         }
 
 
-        public double leftOffset
+        public double LeftOffset
         {
             get
             {
@@ -245,19 +245,7 @@ namespace Ao3TrackReader
             }
         }
 
-        public double opacity
-        {
-            get
-            {
-                return 1;
-            }
-            set
-            {
-
-            }
-        }
-
-        public Task<string> showContextMenu(double x, double y, string[] menuItems)
+        public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
         {
             var handle = new System.Threading.ManualResetEventSlim();
             string result = null;

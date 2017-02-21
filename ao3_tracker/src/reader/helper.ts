@@ -16,8 +16,8 @@ namespace Ao3Track {
         goForward(): void;
         leftOffset: number;
         opacity: number;
-        showPrevPageIndicator: boolean;
-        showNextPageIndicator: boolean;
+        showPrevPageIndicator: number;
+        showNextPageIndicator: number;
 
         onalterfontsizeevent: ((ev: any) => void) | null;
         fontSize: number;
@@ -29,6 +29,7 @@ namespace Ao3Track {
 
         currentLocation: IWorkChapterEx | null;
         pageTitle : IPageTitle | null;
+        pixelScale : number;
     }
 
     export declare var Helper : Ao3Track.IAo3TrackHelper;

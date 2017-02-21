@@ -58,7 +58,9 @@ namespace Ao3TrackReader
             var wv = CreateWebView();
             AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            MainContent.Children.Insert(0, wv);
+            MainContent.Children.Insert(MainContent.Children.IndexOf(WebViewPlaceholder), wv);
+            MainContent.Children.Remove(WebViewPlaceholder);
+            WebViewPlaceholder = null;
 
             string url = App.Database.GetVariable("Sleep:URI");
             App.Database.DeleteVariable("Sleep:URI");
@@ -552,20 +554,42 @@ namespace Ao3TrackReader
             }
         }
 
-        public bool showPrevPageIndicator
+        public int ShowPrevPageIndicator
         {
-            get { return PrevPageIndicator.IsVisible; }
+            get {
+                if (PrevPageIndicator.TextColor == Colors.Highlight)
+                    return 2;
+                else if (PrevPageIndicator.TextColor == Colors.Base.VeryLow)
+                    return 1;
+                return 0;
+            }
             set
             {
-                PrevPageIndicator.IsVisible = value;
+                if (value == 0)
+                    PrevPageIndicator.TextColor = BackgroundColor;
+                else if (value == 1)
+                    PrevPageIndicator.TextColor = Colors.Base.VeryLow;
+                else if (value == 2)
+                    PrevPageIndicator.TextColor = Colors.Highlight;
             }
         }
-        public bool showNextPageIndicator
+        public int ShowNextPageIndicator
         {
-            get { return NextPageIndicator.IsVisible; }
+            get {
+                if (NextPageIndicator.TextColor == Colors.Highlight)
+                    return 2;
+                else if (NextPageIndicator.TextColor == Colors.Base.VeryLow)
+                    return 1;
+                return 0;
+            }
             set
             {
-                NextPageIndicator.IsVisible = value;
+                if (value == 0)
+                    NextPageIndicator.TextColor = BackgroundColor;
+                else if (value == 1)
+                    NextPageIndicator.TextColor = Colors.Base.VeryLow;
+                else if (value == 2)
+                    NextPageIndicator.TextColor = Colors.Highlight;
             }
         }
 
@@ -590,7 +614,7 @@ namespace Ao3TrackReader
 
                     }
                 }
-                nextPageButton.IsEnabled = canGoForward;
+                nextPageButton.IsEnabled = CanGoForward;
             }
         }
         private Uri prevPage;
@@ -613,16 +637,16 @@ namespace Ao3TrackReader
                     {
                     }
                 }
-                prevPageButton.IsEnabled = canGoBack;
+                prevPageButton.IsEnabled = CanGoBack;
             }
         }
 
-        public void addToReadingList(string href)
+        public void AddToReadingList(string href)
         {
             ReadingList.AddAsync(href);
         }
 
-        public void setCookies(string cookies)
+        public void SetCookies(string cookies)
         {
             if (App.Database.GetVariable("siteCookies") != cookies)
                 App.Database.SaveVariable("siteCookies", cookies);
@@ -640,7 +664,7 @@ namespace Ao3TrackReader
                 ReadingList.IsOnScreen = false;
                 return true;
             }
-            else if (canGoBack)
+            else if (CanGoBack)
             {
                 GoBack();
                 return true;

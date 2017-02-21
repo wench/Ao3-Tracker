@@ -20,8 +20,8 @@ namespace Ao3TrackReader.Helper
             this.handler = handler;
         }
 
-        public string[] scriptsToInject { get { return handler.scriptsToInject; } }
-        public string[] cssToInject { get { return handler.cssToInject; } }
+        public string[] ScriptsToInject { get { return handler.ScriptsToInject; } }
+        public string[] CssToInject { get { return handler.CssToInject; } }
 
 
         public event EventHandler<bool> JumpToLastLocationEvent;
@@ -53,7 +53,7 @@ namespace Ao3TrackReader.Helper
             AlterFontSizeEvent = null;
         }
 
-        public IAsyncOperation<object> getWorkChaptersAsync([ReadOnlyArray] long[] works)
+        public IAsyncOperation<object> GetWorkChaptersAsync([ReadOnlyArray] long[] works)
         {
             return Task.Run(async () =>
             {
@@ -61,7 +61,7 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
-        public object createObject(string classname)
+        public object CreateObject(string classname)
         {
             switch (classname)
             {
@@ -80,7 +80,7 @@ namespace Ao3TrackReader.Helper
 
             return null;
         }
-        public void setWorkChapters(IDictionary<long, WorkChapter> works)
+        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
             {
@@ -88,18 +88,18 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
+        public IAsyncOperation<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
         {
-            return handler.showContextMenu(x, y, menuItems);
+            return handler.ShowContextMenu(x, y, menuItems);
         }
 
-        public void addToReadingList(string href)
+        public void AddToReadingList(string href)
         {
-            handler.addToReadingList(href);
+            handler.AddToReadingList(href);
         }
-        public void copyToClipboard(string str, string type)
+        public void CopyToClipboard(string str, string type)
         {
-            if (type == "text" || type == "uri")
+            if (type == "text")
             {
                 var dp = new DataPackage();
                 dp.SetText(str);
@@ -112,58 +112,53 @@ namespace Ao3TrackReader.Helper
                 Clipboard.SetContent(dp);
             }
         }
-        public void setCookies(string cookies)
+        public void SetCookies(string cookies)
         {
-            handler.setCookies(cookies);
+            handler.SetCookies(cookies);
         }
 
-        public string nextPage
+        public string NextPage
         {
             get { return handler.NextPage; }
             set { handler.DoOnMainThread(() => { handler.NextPage = value; }); }
         }
-        public string prevPage
+        public string PrevPage
         {
             get { return handler.PrevPage; }
             set { handler.DoOnMainThread(() => { handler.PrevPage = value; }); }
         }
 
-        public bool canGoBack
+        public bool CanGoBack
         {
-            get { return (bool)handler.DoOnMainThread(() => handler.canGoBack); }
+            get { return (bool)handler.DoOnMainThread(() => handler.CanGoBack); }
         }
-        public bool canGoForward
+        public bool CanGoForward
         {
-            get { return (bool)handler.DoOnMainThread(() => handler.canGoForward); }
+            get { return (bool)handler.DoOnMainThread(() => handler.CanGoForward); }
         }
-        public void goBack() { handler.DoOnMainThread(() => handler.GoBack()); }
-        public void goForward() { handler.DoOnMainThread(() => handler.GoForward()); }
-        public double leftOffset
+        public void GoBack() { handler.DoOnMainThread(() => handler.GoBack()); }
+        public void GoForward() { handler.DoOnMainThread(() => handler.GoForward()); }
+        public double LeftOffset
         {
-            get { return (double)handler.DoOnMainThread(() => handler.leftOffset); }
-            set { handler.DoOnMainThread(() => { handler.leftOffset = value; }); }
+            get { return (double)handler.DoOnMainThread(() => handler.LeftOffset); }
+            set { handler.DoOnMainThread(() => { handler.LeftOffset = value; }); }
         }
-        public double opacity
-        {
-            get { return (double)handler.DoOnMainThread(() => handler.opacity); }
-            set { handler.DoOnMainThread(() => { handler.opacity = value; }); }
-        }
-        public int fontSizeMax { get { return handler.FontSizeMax; } }
-        public int fontSizeMin { get { return handler.FontSizeMin; } }
-        public int fontSize
+        public int FontSizeMax { get { return handler.FontSizeMax; } }
+        public int FontSizeMin { get { return handler.FontSizeMin; } }
+        public int FontSize
         {
             get { return (int)handler.DoOnMainThread(() => handler.FontSize); }
             set { handler.DoOnMainThread(() => { handler.FontSize = value; }); }
         }
-        public bool showPrevPageIndicator
+        public int ShowPrevPageIndicator
         {
-            get { return (bool)handler.DoOnMainThread(() => handler.showPrevPageIndicator); }
-            set { handler.DoOnMainThread(() => { handler.showPrevPageIndicator = value; }); }
+            get { return (int)handler.DoOnMainThread(() => handler.ShowPrevPageIndicator); }
+            set { handler.DoOnMainThread(() => { handler.ShowPrevPageIndicator = value; }); }
         }
-        public bool showNextPageIndicator
+        public int ShowNextPageIndicator
         {
-            get { return (bool)handler.DoOnMainThread(() => handler.showNextPageIndicator); }
-            set { handler.DoOnMainThread(() => { handler.showNextPageIndicator = value; }); }
+            get { return (int)handler.DoOnMainThread(() => handler.ShowNextPageIndicator); }
+            set { handler.DoOnMainThread(() => { handler.ShowNextPageIndicator = value; }); }
         }
 
         public IWorkChapterEx CurrentLocation { get { return (IWorkChapterEx) handler.DoOnMainThread(() => handler.CurrentLocation); } set { handler.DoOnMainThread(() => { handler.CurrentLocation = value; }); } }

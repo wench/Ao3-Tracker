@@ -8,10 +8,11 @@
                             HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
                 <AbsoluteLayout.Children>
-                    <Label x:Name="NextPageIndicator" Text="Next Page" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" IsVisible="False" 
-                           AbsoluteLayout.LayoutBounds=".98, .5, 100, 100" AbsoluteLayout.LayoutFlags="PositionProportional"/>
-                    <Label x:Name="PrevPageIndicator" Text="Previous Page" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" IsVisible="False" 
-                           AbsoluteLayout.LayoutBounds=".02, .5, 100, 100" AbsoluteLayout.LayoutFlags="PositionProportional"/>
+                    <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                           AbsoluteLayout.LayoutBounds=".98, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="18" />
+                    <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                           AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="18" />
+                    <ContentView x:Name="WebViewPlaceholder" />
                     <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"/>
                 </AbsoluteLayout.Children>
             </AbsoluteLayout>

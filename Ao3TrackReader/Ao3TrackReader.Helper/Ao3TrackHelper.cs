@@ -157,27 +157,26 @@ namespace Ao3TrackReader.Helper
         bool JumpToLastLocationEnabled { get; set; }
         string NextPage { get; set; }
         string PrevPage { get; set; }
-        bool canGoBack { get; }
-        bool canGoForward { get; }
+        bool CanGoBack { get; }
+        bool CanGoForward { get; }
         void GoBack();
         void GoForward();
-        double leftOffset { get; set; }
-        double opacity { get; set; }
-        bool showPrevPageIndicator { get; set; }
-        bool showNextPageIndicator { get; set; }
-        string[] scriptsToInject { get; }
-        string[] cssToInject { get; }
+        double LeftOffset { get; set; }
+        int ShowPrevPageIndicator { get; set; }
+        int ShowNextPageIndicator { get; set; }
+        string[] ScriptsToInject { get; }
+        string[] CssToInject { get; }
         int FontSizeMax { get; }
         int FontSizeMin { get; }
         int FontSize { get; set; }
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
 #if WINDOWS_UWP
-        IAsyncOperation<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
+        IAsyncOperation<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
 #else
-        Task<string> showContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
+        Task<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
 #endif
-        void addToReadingList(string href);
-        void setCookies(string cookies);
+        void AddToReadingList(string href);
+        void SetCookies(string cookies);
     }
 }

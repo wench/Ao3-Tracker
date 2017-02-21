@@ -35,7 +35,7 @@ namespace Ao3TrackReader
             }
         })();";
 
-        public string[] scriptsToInject
+        public string[] ScriptsToInject
         {
             get { return new[] {
                 "ms-appx-web:///Content/platform.js",
@@ -45,7 +45,7 @@ namespace Ao3TrackReader
                 "ms-appx-web:///Content/unitconv.js"
             }; }
         }
-        public string[] cssToInject
+        public string[] CssToInject
         {
             get { return new[] { "ms-appx-web:///Content/tracker.css" }; }
 
@@ -68,6 +68,7 @@ namespace Ao3TrackReader
             WebView.ContentLoading += WebView_ContentLoading;
             WebView.NewWindowRequested += WebView_NewWindowRequested;
             WebView.GotFocus += WebView_GotFocus;
+            WebView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
 
             return WebView.ToView();
         }
@@ -133,8 +134,10 @@ namespace Ao3TrackReader
             WebView.AddWebAllowedObject("Ao3TrackHelperUWP", helper = new Ao3TrackHelper(this));
             nextPage = null;
             prevPage = null;
-            prevPageButton.IsEnabled = canGoBack;
-            nextPageButton.IsEnabled = canGoForward;
+            prevPageButton.IsEnabled = CanGoBack;
+            nextPageButton.IsEnabled = CanGoForward;
+            ShowPrevPageIndicator = 0;
+            ShowNextPageIndicator = 0;
             currentLocation = null;
             currentSavedLocation = null;
             forceSetLocationButton.IsEnabled = false;
@@ -145,10 +148,9 @@ namespace Ao3TrackReader
         {
             if (urlEntry != null) urlEntry.Text = WebView.Source.AbsoluteUri;
             ReadingList?.PageChange(Current);
-            PrevPageIndicator.IsVisible = false;
-            NextPageIndicator.IsVisible = false;
+            ShowPrevPageIndicator = 0;
+            ShowNextPageIndicator = 0;
             WebView.RenderTransform = null;
-            WebView.Opacity = 1;
             currentLocation = null;
             currentSavedLocation = null;
             forceSetLocationButton.IsEnabled = false;
@@ -184,9 +186,9 @@ namespace Ao3TrackReader
             WebView.Refresh();
         }
 
-        public bool canGoBack { get { return WebView.CanGoBack || prevPage != null; } }
+        public bool CanGoBack { get { return WebView.CanGoBack || prevPage != null; } }
 
-        public bool canGoForward { get { return WebView.CanGoForward || nextPage != null; } }
+        public bool CanGoForward { get { return WebView.CanGoForward || nextPage != null; } }
 
         public void GoBack()
         {
@@ -200,7 +202,7 @@ namespace Ao3TrackReader
 
         }
 
-        public double leftOffset
+        public double LeftOffset
         {
             get
             {
@@ -220,19 +222,7 @@ namespace Ao3TrackReader
             }
         }
 
-        public double opacity
-        {
-            get
-            {
-                return WebView.Opacity;
-            }
-            set
-            {
-                WebView.Opacity = value;
-            }
-        }
-
-        public Windows.Foundation.IAsyncOperation<string> showContextMenu(double x, double y, string[] menuItems)
+        public Windows.Foundation.IAsyncOperation<string> ShowContextMenu(double x, double y, string[] menuItems)
         {
             string result = null;
             RoutedEventHandler clicked = (sender, e) =>
