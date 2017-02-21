@@ -126,10 +126,10 @@ namespace Ao3Track {
 
                 let acceleration = 0;   // pixels/s^2
 
-                if (offsetCat <= -2) acceleration = -12000.0;
-                else if (offsetCat === -1) acceleration = 12000.0;
-                else if (offsetCat >= 2) acceleration = 12000.0;
-                else if (offsetCat === 1) acceleration = -12000.0;
+                if (offsetCat <= -2) acceleration = -4000.0;
+                else if (offsetCat === -1) acceleration = 4000.0;
+                else if (offsetCat >= 2) acceleration = 4000.0;
+                else if (offsetCat === 1) acceleration = -4000.0;
                 else {
                     swipeCleanup();
                     return;
@@ -156,7 +156,7 @@ namespace Ao3Track {
                     Ao3Track.Helper.goForward();
                     return;
                 }                
-            }, 16);
+            }, 10);
             
             return true;
         }   

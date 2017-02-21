@@ -118,6 +118,7 @@ namespace Ao3TrackReader
             {
                 // Handle external uri
                 args.Cancel = true;
+                LeftOffset = 0;
                 return;
             }
             else if (uri != args.Uri)
@@ -149,19 +150,17 @@ namespace Ao3TrackReader
             if (urlEntry != null) urlEntry.Text = WebView.Source.AbsoluteUri;
             ReadingList?.PageChange(Current);
             ShowPrevPageIndicator = 0;
-            ShowNextPageIndicator = 0;
-            WebView.RenderTransform = null;
+            ShowNextPageIndicator = 0;            
             currentLocation = null;
             currentSavedLocation = null;
             forceSetLocationButton.IsEnabled = false;
             helper?.Reset();
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(()=>LeftOffset = 0);
         }
 
-        Regex chapter_view_split_regex = new Regex(@"^(.*(?: - Chapter \d+)?) - ([^-]* - [^-]*)$");
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
             // Inject JS script
-            helper?.Reset();
             WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();
         }
 

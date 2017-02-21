@@ -456,7 +456,7 @@ namespace Ao3TrackReader
             else
             {
                 T result = default(T);
-                ManualResetEventSlim handle = new ManualResetEventSlim();
+                var handle = new ManualResetEventSlim();
 
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
@@ -464,6 +464,27 @@ namespace Ao3TrackReader
                     handle.Set();
                 });
                 handle.Wait();
+
+                return result;
+            }
+        }
+        public async Task<T> DoOnMainThreadAsync<T>(Func<T> function)
+        {
+            if (IsMainThread)
+            {
+                return function();
+            }
+            else
+            {
+                T result = default(T);
+                var handle = new ManualResetEventSlim();
+
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    result = function();
+                    handle.Set();
+                });
+                await Task.Run(() => handle.Wait());
 
                 return result;
             }
@@ -478,7 +499,7 @@ namespace Ao3TrackReader
             else
             {
                 object result = null;
-                ManualResetEventSlim handle = new ManualResetEventSlim();
+                var handle = new ManualResetEventSlim();
 
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
@@ -503,6 +524,24 @@ namespace Ao3TrackReader
                 {
                     function();
                 });
+            }
+        }
+
+        public async Task DoOnMainThreadAsync(MainThreadAction function)
+        {
+            if (IsMainThread)
+            {
+                function();
+            }
+            else
+            {
+                var handle = new ManualResetEventSlim();
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    function();
+                    handle.Set();
+                });
+                await Task.Run(() => handle.Wait());
             }
         }
 

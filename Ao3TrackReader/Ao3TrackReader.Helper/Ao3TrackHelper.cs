@@ -61,8 +61,11 @@ namespace Ao3TrackReader.Helper
 
         bool IWorkChapter.IsNewer(IWorkChapter newitem)
         {
-            if (newitem.seq > this.seq) { return true; }
-            else if (newitem.seq < this.seq) { return false; }
+            if (newitem.seq != null && this.seq != null)
+            {
+                if (newitem.seq > this.seq) { return true; }
+                else if (newitem.seq < this.seq) { return false; }
+            }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
@@ -79,21 +82,30 @@ namespace Ao3TrackReader.Helper
         {
             if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
-            if (newitem.seq > this.seq) { return true; }
-            else if (newitem.seq < this.seq) { return false; }
+            if (newitem.seq != null && this.seq != null)
+            {
+                if (newitem.seq > this.seq) { return true; }
+                else if (newitem.seq < this.seq) { return false; }
+            }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
 
-            if (this.location == null) { return false; }
-            if (newitem.location == null) { return true; }
+            if (newitem.seq != null && this.seq != null)
+            {
+                if (this.location == null) { return false; }
+                if (newitem.location == null) { return true; }
+            }
 
             return newitem.location > this.location;
         }
         bool IWorkChapter.IsNewerOrSame(IWorkChapter newitem)
         {
-            if (newitem.seq > this.seq) { return true; }
-            else if (newitem.seq < this.seq) { return false; }
+            if (newitem.seq != null && this.seq != null)
+            {
+                if (newitem.seq > this.seq) { return true; }
+                else if (newitem.seq < this.seq) { return false; }
+            }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
@@ -110,8 +122,11 @@ namespace Ao3TrackReader.Helper
         {
             if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
-            if (newitem.seq > this.seq) { return true; }
-            else if (newitem.seq < this.seq) { return false; }
+            if (newitem.seq != null && this.seq != null)
+            {
+                if (newitem.seq > this.seq) { return true; }
+                else if (newitem.seq < this.seq) { return false; }
+            }
 
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }

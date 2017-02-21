@@ -24,7 +24,7 @@ namespace Ao3TrackReader.Controls
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
         private readonly WebViewPage wpv;
-        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(10);
+        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(12);
 
         public ReadingListView(WebViewPage wpv)
         {
@@ -383,10 +383,10 @@ namespace Ao3TrackReader.Controls
                 {
                     await RefreshSemaphore.WaitAsync();
 
-                    tasks.Add(Task.Run(() => {
+                    tasks.Add(Task.Run(async () => {
                         if (item.Value == -1)
                         {
-                            RemoveAsyncImpl(item.Key);
+                            await RemoveAsyncImpl(item.Key);
                         }
                         else
                         {
@@ -402,23 +402,23 @@ namespace Ao3TrackReader.Controls
             PageChange(wpv.Current);
         }
 
-        void RemoveAsyncImpl(string href)
+        async Task RemoveAsyncImpl(string href)
         {
             App.Database.DeleteReadingListItems(href);
             var viewmodel = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href);
             if (viewmodel == null) return;
             viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
-            wpv.DoOnMainThread(() =>
+            await wpv.DoOnMainThreadAsync(() =>
             {
                 readingListBacking.Remove(viewmodel);
+                viewmodel.Dispose();
             });
         }
 
         public Task RemoveAsync(string href)
         {
-            return Task.Run(() =>
-            {
-                RemoveAsyncImpl(href);
+            return Task.Run(async () => { 
+                await RemoveAsyncImpl(href);
                 SyncToServerAsync();
             });
         }
@@ -504,7 +504,14 @@ namespace Ao3TrackReader.Controls
                         App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
 
                         var pvm = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
-                        if (pvm != null) readingListBacking.Remove(pvm);
+                        if (pvm != null)
+                        {
+                            await wpv.DoOnMainThreadAsync(() =>
+                            {
+                                readingListBacking.Remove(pvm);
+                                pvm.Dispose();
+                            });
+                        }
                     }
                     App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Unread = viewmodel.Unread });
                 }

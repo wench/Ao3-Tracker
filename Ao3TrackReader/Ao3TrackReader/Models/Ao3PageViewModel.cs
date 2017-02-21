@@ -19,7 +19,7 @@ namespace Ao3TrackReader.Models
     // <ICON>  
 
 
-    public class Ao3PageViewModel : IGroupable<Ao3PageViewModel>, INotifyPropertyChanged, INotifyPropertyChanging
+    public class Ao3PageViewModel : IGroupable<Ao3PageViewModel>, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
     {
         public Ao3PageViewModel(Ao3PageModel baseData, int? unread)
         {
@@ -244,22 +244,6 @@ namespace Ao3TrackReader.Models
             }
         }
 
-        EventHandler<Work> ChapterNumberChangedDelegate;
-
-        class Weak
-        {
-            WeakReference<Ao3PageViewModel> weakref;
-            public Weak(Ao3PageViewModel target) { weakref = new WeakReference<Ao3PageViewModel>(target); }
-
-            public void ChapterNumberChanged(object sender, Work workchap)
-            {
-                Ao3PageViewModel target;
-                if (weakref.TryGetTarget(out target))
-                    target.ChapterNumberChanged(sender, workchap);
-            }
-        }
-
-
         void Register()
         {
             if (baseData.Type == Ao3PageType.Work)
@@ -267,7 +251,7 @@ namespace Ao3TrackReader.Models
                 if (baseData.Details != null)
                 {
                     var workevents = WorkEvents.GetEvent(baseData.Details.WorkId);
-                    workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                    workevents.ChapterNumChanged += ChapterNumberChanged;
                 }
             }
             else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
@@ -277,7 +261,7 @@ namespace Ao3TrackReader.Models
                     foreach (var workdata in baseData.SeriesWorks)
                     {
                         var workevents = WorkEvents.GetEvent(workdata.Details.WorkId);
-                        workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                        workevents.ChapterNumChanged += ChapterNumberChanged;
                     }
                 }
             }
@@ -288,18 +272,12 @@ namespace Ao3TrackReader.Models
             if (baseData == null || (baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series && baseData.Type != Ao3PageType.Collection))
                 return;
 
-            if (ChapterNumberChangedDelegate == null)
-            {
-                Weak weak = new Weak(this);
-                ChapterNumberChangedDelegate = new EventHandler<Work>(weak.ChapterNumberChanged);
-            }
-
             if (baseData.Type == Ao3PageType.Work)
             {
                 if (baseData.Details != null)
                 {
                     var workevents = WorkEvents.TryGetEvent(baseData.Details.WorkId);
-                    if (workevents != null) workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                    if (workevents != null) workevents.ChapterNumChanged -= ChapterNumberChanged;
                 }
             }
             else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
@@ -309,18 +287,12 @@ namespace Ao3TrackReader.Models
                     foreach (var workdata in baseData.SeriesWorks)
                     {
                         var workevents = WorkEvents.TryGetEvent(workdata.Details.WorkId);
-                        if (workevents != null) workevents.ChapterNumChanged += ChapterNumberChangedDelegate;
+                        if (workevents != null) workevents.ChapterNumChanged -= ChapterNumberChanged;
                     }
                 }
             }
         }
 
-
-        ~Ao3PageViewModel()
-        {
-            Deregister();
-            ChapterNumberChangedDelegate = null;
-        }
 
         void ChapterNumberChanged(object sender, Work workchap)
         {
@@ -526,7 +498,7 @@ namespace Ao3TrackReader.Models
 
             if (baseData.Type == Ao3PageType.Collection && Unread != null && Unread > 0)
             {
-                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
+                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + "\xA0unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
             }
 
             if (baseData.Details?.Authors != null && baseData.Details.Authors.Count != 0)
@@ -564,7 +536,7 @@ namespace Ao3TrackReader.Models
 
             if (baseData.Type != Ao3PageType.Collection && Unread != null && Unread > 0)
             {
-                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + " unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
+                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + "\xA0unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
             }
 
             var oldtitle = Title;
@@ -657,7 +629,7 @@ namespace Ao3TrackReader.Models
                     }
                     if (unread != null && unread > 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + " unread chapter" + (unread == 1 ? "" : "s"), Foreground = Resources.Colors.Base.MediumHigh });
+                        ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + "\xA0unread chapter" + (unread == 1 ? "" : "s"), Foreground = Resources.Colors.Base.MediumHigh });
                     }
 
                     worksummary.Nodes.Add(ts);
@@ -688,6 +660,42 @@ namespace Ao3TrackReader.Models
 
             return false;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    Deregister();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Ao3PageViewModel() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
 
     }
 }
