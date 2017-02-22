@@ -8,15 +8,17 @@ namespace Ao3Track {
         Ao3Track.Helper.setWorkChapters(workchapters);
     }
 
-    Ao3Track.Helper.nextPage = jQuery('head link[rel=next]').attr('href') || "";
     export function SetNextPage(uri: string) {
         Ao3Track.Helper.nextPage = uri;
     }
+    let $next = jQuery('head link[rel=next]');
+    if ($next.length > 0) { SetNextPage(($next[0] as HTMLAnchorElement).href); }
 
-    Ao3Track.Helper.prevPage = jQuery('head link[rel=prev]').attr('href') || "";
     export function SetPrevPage(uri: string) {
         Ao3Track.Helper.prevPage = uri;
     }
+    let $prev = jQuery('head link[rel=prev]');
+    if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
 
     export function DisableLastLocationJump() {
         Ao3Track.Helper.jumpToLastLocationEnabled = false;
