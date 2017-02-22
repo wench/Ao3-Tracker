@@ -24,7 +24,7 @@ namespace Ao3TrackReader.Controls
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
         private readonly WebViewPage wpv;
-        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(12);
+        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(20);
 
         public ReadingListView(WebViewPage wpv)
         {

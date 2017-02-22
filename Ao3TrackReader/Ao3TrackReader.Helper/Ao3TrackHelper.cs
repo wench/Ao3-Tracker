@@ -19,6 +19,9 @@ namespace Ao3TrackReader.Helper
         long? seq { get; set; }
         bool IsNewer(IWorkChapter newitem);
         bool IsNewerOrSame(IWorkChapter newitem);
+
+        long Paragraph { get; }
+        long Frac { get; }
     }
     public interface IWorkChapterEx : IWorkChapter
     {
@@ -58,6 +61,21 @@ namespace Ao3TrackReader.Helper
         public long chapterid { get; set; }
         public long? location { get; set; }
         public long? seq { get; set; }
+
+        public long Paragraph {
+            get {
+                if (location == null) return long.MaxValue;
+                return (long)location / 1000000000L;
+            }
+        }
+        public long Frac {
+            get {
+                if (location == null) return long.MaxValue;
+                var offset = (long)location % 1000000000L;
+                if (offset == 500000000L) return 100;
+                return offset * 100L / 479001600L;
+            }
+        }
 
         bool IWorkChapter.IsNewer(IWorkChapter newitem)
         {

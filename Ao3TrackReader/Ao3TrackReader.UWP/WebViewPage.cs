@@ -155,13 +155,18 @@ namespace Ao3TrackReader
             currentSavedLocation = null;
             forceSetLocationButton.IsEnabled = false;
             helper?.Reset();
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(()=>LeftOffset = 0);
+            Task.Run(async () =>
+            {
+                await Task.Delay(300);
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => LeftOffset = 0);
+            });            
         }
 
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
             // Inject JS script
             WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();
+            LeftOffset = 0;
         }
 
         public Uri Current {
