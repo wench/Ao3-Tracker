@@ -129,6 +129,101 @@ namespace Ao3TrackReader.Data
             });
         }
 
+        class WorkWorker
+        {
+            static object workSummaryLock = new object();
+            static List<WorkWorker> workLookupWorkers = new List<WorkWorker>();
+
+            ManualResetEventSlim start;
+            ManualResetEventSlim finished;
+            HtmlDocument doc;
+            List<long> works;
+
+            public WorkWorker()
+            {
+                start = new ManualResetEventSlim(false);
+                finished = new ManualResetEventSlim(false);
+                works = new List<long>();
+            }
+
+            bool Full { get { return works.Count >= 10; } }
+            bool started = false;
+
+            HtmlDocument Wait()
+            {
+                lock (workSummaryLock)
+                {
+                    if (Full)
+                    {
+                        workLookupWorkers.Remove(this);
+                        start.Set();
+                    }
+
+                    if (!started)
+                    {
+                        started = true;
+                        Task.Run(async () =>
+                        {
+                            lock (workSummaryLock)
+                            {
+                            }
+
+                            start.Wait(5000);
+
+                            lock (workSummaryLock)
+                            {
+                                workLookupWorkers.Remove(this);
+                            }
+                            if (works.Count == 0)
+                                return;
+
+                            var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A%28" + string.Join("+OR+", works) + "%29");
+                            var response = await HttpRequestAsync(wsuri);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                doc = await response.Content.ReadAsHtmlDocumentAsync();
+                            }
+
+                            finished.Set();
+                        });
+                    }
+                }
+
+                finished.Wait();
+
+                return doc;
+            }
+           
+            public static Task<HtmlNode> LookupSummaryAsync(long workid)
+            {
+                return Task.Run(() =>
+                {
+                    WorkWorker worker = null;
+                    lock (workSummaryLock)
+                    {
+                        for (var i = 0; i < workLookupWorkers.Count; i++)
+                        {
+                            if (!workLookupWorkers[i].Full)
+                            {
+                                worker = workLookupWorkers[i];
+                                break;
+                            }
+                        }
+
+                        if (worker == null) workLookupWorkers.Add(worker = new WorkWorker());
+
+                        worker.works.Add(workid);
+                        if (worker.Full) workLookupWorkers.Remove(worker);
+                    }
+
+                    var doc = worker.Wait();
+                    var worknode = doc.GetElementbyId("work_" + workid.ToString());
+                    return worknode;
+                });
+            }
+        }
+
         static bool use_https = false;
         public static bool UseHttps
         {
@@ -706,42 +801,29 @@ namespace Ao3TrackReader.Data
 
                         model.Details = new Ao3WorkDetails();
 
-                        try
-                        {
-                            model.Details.WorkId = long.Parse(sWORKID);
-                        }
-                        catch
-                        {
-
-                        }
+                        model.Details.WorkId = long.Parse(sWORKID);
 
                         var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
-                        var response = await HttpRequestAsync(wsuri);
 
-                        if (response.IsSuccessStatusCode)
+                        var worknode = await WorkWorker.LookupSummaryAsync(model.Details.WorkId);
+
+                        if (worknode == null)
                         {
-                            HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
-
-                            var worknode = doc.GetElementbyId("work_" + sWORKID);
-
-                            if (worknode == null)
+                            // No worknode, try with cookies
+                            string cookies = App.Database.GetVariable("siteCookies");
+                            if (!string.IsNullOrWhiteSpace(cookies))
                             {
-                                // No worknode, try with cookies
-                                string cookies = App.Database.GetVariable("siteCookies");
-                                if (!string.IsNullOrWhiteSpace(cookies))
-                                {
-                                    response = await HttpRequestAsync(wsuri, cookies: cookies);
+                                var response = await HttpRequestAsync(wsuri, cookies: cookies);
 
-                                    if (response.IsSuccessStatusCode)
-                                    {
-                                        doc = await response.Content.ReadAsHtmlDocumentAsync();
-                                        worknode = doc.GetElementbyId("work_" + sWORKID);
-                                    }
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    var doc = await response.Content.ReadAsHtmlDocumentAsync();
+                                    worknode = doc.GetElementbyId("work_" + sWORKID);
                                 }
                             }
-
-                            if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
                         }
+
+                        if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
                     }
                     else if ((match = regexSeries.Match(uri.LocalPath)).Success)
                     {
