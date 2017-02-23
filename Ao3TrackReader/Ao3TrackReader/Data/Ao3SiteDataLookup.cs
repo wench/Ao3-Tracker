@@ -89,7 +89,7 @@ namespace Ao3TrackReader.Data
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dd"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dt"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
-            httpSemaphore = new SemaphoreSlim(20);
+            httpSemaphore = new SemaphoreSlim(5);
         }
 
         static SemaphoreSlim httpSemaphore;
@@ -148,7 +148,14 @@ namespace Ao3TrackReader.Data
 
             bool Full { get { return works.Count >= 10; } }
             bool started = false;
-
+            void Reset()
+            {
+                start.Reset();
+                finished.Reset();
+                doc = null;
+                works.Clear();
+                started = false;
+            }
             HtmlDocument Wait()
             {
                 lock (workSummaryLock)
@@ -174,8 +181,6 @@ namespace Ao3TrackReader.Data
                             {
                                 workLookupWorkers.Remove(this);
                             }
-                            if (works.Count == 0)
-                                return;
 
                             var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A%28" + string.Join("+OR+", works) + "%29");
                             var response = await HttpRequestAsync(wsuri);
@@ -218,6 +223,16 @@ namespace Ao3TrackReader.Data
                     }
 
                     var doc = worker.Wait();
+
+                    lock (workSummaryLock)
+                    {
+                        if (worker.works.Remove(workid) && worker.works.Count == 0)
+                        {
+                            worker.Reset();
+                            workLookupWorkers.Add(worker);
+                        }
+                    }
+
                     var worknode = doc.GetElementbyId("work_" + workid.ToString());
                     return worknode;
                 });
