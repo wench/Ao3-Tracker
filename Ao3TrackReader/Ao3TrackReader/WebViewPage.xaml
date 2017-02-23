@@ -1,20 +1,18 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-             x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}">
+             x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}" x:Name="root">
     <ContentPage.Content>
         <StackLayout x:Name="MainLayout" Spacing="0">
-            <local:TextView TextTree="{Binding TitleEx}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}" FontSize="14" 
-                            LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
+            <local:TextView TextTree="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
+                            FontSize="14" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
                             HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
-                <AbsoluteLayout.Children>
-                    <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
-                           AbsoluteLayout.LayoutBounds=".98, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
-                    <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
-                           AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
-                    <ContentView x:Name="WebViewPlaceholder" />
-                    <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"/>
-                </AbsoluteLayout.Children>
+                <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                        AbsoluteLayout.LayoutBounds=".98, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
+                <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                        AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
+                <ContentView x:Name="WebViewPlaceholder" />
+                <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"/>
             </AbsoluteLayout>
             <StackLayout x:Name="urlBar" Orientation="Horizontal" Spacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
                          VerticalOptions="End" HorizontalOptions="Fill">

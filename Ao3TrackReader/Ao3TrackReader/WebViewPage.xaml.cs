@@ -13,6 +13,7 @@ using Ao3TrackReader.Resources;
 using Icons = Ao3TrackReader.Resources.Icons;
 
 using Xamarin.Forms.PlatformConfiguration;
+using System.Runtime.CompilerServices;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
@@ -41,7 +42,6 @@ namespace Ao3TrackReader
 
         public WebViewPage()
         {
-            BindingContext = this;
             TitleEx = "Loading...";
             InitializeComponent();           
                 
@@ -305,17 +305,16 @@ namespace Ao3TrackReader
             }
 
         }
-        public new string Title
+
+        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            get
+            base.OnPropertyChanged(propertyName);
+            if (propertyName == "Title")
             {
-                return TitleEx?.ToString();
-            }
-            set
-            {
-                TitleEx = value;
+                TitleEx = Title;
             }
         }
+
         public Models.TextTree TitleEx
         {
             get
@@ -549,25 +548,22 @@ namespace Ao3TrackReader
         public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             App.Storage.setWorkChapters(works);
-            if (currentSavedLocation != null && currentLocation != null) {
-                if (works.TryGetValue(currentSavedLocation.workid, out var workchap))
+            if (currentLocation != null) {
+                if (works.TryGetValue(currentLocation.workid, out var workchap))
                 {
-                    workchap.workid = currentSavedLocation.workid;
-                    if (currentSavedLocation.IsNewer(workchap))
+                    workchap.workid = currentLocation.workid;
+                    if (currentSavedLocation == null || currentSavedLocation.IsNewer(workchap))
                     {
-                        bool prev = currentLocation.IsNewer(currentSavedLocation);
                         currentSavedLocation = workchap;
-                        bool cur = currentLocation.IsNewer(currentSavedLocation);
-                        if (prev != cur)
+                        Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                         {
-                            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                            {
-                                if (currentSavedLocation == null || forceSetLocationButton == null)
-                                    forceSetLocationButton.IsEnabled = false;
-                                else if (currentLocation.workid == currentSavedLocation?.workid)
-                                    forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
-                            });
-                        }
+                            if (currentSavedLocation == null || currentLocation == null)
+                                forceSetLocationButton.IsEnabled = false;
+                            else if (currentLocation.workid == currentSavedLocation?.workid)
+                                forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                            else
+                                forceSetLocationButton.IsEnabled = false;
+                        });
                     }
                 }
             }
@@ -735,10 +731,12 @@ namespace Ao3TrackReader
 
                     Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                     {
-                        if (currentSavedLocation == null || forceSetLocationButton == null)
+                        if (currentSavedLocation == null || currentLocation == null)
                             forceSetLocationButton.IsEnabled = false;
                         else if (currentLocation.workid == currentSavedLocation?.workid)
                             forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                        else
+                            forceSetLocationButton.IsEnabled = false;
                     });
                 });
             }
