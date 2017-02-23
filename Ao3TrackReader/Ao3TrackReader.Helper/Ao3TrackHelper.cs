@@ -109,11 +109,8 @@ namespace Ao3TrackReader.Helper
             if (newitem.number > this.number) { return true; }
             else if (newitem.number < this.number) { return false; }
 
-            if (newitem.seq != null && this.seq != null)
-            {
-                if (this.location == null) { return false; }
-                if (newitem.location == null) { return true; }
-            }
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
 
             return newitem.location > this.location;
         }
