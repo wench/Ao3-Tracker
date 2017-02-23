@@ -548,23 +548,13 @@ namespace Ao3TrackReader
         public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             App.Storage.setWorkChapters(works);
-            if (currentLocation != null) {
-                if (works.TryGetValue(currentLocation.workid, out var workchap))
+
+            lock (currentLocationLock)
+            {
+                if (currentSavedLocation != null && currentLocation != null && works.TryGetValue(currentLocation.workid, out var workchap))
                 {
                     workchap.workid = currentLocation.workid;
-                    if (currentSavedLocation == null || currentSavedLocation.IsNewer(workchap))
-                    {
-                        currentSavedLocation = workchap;
-                        Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                        {
-                            if (currentSavedLocation == null || currentLocation == null)
-                                forceSetLocationButton.IsEnabled = false;
-                            else if (currentLocation.workid == currentSavedLocation?.workid)
-                                forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
-                            else
-                                forceSetLocationButton.IsEnabled = false;
-                        });
-                    }
+                    UpdateCurrentSavedLocation(workchap);
                 }
             }
         }
@@ -709,36 +699,57 @@ namespace Ao3TrackReader
 
         IWorkChapterEx currentLocation;
         WorkChapter currentSavedLocation;
+        object currentLocationLock = new object();
         public IWorkChapterEx CurrentLocation {
             get { return currentLocation; }
             set {
-                currentLocation = value;
-                if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
+                lock (currentLocationLock)
                 {
-                    if (forceSetLocationButton.IsEnabled == currentLocation.IsNewer(currentSavedLocation))
+                    currentLocation = value;
+                    if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
+                    {
+                        forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
                         return;
+                    }
+                    else if (currentLocation == null)
+                    {
+                        forceSetLocationButton.IsEnabled = false;
+                        return;
+                    }
+
                 }
                 Task.Run(async () =>
                 {
-                    if (currentLocation == null)
+                    long workid = 0;
+                    lock(currentLocationLock)
                     {
-                        currentSavedLocation = null;
+                        if (currentLocation != null) workid = currentLocation.workid;
                     }
-                    else if (currentLocation.workid != currentSavedLocation?.workid)
-                    {
-                        currentSavedLocation = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.workid })).Select(kvp=>kvp.Value).FirstOrDefault();
-                    }
+                    var workchap = workid == 0 ? null : (await App.Storage.getWorkChaptersAsync(new[] { workid })).Select(kvp => kvp.Value).FirstOrDefault();
+                    if (workchap != null) workchap.workid = workid;
+                    UpdateCurrentSavedLocation(workchap);
+                });
+            }
+        }
 
+        void UpdateCurrentSavedLocation(WorkChapter workchap)
+        {
+            lock (currentLocationLock)
+            {
+                if (currentSavedLocation == null || currentSavedLocation.IsNewer(workchap))
+                {
+                    currentSavedLocation = workchap;
                     Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                     {
-                        if (currentSavedLocation == null || currentLocation == null)
-                            forceSetLocationButton.IsEnabled = false;
-                        else if (currentLocation.workid == currentSavedLocation?.workid)
-                            forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
-                        else
-                            forceSetLocationButton.IsEnabled = false;
+                        lock (currentLocationLock)
+                        {
+                            if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
+                                forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                            else
+                                forceSetLocationButton.IsEnabled = false;
+                        }
                     });
-                });
+                }
             }
         }
 
