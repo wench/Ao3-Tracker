@@ -10,16 +10,6 @@ using Ao3TrackReader.Resources;
 
 namespace Ao3TrackReader.Controls
 {
-    public class RLMenuItem : MenuItem
-    {
-        public event Func<RLMenuItem, bool> Filter;
-
-        public bool OnFilter()
-        {
-            return Filter?.Invoke(this) ?? true;
-        }
-    }
-
     public partial class ReadingListView : PaneView
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
@@ -36,13 +26,12 @@ namespace Ao3TrackReader.Controls
 
             ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
-            ListView.ItemAppearing += ListView_ItemAppearing;
 
-            Device.BeginInvokeOnMainThread(() =>Task.Run(async () => { await RestoreReadingList(); }));            
+            Device.BeginInvokeOnMainThread(() => Task.Run(async () => { await RestoreReadingList(); }));
         }
 
         async Task RestoreReadingList()
-        { 
+        {
             // Restore the reading list contents!
             var items = new Dictionary<string, Models.ReadingList>();
             foreach (var i in App.Database.GetReadingListItems())
@@ -123,6 +112,22 @@ namespace Ao3TrackReader.Controls
             });
         }
 
+        private void OnClose(object sender, EventArgs e)
+        {
+            IsOnScreen = false;
+        }
+
+        protected override void OnIsOnScreenChanging(bool newValue)
+        {
+            if (newValue == true)
+            {
+                ListView.Focus();
+            }
+            else
+            {
+                ListView.Unfocus();
+            }
+        }
 
         Models.Ao3PageViewModel selectedItem;
         private void UpdateSelectedItem(Models.Ao3PageViewModel newselected)
@@ -141,9 +146,21 @@ namespace Ao3TrackReader.Controls
                 ListView.SelectedItem = newselected;
         }
 
-        private void ListView_ItemAppearing(object sender, ItemVisibilityEventArgs e)
+        private void OnSelection(object sender, SelectedItemChangedEventArgs e)
         {
-            var item = e.Item as Models.Ao3PageViewModel;
+            if (e.SelectedItem == null)
+            {
+                PageChange(wpv.Current);
+                return;
+            }
+            else
+                UpdateSelectedItem(e.SelectedItem as Models.Ao3PageViewModel);
+        }
+
+        private void OnCellAppearing(object sender, EventArgs e)
+        {
+            var mi = ((Cell)sender);
+            var item = mi.BindingContext as Models.Ao3PageViewModel;
             if (item == null) return;
             Uri uri = Data.Ao3SiteDataLookup.ReadingListlUri(wpv.Current.AbsoluteUri);
             if (uri != null && item.HasUri(uri))
@@ -152,16 +169,156 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        protected override void OnIsOnScreenChanging(bool newValue)
+        private void OnCellDisappearing(object sender, EventArgs e)
         {
-            if (newValue == true)
+            var mi = ((Cell)sender);
+            var item = mi.BindingContext as Models.Ao3PageViewModel;
+            if (item == null) return;
+            if (selectedItem == item)
             {
-                ListView.Focus();
+                UpdateSelectedItem(null);
             }
-            else
+        }
+
+        private void OnCellTapped(object sender, EventArgs e)
+        {
+            var mi = ((Cell)sender);
+            var item = mi.BindingContext as Models.Ao3PageViewModel;
+            if (item != null)
             {
-                ListView.Unfocus();
+                GotoLast(item);
             }
+        }
+
+        private Command MenuOpenLastCommand {
+            get {
+                System.ComponentModel.PropertyChangedEventHandler pc = null;
+                Command<Models.Ao3PageViewModel> command = null;
+                command = new Command<Models.Ao3PageViewModel>((item)=>GotoLast(item),
+                    (item) => {
+                        if (item == null)
+                        {
+                            return true;
+                        }
+                        if (item.BaseData == null)
+                        {
+                            if (pc == null)
+                            {
+                                pc = (sender, e) =>
+                                {
+                                    if (string.IsNullOrEmpty(e.PropertyName))
+                                    {
+                                        command.ChangeCanExecute();
+                                        item.PropertyChanged -= pc;
+                                        pc = null;
+                                    }
+                                };
+                                item.PropertyChanged += pc;
+                            }
+                            return true;
+                        }
+
+                        return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Series;
+                    });
+
+                return command;
+            }
+        }
+
+        private void OnMenuOpen(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                wpv.Navigate(item.Uri);
+                IsOnScreen = false;
+            }
+        }
+
+        private void OnMenuRefresh(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                RefreshAsync(item);
+            }
+
+        }
+
+        private void OnMenuDelete(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var item = mi.CommandParameter as Models.Ao3PageViewModel;
+            if (item != null)
+            {
+                RemoveAsync(item.Uri.AbsoluteUri);
+            }
+
+        }
+
+        private void OnAddPage(object sender, EventArgs e)
+        {
+            AddAsync(wpv.Current.AbsoluteUri);
+        }
+
+        private void OnRefresh(object sender, EventArgs e)
+        {
+            ListView.Focus();
+            RefreshButton.IsEnabled = false;
+            SyncIndicator.IsRunning = true;
+            SyncIndicator.IsVisible = true;
+            Task.Run(async () =>
+            {
+                List<Task> tasks = new List<Task>();
+                foreach (var viewmodel in readingListBacking.AllSafe)
+                {
+                    await RefreshSemaphore.WaitAsync();
+
+                    tasks.Add(Task.Run(async () => {
+                        await RefreshAsync(viewmodel);
+                        RefreshSemaphore.Release();
+                    }));
+                }
+
+
+                await Task.WhenAll(tasks);
+
+                wpv.DoOnMainThread(() =>
+                {
+                    RefreshButton.IsEnabled = true;
+                    SyncIndicator.IsRunning = false;
+                    SyncIndicator.IsVisible = false;
+                    PageChange(wpv.Current);
+                });
+            });
+        }
+
+        private void OnShowHidden(object sender, EventArgs e)
+        {
+            readingListBacking.ShowHidden = !readingListBacking.ShowHidden;
+            ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
+        }
+
+        bool tags_visible = false;
+        public bool TagsVisible
+        {
+            get { return tags_visible; }
+            set
+            {
+                if (tags_visible != value)
+                {
+                    tags_visible = value;
+                    readingListBacking.ForEachInAll((item) => item.TagsVisible = tags_visible);
+                }
+            }
+        }
+
+        private void OnShowTags(object sender, EventArgs e)
+        {
+            TagsVisible = !TagsVisible;
+            ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
         }
 
         void GotoLast(Models.Ao3PageViewModel item)
@@ -196,16 +353,6 @@ namespace Ao3TrackReader.Controls
             IsOnScreen = false;
         }
 
-        public void OnCellTapped(object sender, EventArgs e)
-        {
-            var mi = ((Cell)sender);
-            var item = mi.BindingContext as Models.Ao3PageViewModel;
-            if (item != null)
-            {
-                GotoLast(item);
-            }
-        }
-
         public void PageChange(Uri uri)
         {
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
@@ -214,151 +361,6 @@ namespace Ao3TrackReader.Controls
                 if (uri == null) return;
                 UpdateSelectedItem(readingListBacking.Find((m) => m.HasUri(uri)));
             });
-        }
-
-        public void OnSelection(object sender, SelectedItemChangedEventArgs e)
-        {
-            if (e.SelectedItem == null)
-            {
-                PageChange(wpv.Current);
-                return;
-            }
-            else
-                UpdateSelectedItem(e.SelectedItem as Models.Ao3PageViewModel);
-        }
-
-        private bool MenuOpenLastFilter(RLMenuItem mi)
-        {
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item?.BaseData == null) return true;
-
-            return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Series;
-        }
-
-        private void OnCellAppearing(object sender, EventArgs e)
-        {
-            var cell = ((Cell)sender);
-            for (int i = 0; i < cell.ContextActions.Count; i++)
-            {
-                var mi = cell.ContextActions[i] as RLMenuItem;
-                if (mi != null && mi.OnFilter() == false)
-                {
-                    cell.ContextActions.RemoveAt(i);
-                    i--;
-                }
-            }
-        }
-
-        public void OnMenuOpenLast(object sender, EventArgs e)
-        {
-            var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
-            {
-                GotoLast(item);
-            }
-        }
-
-        public void OnMenuOpen(object sender, EventArgs e)
-        {
-            var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
-            {
-                wpv.Navigate(item.Uri);
-                IsOnScreen = false;
-            }
-        }
-
-        public void OnMenuRefresh(object sender, EventArgs e)
-        {
-            var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
-            {
-                RefreshAsync(item);
-            }
-
-        }
-
-        public void OnMenuDelete(object sender, EventArgs e)
-        {
-            var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
-            {
-                RemoveAsync(item.Uri.AbsoluteUri);
-            }
-
-        }
-
-        public void OnAddPage(object sender, EventArgs e)
-        {
-            AddAsync(wpv.Current.AbsoluteUri);
-        }
-
-        public void OnRefresh(object sender, EventArgs e)
-        {
-            ListView.Focus();
-            RefreshButton.IsEnabled = false;
-            SyncIndicator.IsRunning = true;
-            SyncIndicator.IsVisible = true;
-            Task.Run(async () =>
-            {
-                List<Task> tasks = new List<Task>();
-                foreach (var viewmodel in readingListBacking.AllSafe)
-                {
-                    await RefreshSemaphore.WaitAsync();
-
-                    tasks.Add(Task.Run(async () => {
-                        await RefreshAsync(viewmodel);
-                        RefreshSemaphore.Release();
-                    }));
-                }
-
-
-                await Task.WhenAll(tasks);
-
-                wpv.DoOnMainThread(() =>
-                {
-                    RefreshButton.IsEnabled = true;
-                    SyncIndicator.IsRunning = false;
-                    SyncIndicator.IsVisible = false;
-                    PageChange(wpv.Current);
-                });
-            });
-        }
-
-        public void OnShowHidden(object sender, EventArgs e)
-        {
-            readingListBacking.ShowHidden = !readingListBacking.ShowHidden;
-            ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
-        }
-
-        public void OnShowTags(object sender, EventArgs e)
-        {
-            TagsVisible = !TagsVisible;
-            ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
-        }
-
-        bool tags_visible = false;
-        public bool TagsVisible
-        {
-            get { return tags_visible; }
-            set
-            {
-                if (tags_visible != value)
-                {
-                    tags_visible = value;
-                    readingListBacking.ForEachInAll((item) => item.TagsVisible = tags_visible);
-                }
-            }
-        }
-
-
-        public void OnClose(object sender, EventArgs e)
-        {
-            IsOnScreen = false;
         }
 
         public async void SyncToServerAsync()

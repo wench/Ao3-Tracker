@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-            x:Class="Ao3TrackReader.Controls.ReadingListView">
+            x:Class="Ao3TrackReader.Controls.ReadingListView" x:Name="root">
     <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
@@ -13,15 +13,16 @@
                 </ContentView>
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End" />
             </StackLayout>
-            <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" ItemSelected="OnSelection" Margin="4,0,0,0" x:Name="ListView">
+            <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" ItemSelected="OnSelection" Margin="4,0,0,0"
+                      x:Name="ListView">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
+                        <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing" Disappearing="OnCellDisappearing">
                             <ViewCell.ContextActions>
-                                <local:RLMenuItem Text="Open at Last Location" Clicked="OnMenuOpenLast" CommandParameter="{Binding .}" Filter="MenuOpenLastFilter"/>
-                                <MenuItem Text="Open"   Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open at Last Location" Command="{Binding MenuOpenLastCommand, Source={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open"    Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Refresh" Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
-                                <MenuItem Text="Delete" Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
+                                <MenuItem Text="Delete"  Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
                             </ViewCell.ContextActions>
                             <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
                                 <Grid.ColumnDefinitions>
