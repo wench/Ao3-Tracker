@@ -7,6 +7,7 @@
     <!-- @if BROWSER='Edge' -->
     <script type="text/javascript" src="edge.js"></script>
     <!-- @endif -->
+    <script type="text/javascript" src="browser.js"></script>
     <script type="text/javascript" src="options.js"></script>
     <style>
         form {
@@ -26,14 +27,14 @@
         <h3>User login</h3>
         <p><label>Username:</label> <input type="text" name="username" /> <span class="errors"></span></p>
         <p><label>Password:</label> <input type="password" name="password" /> <span class="errors"></span></p>
-        <p><input type="submit" /> <span class="errors"></span></p>
+        <p><input type="submit" value="Login"/> <span class="errors"></span></p>
     </form>
     <form id="create">
         <p><label>Username:</label> <input type="text" name="username" /> <span class="errors"></span></p>
         <p><label>Password:</label> <input type="password" name="password" /> <span class="errors"></span></p>
         <p><label>Password (verify):</label> <input type="password" name="verify" /> <span class="errors"></span></p>
         <p><label>Email Address (optional):</label> <input type="email" name="email" /> <span class="errors"></span></p>
-        <p><input type="submit" /> </p>
+        <p><input type="submit" value="Create" /> </p>
     </form>
     <form id="errors">
         <input type="checkbox" value="Show background error messages" />
