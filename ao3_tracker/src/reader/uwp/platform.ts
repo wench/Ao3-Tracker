@@ -100,7 +100,7 @@ namespace Ao3Track {
         }
 
         export let Marshalled = {
-            getWorkChaptersAsync(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void): void {
+            getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void): void {
                 Ao3TrackHelperUWP.getWorkChaptersAsync(works).then((result) => {
                     callback(ToAssocArray<IWorkChapter>(result));
                 });

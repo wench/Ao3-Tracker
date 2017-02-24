@@ -44,8 +44,8 @@ function scripts() {
         .pipe(sourcemaps.init())
         .pipe(ts(tsOptions_ES6))
         .pipe(sourcemaps.write('src-maps'))
-        .pipe(gulp.dest('build/chrome'))
-        .pipe(gulp.dest('build/edge'));
+        .pipe(gulp.dest('build/browser/chrome'))
+        .pipe(gulp.dest('build/browser/edge'));
 }
 gulp.task('scripts', scripts);
 
@@ -100,27 +100,27 @@ function styles() {
         .pipe(sourcemaps.init())
         .pipe(less())
         .pipe(sourcemaps.write('src-maps'))
-        .pipe(gulp.dest('build/edge'))
-        .pipe(gulp.dest('build/chrome'));
+        .pipe(gulp.dest('build/browser/edge'))
+        .pipe(gulp.dest('build/browser/chrome'));
 }
 gulp.task('styles', styles);
 
 function images() {
     return gulp.src('src/browser/*.png')
         .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
-        .pipe(gulp.dest('build/edge'))
-        .pipe(gulp.dest('build/chrome'));
+        .pipe(gulp.dest('build/browser/edge'))
+        .pipe(gulp.dest('build/browser/chrome'));
 }
 gulp.task('images', images);
 
 function pages() {
     var edge = gulp.src('src/browser/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' } }))
-        .pipe(gulp.dest('build/edge'));
+        .pipe(gulp.dest('build/browser/edge'));
 
     var chrome = gulp.src('src/browser/*.html')
         .pipe(preprocess({ context:  {  BROWSER: 'Chrome' } }))
-        .pipe(gulp.dest('build/chrome'));
+        .pipe(gulp.dest('build/browser/chrome'));
 
     return merge(edge, chrome);
 }
@@ -128,10 +128,10 @@ gulp.task('pages', pages);
 
 function extras() {
     var edge = gulp.src('src/browser/edge/**/*')
-        .pipe(gulp.dest('build/edge'));
+        .pipe(gulp.dest('build/browser/edge'));
 
     var chrome = gulp.src('src/browser/chrome/**/*')
-        .pipe(gulp.dest('build/chrome'));
+        .pipe(gulp.dest('build/browser/chrome'));
 
     return merge(edge, chrome);
 }
@@ -139,19 +139,19 @@ gulp.task('extras', extras);
 
 function libs() {
     return gulp.src('src/lib/**/*')
-        .pipe(gulp.dest('build/edge/lib'))
-        .pipe(gulp.dest('build/chrome/lib'));
+        .pipe(gulp.dest('build/browser/edge/lib'))
+        .pipe(gulp.dest('build/browser/chrome/lib'));
 }
 gulp.task('libs', libs);
 
 function json() {
     var edge = gulp.src('src/browser/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Edge' }, extension: 'js' }))
-        .pipe(gulp.dest('build/edge'));
+        .pipe(gulp.dest('build/browser/edge'));
 
     var chrome = gulp.src('src/browser/*.json')
         .pipe(preprocess({ context:  {  BROWSER: 'Chrome' }, extension: 'js' }))
-        .pipe(gulp.dest('build/chrome'));
+        .pipe(gulp.dest('build/browser/chrome'));
 
     return merge(edge, chrome);
 }

@@ -1,4 +1,5 @@
 namespace Ao3Track {
+
     const $ = jQuery;
 
     // Enable swipe left to go to next page
@@ -288,7 +289,7 @@ namespace Ao3Track {
     Ao3Track.GetWorkChapters(works, (it) => {
         for (let i = 0; i < $works.length && i < works.length; i++) {
             if (works[i] in it) {
-                let workchap = it[works[i]];
+                let workchap = it[works[i]] || { } ;
                 if (works[i] === workid) {
                     EnableLastLocationJump(workid, workchap);
                     if (jumpnow) { scrollToLocation(workid, workchap, false); }

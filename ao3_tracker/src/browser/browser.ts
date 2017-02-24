@@ -1,12 +1,13 @@
 /// <reference path="../../typings/globals/chrome/index.d.ts" />
 
 namespace Ao3Track {
-    export function GetWorkChapters(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void) {
+
+    GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => {
         let msg: GetWorkChaptersMessage = { type: "GET", data: works };
         chrome.runtime.sendMessage(msg, callback);
     }
 
-    export function SetWorkChapters(workchapters: { [key: number]: IWorkChapter; }) {
+    SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
         let msg: SetWorkChaptersMessage = { type: "SET", data: workchapters };
         chrome.runtime.sendMessage(msg);
     }
@@ -26,7 +27,7 @@ namespace Ao3Track {
         chrome.runtime.sendMessage(req, callback);
     }
 
-    export function SetNextPage(uri: string) {
+    SetNextPage = (uri: string) => {
         let $e = jQuery('head link[rel=next]');
         if ($e.length > 0) {
             $e.attr('href', uri);
@@ -35,7 +36,7 @@ namespace Ao3Track {
             jQuery('<link rel="next"></link>').attr('href', uri).appendTo('head');
         }
     }
-    export function SetPrevPage(uri: string) {
+    SetPrevPage = (uri: string) => {
         let $e = jQuery('head link[rel=prev]');
         if ($e.length > 0) {
             $e.attr('href', uri);
@@ -56,12 +57,12 @@ namespace Ao3Track {
         });
     });
 
-    export function DisableLastLocationJump() {
+    DisableLastLocationJump = () => {
         $('#ao3t-last-loc').remove();
     }
 
     let curLastLoc: IWorkChapter | null = null;
-    export function EnableLastLocationJump(workid: number, lastloc: IWorkChapter) {
+    EnableLastLocationJump = (workid: number, lastloc: IWorkChapter) => {
         if (curLastLoc === null) {
             $('<li><a href="#" id="ao3t-last-loc">Jump to previous</a></li>').appendTo($actions_ul).click((eventObject) => {
                 eventObject.preventDefault();
@@ -72,7 +73,7 @@ namespace Ao3Track {
         curLastLoc = lastloc;
     }
 
-    export function SetCurrentLocation(current : IWorkChapterEx)
+    SetCurrentLocation = (current : IWorkChapterEx) => void
     {
     }
 

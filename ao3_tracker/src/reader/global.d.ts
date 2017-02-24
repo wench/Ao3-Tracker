@@ -1,6 +1,16 @@
-namespace Ao3Track {
+declare namespace Ao3Track {
+    export interface IPageTitle
+    {
+        title: string;
+        chapter?: string | null;
+        chaptername?: string | null;
+        authors?: string[]  | null;
+        fandoms?: string[] | null;
+        primarytag?: string | null;
+    }    
+    
     export interface IAo3TrackHelper {
-        getWorkChaptersAsync(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void) : void;
+        getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) : void;
 
         setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void;
 
@@ -32,5 +42,5 @@ namespace Ao3Track {
         pixelScale : number;
     }
 
-    export declare var Helper : Ao3Track.IAo3TrackHelper;
+    export var Helper : Ao3Track.IAo3TrackHelper;
 }

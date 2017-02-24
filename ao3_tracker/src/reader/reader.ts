@@ -1,31 +1,31 @@
 
 namespace Ao3Track {
-    export function GetWorkChapters(works: number[], callback: (workchapters: GetWorkChaptersMessageResponse) => void) {
+    GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter } ) => void) => {
         Ao3Track.Helper.getWorkChaptersAsync(works, callback);
     }
 
-    export function SetWorkChapters(workchapters: { [key: number]: IWorkChapter; }) {
+    SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
         Ao3Track.Helper.setWorkChapters(workchapters);
     }
 
-    export function SetNextPage(uri: string) {
+    SetNextPage = (uri: string) => {
         Ao3Track.Helper.nextPage = uri;
     }
     let $next = jQuery('head link[rel=next]');
     if ($next.length > 0) { SetNextPage(($next[0] as HTMLAnchorElement).href); }
 
-    export function SetPrevPage(uri: string) {
+    SetPrevPage = (uri: string) => {
         Ao3Track.Helper.prevPage = uri;
     }
     let $prev = jQuery('head link[rel=prev]');
     if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
 
-    export function DisableLastLocationJump() {
+    DisableLastLocationJump = () => {
         Ao3Track.Helper.jumpToLastLocationEnabled = false;
         Ao3Track.Helper.onjumptolastlocationevent = null;
-    }
+    };
 
-    export function EnableLastLocationJump(workid: number, lastloc: IWorkChapter) {
+    EnableLastLocationJump = (workid: number, lastloc: IWorkChapter) => {
         Ao3Track.Helper.onjumptolastlocationevent = (ev) => {
             if (Boolean(ev)) {
                 GetWorkChapters([workid], (workchaps) => { 
@@ -38,7 +38,7 @@ namespace Ao3Track {
             }
         };
         Ao3Track.Helper.jumpToLastLocationEnabled = true;
-    }
+    };
 
     // Font size up/down support 
     let updatefontsize = () => {
@@ -50,8 +50,7 @@ namespace Ao3Track {
     Ao3Track.Helper.onalterfontsizeevent = updatefontsize;
     updatefontsize();
 
-    export function SetCurrentLocation(current : IWorkChapterEx)
-    {
+    SetCurrentLocation = (current : IWorkChapterEx) => {
         Ao3Track.Helper.currentLocation = current;
     }
 
