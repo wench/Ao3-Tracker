@@ -453,6 +453,35 @@ namespace Ao3TrackReader.Controls
             });
         }
 
+        public Task<IDictionary<string, bool>> AreUrlsInListAsync(string[] urls)
+        {
+            return wpv.DoOnMainThreadAsync(() =>
+            {
+                var urlmap = new Dictionary<string, string>();
+                IDictionary<string, bool> result = new Dictionary<string, bool>();
+
+                foreach (var url in urls)
+                {
+                    var uri = Data.Ao3SiteDataLookup.ReadingListlUri(url);
+                    if (uri != null) urlmap[uri.AbsoluteUri] = url;
+                    result[url] = false;
+                }
+
+                readingListBacking.ForEachInAll((m) =>
+                {
+                    if (urlmap.TryGetValue(m.Uri.AbsoluteUri,out var url))
+                    {
+                        result[url] = true;
+                        urlmap.Remove(m.Uri.AbsoluteUri);
+                        if (urlmap.Count == 0) return true;
+                    }
+                    return false;
+                });
+
+                return result;
+            });
+        }
+
         private void Viewmodel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var viewmodel = (Models.Ao3PageViewModel)sender;

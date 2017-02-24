@@ -149,5 +149,12 @@ namespace Ao3TrackReader
             return Windows.UI.Color.FromArgb((byte)(color.A * 255), (byte)(color.R * 255), (byte)(color.G * 255), (byte)(color.B * 255));
         }
 #endif
+
+#if !WINDOWS_UWP
+        public static Task<T> AsAsyncOperation<T>(this Task<T> task)
+        {
+            return task;
+        }
+#endif
     }
 }

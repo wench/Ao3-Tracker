@@ -6,9 +6,9 @@ namespace Ao3Track {
     }
 
     // Convert a UTF8 string to UTF16 (expect trouble if the input isn't valid utf8)
-    function utf8_to_utf16(s: string): string {
-        return decodeURIComponent(escape(s));
-    }
+    //function utf8_to_utf16(s: string): string {
+    //    return decodeURIComponent(escape(s));
+    //}
 
     class WorkChapter implements IWorkChapterTS {
         number: number;
@@ -31,8 +31,7 @@ namespace Ao3Track {
 
         IsNewer(newitem: IWorkChapter): boolean {
 
-            if (newitem.seq !== null)
-            {
+            if (newitem.seq !== null) {
                 if (newitem.seq > this.seq) { return true; }
                 else if (newitem.seq < this.seq) { return false; }
             }
@@ -47,8 +46,7 @@ namespace Ao3Track {
         }
 
         IsNewerOrSame(newitem: IWorkChapter): boolean {
-            if (newitem.seq !== null)
-            {
+            if (newitem.seq !== null) {
                 if (newitem.seq > this.seq) { return true; }
                 else if (newitem.seq < this.seq) { return false; }
             }
@@ -103,6 +101,10 @@ namespace Ao3Track {
             onSyncFromServer[i](success);
         }
         onSyncFromServer = [];
+    }
+
+    export function syncingDisabled() : boolean {
+        return serversync === SyncState.Disabled;
     }
 
     function delayedsync(timeout: number): void {
@@ -309,12 +311,11 @@ namespace Ao3Track {
         window.setInterval(dosync, 1000 * 60 * 60 * 6);
     });
 
-    export function SyncReadingListAsync(srl: IServerReadingList) : Promise<IServerReadingList|null>
-    {
-        return new Promise<IServerReadingList|null>((resolve) => {
+    export function SyncReadingListAsync(srl: IServerReadingList): Promise<IServerReadingList | null> {
+        return new Promise<IServerReadingList | null>((resolve) => {
             if (authorization.username === null || authorization.username === "" || authorization.credential === null || authorization.credential === "" || serversync === SyncState.Disabled) {
                 resolve(null);
-                return;                
+                return;
             }
 
             jQuery.ajax({
@@ -331,11 +332,32 @@ namespace Ao3Track {
                 success: function (items: IServerReadingList, textStatus: string, jqXHR: JQueryXHR) {
                     resolve(items);
                 }
-            });                    
-        });        
+            });
+        });
     }
 
-    export function processMessage(request: MessageType, sender: chrome.runtime.MessageSender|null, sendResponse: (response: any) => void) {
+
+    let messageHandlers : ((request: any, sendResponse: (response: any) => void)=>boolean)[] = [];
+    export function addMessageHandler(handler : (request: any, sendResponse: (response: any) => void)=>boolean) 
+    {
+         messageHandlers.push(handler);
+    }
+
+    export function handleMessage(request: any, sendResponse: (response: any) => void) : boolean
+    {
+        let responseSent = false;
+        
+        for (let handler of messageHandlers)
+        {
+            let res = handler(request,(response) => { responseSent = true; sendResponse(response); });
+            if (res || responseSent) {
+                return res;
+            }
+        }
+        return false;
+    }
+
+    addMessageHandler((request: MessageType, sendResponse: (response: any) => void) => {
         switch (request.type) {
             case 'GET':
                 {
@@ -365,11 +387,11 @@ namespace Ao3Track {
                         if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
                             // Do a delayed since if we finished a chapter, or started a new one 
                             if (!(id in storage) || request.data[id].location === null || request.data[id].location === 0 ||
-                                 request.data[id].chapterid > storage[id].chapterid || (request.data[id].seq||0) > storage[id].seq) {
+                                request.data[id].chapterid > storage[id].chapterid || (request.data[id].seq || 0) > storage[id].seq) {
                                 do_delayed = true;
                             }
-                            let seq  = request.data[id].seq;
-                            if (seq === null && id in storage) { 
+                            let seq = request.data[id].seq;
+                            if (seq === null && id in storage) {
                                 seq = storage[id].seq;
                             }
 
@@ -479,10 +501,10 @@ namespace Ao3Track {
                         }
                     });
                 }
-                return true;              
+                return true;
         };
         return false;
-    }
+    });
 
-    chrome.runtime.onMessage.addListener(processMessage);
+    chrome.runtime.onMessage.addListener((request,sender,response) => { return handleMessage(request,response); });
 }

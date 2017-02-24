@@ -17,10 +17,15 @@ using System.Runtime.CompilerServices;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
-#elif __ANDROID__
+using IAsyncOp_WorkChapterMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
+using IAsyncOp_StringBoolMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<string, bool>>;
+#else
+#if __ANDROID__
 using Android.OS;
 #endif
-
+using IAsyncOp_WorkChapterMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
+using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>>;
+#endif
 
 namespace Ao3TrackReader
 {
@@ -425,17 +430,15 @@ namespace Ao3TrackReader
 
         static object locker = new object();
 
-#if WINDOWS_UWP
-        public Windows.Foundation.IAsyncOperation<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(long[] works)
+        public IAsyncOp_WorkChapterMap GetWorkChaptersAsync(long[] works)
         {
             return App.Storage.getWorkChaptersAsync(works).AsAsyncOperation();
         }
-#else
-        public Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(long[] works)
+
+        public IAsyncOp_StringBoolMap AreUrlsInReadingListAsync(string[] urls)
         {
-            return App.Storage.getWorkChaptersAsync(works);
+            return ReadingList.AreUrlsInListAsync(urls).AsAsyncOperation();
         }
-#endif
 
         public bool IsMainThread
         {

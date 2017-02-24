@@ -39,7 +39,8 @@ declare namespace Ao3Track {
 
         currentLocation: IWorkChapterEx | null;
         pageTitle : IPageTitle | null;
-        pixelScale : number;
+
+        areUrlsInReadingListAsync : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;        
     }
 
     export var Helper : Ao3Track.IAo3TrackHelper;

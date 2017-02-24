@@ -49,7 +49,14 @@ declare namespace Ao3Track {
     }
     type SetDoSyncMessageResponse = boolean;
 
-
     type MessageType = GetWorkChaptersMessage | SetWorkChaptersMessage | UserCreateMessage | UserLoginMessage | DoSyncMessage;
+
+    interface IsInReadingListMessage {
+        type: 'RL_ISINLIST';
+        data: string[];
+    }
+    type IsInReadingListMessageResponse = { [key: string]: boolean; };
+
+    type ReadingListMessageType = IsInReadingListMessage;
 
 }

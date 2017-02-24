@@ -159,7 +159,7 @@ namespace Ao3TrackReader
                 foreach (var g in this)
                 {
                     foreach (var e in g)
-                    {
+                    {   
                         action(e);
                     }
                 }
@@ -172,6 +172,17 @@ namespace Ao3TrackReader
                 foreach (var e in allItems.Keys)
                 {
                     action(e);
+                }
+            }
+        }
+        public void ForEachInAll(Func<T, bool> func)
+        {
+            lock (locker)
+            {
+                foreach (var e in allItems.Keys)
+                {
+                    if (func(e) == true)
+                        break;
                 }
             }
         }

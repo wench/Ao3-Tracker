@@ -88,21 +88,96 @@ namespace Ao3Track {
 
             currentLocation: WorkChapterExNative | null;
             pageTitle : PageTitleNative | null;
+
+            areUrlsInReadingListAsync(urls: string[]): WinJS.Promise<IMap<string, boolean>>;            
         }
 
-        export function ToAssocArray<V>(map: IIterable<IKeyValuePair<number, V>>): { [key: number]: V } {
-            let response: { [key: number]: V } = {};
-            for (let it = map.first(); it.hasCurrent; it.moveNext()) {
-                let i = it.current;
-                response[i.key] = i.value;
+        function PropKeyToNum(key: PropertyKey) : number|null
+        {
+            if (typeof key === "number") {
+                return key;
             }
-            return response;
+            else if (typeof key === "string") {
+                let num = Number(key);
+                if (num.toString() === key) return num;
+            }
+            return null;
+        }
+
+        function PropKeyToString(key: PropertyKey) : string|null
+        {
+            if (typeof key === "number") {
+                return key.toString();
+            }
+            else if (typeof key === "string") {
+                return key;
+            }
+            return null;
+        }
+
+        function GetIMapProxy<V, I extends string|number>(map: IMap<I,V>, conv: (key: PropertyKey)=>(I|null)) : any
+        {
+            let proxy = new Proxy(map, {
+                get: (oTarget, sKey) => {
+                    let key = conv(sKey);
+                    if (key === null) return undefined;
+                    return oTarget.hasKey(key) ? oTarget.lookup(key) : undefined;
+                },
+                set:(oTarget, sKey, vValue) => {
+                    let key = conv(sKey);
+                    if (key === null) return false;
+                    oTarget.insert(key,vValue);
+                    return true;
+                },
+                deleteProperty: (oTarget, sKey) => {
+                    let key = conv(sKey);
+                    if (key === null) return false;
+                    oTarget.remove(key);
+                    return true;
+                },
+                enumerate: (oTarget) => {
+                    let keys : PropertyKey[] = [];
+                    for (let it = oTarget.first(); it.hasCurrent; it.moveNext()) {
+                        keys.push(it.current.key);
+                    }                    
+                    return keys;
+                },
+                ownKeys: (oTarget) => {
+                    let keys : PropertyKey[] = [];
+                    for (let it = oTarget.first(); it.hasCurrent; it.moveNext()) {
+                        keys.push(it.current.key);
+                    }                    
+                    return keys;
+                },
+                has: (oTarget, sKey) => {
+                    let key = conv(sKey);
+                    if (key === null) return false;
+                    return oTarget.hasKey(key);
+                },
+                defineProperty:  (oTarget, sKey, oDesc) => {                    
+                    return false;
+                },
+                getOwnPropertyDescriptor: (oTarget, sKey) => {
+                    let v = this.get(oTarget,sKey);
+                    if (v === undefined) return undefined as any;
+                    
+                    let res : PropertyDescriptor = {
+                        value: v,
+                        writable: true,
+                        enumerable: true,
+                        configurable: false
+                    };
+                    return res;
+                }    
+            });
+
+            return proxy;
         }
 
         export let Marshalled = {
             getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void): void {
                 Ao3TrackHelperUWP.getWorkChaptersAsync(works).then((result) => {
-                    callback(ToAssocArray<IWorkChapter>(result));
+                    callback(GetIMapProxy(result,PropKeyToNum));
                 });
             },
 
@@ -142,7 +217,14 @@ namespace Ao3Track {
                     Object.assign(obj,value);                                    
                     Ao3TrackHelperUWP.pageTitle = obj;  
                 }                
+            },
+
+            areUrlsInReadingListAsync(urls: string[], callback: (result: { [key:string]:boolean})=> void) : void {
+                Ao3TrackHelperUWP.areUrlsInReadingListAsync(urls).then((result) => {
+                    callback(GetIMapProxy(result,PropKeyToString));
+                });
             }
+            
         };
 
         for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelperUWP)))

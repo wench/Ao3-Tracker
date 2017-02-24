@@ -6,36 +6,85 @@ namespace Ao3Track {
             paths: { }
         };
 
-        function syncToServerAsync() {
-
-            let srl : IServerReadingList = { last_sync: readingListBacking.last_sync, paths: { } };
-            for(let uri in readingListBacking.paths) {
-                let rle = readingListBacking.paths[uri];
-                srl.paths[uri] = rle.timestamp;
+        let readingListSynced = false;
+        let readingListSyncing = false;
+        let onreadinglistsync: Array<(success: boolean) => void> = [];
+        
+        function do_onreadinglistsync(success: boolean) {
+            for (let i = 0; i < onreadinglistsync.length; i++) {
+                onreadinglistsync[i](success);
             }
+            onreadinglistsync = [];
+        }
 
-            Ao3Track.SyncReadingListAsync(srl).then((srl) => {
-                if (srl === null) {
-                    return;
+        function syncToServerAsync() : Promise<boolean> {            
+            readingListSyncing = true;
+            return new Promise<boolean> ((resolve) => {
+                let srl : IServerReadingList = { last_sync: readingListBacking.last_sync, paths: { } };
+                for(let uri in readingListBacking.paths) {
+                    let rle = readingListBacking.paths[uri];
+                    srl.paths[uri] = rle.timestamp;
                 }
-                
-                for(let uri in srl.paths) {
-                    let v = srl.paths[uri];
-                    if (v === -1) {
-                        delete readingListBacking.paths[uri];
+
+                Ao3Track.SyncReadingListAsync(srl).then((srl) => {
+                    if (srl === null) {
+                        readingListSyncing = false;
+                        do_onreadinglistsync(false);
+                        resolve(false);
+                        return;
                     }
-                    else {
-                        if (readingListBacking.paths[uri] !== undefined) {
-                            readingListBacking.paths[uri].timestamp = v;
+                    
+                    for(let uri in srl.paths) {
+                        let v = srl.paths[uri];
+                        if (v === -1) {
+                            delete readingListBacking.paths[uri];
                         }
                         else {
-                            readingListBacking.paths[uri] = { uri: uri, timestamp:v};                
+                            if (readingListBacking.paths[uri] !== undefined) {
+                                readingListBacking.paths[uri].timestamp = v;
+                            }
+                            else {
+                                readingListBacking.paths[uri] = { uri: uri, timestamp:v};                
+                            }
                         }
                     }
-                }
-                readingListBacking.last_sync = srl.last_sync;
+                    readingListBacking.last_sync = srl.last_sync;
+                    readingListSynced = true;
+                    readingListSyncing = false;
+                    do_onreadinglistsync(true);
+                    resolve(true);
+                });
             });
         }    
+
+        function syncIfNeededAsync() : Promise<boolean>
+        {
+            return new Promise<boolean> ((resolve) => {
+                if (Ao3Track.syncingDisabled()) 
+                {
+                    resolve(readingListSynced);
+                    return;
+                }
+
+                if (readingListSyncing) {
+                    onreadinglistsync.push((result)=>{
+                        resolve(result);
+                        return;
+                    });
+                    return;
+                }
+
+                if (readingListSynced) {
+                    resolve(true);
+                    return;
+                }
+
+                syncToServerAsync().then((result) => {
+                    resolve(result);
+                    return;
+                });
+            });
+        }
 
         //  Quick and dirty add to reading list
         export function add(href: string|URL) : void
@@ -48,9 +97,6 @@ namespace Ao3Track {
                 readingListBacking.paths[uri.href] = {uri: uri.href, timestamp:Date.now()};
                 syncToServerAsync();                
             }
-            Ao3Track.Data.lookupAsync([uri.href]).then((value)=>{
-                debugger;
-            });
         }
 
         // Context menus!
@@ -69,6 +115,33 @@ namespace Ao3Track {
                 }
             });
         }
+
+        Ao3Track.addMessageHandler((request: IsInReadingListMessage, sendResponse: (response: any) => void) => {
+            switch(request.type)
+            {
+                case "RL_ISINLIST":
+                {
+                    syncIfNeededAsync().then((result) => {
+                        let response : { [key: string]: boolean;  }= { };
+                        for (let href of request.data)
+                        {
+                            let uri = Ao3Track.Data.readingListlUri(href);
+                            if (uri !== null && Object.keys(readingListBacking.paths).indexOf(uri.href) !== -1) {
+                                response[href] = true;
+                            }            
+                            else {
+                                response[href] = false;
+                            }                
+                        }
+                        sendResponse(response);
+                    });
+                }
+                return true;
+            }
+            return false;
+        });
+
+        
     }
 }
 

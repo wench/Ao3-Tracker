@@ -29,4 +29,5 @@ declare namespace Ao3Track {
     export let DisableLastLocationJump : () => void;
     export let EnableLastLocationJump : (workid: number, lastloc: IWorkChapter) => void;
     export let SetCurrentLocation : (current : IWorkChapterEx) => void;    
+    export let AreUrlsInReadingList : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;
 }

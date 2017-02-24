@@ -5,27 +5,27 @@ namespace Ao3Track {
     GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => {
         let msg: GetWorkChaptersMessage = { type: "GET", data: works };
         chrome.runtime.sendMessage(msg, callback);
-    }
+    };
 
     SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
         let msg: SetWorkChaptersMessage = { type: "SET", data: workchapters };
         chrome.runtime.sendMessage(msg);
-    }
+    };
 
     export function DoSync(callback: (result: boolean) => void) {
         let msg: DoSyncMessage = { type: "DO_SYNC" };
         chrome.runtime.sendMessage(msg, callback);
-    }
+    };
 
     export function UserLogin(credentials: IUserLoginData, callback: (errors: FormErrorList) => void) {
         let req: UserLoginMessage = { type: "USER_LOGIN", data: credentials };
         chrome.runtime.sendMessage(req, callback);
-    }
+    };
 
     export function UserCreate(credentials: IUserCreateData, callback: (errors: FormErrorList) => void) {
         let req: UserCreateMessage = { type: "USER_CREATE", data: credentials };
         chrome.runtime.sendMessage(req, callback);
-    }
+    };
 
     SetNextPage = (uri: string) => {
         let $e = jQuery('head link[rel=next]');
@@ -35,7 +35,7 @@ namespace Ao3Track {
         else {
             jQuery('<link rel="next"></link>').attr('href', uri).appendTo('head');
         }
-    }
+    };
     SetPrevPage = (uri: string) => {
         let $e = jQuery('head link[rel=prev]');
         if ($e.length > 0) {
@@ -44,7 +44,7 @@ namespace Ao3Track {
         else {
             jQuery('<link rel="prev"></link>').attr('href', uri).appendTo('head');
         }
-    }
+    };
 
     let $actions = $('<div class=" actions" id="ao3t-actions"a></div>').appendTo("#outer");
     let $actions_ul = $('<ul></ul>').appendTo($actions);
@@ -59,7 +59,7 @@ namespace Ao3Track {
 
     DisableLastLocationJump = () => {
         $('#ao3t-last-loc').remove();
-    }
+    };
 
     let curLastLoc: IWorkChapter | null = null;
     EnableLastLocationJump = (workid: number, lastloc: IWorkChapter) => {
@@ -71,10 +71,13 @@ namespace Ao3Track {
             });
         }
         curLastLoc = lastloc;
-    }
+    };
 
-    SetCurrentLocation = (current : IWorkChapterEx) => void
-    {
-    }
+    SetCurrentLocation = (current : IWorkChapterEx) => {
+    };
 
+    AreUrlsInReadingList = (urls: string[], callback: (result: { [key:string]:boolean})=> void)  => {
+        let req: ReadingListMessageType = { type: "RL_ISINLIST", data: urls };
+        chrome.runtime.sendMessage(req, callback);        
+    };
 }

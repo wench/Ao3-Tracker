@@ -1,66 +1,13 @@
 // tslint:disable-next-line:no-var-keyword
 var Ao3TrackHelperWebkit: Ao3Track.Webkit.IAo3TrackHelperWebkit;
 
-interface ObjectConstructor
-{
-    assign(target : any, varArgs : any) : any;
-}
-
-if (typeof Object.assign !== 'function') {
-  Object.assign = function(target : any, varArgs : any) { // .length of function is 2
-    'use strict';
-    if (target === null) { // TypeError if undefined or null
-      throw new TypeError('Cannot convert undefined or null to object');
-    }
-
-    let to = Object(target);
-
-    for (let index = 1; index < arguments.length; index++) {
-      let nextSource = arguments[index];
-
-      if (nextSource !== null) { // Skip over if undefined or null
-        for (let nextKey in nextSource) {
-          // Avoid bugs when hasOwnProperty is shadowed
-          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-            to[nextKey] = nextSource[nextKey];
-          }
-        }
-      }
-    }
-    return to;
-  };
-}
-
-interface String
-{
-    endsWith(searchString: string, position?: number) : boolean;
-    startsWith(searchString: string, position?: number) : boolean;
-}
-
-if (!String.prototype.endsWith) {
-  String.prototype.endsWith = function(searchString: string, position?: number) {
-      let subjectString : string = this.toString();
-      if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
-        position = subjectString.length;
-      }
-      position -= searchString.length;
-      let lastIndex = subjectString.lastIndexOf(searchString, position);
-      return lastIndex !== -1 && lastIndex === position;
-  };
-}
-
-if (!String.prototype.startsWith) {
-    String.prototype.startsWith = function(searchString: string, position?: number){
-      position = position || 0;
-      return this.substr(position, searchString.length) === searchString;
-  };
-}
 namespace Ao3Track {
     export namespace Webkit {
         type jsonNumberArray = string;
         type jsonStringArray = string;
         type jsonWorkChapEx = string;
         type jsonWorkChapList = string;
+        type jsonWorkStringBoolList = string;
         type jsonPageTitle = string;
         type hCallback<T> = number;
         
@@ -110,11 +57,13 @@ namespace Ao3Track {
 
             get_PageTitle(): jsonPageTitle|null { return null; }
             set_PageTitle(value: jsonPageTitle|null): void {}
+
+            areUrlsInReadingListAsync(works: jsonStringArray, callback: hCallback<jsonWorkStringBoolList>): void { }            
         }
 
         export let Marshalled = {           
             getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void): void {
-                let hCallback = Ao3TrackCallbacks.Add(callback);
+                let hCallback = Ao3TrackCallbacks.Add(callback, true);
                 Ao3TrackHelperWebkit.getWorkChaptersAsync(JSON.stringify(works),hCallback);
             },
 
@@ -157,7 +106,12 @@ namespace Ao3Track {
             set pageTitle(value :IPageTitle | null) { 
                 if (value === null) { Ao3TrackHelperWebkit.set_PageTitle(null); }
                 else { Ao3TrackHelperWebkit.set_PageTitle(JSON.stringify(value)); }             
-            }      
+            },
+
+            areUrlsInReadingListAsync(urls: string[], callback: (result: { [key:string]:boolean})=> void) : void {
+                let hCallback = Ao3TrackCallbacks.Add(callback, true);
+                Ao3TrackHelperWebkit.areUrlsInReadingListAsync(JSON.stringify(urls),hCallback);                
+            }            
         };
         let helperobj = new IAo3TrackHelperWebkit();
 

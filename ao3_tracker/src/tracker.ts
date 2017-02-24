@@ -14,11 +14,11 @@ namespace Ao3Track {
     const LOC_PARA_FRAC_MULTIPLER = 479001600;
 
     let $feedback_actions = $('#feedback > .actions');
-    let $chapter_text = $();    
+    let $chapter_text = $();
 
     let jumpnow = window.location.hash === "#ao3t:jump";
     if (jumpnow) {
-        history.replaceState({}, document.title, window.location.href.substr(0,window.location.href.indexOf('#')));
+        history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('#')));
     }
 
     let regex_work_url = /^(?:\/collections\/[^\/?#]+)?\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
@@ -27,7 +27,7 @@ namespace Ao3Track {
     let works: number[] = [];
     let $works = $();
 
-    export function scrollToLocation (workid: number, workchap: IWorkChapter, dojump? : boolean) {
+    export function scrollToLocation(workid: number, workchap: IWorkChapter, dojump?: boolean) {
         if (!$chapter_text) { return; }
 
         let had_chapter = false;
@@ -53,9 +53,9 @@ namespace Ao3Track {
             // Last chapter on page
             else if (index === ($chapter_text.length - 1) && workchap.location === null) {
                 console.log("Should scroll to: %i page bottom", workchap.number);
-                if ($feedback_actions.length) {  
+                if ($feedback_actions.length) {
                     $feedback_actions[0].scrollIntoView(false);
-                }                
+                }
                 return false;
             }
 
@@ -86,7 +86,7 @@ namespace Ao3Track {
             return false;
         });
 
-        if (had_chapter) { SetCurrentLocation(Object.assign({workid:workid},workchap)); }
+        if (had_chapter) { SetCurrentLocation(Object.assign({ workid: workid }, workchap)); }
 
         // Change page!
         if (!had_chapter && dojump) {
@@ -94,7 +94,7 @@ namespace Ao3Track {
         }
     };
 
-    export function updateLocation () {
+    export function updateLocation() {
         let workchapter: IWorkChapter | null = null;
 
         // Find which $userstuff is at the centre of the screen
@@ -108,7 +108,7 @@ namespace Ao3Track {
                 number: data.num,
                 chapterid: data.id,
                 location: null,
-                seq: null                
+                seq: null
             };
         }
         // First chapter hasn't reached centre yet? Declare entire thing unread
@@ -118,7 +118,7 @@ namespace Ao3Track {
                 number: data.num,
                 chapterid: data.id,
                 location: 0,
-                seq: null,                
+                seq: null,
             };
         }
         else {
@@ -210,7 +210,7 @@ namespace Ao3Track {
         }
 
         let last_location = updateLocation();
-        if (last_location !== null) { SetCurrentLocation(Object.assign({workid:workid},last_location)); }
+        if (last_location !== null) { SetCurrentLocation(Object.assign({ workid: workid }, last_location)); }
         let last_set_location = last_location;
         if (last_set_location) {
             SetWorkChapters({ [workid]: last_set_location });
@@ -218,15 +218,14 @@ namespace Ao3Track {
 
         $(window).scroll((eventObject) => {
             let new_location = updateLocation();
-            if (new_location !== null) { SetCurrentLocation(Object.assign({workid:workid},new_location)); }
+            if (new_location !== null) { SetCurrentLocation(Object.assign({ workid: workid }, new_location)); }
             if (new_location && (!last_location || new_location.number > last_location.number ||
-                 (new_location.number === last_location.number && last_location.location !== null && 
-                  (new_location.location === null || new_location.location > last_location.location))))
-            { 
+                (new_location.number === last_location.number && last_location.location !== null &&
+                    (new_location.location === null || new_location.location > last_location.location)))) {
                 last_location = new_location;
 
                 if (last_location.location === null) {
-                    EnableLastLocationJump(workid,last_location);
+                    EnableLastLocationJump(workid, last_location);
                     SetWorkChapters({ [workid]: last_set_location = last_location });
                 }
             }
@@ -234,10 +233,9 @@ namespace Ao3Track {
 
         setInterval(() => {
             if (last_location && (!last_set_location || last_location.number > last_set_location.number ||
-                 (last_location.number === last_set_location.number && last_set_location.location !== null &&
-                  (last_location.location === null || last_location.location > last_set_location.location)))) 
-            {
-                EnableLastLocationJump(workid,last_location);
+                (last_location.number === last_set_location.number && last_set_location.location !== null &&
+                    (last_location.location === null || last_location.location > last_set_location.location)))) {
+                EnableLastLocationJump(workid, last_location);
                 SetWorkChapters({ [workid]: last_set_location = last_location });
             }
         }, 5000);
@@ -259,8 +257,7 @@ namespace Ao3Track {
 
     let regex_chapter_count = /^(\d+)\//;
 
-    export function ExtendWorkSummary($work: JQuery, workid: number, workchap : IWorkChapter)
-    {
+    export function ExtendWorkSummary($work: JQuery, workid: number, workchap: IWorkChapter, inreadinglist : boolean) {
         $work.find(".stats .lastchapters").remove();
 
         let $chapters = $work.find(".stats dd.chapters");
@@ -283,20 +280,39 @@ namespace Ao3Track {
                 let unread = chapter_count - chapters_finished;
                 $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + "\xA0unread chapter" + (unread === 1 ? '' : 's') + '</a>)</span>');
             }
+
+            if (inreadinglist) {                
+                $blurb_heading.prepend('<abbr class="ao3-track-inlist" title="In Ao3Track Reading List">' + String.fromCodePoint(0x1F4DA) + "</abbr>");
+            }
         }
     }
 
-    Ao3Track.GetWorkChapters(works, (it) => {
+
+    let workchaps: { [key: number]: IWorkChapter } | null = null;
+    let readinglist: { [key: string]: boolean } | null = null;
+
+    function iterateWorks(workchaps: { [key: number]: IWorkChapter | undefined}, readinglist: { [key: string]: boolean| undefined}) {
         for (let i = 0; i < $works.length && i < works.length; i++) {
-            if (works[i] in it) {
-                let workchap = it[works[i]] || { } ;
+            let inreadinglist = readinglist["http://archiveofourown.org/works/"+works[i]] || false;
+            if (inreadinglist || works[i] in workchaps) {
+                let workchap = workchaps[works[i]] || { number: 1, chapterid: 0, location: 0, seq: 0};
                 if (works[i] === workid) {
                     EnableLastLocationJump(workid, workchap);
                     if (jumpnow) { scrollToLocation(workid, workchap, false); }
                 }
 
-                ExtendWorkSummary($($works[i]), works[i], workchap);
+                ExtendWorkSummary($($works[i]), works[i], workchap, inreadinglist);
             }
         }
+    }
+
+    Ao3Track.AreUrlsInReadingList(works.map((id) => "http://archiveofourown.org/works/"+id), (response) => {
+        readinglist = response;
+        if (workchaps !== null) iterateWorks(workchaps, readinglist);
+    });
+
+    Ao3Track.GetWorkChapters(works, (response) => {
+        workchaps = response;
+        if (readinglist !== null) iterateWorks(workchaps, readinglist);
     });
 }

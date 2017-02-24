@@ -163,5 +163,10 @@ namespace Ao3TrackReader.Helper
 
         public IWorkChapterEx CurrentLocation { get { return (IWorkChapterEx) handler.DoOnMainThread(() => handler.CurrentLocation); } set { handler.DoOnMainThread(() => { handler.CurrentLocation = value; }); } }
         public PageTitle PageTitle { get { return (PageTitle) handler.DoOnMainThread(() => handler.PageTitle); } set { handler.DoOnMainThread(() => { handler.PageTitle = value; }); } }
+
+        public IAsyncOperation<IDictionary<string, bool>> AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls)
+        {
+            return handler.AreUrlsInReadingListAsync(urls);
+        }
     }
 }

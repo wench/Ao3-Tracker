@@ -2,21 +2,21 @@
 namespace Ao3Track {
     GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter } ) => void) => {
         Ao3Track.Helper.getWorkChaptersAsync(works, callback);
-    }
+    };
 
     SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
         Ao3Track.Helper.setWorkChapters(workchapters);
-    }
+    };
 
     SetNextPage = (uri: string) => {
         Ao3Track.Helper.nextPage = uri;
-    }
+    };
     let $next = jQuery('head link[rel=next]');
     if ($next.length > 0) { SetNextPage(($next[0] as HTMLAnchorElement).href); }
 
     SetPrevPage = (uri: string) => {
         Ao3Track.Helper.prevPage = uri;
-    }
+    };
     let $prev = jQuery('head link[rel=prev]');
     if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
 
@@ -52,7 +52,11 @@ namespace Ao3Track {
 
     SetCurrentLocation = (current : IWorkChapterEx) => {
         Ao3Track.Helper.currentLocation = current;
-    }
+    };
+
+    AreUrlsInReadingList = (urls: string[], callback: (result: { [key:string]:boolean})=> void) => {
+        Ao3Track.Helper.areUrlsInReadingListAsync(urls,callback);
+    };
 
     function contextMenuHandler(ev: PointerEvent) {
         for (let target = ev.target as (HTMLElement|null); target && target !== document.body; target = target.parentElement) {

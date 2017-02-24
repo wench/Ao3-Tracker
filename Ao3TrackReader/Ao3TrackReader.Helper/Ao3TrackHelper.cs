@@ -5,8 +5,15 @@ using System.Runtime.InteropServices.WindowsRuntime;
 #if WINDOWS_UWP
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
+using IAsyncOp_WorkChapterMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
+using IAsyncOp_StringBoolMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<string, bool>>;
+using IAsyncOp_String = Windows.Foundation.IAsyncOperation<string>;
 #else 
 using System.Threading.Tasks;
+using IAsyncOperation = System.Threading.Tasks.Task;
+using IAsyncOp_WorkChapterMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
+using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>>;
+using IAsyncOp_String = System.Threading.Tasks.Task<string>;
 #endif
 
 namespace Ao3TrackReader.Helper
@@ -178,11 +185,7 @@ namespace Ao3TrackReader.Helper
         object DoOnMainThread(MainThreadFunc function);
         void DoOnMainThread(MainThreadAction function);
 
-#if WINDOWS_UWP
-        IAsyncOperation<IDictionary<long, WorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
-#else
-        Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync([ReadOnlyArray] long[] works);
-#endif
+        IAsyncOp_WorkChapterMap GetWorkChaptersAsync([ReadOnlyArray] long[] works);
         void SetWorkChapters(IDictionary<long, WorkChapter> works);
         bool JumpToLastLocationEnabled { get; set; }
         string NextPage { get; set; }
@@ -201,12 +204,10 @@ namespace Ao3TrackReader.Helper
         int FontSize { get; set; }
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
-#if WINDOWS_UWP
-        IAsyncOperation<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
-#else
-        Task<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
-#endif
+        IAsyncOp_String ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
         void AddToReadingList(string href);
         void SetCookies(string cookies);
+
+        IAsyncOp_StringBoolMap AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls);
     }
 }
