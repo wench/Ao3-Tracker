@@ -269,9 +269,9 @@ namespace Ao3TrackReader
                 DoOnMainThread(() =>
                 {
                     WorkChapter wc;
-                    if (workchaps.TryGetValue(workid, out wc) && wc.chapterid != 0)
+                    if (workchaps.TryGetValue(workid, out wc) && wc.Chapterid != 0)
                     {
-                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
+                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.Chapterid, "#ao3t:jump")));
                     }
                     else
                     {
@@ -554,9 +554,9 @@ namespace Ao3TrackReader
 
             lock (currentLocationLock)
             {
-                if (currentSavedLocation != null && currentLocation != null && works.TryGetValue(currentLocation.workid, out var workchap))
+                if (currentSavedLocation != null && currentLocation != null && works.TryGetValue(currentLocation.Workid, out var workchap))
                 {
-                    workchap.workid = currentLocation.workid;
+                    workchap.Workid = currentLocation.Workid;
                     UpdateCurrentSavedLocation(workchap);
                 }
             }
@@ -709,9 +709,9 @@ namespace Ao3TrackReader
                 lock (currentLocationLock)
                 {
                     currentLocation = value;
-                    if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
+                    if (currentLocation != null && currentLocation.Workid == currentSavedLocation?.Workid)
                     {
-                        forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                        forceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                         return;
                     }
                     else if (currentLocation == null)
@@ -726,10 +726,10 @@ namespace Ao3TrackReader
                     long workid = 0;
                     lock(currentLocationLock)
                     {
-                        if (currentLocation != null) workid = currentLocation.workid;
+                        if (currentLocation != null) workid = currentLocation.Workid;
                     }
                     var workchap = workid == 0 ? null : (await App.Storage.getWorkChaptersAsync(new[] { workid })).Select(kvp => kvp.Value).FirstOrDefault();
-                    if (workchap != null) workchap.workid = workid;
+                    if (workchap != null) workchap.Workid = workid;
                     UpdateCurrentSavedLocation(workchap);
                 });
             }
@@ -739,15 +739,15 @@ namespace Ao3TrackReader
         {
             lock (currentLocationLock)
             {
-                if (currentSavedLocation == null || currentSavedLocation.IsNewer(workchap))
+                if (currentSavedLocation == null || currentSavedLocation.LessThan(workchap))
                 {
                     currentSavedLocation = workchap;
                     Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                     {
                         lock (currentLocationLock)
                         {
-                            if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
-                                forceSetLocationButton.IsEnabled = currentLocation.IsNewer(currentSavedLocation);
+                            if (currentLocation != null && currentLocation.Workid == currentSavedLocation?.Workid)
+                                forceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                             else
                                 forceSetLocationButton.IsEnabled = false;
                         }
@@ -763,9 +763,9 @@ namespace Ao3TrackReader
             {
                 Task.Run(async () =>
                 {
-                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
-                    currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
-                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation });
+                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.Workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                    currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { Seq = (db_workchap?.Seq ?? 0) + 1 };
+                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.Workid] = currentSavedLocation });
                 });
             }
         }

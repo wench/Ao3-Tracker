@@ -65,16 +65,16 @@ namespace Ao3TrackReader.Helper
         {
             switch (classname)
             {
-                case "WorkChapter":
+                case "WorkChapterNative":
                     return new WorkChapter();
 
-                case "WorkChapterEx":
+                case "WorkChapterExNative":
                     return new WorkChapter();
 
-                case "WorkChapterMap":
+                case "WorkChapterMapNative":
                     return new Dictionary<long, WorkChapter>();
 
-                case "PageTitle":
+                case "PageTitleNative":
                     return new PageTitle();
             }
 
@@ -119,12 +119,12 @@ namespace Ao3TrackReader.Helper
 
         public string NextPage
         {
-            get { return handler.NextPage; }
+            get { return handler.NextPage ?? ""; }
             set { handler.DoOnMainThread(() => { handler.NextPage = value; }); }
         }
         public string PrevPage
         {
-            get { return handler.PrevPage; }
+            get { return handler.PrevPage ?? ""; }
             set { handler.DoOnMainThread(() => { handler.PrevPage = value; }); }
         }
 

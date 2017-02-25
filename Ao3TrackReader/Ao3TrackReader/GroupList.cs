@@ -322,7 +322,7 @@ namespace Ao3TrackReader
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var item = (T)sender;
-            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "SortOrder")
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Group" || e.PropertyName == "SortOrder" || e.PropertyName == "ShouldHide")
             {
                 lock (locker)
                 {

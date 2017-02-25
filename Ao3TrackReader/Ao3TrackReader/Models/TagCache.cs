@@ -12,15 +12,19 @@ namespace Ao3TrackReader.Models
             parents = new List<string>();
         }
 
-        [PrimaryKey]
+        [PrimaryKey, Column("name")]
         public string name { get; set; }
 
+        [Column("id")]
         public int id { get; set; }
 
+        [Column("actual")]
         public string actual { get; set; }
 
+        [Column("category")]
         public string category { get; set; }
 
+        [Column("expires")]
         public DateTime expires { get; set; }
 
 

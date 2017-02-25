@@ -1,3 +1,5 @@
+/// <reference path="../../typings/globals/chrome/index.d.ts" />
+
 declare namespace Ao3Track {
     interface IUserCreateData {
         username: string;
@@ -44,12 +46,22 @@ declare namespace Ao3Track {
     }
     type UserLoginMessageResponse = FormErrorList;
 
+    interface UserLogoutMessage {
+        type: 'USER_LOGOUT';
+    }
+    type UserLogoutMessageResponse = boolean;
+
+    interface UserNameMessage {
+        type: 'USER_NAME';
+    }
+    type UserNameMessageResponse = boolean;
+
     interface DoSyncMessage {
         type: 'DO_SYNC';
     }
-    type SetDoSyncMessageResponse = boolean;
+    type DoSyncMessageResponse = boolean;
 
-    type MessageType = GetWorkChaptersMessage | SetWorkChaptersMessage | UserCreateMessage | UserLoginMessage | DoSyncMessage;
+    type MessageType = GetWorkChaptersMessage | SetWorkChaptersMessage | UserCreateMessage | UserLoginMessage | UserLogoutMessage | UserNameMessage | DoSyncMessage;
 
     interface IsInReadingListMessage {
         type: 'RL_ISINLIST';

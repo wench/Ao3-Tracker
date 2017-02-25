@@ -13,7 +13,65 @@ span.mw_ao3track_unitconv {
 }
 
 #ao3t-options {
-    
+    form {
+        border: 1px solid black;
+        margin: 5px;
+    }
+
+    fieldset {
+        border: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    span.errors {
+        color: red;
+        font-weight: bold;
+    }
+
+    &.waiting {
+        #loggedin, #loginorcreate {
+            display: none;
+        }
+    }
+
+    &.loggedin {
+        #loggedin {
+            display: block;
+        }
+
+        #loginorcreate {
+            display: none;
+        }
+    }    
+
+    &.formcreateuser {
+        #loggedin {
+            display: none;
+        }
+
+        #loginorcreate {
+            display: block;
+
+            #createfields {
+                display: block;
+            }
+        }
+    }    
+
+    &.formloginuser {
+        #loggedin {
+            display: none;
+        }
+
+        #loginorcreate {
+            display: block;
+
+            #createfields {
+                display: none;
+            }
+        }
+    }    
 }
 
 #ao3t-actions {

@@ -11,7 +11,7 @@ const url = require('url');
 var tsOptions = {
     module: "none",
     noImplicitAny: true,
-    removeComments: false,
+    removeComments: true,
     preserveConstEnums: true,
     strictNullChecks: true
 };
@@ -33,9 +33,10 @@ var uwp_scripts = [
     'src/reader/uwp/*.ts',
     'src/reader/*.ts'
 ];
-var webkit_scripts = [
+var droid_scripts = [
     'src/*.ts',
     'src/reader/webkit/*.ts',
+    'src/reader/webkit/droid/*.ts',
     'src/reader/*.ts'
 ];
 
@@ -50,50 +51,53 @@ function scripts() {
 gulp.task('scripts', scripts);
 
 var reader = {
-    scripts: {
-        uwp: function reader_scripts_uwp() {
-            return gulp.src(uwp_scripts)
-                .pipe(sourcemaps.init())
-                .pipe(ts(tsOptions_ES6))
-                .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
-                .pipe(gulp.dest('build/reader/uwp'));
-        },
-        webkit: function reader_scripts_webkit() {
-           return gulp.src(webkit_scripts)
+    "reader.scripts.uwp": () => {
+        return gulp.src(uwp_scripts)
             .pipe(sourcemaps.init())
-            .pipe(ts(tsOptions_ES5))
-            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/webkit/src-maps/' + file.basename + ".map").href; }}))
-            .pipe(gulp.dest('build/reader/webkit'));
-        },
+            .pipe(ts(tsOptions_ES6))
+            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
+            .pipe(gulp.dest('build/reader/uwp'));
+    },
+    "reader.scripts.droid": () => {
+        return gulp.src(droid_scripts)
+        .pipe(sourcemaps.init())
+        .pipe(ts(tsOptions_ES5))
+        .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/droid/src-maps/' + file.basename + ".map").href; }}))
+        .pipe(gulp.dest('build/reader/droid'));
     },
 
-    styles: {
-        uwp: function reader_styles_uwp() {
-            return gulp.src('src/*.less')
-                .pipe(sourcemaps.init())
-                .pipe(less())
-                .pipe(sourcemaps.write('src-maps'))
-                .pipe(gulp.dest('build/reader/uwp'));
-        },
-        webkit: function reader_styles_webkit() {
-            return gulp.src('src/*.less')
-                .pipe(sourcemaps.init())
-                .pipe(less())
-                .pipe(sourcemaps.write('src-maps'))
-                .pipe(gulp.dest('build/reader/webkit'));
-        },
+    "reader.styles.uwp": () => {
+        return gulp.src('src/*.less')
+            .pipe(sourcemaps.init())
+            .pipe(less())
+            .pipe(sourcemaps.write('src-maps'))
+            .pipe(gulp.dest('build/reader/uwp'));
+    },
+    "reader.styles.droid": () => {
+        return gulp.src('src/*.less')
+            .pipe(sourcemaps.init())
+            .pipe(less())
+            .pipe(sourcemaps.write('src-maps'))
+            .pipe(gulp.dest('build/reader/droid'));
     },
 };
-exports.reader_scripts = reader.scripts.all = gulp.series(reader.scripts.uwp,reader.scripts.webkit);
-exports.reader_styles = reader.styles.all = gulp.series(reader.styles.uwp,reader.styles.webkit);
-exports.reader_uwp = reader.uwp = gulp.series(reader.scripts.uwp, reader.styles.uwp);
-exports.reader_webkit = reader.webkit = gulp.series(reader.scripts.webkit, reader.styles.webkit);
-exports.reader = reader.all = gulp.series(reader.scripts.all,reader.styles.all);
+exports["reader.scripts"] = reader.scripts = gulp.series(reader["reader.scripts.uwp"],reader["reader.scripts.droid"]);
+exports["reader.scripts.uwp"] = reader.scripts.uwp = reader["reader.scripts.uwp"];
+exports["reader.scripts.droid"] = reader.scripts.droid = reader["reader.scripts.droid"]
 
-exports.reader_scripts_uwp = reader.scripts.uwp;
-exports.reader_styles_uwp = reader.styles.uwp;
-exports.reader_scripts_webkit = reader.scripts.webkit;
-exports.reader_styles_webkit = reader.styles.webkit;
+exports["reader.styles"] = reader.styles = gulp.series(reader["reader.styles.uwp"],reader["reader.styles.droid"]);
+exports["reader.styles.uwp"] = reader.styles.uwp = reader["reader.styles.uwp"];
+exports["reader.styles.droid"] = reader.styles.droid = reader["reader.styles.droid"];
+
+exports["reader.uwp"] = reader.uwp = gulp.series(reader.scripts.uwp, reader.styles.uwp);
+exports["reader.uwp.scripts"] = reader.uwp.scripts = reader.scripts.uwp;
+exports["reader.uwp.styles"] = reader.uwp.styles = reader.styles.uwp;
+
+exports["reader.droid"] = reader.droid = gulp.series(reader.scripts.droid, reader.styles.droid);
+exports["reader.droid.scripts"] = reader.droid.scripts = reader.scripts.droid;
+exports["reader.droid.styles"] = reader.droid.styles = reader.styles.droid;
+
+exports["reader"] = reader = Object.assign(gulp.series(reader.scripts,reader.styles),reader);
 
 function styles() {
     return gulp.src('src/*.less')
@@ -157,7 +161,7 @@ function json() {
 }
 gulp.task('json', json);
 
-var build = gulp.series(scripts, styles, images, pages, json, extras, libs, reader.all);
+var build = gulp.series(scripts, styles, images, pages, json, extras, libs, reader);
 gulp.task('default', build);
 
 gulp.task('watch', gulp.series(build, function() {

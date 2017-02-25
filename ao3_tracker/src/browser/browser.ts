@@ -1,5 +1,3 @@
-/// <reference path="../../typings/globals/chrome/index.d.ts" />
-
 namespace Ao3Track {
 
     GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => {
@@ -24,6 +22,16 @@ namespace Ao3Track {
 
     export function UserCreate(credentials: IUserCreateData, callback: (errors: FormErrorList) => void) {
         let req: UserCreateMessage = { type: "USER_CREATE", data: credentials };
+        chrome.runtime.sendMessage(req, callback);
+    };
+
+    export function UserLogout(callback: (result: boolean) => void) {
+        let req: UserLogoutMessage = { type: "USER_LOGOUT" };
+        chrome.runtime.sendMessage(req, callback);
+    };
+
+    export function UserName(callback: (username: string) => void) {
+        let req: UserNameMessage = { type: "USER_NAME" };
         chrome.runtime.sendMessage(req, callback);
     };
 

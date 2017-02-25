@@ -29,7 +29,7 @@ namespace Ao3Track {
             return new this(other.number, other.chapterid, other.location, other.timestamp, other.seq || 0);
         }
 
-        IsNewer(newitem: IWorkChapter): boolean {
+        LessThan(newitem: IWorkChapter): boolean {
 
             if (newitem.seq !== null) {
                 if (newitem.seq > this.seq) { return true; }
@@ -45,7 +45,7 @@ namespace Ao3Track {
             return newitem.location > this.location;
         }
 
-        IsNewerOrSame(newitem: IWorkChapter): boolean {
+        LessThanOrEqual(newitem: IWorkChapter): boolean {
             if (newitem.seq !== null) {
                 if (newitem.seq > this.seq) { return true; }
                 else if (newitem.seq < this.seq) { return false; }
@@ -103,7 +103,7 @@ namespace Ao3Track {
         onSyncFromServer = [];
     }
 
-    export function syncingDisabled() : boolean {
+    export function syncingDisabled(): boolean {
         return serversync === SyncState.Disabled;
     }
 
@@ -182,7 +182,7 @@ namespace Ao3Track {
                     // Highest time value of incoming item is our new sync time
                     if (items[key].timestamp > last_sync) { last_sync = items[key].timestamp; }
 
-                    if (!(key in storage) || storage[key].IsNewerOrSame(items[key])) {
+                    if (!(key in storage) || storage[key].LessThanOrEqual(items[key])) {
                         // Remove from unsynced list (if it exists)
                         if (key in unsynced) { delete unsynced[key]; }
                         // Grab the new details
@@ -337,19 +337,16 @@ namespace Ao3Track {
     }
 
 
-    let messageHandlers : ((request: any, sendResponse: (response: any) => void)=>boolean)[] = [];
-    export function addMessageHandler(handler : (request: any, sendResponse: (response: any) => void)=>boolean) 
-    {
-         messageHandlers.push(handler);
+    let messageHandlers: ((request: any, sendResponse: (response: any) => void) => boolean)[] = [];
+    export function addMessageHandler(handler: (request: any, sendResponse: (response: any) => void) => boolean) {
+        messageHandlers.push(handler);
     }
 
-    export function handleMessage(request: any, sendResponse: (response: any) => void) : boolean
-    {
+    export function handleMessage(request: any, sendResponse: (response: any) => void): boolean {
         let responseSent = false;
-        
-        for (let handler of messageHandlers)
-        {
-            let res = handler(request,(response) => { responseSent = true; sendResponse(response); });
+
+        for (let handler of messageHandlers) {
+            let res = handler(request, (response) => { responseSent = true; sendResponse(response); });
             if (res || responseSent) {
                 return res;
             }
@@ -384,7 +381,7 @@ namespace Ao3Track {
                     let newitems: { [key: number]: IWorkChapterTS; } = {};
                     let do_delayed = false;
                     for (let id in request.data) {
-                        if (!(id in storage) || storage[id].IsNewer(request.data[id])) {
+                        if (!(id in storage) || storage[id].LessThan(request.data[id])) {
                             // Do a delayed since if we finished a chapter, or started a new one 
                             if (!(id in storage) || request.data[id].location === null || request.data[id].location === 0 ||
                                 request.data[id].chapterid > storage[id].chapterid || (request.data[id].seq || 0) > storage[id].seq) {
@@ -502,9 +499,45 @@ namespace Ao3Track {
                     });
                 }
                 return true;
+
+            case 'USER_LOGOUT':
+                {
+                    if (serversync !== SyncState.Disabled) {
+                        if (serversync === SyncState.Syncing) {
+                            onSyncFromServer.push(function () {
+                                serversync = SyncState.Disabled;
+                                authorization.username = "";
+                                authorization.credential = "";
+                                chrome.storage.local.remove('authorization');
+                                sendResponse(true);
+                            });
+                            return true;
+                        }
+                        else {
+                            serversync = SyncState.Disabled;
+                            authorization.username = "";
+                            authorization.credential = "";
+                            chrome.storage.local.remove('authorization');
+                            sendResponse(true);
+                        }
+                    }
+                    else {
+                        sendResponse(false);
+                    }
+                }
+                return false;
+
+            case 'USER_NAME':
+                {
+                    if (serversync !== SyncState.Disabled)
+                        sendResponse(authorization.username);
+                    else
+                        sendResponse("");
+                }
+                return false;
         };
         return false;
     });
 
-    chrome.runtime.onMessage.addListener((request,sender,response) => { return handleMessage(request,response); });
+    chrome.runtime.onMessage.addListener((request, sender, response) => { return handleMessage(request, response); });
 }

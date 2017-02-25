@@ -20,21 +20,21 @@ namespace Ao3TrackReader.Helper
 {
     public interface IWorkChapter
     {
-        long number { get; set; }
-        long chapterid { get; set; }
-        long? location { get; set; }
-        long? seq { get; set; }
-        bool IsNewer(IWorkChapter newitem);
-        bool IsNewerOrSame(IWorkChapter newitem);
+        long Number { get; set; }
+        long Chapterid { get; set; }
+        long? Location { get; set; }
+        long? Seq { get; set; }
+        bool LessThan(IWorkChapter newitem);
+        bool LessThanOrEqual(IWorkChapter newitem);
 
         long Paragraph { get; }
         long Frac { get; }
     }
     public interface IWorkChapterEx : IWorkChapter
     {
-        long workid { get; set; }
-        bool IsNewer(IWorkChapterEx newitem);
-        bool IsNewerOrSame(IWorkChapterEx newitem);
+        long Workid { get; set; }
+        bool LessThan(IWorkChapterEx newitem);
+        bool LessThanOrEqual(IWorkChapterEx newitem);
     }
 
 #if WINDOWS_UWP
@@ -46,118 +46,140 @@ namespace Ao3TrackReader.Helper
         {
 
         }
-        //public WorkChapter(IWorkChapter toCopy)
-        //{
-        //    workid = 0;
-        //    number = toCopy.number;
-        //    chapterid = toCopy.chapterid;
-        //    location = toCopy.location;
-        //    seq = toCopy.seq;
-        //}
+
         public WorkChapter(IWorkChapterEx toCopy)
         {
-            workid = toCopy.workid; 
-            number = toCopy.number;
-            chapterid = toCopy.chapterid;
-            location = toCopy.location;
-            seq = toCopy.seq;
+            Workid = toCopy.Workid; 
+            Number = toCopy.Number;
+            Chapterid = toCopy.Chapterid;
+            Location = toCopy.Location;
+            Seq = toCopy.Seq;
         }
 
-        public long workid { get; set; }
-        public long number { get; set; }
-        public long chapterid { get; set; }
-        public long? location { get; set; }
-        public long? seq { get; set; }
+        public long Workid { get; set; }
+        public long Number { get; set; }
+        public long Chapterid { get; set; }
+        public long? Location { get; set; }
+        public long? Seq { get; set; }
 
         public long Paragraph {
             get {
-                if (location == null) return long.MaxValue;
-                return (long)location / 1000000000L;
+                if (Location == null) return long.MaxValue;
+                return (long)Location / 1000000000L;
             }
         }
         public long Frac {
             get {
-                if (location == null) return long.MaxValue;
-                var offset = (long)location % 1000000000L;
+                if (Location == null) return long.MaxValue;
+                var offset = (long)Location % 1000000000L;
                 if (offset == 500000000L) return 100;
                 return offset * 100L / 479001600L;
             }
         }
 
-        bool IWorkChapter.IsNewer(IWorkChapter newitem)
+        bool IWorkChapter.LessThan(IWorkChapter newitem)
         {
-            if (newitem.seq != null && this.seq != null)
+            if (newitem is IWorkChapterEx) return LessThan(newitem as IWorkChapterEx);
+
+            if (newitem.Seq != null && this.Seq != null)
             {
-                if (newitem.seq > this.seq) { return true; }
-                else if (newitem.seq < this.seq) { return false; }
+                if (newitem.Seq > this.Seq) { return true; }
+                else if (newitem.Seq < this.Seq) { return false; }
             }
 
-            if (newitem.number > this.number) { return true; }
-            else if (newitem.number < this.number) { return false; }
+            if (newitem.Number > this.Number) { return true; }
+            else if (newitem.Number < this.Number) { return false; }
 
-            if (this.location == null) { return false; }
-            if (newitem.location == null) { return true; }
+            if (this.Location == null) { return false; }
+            if (newitem.Location == null) { return true; }
 
-            return newitem.location > this.location;
+            return newitem.Location > this.Location;
         }
 #if WINDOWS_UWP
         [DefaultOverload]
 #endif
-        public bool IsNewer(IWorkChapterEx newitem)
+        public bool LessThan(IWorkChapterEx newitem)
         {
-            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.Workid != Workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
-            if (newitem.seq != null && this.seq != null)
+            if (newitem.Seq != null && this.Seq != null)
             {
-                if (newitem.seq > this.seq) { return true; }
-                else if (newitem.seq < this.seq) { return false; }
+                if (newitem.Seq > this.Seq) { return true; }
+                else if (newitem.Seq < this.Seq) { return false; }
             }
 
-            if (newitem.number > this.number) { return true; }
-            else if (newitem.number < this.number) { return false; }
+            if (newitem.Number > this.Number) { return true; }
+            else if (newitem.Number < this.Number) { return false; }
 
-            if (this.location == null) { return false; }
-            if (newitem.location == null) { return true; }
+            if (this.Location == null) { return false; }
+            if (newitem.Location == null) { return true; }
 
-            return newitem.location > this.location;
+            return newitem.Location > this.Location;
         }
-        bool IWorkChapter.IsNewerOrSame(IWorkChapter newitem)
+        bool IWorkChapter.LessThanOrEqual(IWorkChapter newitem)
         {
-            if (newitem.seq != null && this.seq != null)
+            if (newitem is IWorkChapterEx) return LessThanOrEqual(newitem as IWorkChapterEx);
+
+            if (newitem.Seq != null && this.Seq != null)
             {
-                if (newitem.seq > this.seq) { return true; }
-                else if (newitem.seq < this.seq) { return false; }
+                if (newitem.Seq > this.Seq) { return true; }
+                else if (newitem.Seq < this.Seq) { return false; }
             }
 
-            if (newitem.number > this.number) { return true; }
-            else if (newitem.number < this.number) { return false; }
+            if (newitem.Number > this.Number) { return true; }
+            else if (newitem.Number < this.Number) { return false; }
 
-            if (newitem.location == null) { return true; }
-            if (this.location == null) { return false; }
+            if (newitem.Location == null) { return true; }
+            if (this.Location == null) { return false; }
 
-            return newitem.location >= this.location;
+            return newitem.Location >= this.Location;
         }
 #if WINDOWS_UWP
         [DefaultOverload]
 #endif
-        public bool IsNewerOrSame(IWorkChapterEx newitem)
+        public bool LessThanOrEqual(IWorkChapterEx newitem)
         {
-            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.Workid != Workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
-            if (newitem.seq != null && this.seq != null)
+            if (newitem.Seq != null && this.Seq != null)
             {
-                if (newitem.seq > this.seq) { return true; }
-                else if (newitem.seq < this.seq) { return false; }
+                if (newitem.Seq > this.Seq) { return true; }
+                else if (newitem.Seq < this.Seq) { return false; }
             }
 
-            if (newitem.number > this.number) { return true; }
-            else if (newitem.number < this.number) { return false; }
+            if (newitem.Number > this.Number) { return true; }
+            else if (newitem.Number < this.Number) { return false; }
 
-            if (newitem.location == null) { return true; }
-            if (this.location == null) { return false; }
+            if (newitem.Location == null) { return true; }
+            if (this.Location == null) { return false; }
 
-            return newitem.location >= this.location;
+            return newitem.Location >= this.Location;
         }
+
+        //public static bool operator >=(WorkChapter left, WorkChapter right)
+        //{
+        //    return !left.LessThan(right);
+        //}
+        //public static bool operator <=(WorkChapter left, WorkChapter right)
+        //{
+        //    return left.LessThanOrEqual(right);
+        //}
+        //public static bool operator >=(WorkChapter left, IWorkChapter right)
+        //{
+        //    return !(left as IWorkChapter).LessThan(right);
+        //}
+        //public static bool operator <=(WorkChapter left, IWorkChapter right)
+        //{
+        //    return (left as IWorkChapter).LessThanOrEqual(right);
+        //}
+        //public static bool operator >=(IWorkChapter left, WorkChapter right)
+        //{
+        //    return (right as IWorkChapter).LessThanOrEqual(left);
+        //}
+        //public static bool operator <=(IWorkChapter left, WorkChapter right)
+        //{
+        //    return !(right as IWorkChapter).LessThan(left);
+        //}
     }
 
 #if WINDOWS_UWP

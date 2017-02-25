@@ -4,6 +4,8 @@
 var Ao3TrackHelperUWP: Ao3Track.UWP.IAo3TrackHelperUWP;
 
 namespace Ao3Track {
+    Helper = {} as Ao3Track.IAo3TrackHelper;
+
     export namespace UWP {
         interface Native {
             native: never;
@@ -13,9 +15,8 @@ namespace Ao3Track {
         }
         interface WorkChapterExNative extends WorkChapterNative, IWorkChapterEx {
         }
-        interface PageTitleNative extends Native, IPageTitle
-        {
-        }        
+        interface PageTitleNative extends Native, IPageTitle {
+        }
 
         interface IKeyValuePair<K, V> {
             key: K;
@@ -49,12 +50,17 @@ namespace Ao3Track {
             size: number;
         }
 
-        interface ClassNameMap
-        {
-            "WorkChapter" : WorkChapterNative;
-            "WorkChapterEx" : WorkChapterExNative;
-            "WorkChapterMap" : IMap<number, WorkChapterNative>;
-            "PageTitle" : PageTitleNative;
+        interface ClassNameMap {
+            "WorkChapterNative": WorkChapterNative;
+            "WorkChapterExNative": WorkChapterExNative;
+            "WorkChapterMapNative": IMap<number, WorkChapterNative>;
+            "PageTitleNative": PageTitleNative;
+        }
+        interface ClassNameSourceMap {
+            "WorkChapterNative": IWorkChapter;
+            "WorkChapterExNative": IWorkChapterEx;
+            "WorkChapterMapNative": {[key:number] : WorkChapterNative };
+            "PageTitleNative": IPageTitle;
         }
 
         export interface IAo3TrackHelperUWP {
@@ -87,13 +93,12 @@ namespace Ao3Track {
             setCookies(cookies: string): void;
 
             currentLocation: WorkChapterExNative | null;
-            pageTitle : PageTitleNative | null;
+            pageTitle: PageTitleNative | null;
 
-            areUrlsInReadingListAsync(urls: string[]): WinJS.Promise<IMap<string, boolean>>;            
+            areUrlsInReadingListAsync(urls: string[]): WinJS.Promise<IMap<string, boolean>>;
         }
 
-        function PropKeyToNum(key: PropertyKey) : number|null
-        {
+        function PropKeyToNum(key: PropertyKey): number | null {
             if (typeof key === "number") {
                 return key;
             }
@@ -104,8 +109,7 @@ namespace Ao3Track {
             return null;
         }
 
-        function PropKeyToString(key: PropertyKey) : string|null
-        {
+        function PropKeyToString(key: PropertyKey): string | null {
             if (typeof key === "number") {
                 return key.toString();
             }
@@ -115,18 +119,17 @@ namespace Ao3Track {
             return null;
         }
 
-        function GetIMapProxy<V, I extends string|number>(map: IMap<I,V>, conv: (key: PropertyKey)=>(I|null)) : any
-        {
+        function GetIMapProxy<V, I extends string | number>(map: IMap<I, V>, conv: (key: PropertyKey) => (I | null)): any {
             let proxy = new Proxy(map, {
                 get: (oTarget, sKey) => {
                     let key = conv(sKey);
                     if (key === null) return undefined;
                     return oTarget.hasKey(key) ? oTarget.lookup(key) : undefined;
                 },
-                set:(oTarget, sKey, vValue) => {
+                set: (oTarget, sKey, vValue) => {
                     let key = conv(sKey);
                     if (key === null) return false;
-                    oTarget.insert(key,vValue);
+                    oTarget.insert(key, vValue);
                     return true;
                 },
                 deleteProperty: (oTarget, sKey) => {
@@ -136,17 +139,17 @@ namespace Ao3Track {
                     return true;
                 },
                 enumerate: (oTarget) => {
-                    let keys : PropertyKey[] = [];
+                    let keys: PropertyKey[] = [];
                     for (let it = oTarget.first(); it.hasCurrent; it.moveNext()) {
                         keys.push(it.current.key);
-                    }                    
+                    }
                     return keys;
                 },
                 ownKeys: (oTarget) => {
-                    let keys : PropertyKey[] = [];
+                    let keys: PropertyKey[] = [];
                     for (let it = oTarget.first(); it.hasCurrent; it.moveNext()) {
                         keys.push(it.current.key);
-                    }                    
+                    }
                     return keys;
                 },
                 has: (oTarget, sKey) => {
@@ -154,109 +157,141 @@ namespace Ao3Track {
                     if (key === null) return false;
                     return oTarget.hasKey(key);
                 },
-                defineProperty:  (oTarget, sKey, oDesc) => {                    
+                defineProperty: (oTarget, sKey, oDesc) => {
                     return false;
                 },
                 getOwnPropertyDescriptor: (oTarget, sKey) => {
-                    let v = this.get(oTarget,sKey);
+                    let v = this.get(oTarget, sKey);
                     if (v === undefined) return undefined as any;
-                    
-                    let res : PropertyDescriptor = {
+
+                    let res: PropertyDescriptor = {
                         value: v,
                         writable: true,
                         enumerable: true,
                         configurable: false
                     };
                     return res;
-                }    
+                }
             });
 
             return proxy;
         }
 
-        export let Marshalled = {
-            getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void): void {
-                Ao3TrackHelperUWP.getWorkChaptersAsync(works).then((result) => {
-                    callback(GetIMapProxy(result,PropKeyToNum));
-                });
-            },
-
-            setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void {
-                let m = Ao3TrackHelperUWP.createObject("WorkChapterMap");
-                for (let key in workchapters) {
-                    let obj = Ao3TrackHelperUWP.createObject("WorkChapter");
-                    Object.assign(obj,workchapters[key]);
-                    m.insert(key as any, obj);
-                }
-                Ao3TrackHelperUWP.setWorkChapters(m);
-            },
-
-            showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void {
-                Ao3TrackHelperUWP.showContextMenu(x,y,menuItems).then((selected)=> { callback(selected); } );
-            },
-
-            get currentLocation() : IWorkChapterEx | null { return Ao3TrackHelperUWP.currentLocation; },
-            set currentLocation(value : IWorkChapterEx | null)  { 
-                if (value === null) { 
-                    Ao3TrackHelperUWP.currentLocation = null; 
-                }
-                else { 
-                    let obj = Ao3TrackHelperUWP.createObject("WorkChapterEx");
-                    Object.assign(obj,value);                                    
-                    Ao3TrackHelperUWP.currentLocation = obj;  
-                }
-            },
-
-            get pageTitle(): IPageTitle | null { return Ao3TrackHelperUWP.pageTitle; },
-            set pageTitle(value :IPageTitle | null) { 
-                if (value === null) { 
-                    Ao3TrackHelperUWP.pageTitle = null; 
-                }
-                else { 
-                    let obj = Ao3TrackHelperUWP.createObject("PageTitle");
-                    Object.assign(obj,value);                                    
-                    Ao3TrackHelperUWP.pageTitle = obj;  
-                }                
-            },
-
-            areUrlsInReadingListAsync(urls: string[], callback: (result: { [key:string]:boolean})=> void) : void {
-                Ao3TrackHelperUWP.areUrlsInReadingListAsync(urls).then((result) => {
-                    callback(GetIMapProxy(result,PropKeyToString));
-                });
+        function WrapIMapNum<V>(map: IMap<number, V>) {
+            return GetIMapProxy(map, PropKeyToNum);
+        }
+        function WrapIMapString<V>(map: IMap<string, V>) {
+            return GetIMapProxy(map, PropKeyToString);
+        }
+        function ToNative<K extends keyof ClassNameMap>(classname: K, source: ClassNameSourceMap[K]): ClassNameMap[K]{
+            return Object.assign(Ao3TrackHelperUWP.createObject(classname), source);
+        }
+        function ToWorkChapterNative(source: IWorkChapter): ClassNameMap["WorkChapterNative"] {
+            return ToNative("WorkChapterNative", source);
+        }
+        function ToWorkChapterExNative(source: IWorkChapterEx): ClassNameMap["WorkChapterExNative"] {
+            return ToNative("WorkChapterExNative", source);
+        }
+        function ToPageTitleNative(source: IPageTitle): ClassNameMap["PageTitleNative"] {
+            return ToNative("PageTitleNative", source);
+        }
+        function ToWorkChapterMapNative(source: { [key: number]: IWorkChapter }): ClassNameMap["WorkChapterMapNative"] {
+            let m = Ao3TrackHelperUWP.createObject("WorkChapterMapNative");
+            for (let key in source) {
+                m.insert(key as any, ToWorkChapterNative(source[key]));
             }
-            
+            return m;
+        }
+
+        // Would be nice to autogenerate this nonsense by reflection
+        let helperDef: Marshal.IHelperDef = {
+            getWorkChaptersAsync: { args: { }, return: WrapIMapNum, promise: 1 },
+            setWorkChapters: { args: { 0: ToWorkChapterMapNative } },
+            onjumptolastlocationevent: { setter: true },
+            jumpToLastLocationEnabled: { getter: true, setter: true },
+            nextPage: { getter: true, setter: true },
+            prevPage: { getter: true, setter: true },
+            canGoBack: { getter: true },
+            canGoForward: { getter: true },
+            goBack: { args: {} },
+            goForward: { args: {} },
+            leftOffset: { getter: true, setter: true },
+            showPrevPageIndicator: { getter: true, setter: true },
+            showNextPageIndicator: { getter: true, setter: true },
+            onalterfontsizeevent: { setter: true },
+            fontSize: { getter: true, setter: true },
+            showContextMenu: { args: {}, promise: 3 },
+            addToReadingList: { args: {} },
+            copyToClipboard: { args: {} },
+            setCookies: { args: {} },
+            currentLocation: { getter: true, setter: ToWorkChapterExNative },
+            pageTitle: { getter: true, setter: ToPageTitleNative },
+            areUrlsInReadingListAsync: { args: { }, return: WrapIMapString, promise: 1 },
         };
 
-        for(let name of Object.getOwnPropertyNames(Object.getPrototypeOf(Ao3TrackHelperUWP)))
-        {
-            if (Object.getOwnPropertyDescriptor(Marshalled,name)) { continue; }
-            let prop = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Ao3TrackHelperUWP),name);
-            let newprop : PropertyDescriptor = { enumerable : prop.enumerable || false };
-            if (typeof prop.value === "function")
-            {
-                newprop.value =  prop.value.bind(Ao3TrackHelperUWP);
-            }
-            else if ((typeof prop.value !== "null" && typeof prop.value !== "undefined") || prop.get || prop.set) 
-            {
-                if (prop.get || !prop.set)
-                {
-                    newprop.get = ()=>{
-                        return (Ao3TrackHelperUWP as any)[name];
+        for (let name in helperDef) {
+            let def = helperDef[name];
+
+            // It's a function!
+            if (def.args !== undefined) {
+                let func = ((Ao3TrackHelperUWP as any)[name] as Function).bind(Ao3TrackHelperUWP) as Function;
+
+                if (def.return || Object.keys(def.args).length > 0 || def.promise !== undefined) {
+                    let argconv = def.args;
+                    let retconv = def.return || null;
+                    (Ao3Track.Helper as any)[name] = function () {
+                        let args : any[] = [].slice.call(arguments);
+                        for (let i in argconv) {
+                            args[i] = argconv[i](args[i]);
+                        }
+                        let promcb = (def.promise !== undefined) ? args.splice(def.promise,1)[0] : null;
+                        let ret = func.apply(Ao3TrackHelperUWP, args);
+                        if (promcb) 
+                        {
+                            let prom = ret as WinJS.Promise<any>;
+                            prom.then((v) => {
+                                if (retconv) v = retconv(v);
+                                promcb(v);
+                            });
+                            return;
+                        }
+                        else 
+                        {
+                            if (retconv) ret = retconv(ret);
+                            return ret;
+                        }
                     };
                 }
-                if (!prop.get || prop.set)
-                {
-                    newprop.set = (value: any)=>{
-                        (Ao3TrackHelperUWP as any)[name] = value;
-                    };
+                else {
+                    (Ao3Track.Helper as any)[name] = func;
                 }
             }
-            else {
-                continue;
+            // It's a property
+            else if (def.getter || def.setter) {
+                let newprop: PropertyDescriptor = { enumerable: true };
+
+                if (def.getter) {
+
+                    if (typeof def.getter === "function") {
+                        let getter = def.getter;
+                        newprop.get = () => getter((Ao3TrackHelperUWP as any)[name]);
+                    }
+                    else {
+                        newprop.get = () => (Ao3TrackHelperUWP as any)[name];
+                    }
+                }
+                if (def.setter) {
+                    if (typeof def.setter === "function") {
+                        let setter = def.setter;
+                        newprop.set = (v) => (Ao3TrackHelperUWP as any)[name] = setter(v);
+                    }
+                    else {
+                        newprop.set = (v) => (Ao3TrackHelperUWP as any)[name] = v;
+                    }
+                }
+                Object.defineProperty(Ao3Track.Helper, name, newprop);
             }
-            Object.defineProperty(Marshalled,name,newprop);
         }
     }
-    Helper = Ao3Track.UWP.Marshalled as any as Ao3Track.IAo3TrackHelper;
 }
 

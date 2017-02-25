@@ -7,8 +7,9 @@ namespace Ao3TrackReader
 {
     class Variable
     {
-        [PrimaryKey]
+        [PrimaryKey, Column("name")]
         public string name { get; set; }
+        [Column("value")]
         public string value { get; set; }
     }
 }
