@@ -65,6 +65,8 @@ namespace Ao3TrackReader
         }
         public bool LessThan(IWorkChapter newitem)
         {
+            if (newitem is IWorkChapterEx) return LessThan(newitem as IWorkChapterEx);
+
             if (newitem.Seq > this.Seq) { return true; }
             else if (newitem.Seq < this.Seq) { return false; }
 
@@ -109,6 +111,8 @@ namespace Ao3TrackReader
 
         public bool LessThanOrEqual(IWorkChapter newitem)
         {
+            if (newitem is IWorkChapterEx) return LessThanOrEqual(newitem as IWorkChapterEx);
+
             if (newitem.Seq > this.Seq) { return true; }
             else if (newitem.Seq < this.Seq) { return false; }
 
