@@ -311,6 +311,11 @@ namespace Ao3Track {
         window.setInterval(dosync, 1000 * 60 * 60 * 6);
     });
 
+    export interface IServerReadingList {
+        last_sync: timestamp;
+        paths: { [key: string]: timestamp; };
+    }
+
     export function SyncReadingListAsync(srl: IServerReadingList): Promise<IServerReadingList | null> {
         return new Promise<IServerReadingList | null>((resolve) => {
             if (authorization.username === null || authorization.username === "" || authorization.credential === null || authorization.credential === "" || serversync === SyncState.Disabled) {
@@ -336,25 +341,37 @@ namespace Ao3Track {
         });
     }
 
+    type MessageHandler = (request: MessageRequest) => boolean;
 
-    let messageHandlers: ((request: any, sendResponse: (response: any) => void) => boolean)[] = [];
-    export function addMessageHandler(handler: (request: any, sendResponse: (response: any) => void) => boolean) {
+    let messageHandlers: MessageHandler[] = [];
+    export function addMessageHandler(handler: MessageHandler) {
         messageHandlers.push(handler);
     }
 
-    export function handleMessage(request: any, sendResponse: (response: any) => void): boolean {
+    function handleMessage (request: MessageRequest) : boolean {
         let responseSent = false;
+        let sr: ((response: any) => void) | undefined = request.sendResponse;
+        request = Object.assign({}, request, {
+            sendResponse: (response: any) => {
+                responseSent = true;
+                if (sr !== undefined) sr(response);
+            }
+        });
 
         for (let handler of messageHandlers) {
-            let res = handler(request, (response) => { responseSent = true; sendResponse(response); });
+            let res = handler(request);
             if (res || responseSent) {
                 return res;
             }
         }
         return false;
     }
+    sendMessage = handleMessage;
 
-    addMessageHandler((request: MessageType, sendResponse: (response: any) => void) => {
+    export function assertNever(x: never) {
+    }
+
+    addMessageHandler((request: CloudMessageRequest): boolean => {
         switch (request.type) {
             case 'GET':
                 {
@@ -368,10 +385,10 @@ namespace Ao3Track {
                         return r;
                     };
                     if (serversync === SyncState.Syncing) {
-                        onSyncFromServer.push(function () { sendResponse(getResponse()); });
+                        onSyncFromServer.push(function () { request.sendResponse(getResponse()); });
                         return true;
                     }
-                    sendResponse(getResponse());
+                    request.sendResponse(getResponse());
                 }
                 return false;
 
@@ -420,11 +437,11 @@ namespace Ao3Track {
             case 'DO_SYNC':
                 {
                     if (serversync === SyncState.Disabled) {
-                        sendResponse(false);
+                        request.sendResponse(false);
                         return false;
                     }
                     else {
-                        onSyncFromServer.push(function () { sendResponse(true); });
+                        onSyncFromServer.push(function () { request.sendResponse(true); });
                         if (serversync !== SyncState.Syncing) { dosync(true); }
                     }
                 }
@@ -444,7 +461,7 @@ namespace Ao3Track {
                         dataType: "json",
                         data: { "username": request.data.username, "password": request.data.password, "email": request.data.email },
                         error: function (jqXHR, textStatus, errorThrown) {
-                            sendResponse(null);
+                            request.sendResponse(null);
                         },
                         success: function (response, textStatus, jqXHR) {
                             if (typeof response === "string") {
@@ -454,11 +471,11 @@ namespace Ao3Track {
                                 chrome.storage.local.set({ 'authorization': authorization, 'last_sync': 0 });
                                 serversync = SyncState.Syncing;
                                 dosync(true);
-                                sendResponse({});
+                                request.sendResponse({});
                             } else if (typeof response === "object" && Object.keys(response).length > 0) {
-                                sendResponse(response);
+                                request.sendResponse(response);
                             } else {
-                                sendResponse(null);
+                                request.sendResponse(null);
                             }
                         }
                     });
@@ -479,7 +496,7 @@ namespace Ao3Track {
                         dataType: "json",
                         data: { "username": request.data.username, "password": request.data.password },
                         error: function (jqXHR, textStatus, errorThrown) {
-                            sendResponse(null);
+                            request.sendResponse(null);
                         },
                         success: function (response, textStatus, jqXHR) {
                             if (typeof response === "string") {
@@ -489,11 +506,11 @@ namespace Ao3Track {
                                 chrome.storage.local.set({ 'authorization': authorization, 'last_sync': 0 });
                                 serversync = SyncState.Syncing;
                                 dosync(true);
-                                sendResponse({});
+                                request.sendResponse({});
                             } else if (typeof response === "object" && Object.keys(response).length > 0) {
-                                sendResponse(response);
+                                request.sendResponse(response);
                             } else {
-                                sendResponse(null);
+                                request.sendResponse(null);
                             }
                         }
                     });
@@ -509,7 +526,7 @@ namespace Ao3Track {
                                 authorization.username = "";
                                 authorization.credential = "";
                                 chrome.storage.local.remove('authorization');
-                                sendResponse(true);
+                                request.sendResponse(true);
                             });
                             return true;
                         }
@@ -518,11 +535,11 @@ namespace Ao3Track {
                             authorization.username = "";
                             authorization.credential = "";
                             chrome.storage.local.remove('authorization');
-                            sendResponse(true);
+                            request.sendResponse(true);
                         }
                     }
                     else {
-                        sendResponse(false);
+                        request.sendResponse(false);
                     }
                 }
                 return false;
@@ -530,14 +547,17 @@ namespace Ao3Track {
             case 'USER_NAME':
                 {
                     if (serversync !== SyncState.Disabled)
-                        sendResponse(authorization.username);
+                        request.sendResponse(authorization.username);
                     else
-                        sendResponse("");
+                        request.sendResponse("");
                 }
                 return false;
+
+            default:
+                assertNever(request);
         };
         return false;
     });
 
-    chrome.runtime.onMessage.addListener((request, sender, response) => { return handleMessage(request, response); });
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { return handleMessage({ type: request.type, data: request.data, sendResponse: sendResponse }); });
 }

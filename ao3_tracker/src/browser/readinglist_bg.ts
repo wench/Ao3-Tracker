@@ -1,15 +1,20 @@
 namespace Ao3Track {
-    namespace ReadingList { 
+    namespace ReadingList {
 
-        let readingListBacking : IReadingList = {
+        interface IReadingList {
+            last_sync: timestamp;
+            paths: { [key: string]: { uri: string; timestamp: timestamp } };
+        }
+
+        let readingListBacking: IReadingList = {
             last_sync: 0,
-            paths: { }
+            paths: {}
         };
 
         let readingListSynced = false;
         let readingListSyncing = false;
         let onreadinglistsync: Array<(success: boolean) => void> = [];
-        
+
         function do_onreadinglistsync(success: boolean) {
             for (let i = 0; i < onreadinglistsync.length; i++) {
                 onreadinglistsync[i](success);
@@ -17,11 +22,11 @@ namespace Ao3Track {
             onreadinglistsync = [];
         }
 
-        function syncToServerAsync() : Promise<boolean> {            
+        function syncToServerAsync(): Promise<boolean> {
             readingListSyncing = true;
-            return new Promise<boolean> ((resolve) => {
-                let srl : IServerReadingList = { last_sync: readingListBacking.last_sync, paths: { } };
-                for(let uri in readingListBacking.paths) {
+            return new Promise<boolean>((resolve) => {
+                let srl: IServerReadingList = { last_sync: readingListBacking.last_sync, paths: {} };
+                for (let uri in readingListBacking.paths) {
                     let rle = readingListBacking.paths[uri];
                     srl.paths[uri] = rle.timestamp;
                 }
@@ -33,8 +38,8 @@ namespace Ao3Track {
                         resolve(false);
                         return;
                     }
-                    
-                    for(let uri in srl.paths) {
+
+                    for (let uri in srl.paths) {
                         let v = srl.paths[uri];
                         if (v === -1) {
                             delete readingListBacking.paths[uri];
@@ -44,7 +49,7 @@ namespace Ao3Track {
                                 readingListBacking.paths[uri].timestamp = v;
                             }
                             else {
-                                readingListBacking.paths[uri] = { uri: uri, timestamp:v};                
+                                readingListBacking.paths[uri] = { uri: uri, timestamp: v };
                             }
                         }
                     }
@@ -55,19 +60,17 @@ namespace Ao3Track {
                     resolve(true);
                 });
             });
-        }    
+        }
 
-        function syncIfNeededAsync() : Promise<boolean>
-        {
-            return new Promise<boolean> ((resolve) => {
-                if (Ao3Track.syncingDisabled()) 
-                {
+        function syncIfNeededAsync(): Promise<boolean> {
+            return new Promise<boolean>((resolve) => {
+                if (Ao3Track.syncingDisabled()) {
                     resolve(readingListSynced);
                     return;
                 }
 
                 if (readingListSyncing) {
-                    onreadinglistsync.push((result)=>{
+                    onreadinglistsync.push((result) => {
                         resolve(result);
                         return;
                     });
@@ -87,21 +90,19 @@ namespace Ao3Track {
         }
 
         //  Quick and dirty add to reading list
-        export function add(href: string|URL) : void
-        {
+        export function add(href: string | URL): void {
             let uri = Ao3Track.Data.readingListlUri(href);
             if (uri === null) {
                 return;
             }
             if (Object.keys(readingListBacking.paths).indexOf(uri.href) === -1) {
-                readingListBacking.paths[uri.href] = {uri: uri.href, timestamp:Date.now()};
-                syncToServerAsync();                
+                readingListBacking.paths[uri.href] = { uri: uri.href, timestamp: Date.now() };
+                syncToServerAsync();
             }
         }
 
         // Context menus!
-        if (chrome.contextMenus.create)
-        {
+        if (chrome.contextMenus.create) {
             chrome.contextMenus.create({
                 id: "Ao3Track-RL-Add",
                 title: "Add To Reading List",
@@ -116,32 +117,34 @@ namespace Ao3Track {
             });
         }
 
-        Ao3Track.addMessageHandler((request: IsInReadingListMessage, sendResponse: (response: any) => void) => {
-            switch(request.type)
-            {
+        Ao3Track.addMessageHandler((request: ReadingListMessageRequest) => {
+            switch (request.type) {
                 case "RL_ISINLIST":
-                {
-                    syncIfNeededAsync().then((result) => {
-                        let response : { [key: string]: boolean;  }= { };
-                        for (let href of request.data)
-                        {
-                            let uri = Ao3Track.Data.readingListlUri(href);
-                            if (uri !== null && Object.keys(readingListBacking.paths).indexOf(uri.href) !== -1) {
-                                response[href] = true;
-                            }            
-                            else {
-                                response[href] = false;
-                            }                
-                        }
-                        sendResponse(response);
-                    });
-                }
-                return true;
+                    {
+                        syncIfNeededAsync().then((result) => {
+                            let response: { [key: string]: boolean; } = {};
+                            for (let href of request.data) {
+                                let uri = Ao3Track.Data.readingListlUri(href);
+                                if (uri !== null && Object.keys(readingListBacking.paths).indexOf(uri.href) !== -1) {
+                                    response[href] = true;
+                                }
+                                else {
+                                    response[href] = false;
+                                }
+                            }
+                            request.sendResponse(response);
+                        });
+                    }
+                    return true;
+
+            default:
+                //assertNever(request);
+                    
             }
             return false;
         });
 
-        
+
     }
 }
 

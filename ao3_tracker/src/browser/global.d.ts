@@ -12,63 +12,65 @@ declare namespace Ao3Track {
         password: string;
     }
 
-    interface IReadingList {
-        last_sync: timestamp;
-        paths: { [key: string]: { uri: string; timestamp: timestamp } };
+    interface IMessageRequest<D,R,K extends keyof D & keyof R>
+    {
+        type: K,
+        data: D[K],
+        sendResponse: ((response: R[K]) => void);
+    }
+    interface IMessageRequestNoResponse<D, R extends {[P in K]: undefined}, K extends keyof D>
+    {
+        type: K,
+        data: D[K],
+        sendResponse: undefined;
     }
 
-    interface IServerReadingList {
-        last_sync: timestamp;
-        paths: { [key: string]: timestamp; };
+    interface CloudMessageData
+    {
+        'GET': number[];
+        'SET': { [key: number]: IWorkChapter; };
+        'USER_CREATE': IUserCreateData;
+        'USER_LOGIN': IUserLoginData;
+        'USER_LOGOUT': undefined;
+        'USER_NAME' : undefined;
+        'DO_SYNC' : undefined;
+    }
+    interface CloudMessageResponse
+    {
+        'GET': { [key: number]: IWorkChapter; };
+        'SET': never;
+        'USER_CREATE': FormErrorList|null;
+        'USER_LOGIN': FormErrorList|null;
+        'USER_LOGOUT': boolean;
+        'USER_NAME' : string;
+        'DO_SYNC' : boolean;
+    }
+    
+    type ICloudMessageRequest<K extends keyof CloudMessageData & keyof CloudMessageResponse> = IMessageRequest<CloudMessageData,CloudMessageResponse,K>;        
+    type CloudMessageRequest = ICloudMessageRequest<'GET'> | ICloudMessageRequest<'USER_CREATE'> | ICloudMessageRequest<'USER_LOGIN'> | 
+                                ICloudMessageRequest<'USER_LOGOUT'> | ICloudMessageRequest<'USER_NAME'> | ICloudMessageRequest<'DO_SYNC'> |
+                                IMessageRequestNoResponse<CloudMessageData,CloudMessageResponse,'SET'>;
+
+    interface ReadingListMessageData
+    {
+        'RL_ISINLIST': string[];
+    }
+    interface ReadingListMessageResponse
+    {
+        'RL_ISINLIST': { [key: string]: boolean; };
+    }
+    type IReadingListMessageRequest<K extends keyof ReadingListMessageData & keyof ReadingListMessageResponse> = IMessageRequest<ReadingListMessageData,ReadingListMessageResponse,K>;        
+    type ReadingListMessageRequest = IReadingListMessageRequest<'RL_ISINLIST'>;
+    
+    interface MessageData extends CloudMessageData, ReadingListMessageData
+    {
+    }    
+    
+    interface MessageResponse extends CloudMessageResponse, ReadingListMessageResponse
+    {
     }
 
-    interface GetWorkChaptersMessage {
-        type: 'GET';
-        data: number[];
-    }
-    type GetWorkChaptersMessageResponse = { [key: number]: IWorkChapter; };
+    type MessageRequest = CloudMessageRequest | ReadingListMessageRequest;
 
-    interface SetWorkChaptersMessage {
-        type: 'SET';
-        data: { [key: number]: IWorkChapter; };
-    }
-    type SetWorkChaptersMessageResponse = never;
-
-    interface UserCreateMessage {
-        type: 'USER_CREATE';
-        data: IUserCreateData;
-    }
-    type UserCreateMessageResponse = FormErrorList;
-
-    interface UserLoginMessage {
-        type: 'USER_LOGIN';
-        data: IUserLoginData;
-    }
-    type UserLoginMessageResponse = FormErrorList;
-
-    interface UserLogoutMessage {
-        type: 'USER_LOGOUT';
-    }
-    type UserLogoutMessageResponse = boolean;
-
-    interface UserNameMessage {
-        type: 'USER_NAME';
-    }
-    type UserNameMessageResponse = boolean;
-
-    interface DoSyncMessage {
-        type: 'DO_SYNC';
-    }
-    type DoSyncMessageResponse = boolean;
-
-    type MessageType = GetWorkChaptersMessage | SetWorkChaptersMessage | UserCreateMessage | UserLoginMessage | UserLogoutMessage | UserNameMessage | DoSyncMessage;
-
-    interface IsInReadingListMessage {
-        type: 'RL_ISINLIST';
-        data: string[];
-    }
-    type IsInReadingListMessageResponse = { [key: string]: boolean; };
-
-    type ReadingListMessageType = IsInReadingListMessage;
-
+    export let sendMessage : (request: MessageRequest)=>void;
 }

@@ -1,38 +1,35 @@
 namespace Ao3Track {
 
+    sendMessage = (request: MessageRequest) => {
+        chrome.runtime.sendMessage({type: request.type, data: request.data}, request.sendResponse);
+    }
+
     GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => {
-        let msg: GetWorkChaptersMessage = { type: "GET", data: works };
-        chrome.runtime.sendMessage(msg, callback);
+        sendMessage({type: "GET", data: works, sendResponse: callback});
     };
 
     SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
-        let msg: SetWorkChaptersMessage = { type: "SET", data: workchapters };
-        chrome.runtime.sendMessage(msg);
+        sendMessage({type: "SET", data: workchapters, sendResponse: undefined});
     };
 
     export function DoSync(callback: (result: boolean) => void) {
-        let msg: DoSyncMessage = { type: "DO_SYNC" };
-        chrome.runtime.sendMessage(msg, callback);
+        sendMessage({type: "DO_SYNC", data: undefined, sendResponse: callback});
     };
 
     export function UserLogin(credentials: IUserLoginData, callback: (errors: FormErrorList) => void) {
-        let req: UserLoginMessage = { type: "USER_LOGIN", data: credentials };
-        chrome.runtime.sendMessage(req, callback);
+        sendMessage({type: "USER_LOGIN", data: credentials, sendResponse: callback});
     };
 
     export function UserCreate(credentials: IUserCreateData, callback: (errors: FormErrorList) => void) {
-        let req: UserCreateMessage = { type: "USER_CREATE", data: credentials };
-        chrome.runtime.sendMessage(req, callback);
+        sendMessage({type: "USER_CREATE", data: credentials, sendResponse: callback});
     };
 
     export function UserLogout(callback: (result: boolean) => void) {
-        let req: UserLogoutMessage = { type: "USER_LOGOUT" };
-        chrome.runtime.sendMessage(req, callback);
+        sendMessage({type: "USER_LOGOUT",data: undefined, sendResponse: callback});
     };
 
     export function UserName(callback: (username: string) => void) {
-        let req: UserNameMessage = { type: "USER_NAME" };
-        chrome.runtime.sendMessage(req, callback);
+        sendMessage({type: "USER_NAME", data: undefined, sendResponse: callback});
     };
 
     SetNextPage = (uri: string) => {
@@ -85,7 +82,6 @@ namespace Ao3Track {
     };
 
     AreUrlsInReadingList = (urls: string[], callback: (result: { [key:string]:boolean})=> void)  => {
-        let req: ReadingListMessageType = { type: "RL_ISINLIST", data: urls };
-        chrome.runtime.sendMessage(req, callback);        
+        sendMessage({ type: "RL_ISINLIST", data: urls, sendResponse: callback });
     };
 }
