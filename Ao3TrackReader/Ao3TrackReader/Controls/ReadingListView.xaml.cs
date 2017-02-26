@@ -132,52 +132,29 @@ namespace Ao3TrackReader.Controls
         Models.Ao3PageViewModel selectedItem;
         private void UpdateSelectedItem(Models.Ao3PageViewModel newselected)
         {
-            if (selectedItem != null)
-            {
-                if (newselected != selectedItem) selectedItem.IsSelected = false;
-                selectedItem = null;
-            }
+            if (selectedItem != null && newselected != selectedItem) selectedItem.IsSelected = false;
+            selectedItem = null;
+            ListView.SelectedItem = null;
+
             if (newselected != null)
             {
                 newselected.IsSelected = true;
                 selectedItem = newselected;
             }
-            if (ListView.SelectedItem != newselected)
-                ListView.SelectedItem = newselected;
-        }
-
-        private void OnSelection(object sender, SelectedItemChangedEventArgs e)
-        {
-            if (e.SelectedItem == null)
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
-                PageChange(wpv.Current);
-                return;
-            }
-            else
-                UpdateSelectedItem(e.SelectedItem as Models.Ao3PageViewModel);
+                if (selectedItem?.IsSelected != false && ListView.SelectedItem != selectedItem)
+                {
+                    ListView.SelectedItem = selectedItem;
+                }
+            });
         }
 
         private void OnCellAppearing(object sender, EventArgs e)
         {
             var mi = ((Cell)sender);
             var item = mi.BindingContext as Models.Ao3PageViewModel;
-            if (item == null) return;
-            Uri uri = Data.Ao3SiteDataLookup.ReadingListlUri(wpv.Current.AbsoluteUri);
-            if (uri != null && item.HasUri(uri))
-            {
-                UpdateSelectedItem(item);
-            }
-        }
-
-        private void OnCellDisappearing(object sender, EventArgs e)
-        {
-            var mi = ((Cell)sender);
-            var item = mi.BindingContext as Models.Ao3PageViewModel;
-            if (item == null) return;
-            if (selectedItem == item)
-            {
-                UpdateSelectedItem(null);
-            }
+            if (item?.IsSelected == true) ListView.SelectedItem = item;
         }
 
         private void OnCellTapped(object sender, EventArgs e)
@@ -356,10 +333,9 @@ namespace Ao3TrackReader.Controls
         public void PageChange(Uri uri)
         {
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
-            wpv.DoOnMainThread(() => {
-                UpdateSelectedItem(null);
-                if (uri == null) return;
-                UpdateSelectedItem(readingListBacking.Find((m) => m.HasUri(uri)));
+            wpv.DoOnMainThread(() => {                
+                if (uri == null) UpdateSelectedItem(null);
+                else UpdateSelectedItem(readingListBacking.FindInAll((m) => m.HasUri(uri)));
             });
         }
 
@@ -412,6 +388,7 @@ namespace Ao3TrackReader.Controls
             viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
             await wpv.DoOnMainThreadAsync(() =>
             {
+                if (viewmodel == selectedItem) UpdateSelectedItem(null);
                 readingListBacking.Remove(viewmodel);
                 viewmodel.Dispose();
             });
@@ -457,23 +434,27 @@ namespace Ao3TrackReader.Controls
         {
             return wpv.DoOnMainThreadAsync(() =>
             {
-                var urlmap = new Dictionary<string, string>();
+                var urlmap = new Dictionary<string, Uri>();
                 IDictionary<string, bool> result = new Dictionary<string, bool>();
 
                 foreach (var url in urls)
                 {
                     var uri = Data.Ao3SiteDataLookup.ReadingListlUri(url);
-                    if (uri != null) urlmap[uri.AbsoluteUri] = url;
+                    if (uri != null) urlmap[url] = uri;
                     result[url] = false;
                 }
 
                 readingListBacking.ForEachInAll((m) =>
                 {
-                    if (urlmap.TryGetValue(m.Uri.AbsoluteUri,out var url))
+                    foreach (var kvp in urlmap)
                     {
-                        result[url] = true;
-                        urlmap.Remove(m.Uri.AbsoluteUri);
-                        if (urlmap.Count == 0) return true;
+                        if (m.HasUri(kvp.Value))
+                        {
+                            result[kvp.Key] = true;
+                            urlmap.Remove(kvp.Key);
+                            if (urlmap.Count == 0) return true;
+                            break;
+                        }
                     }
                     return false;
                 });

@@ -13,11 +13,11 @@
                 </ContentView>
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End" />
             </StackLayout>
-            <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" ItemSelected="OnSelection" Margin="4,0,0,0"
+            <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0"
                       x:Name="ListView">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing" Disappearing="OnCellDisappearing">
+                        <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
                             <ViewCell.ContextActions>
                                 <MenuItem Text="Open at Last Location" Command="{Binding MenuOpenLastCommand, Source={x:Reference root}}" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Open"    Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
