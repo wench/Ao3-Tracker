@@ -134,15 +134,15 @@ namespace Ao3TrackReader.Data
             static object workSummaryLock = new object();
             static List<WorkWorker> workLookupWorkers = new List<WorkWorker>();
 
-            ManualResetEventSlim start;
-            ManualResetEventSlim finished;
+            SemaphoreSlim start;
+            SemaphoreSlim finished;
             HtmlDocument doc;
             List<long> works;
 
             public WorkWorker()
             {
-                start = new ManualResetEventSlim(false);
-                finished = new ManualResetEventSlim(false);
+                start = new SemaphoreSlim(0,1);
+                finished = new SemaphoreSlim(0,10);
                 works = new List<long>();
             }
 
@@ -150,20 +150,20 @@ namespace Ao3TrackReader.Data
             bool started = false;
             void Reset()
             {
-                start.Reset();
-                finished.Reset();
+                while (start.CurrentCount != 0) start.Wait();
+                while (finished.CurrentCount != 0) finished.Wait();
                 doc = null;
                 works.Clear();
                 started = false;
             }
-            HtmlDocument Wait()
+            async Task<HtmlDocument> Wait()
             {
                 lock (workSummaryLock)
                 {
                     if (Full)
                     {
-                        workLookupWorkers.Remove(this);
-                        start.Set();
+                        if (workLookupWorkers.Remove(this))
+                            start.Release();
                     }
 
                     if (!started)
@@ -175,7 +175,7 @@ namespace Ao3TrackReader.Data
                             {
                             }
 
-                            start.Wait(5000);
+                            await start.WaitAsync(5000);
 
                             lock (workSummaryLock)
                             {
@@ -190,52 +190,48 @@ namespace Ao3TrackReader.Data
                                 doc = await response.Content.ReadAsHtmlDocumentAsync();
                             }
 
-                            finished.Set();
+                            finished.Release(works.Count);
                         });
                     }
                 }
 
-                finished.Wait();
+                await finished.WaitAsync();
 
                 return doc;
             }
            
-            public static Task<HtmlNode> LookupSummaryAsync(long workid)
+            public static async Task<HtmlNode> LookupSummaryAsync(long workid)
             {
-                return Task.Run(() =>
+                WorkWorker worker = null;
+                lock (workSummaryLock)
                 {
-                    WorkWorker worker = null;
-                    lock (workSummaryLock)
+                    for (var i = 0; i < workLookupWorkers.Count; i++)
                     {
-                        for (var i = 0; i < workLookupWorkers.Count; i++)
+                        if (!workLookupWorkers[i].Full)
                         {
-                            if (!workLookupWorkers[i].Full)
-                            {
-                                worker = workLookupWorkers[i];
-                                break;
-                            }
-                        }
-
-                        if (worker == null) workLookupWorkers.Add(worker = new WorkWorker());
-
-                        worker.works.Add(workid);
-                        if (worker.Full) workLookupWorkers.Remove(worker);
-                    }
-
-                    var doc = worker.Wait();
-
-                    lock (workSummaryLock)
-                    {
-                        if (worker.works.Remove(workid) && worker.works.Count == 0)
-                        {
-                            worker.Reset();
-                            workLookupWorkers.Add(worker);
+                            worker = workLookupWorkers[i];
+                            break;
                         }
                     }
 
-                    var worknode = doc.GetElementbyId("work_" + workid.ToString());
-                    return worknode;
-                });
+                    if (worker == null) workLookupWorkers.Add(worker = new WorkWorker());
+
+                    worker.works.Add(workid);
+                }
+
+                var doc = await worker.Wait();
+
+                lock (workSummaryLock)
+                {
+                    if (worker.works.Remove(workid) && worker.works.Count == 0)
+                    {
+                        worker.Reset();
+                        workLookupWorkers.Add(worker);
+                    }
+                }
+
+                var worknode = doc.GetElementbyId("work_" + workid.ToString());
+                return worknode;
             }
         }
 
