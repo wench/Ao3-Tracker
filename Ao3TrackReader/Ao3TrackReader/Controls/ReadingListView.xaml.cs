@@ -167,38 +167,10 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        private Command MenuOpenLastCommand {
+        public Command MenuOpenLastCommand {
             get {
-                System.ComponentModel.PropertyChangedEventHandler pc = null;
-                Command<Models.Ao3PageViewModel> command = null;
-                command = new Command<Models.Ao3PageViewModel>((item)=>GotoLast(item),
-                    (item) => {
-                        if (item == null)
-                        {
-                            return true;
-                        }
-                        if (item.BaseData == null)
-                        {
-                            if (pc == null)
-                            {
-                                pc = (sender, e) =>
-                                {
-                                    if (string.IsNullOrEmpty(e.PropertyName))
-                                    {
-                                        command.ChangeCanExecute();
-                                        item.PropertyChanged -= pc;
-                                        pc = null;
-                                    }
-                                };
-                                item.PropertyChanged += pc;
-                            }
-                            return true;
-                        }
-
-                        return item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Series;
-                    });
-
-                return command;
+                return new Command<Models.Ao3PageViewModel>((item)=>GotoLast(item),
+                    (item) => item != null && (item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Series));
             }
         }
 
