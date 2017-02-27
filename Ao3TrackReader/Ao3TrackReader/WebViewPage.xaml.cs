@@ -27,6 +27,8 @@ using IAsyncOp_WorkChapterMap = System.Threading.Tasks.Task<System.Collections.G
 using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>>;
 #endif
 
+using ToolbarItem = Ao3TrackReader.Controls.ToolbarItem;
+
 namespace Ao3TrackReader
 {
     public partial class WebViewPage : ContentPage, IWebViewPage, IPageEx
@@ -34,6 +36,10 @@ namespace Ao3TrackReader
 #if WINDOWS_UWP
         public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
 #endif
+        ToolbarItem settingsToolBarItem;
+        ToolbarItem readingListToolBarItem;
+        ToolbarItem urlBarToolBarItem;
+
         DisableableCommand jumpButton { get; set; }
         DisableableCommand incFontSizeButton { get; set; }
         DisableableCommand decFontSizeButton { get; set; }
@@ -60,6 +66,10 @@ namespace Ao3TrackReader
             Panes.Children.Add(SettingsPane = new SettingsView(this));
             Panes.Children.Add(ReadingList = new ReadingListView(this));
 
+            SettingsPane.IsOnScreenChanged += SettingsPane_IsOnScreenChanged;
+            ReadingList.IsOnScreenChanged += ReadingList_IsOnScreenChanged;
+            urlBar.PropertyChanged += UrlBar_PropertyChanged;
+
             WebViewHolder.Content = CreateWebView();
 
             string url = App.Database.GetVariable("Sleep:URI");
@@ -78,6 +88,30 @@ namespace Ao3TrackReader
             {
                 Navigate(uri);
             });
+        }
+
+        private void UrlBar_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
+            {
+                if (readingListToolBarItem == null) return;
+                if (urlBar.IsVisible == false) urlBarToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+                else urlBarToolBarItem.Foreground = Colors.Highlight.High;
+            }
+        }
+
+        private void ReadingList_IsOnScreenChanged(object sender, bool e)
+        {
+            if (readingListToolBarItem == null) return;
+            if (e == false) readingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else readingListToolBarItem.Foreground = Colors.Highlight.High;
+        }
+
+        private void SettingsPane_IsOnScreenChanged(object sender, bool e)
+        {
+            if (settingsToolBarItem == null) return;
+            if (e == false) settingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else settingsToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         void SetupToolbarCommands()
@@ -127,7 +161,7 @@ namespace Ao3TrackReader
                 Command = jumpButton
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            ToolbarItems.Add(readingListToolBarItem = new ToolbarItem
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
@@ -176,7 +210,7 @@ namespace Ao3TrackReader
                 Command = forceSetLocationButton
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            ToolbarItems.Add(urlBarToolBarItem = new ToolbarItem
             {
                 Text = "Url Bar",
                 Icon = Icons.Rename,
@@ -202,7 +236,7 @@ namespace Ao3TrackReader
                 Icon = Icons.Font,
                 Command = new Command(() => FontSize = 100)
             });
-            ToolbarItems.Add(new ToolbarItem
+            ToolbarItems.Add(settingsToolBarItem = new ToolbarItem
             {
                 Text = "Settings",
                 Icon = Icons.Settings,

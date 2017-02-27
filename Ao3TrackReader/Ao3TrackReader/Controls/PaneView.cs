@@ -58,8 +58,10 @@ namespace Ao3TrackReader.Controls
                     }
                 }
                 OnIsOnScreenChanging(value);
+                IsOnScreenChanged?.Invoke(this,value);
             }
         }
+        public event EventHandler<bool> IsOnScreenChanged;
 
         protected virtual void OnIsOnScreenChanging(bool newValue)
         {

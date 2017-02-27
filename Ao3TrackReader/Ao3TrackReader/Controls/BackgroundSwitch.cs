@@ -19,8 +19,7 @@ namespace Ao3TrackReader.Controls
 
         public static readonly BindableProperty ConditionProperty =
              BindableProperty.CreateAttached("Condition", typeof(bool),
-                                      typeof(BackgroundSwitch
-                 ),
+                                      typeof(BackgroundSwitch),
                                       false, propertyChanged: onPropertyChanged);
         
         static void onPropertyChanged(BindableObject bindable, object oldvalue, object newvalue)
