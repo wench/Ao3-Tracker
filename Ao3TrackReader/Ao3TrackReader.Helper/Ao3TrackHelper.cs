@@ -199,7 +199,7 @@ namespace Ao3TrackReader.Helper
     public delegate void MainThreadAction();
     public delegate object MainThreadFunc();
 
-    public interface IEventHandler
+    public interface IWebViewPage
     {
 #if WINDOWS_UWP
         [DefaultOverload]
@@ -231,5 +231,8 @@ namespace Ao3TrackReader.Helper
         void SetCookies(string cookies);
 
         IAsyncOp_StringBoolMap AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls);
+
+        void StartWebViewDragAccelerate(double velocity);
+        void StopWebViewDragAccelerate();
     }
 }

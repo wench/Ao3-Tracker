@@ -227,6 +227,8 @@ namespace Ao3Track {
             currentLocation: { getter: true, setter: ToWorkChapterExNative },
             pageTitle: { getter: true, setter: ToPageTitleNative },
             areUrlsInReadingListAsync: { args: { }, return: WrapIMapString, promise: 1 },
+            startWebViewDragAccelerate: { args: { } },
+            stopWebViewDragAccelerate: { args: { } },
         };
 
         for (let name in helperDef) {

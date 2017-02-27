@@ -11,7 +11,7 @@
                         AbsoluteLayout.LayoutBounds=".98, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
                 <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
                         AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
-                <ContentView x:Name="WebViewPlaceholder" />
+                <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
                 <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"/>
             </AbsoluteLayout>
             <StackLayout x:Name="urlBar" Orientation="Horizontal" Spacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 

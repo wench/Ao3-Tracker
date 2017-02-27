@@ -402,9 +402,9 @@ namespace Ao3TrackReader.Controls
             });
         }
 
-        public Task<IDictionary<string, bool>> AreUrlsInListAsync(string[] urls)
+        public async Task<IDictionary<string, bool>> AreUrlsInListAsync(string[] urls)
         {
-            return wpv.DoOnMainThreadAsync(() =>
+            return await Task.Run(() =>
             {
                 var urlmap = new Dictionary<string, Uri>();
                 IDictionary<string, bool> result = new Dictionary<string, bool>();

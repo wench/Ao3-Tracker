@@ -29,7 +29,7 @@ using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Ge
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : ContentPage, IEventHandler, IPageEx
+    public partial class WebViewPage : ContentPage, IWebViewPage, IPageEx
     {
 #if WINDOWS_UWP
         public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
@@ -60,12 +60,7 @@ namespace Ao3TrackReader
             Panes.Children.Add(SettingsPane = new SettingsView(this));
             Panes.Children.Add(ReadingList = new ReadingListView(this));
 
-            var wv = CreateWebView();
-            AbsoluteLayout.SetLayoutBounds(wv, new Rectangle(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(wv, AbsoluteLayoutFlags.All);
-            MainContent.Children.Insert(MainContent.Children.IndexOf(WebViewPlaceholder), wv);
-            MainContent.Children.Remove(WebViewPlaceholder);
-            WebViewPlaceholder = null;
+            WebViewHolder.Content = CreateWebView();
 
             string url = App.Database.GetVariable("Sleep:URI");
             App.Database.DeleteVariable("Sleep:URI");
@@ -479,20 +474,20 @@ namespace Ao3TrackReader
             else
             {
                 T result = default(T);
-                var handle = new ManualResetEventSlim();
+                var handle = new SemaphoreSlim(0,1);
 
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     result = function();
-                    handle.Set();
+                    handle.Release();
                 });
-                await Task.Run(() => handle.Wait());
+                await handle.WaitAsync();
 
                 return result;
             }
         }
 
-        object IEventHandler.DoOnMainThread(MainThreadFunc function)
+        object IWebViewPage.DoOnMainThread(MainThreadFunc function)
         {
             if (IsMainThread)
             {
@@ -537,13 +532,13 @@ namespace Ao3TrackReader
             }
             else
             {
-                var handle = new ManualResetEventSlim();
+                var handle = new SemaphoreSlim(0,1);
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     function();
-                    handle.Set();
+                    handle.Release();
                 });
-                await Task.Run(() => handle.Wait());
+                await handle.WaitAsync();
             }
         }
 
@@ -768,6 +763,110 @@ namespace Ao3TrackReader
                     App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.Workid] = currentSavedLocation });
                 });
             }
+        }
+
+
+        System.Diagnostics.Stopwatch webViewDragAccelerateStopWatch = null;
+        public void StopWebViewDragAccelerate()
+        {
+            if (webViewDragAccelerateStopWatch != null)
+                webViewDragAccelerateStopWatch.Reset();
+        }
+
+        int swipeOffsetChanged(double offset) 
+        {
+            var end = WebViewHolder.Width;
+            var centre = end / 2;
+            if ((!CanGoBack && offset > 0.0) || (!CanGoForward && offset< 0.0)) {
+                offset = 0.0;
+            }
+            else if (offset< -end) 
+            {
+                offset = -end;
+            }
+            else if (offset > end) 
+            {
+                offset = end;
+            }
+            LeftOffset = offset;
+            
+
+            if (CanGoForward && offset< -centre) {
+                ShowNextPageIndicator = 2;
+                if (offset <= -end) return -3;
+                return -2;
+            }
+            else if (CanGoForward && offset< 0) {
+                ShowNextPageIndicator = 1;
+            }
+            else {
+                ShowNextPageIndicator = 0;
+            }
+
+            if (CanGoBack && offset >= centre) {
+                ShowPrevPageIndicator = 2;
+                if (offset >= end) return 3;
+                return 2;
+            }
+            else if (CanGoBack && offset > 0)
+            {
+                ShowPrevPageIndicator = 1;
+            }
+            else {
+                ShowPrevPageIndicator = 0;
+            }
+
+            if (offset == 0) return 0;                       
+            else if (offset < 0) return -1;
+            else return 1;
+        }     
+
+        public void StartWebViewDragAccelerate(double velocity)
+        {
+            if (webViewDragAccelerateStopWatch == null) webViewDragAccelerateStopWatch = new System.Diagnostics.Stopwatch();
+            webViewDragAccelerateStopWatch.Restart();
+            double lastTime = 0;
+            double offset = LeftOffset;
+            var offsetCat = swipeOffsetChanged(offset);
+
+            Device.StartTimer(TimeSpan.FromMilliseconds(15),
+                () => {
+                    if (!webViewDragAccelerateStopWatch.IsRunning) return false;
+
+                    double now = webViewDragAccelerateStopWatch.ElapsedMilliseconds;
+
+                    double acceleration = 0;   // pixels/s^2
+                    if (offsetCat <= -2) acceleration = -3000.0;
+                    else if (offsetCat == -1) acceleration = 3000.0;
+                    else if (offsetCat >= 2) acceleration = 3000.0;
+                    else if (offsetCat == 1) acceleration = -3000.0;
+                    else {
+                        return false;
+                    }
+
+                    var oldoffset = offset;
+                    velocity = velocity + acceleration * (now - lastTime) / 1000.0;
+                    offset = offset + velocity * (now - lastTime) / 1000.0;
+
+                    if ((oldoffset < 0 && offset >= 0) || (oldoffset > 0 && offset <= 0))
+                    {
+                        LeftOffset = 0;
+                        return false;
+                    }
+
+                    offsetCat = swipeOffsetChanged(offset);
+                    if (offsetCat == 3) {
+                        GoBack();
+                        return false;
+                    }
+                    else if (offsetCat == -3) {
+                        GoForward();
+                        return false;
+                    }
+
+                    lastTime = now;
+                    return true;
+                });
         }
     }
 }

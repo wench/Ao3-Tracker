@@ -410,9 +410,9 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        public Task<IDictionary<long, WorkChapter>> getWorkChaptersAsync(IEnumerable<long> works)
+        public async Task<IDictionary<long, WorkChapter>> getWorkChaptersAsync(IEnumerable<long> works)
         {
-            return Task.Run(() =>
+            return await Task.Run(() =>
             {
                 ManualResetEventSlim handle = null;
                 IDictionary<long, WorkChapter> r = new Dictionary<long, WorkChapter>();

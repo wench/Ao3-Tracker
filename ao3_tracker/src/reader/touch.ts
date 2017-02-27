@@ -13,12 +13,10 @@ namespace Ao3Track {
         let end: number = 0;
         let yLimit: number = 0;
         let zoomFactor: number = 0;
-        let momentumInterval : number = 0;
         let velocity : number = 0;
 
         function swipeCleanup(keepOffset?: boolean) {
-            if (momentumInterval !== 0) clearInterval(momentumInterval);
-            momentumInterval = 0;
+            Helper.stopWebViewDragAccelerate();
             if (!keepOffset) Ao3Track.Helper.leftOffset = 0.0;
             Ao3Track.Helper.showPrevPageIndicator = 0;
             Ao3Track.Helper.showNextPageIndicator = 0;
@@ -37,10 +35,9 @@ namespace Ao3Track {
             yLimit = window.innerHeight / 8;
             centre = window.innerWidth / 2;
             end = window.innerWidth;
-            if (momentumInterval !== 0) clearInterval(momentumInterval);
-            momentumInterval = 0;
+            Helper.stopWebViewDragAccelerate();
 
-            lastTime = Date.now();
+            lastTime = performance.now() ;
             lastTouchX =x/zoomFactor;
             startTouchX = lastTouchX - Ao3Track.Helper.leftOffset; 
             lastTouchY = startTouchY = y/zoomFactor;
@@ -69,13 +66,12 @@ namespace Ao3Track {
                 return false;
             }
 
-            let now = Date.now();
+            let now = performance.now() ;
             if (now <= lastTime) now = lastTime + 1;
             
             velocity = (touchX-lastTouchX) * 1000.0 / (now-lastTime); // pixels/s
             lastTouchX = touchX;
             lastTime = now;
-
 
             let offsetCat = swipeOffsetChanged(offset, offsetY);
             
@@ -98,7 +94,7 @@ namespace Ao3Track {
                 return false;
             }
 
-            let now = Date.now();
+            let now = performance.now();
             if (now <= lastTime) now = lastTime + 1;
             
             if (touchX !== lastTouchX)
@@ -119,44 +115,7 @@ namespace Ao3Track {
                 return true;
             }
             
-            momentumInterval = setInterval(() => {
-                lastTime = now;
-                now = Date.now();
-                if (now <= lastTime) now = lastTime + 1;
-
-                let acceleration = 0;   // pixels/s^2
-
-                if (offsetCat <= -2) acceleration = -4000.0;
-                else if (offsetCat === -1) acceleration = 4000.0;
-                else if (offsetCat >= 2) acceleration = 4000.0;
-                else if (offsetCat === 1) acceleration = -4000.0;
-                else {
-                    swipeCleanup();
-                    return;
-                }
-
-                let oldoffset = offset;
-                velocity = velocity + acceleration * (now-lastTime) / 1000.0;
-                offset = offset + velocity * (now-lastTime) / 1000.0;
-
-                if ((oldoffset < 0 && offset >= 0) || (oldoffset > 0 && offset <= 0))
-                {
-                    swipeCleanup();
-                    return;
-                }
-
-                offsetCat = swipeOffsetChanged(offset, offsetY);
-                if (offsetCat === 3) {
-                    swipeCleanup(true);
-                    Ao3Track.Helper.goBack();
-                    return;
-                }
-                else if (offsetCat === -3) {
-                    swipeCleanup(true);
-                    Ao3Track.Helper.goForward();
-                    return;
-                }                
-            }, 10);
+            Helper.startWebViewDragAccelerate(velocity);
             
             return true;
         }   

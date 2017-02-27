@@ -16,7 +16,7 @@ using Windows.Foundation.Metadata;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : IEventHandler
+    public partial class WebViewPage : IWebViewPage
     {
         const string JavaScriptInject = @"(function(){
             var head = document.getElementsByTagName('head')[0];

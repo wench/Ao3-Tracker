@@ -59,7 +59,10 @@ declare namespace Ao3Track {
         currentLocation: IWorkChapterEx | null;
         pageTitle : IPageTitle | null;
 
-        areUrlsInReadingListAsync : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;        
+        areUrlsInReadingListAsync : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;     
+
+        startWebViewDragAccelerate(velocity: number) : void;
+        stopWebViewDragAccelerate(): void;
     }
 
     export var Helper : Ao3Track.IAo3TrackHelper;

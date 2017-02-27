@@ -348,7 +348,9 @@ namespace Ao3TrackReader.Models
             get { return baseData; }
             set
             {
-                if (baseData == value) return;
+                if (value == null) throw new ArgumentNullException("value", "BaseData can not be set to null.");
+
+                if (value == BaseData) return;
 
                 OnPropertyChanging("");
                 Deregister();
