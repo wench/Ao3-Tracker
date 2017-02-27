@@ -298,7 +298,7 @@ namespace Ao3Track {
                     document.removeEventListener("touchstart", touchStartHandler);
                 }
                 else if ('PointerEvent' in window) {
-                    window.removeEventListener("pointerdown", pointerDownHandler)
+                    window.removeEventListener("pointerdown", pointerDownHandler);
                 }
             }
             else {
@@ -309,7 +309,7 @@ namespace Ao3Track {
                     document.addEventListener("touchstart", touchStartHandler);
                 }
                 else if ('PointerEvent' in window) {
-                    window.addEventListener("pointerdown", pointerDownHandler)
+                    window.addEventListener("pointerdown", pointerDownHandler);
                 }
             }
         }
