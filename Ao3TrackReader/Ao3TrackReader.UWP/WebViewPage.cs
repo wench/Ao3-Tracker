@@ -38,6 +38,7 @@ namespace Ao3TrackReader
         public string[] ScriptsToInject
         {
             get { return new[] {
+                "ms-appx-web:///Content/marshal.js",
                 "ms-appx-web:///Content/platform.js",
                 "ms-appx-web:///Content/reader.js",
                 "ms-appx-web:///Content/tracker.js",

@@ -10,5 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Ao3TrackHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HelperDef.cs" />
   </ItemGroup>
 </Project>

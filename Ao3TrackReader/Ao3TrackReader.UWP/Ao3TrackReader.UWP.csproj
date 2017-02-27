@@ -336,6 +336,9 @@
     <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.css">
       <Link>Content\tracker.css</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\marshal.js">
+      <Link>Content\marshal.js</Link>
+    </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\platform.js">
       <Link>Content\platform.js</Link>
     </Content>

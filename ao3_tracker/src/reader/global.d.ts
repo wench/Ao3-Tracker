@@ -1,23 +1,5 @@
 declare namespace Ao3Track {
-    export namespace Marshal
-    {
-        export type TypeConverter = (value:any)=>any;
-        export type Type = TypeConverter;
-
-        export interface IMemberDef
-        {
-            return?: Type;
-            args?: {[key:number]: Type};
-            getter?: Type|boolean;
-            setter?: Type|boolean;
-            promise?: number;
-        }
-        export interface IHelperDef
-        {
-            [key:string]: IMemberDef;
-        }
-    }
-        
+       
     export interface IPageTitle
     {
         title: string;
@@ -27,7 +9,7 @@ declare namespace Ao3Track {
         fandoms?: string[] | null;
         primarytag?: string | null;
     }    
-    
+
     export interface IAo3TrackHelper {
         getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) : void;
 

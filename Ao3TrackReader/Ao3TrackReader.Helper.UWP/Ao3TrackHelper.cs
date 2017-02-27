@@ -14,17 +14,31 @@ namespace Ao3TrackReader.Helper
     [AllowForWeb]
     public sealed class Ao3TrackHelper
     {
+        static string s_memberDef;
+
+        static Ao3TrackHelper()
+        {
+            var def = new HelperDef();
+            def.FillFromType(typeof(Ao3TrackHelper));
+            s_memberDef = def.Serialize();
+        }
+
         IWebViewPage wvp;
         public Ao3TrackHelper(IWebViewPage wvp)
         {
             this.wvp = wvp;
         }
 
+        [Ignore]
         public string[] ScriptsToInject { get { return wvp.ScriptsToInject; } }
+        [Ignore]
         public string[] CssToInject { get { return wvp.CssToInject; } }
-
+        [Ignore]
+        public string MemberDef { get { return s_memberDef; } }
 
         public event EventHandler<bool> JumpToLastLocationEvent;
+
+        [Ignore]
         public void OnJumpToLastLocation(bool pagejump)
         {
             Task<object>.Run(() =>
@@ -32,6 +46,7 @@ namespace Ao3TrackReader.Helper
                 JumpToLastLocationEvent?.Invoke(this, pagejump);
             });
         }
+
         public bool jumpToLastLocationEnabled
         {
             get { return (bool)wvp.DoOnMainThread(() => wvp.JumpToLastLocationEnabled); }
@@ -40,6 +55,8 @@ namespace Ao3TrackReader.Helper
 
 
         public event EventHandler<object> AlterFontSizeEvent;
+
+        [Ignore]
         public void OnAlterFontSize()
         {
             Task<object>.Run(() =>
@@ -47,12 +64,15 @@ namespace Ao3TrackReader.Helper
                 AlterFontSizeEvent?.Invoke(this, null);
             });
         }
+
+        [Ignore]
         public void Reset()
         {
             JumpToLastLocationEvent = null;
             AlterFontSizeEvent = null;
         }
 
+        [Converter("WrapIMapNum")]
         public IAsyncOperation<object> GetWorkChaptersAsync([ReadOnlyArray] long[] works)
         {
             return Task.Run(async () =>
@@ -61,6 +81,7 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
+        [Ignore]
         public object CreateObject(string classname)
         {
             switch (classname)
@@ -80,7 +101,8 @@ namespace Ao3TrackReader.Helper
 
             return null;
         }
-        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
+
+        public void SetWorkChapters([Converter("ToWorkChapterMapNative")] IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
             {
@@ -150,20 +172,34 @@ namespace Ao3TrackReader.Helper
             get { return (int)wvp.DoOnMainThread(() => wvp.FontSize); }
             set { wvp.DoOnMainThread(() => { wvp.FontSize = value; }); }
         }
+
         public int ShowPrevPageIndicator
         {
             get { return (int)wvp.DoOnMainThread(() => wvp.ShowPrevPageIndicator); }
             set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
         }
+
         public int ShowNextPageIndicator
         {
             get { return (int)wvp.DoOnMainThread(() => wvp.ShowNextPageIndicator); }
             set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
-        public IWorkChapterEx CurrentLocation { get { return (IWorkChapterEx) wvp.DoOnMainThread(() => wvp.CurrentLocation); } set { wvp.DoOnMainThread(() => { wvp.CurrentLocation = value; }); } }
-        public PageTitle PageTitle { get { return (PageTitle) wvp.DoOnMainThread(() => wvp.PageTitle); } set { wvp.DoOnMainThread(() => { wvp.PageTitle = value; }); } }
+        public IWorkChapterEx CurrentLocation {
+            get { return (IWorkChapterEx) wvp.DoOnMainThread(() => wvp.CurrentLocation); }
 
+            [Converter("ToWorkChapterExNative")]
+            set { wvp.DoOnMainThread(() => { wvp.CurrentLocation = value; }); }
+        }
+
+        public PageTitle PageTitle {
+            get { return (PageTitle) wvp.DoOnMainThread(() => wvp.PageTitle); }
+
+            [Converter("ToPageTitleNative")]
+            set { wvp.DoOnMainThread(() => { wvp.PageTitle = value; }); }
+        }
+
+        [Converter("WrapIMapString")]
         public IAsyncOperation<object> AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls)
         {
             return Task.Run(async () =>
