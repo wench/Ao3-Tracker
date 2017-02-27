@@ -154,7 +154,10 @@ namespace Ao3TrackReader.Controls
         {
             var mi = ((Cell)sender);
             var item = mi.BindingContext as Models.Ao3PageViewModel;
-            if (item?.IsSelected == true) ListView.SelectedItem = item;
+            if (item?.IsSelected == true)
+            {
+                UpdateSelectedItem(item);
+            }
         }
 
         private void OnCellTapped(object sender, EventArgs e)
