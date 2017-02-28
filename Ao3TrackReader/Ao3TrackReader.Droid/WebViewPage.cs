@@ -27,9 +27,9 @@ using Java.Lang;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : IEventHandler
+    public partial class WebViewPage : IWebViewPage
     {
-        const string JavaScriptInject = @"(function(){
+        public string JavaScriptInject { get; } = @"(function(){
             var head = document.getElementsByTagName('head')[0];
             var toInject = JSON.parse(Ao3TrackHelperWebkit.get_CssToInject());
             console.log(toInject);
@@ -50,32 +50,36 @@ namespace Ao3TrackReader
             }
         })();";
 
-        public string[] ScriptsToInject
-        {
-            get { return new[] {
+        public string[] ScriptsToInject { get; } =
+            new[] {
+                "https://ao3track.wenchy.net/polyfills.js",
+                "https://ao3track.wenchy.net/marshal.js",
                 "https://ao3track.wenchy.net/callbacks.js",
                 "https://ao3track.wenchy.net/platform.js",
                 "https://ao3track.wenchy.net/reader.js",
                 "https://ao3track.wenchy.net/tracker.js",
                 "https://ao3track.wenchy.net/unitconv.js",
-                "https://ao3track.wenchy.net/touch.js" }; }
-        }
-        public string[] CssToInject
+                "https://ao3track.wenchy.net/touch.js"
+            };
+
+        public string[] CssToInject { get; } = { "https://ao3track.wenchy.net/tracker.css" };
+
+
+        public bool IsMainThread
         {
-            get { return new[] { "https://ao3track.wenchy.net/tracker.css" }; }
-
+            get { return Looper.MainLooper == Looper.MyLooper(); }
         }
 
-        Ao3TrackHelper helper;
 
         WebView WebView { get; set; }
         WebClient webClient;
         Xamarin.Forms.View contextMenuPlaceholder;
 
-        bool ShowBackOnToolbar { get {
+        public bool ShowBackOnToolbar { get {
                 return true;
             } }
-        private Xamarin.Forms.View CreateWebView()
+
+        public Xamarin.Forms.View CreateWebView()
         {
             WebView = new WebView(Forms.Context);
             WebView.SetWebViewClient(webClient = new WebClient(this));
@@ -90,8 +94,8 @@ namespace Ao3TrackReader
             contextMenuPlaceholder = (new Android.Views.View(Forms.Context)).ToView();
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(0, 0, 0, 0));
             Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, AbsoluteLayoutFlags.None);
+            helper = new Ao3TrackHelper(this);
 
-            //WebView.NewWindowRequested += WebView_NewWindowRequested; ??
             WebView.FocusChange += WebView_FocusChange;
 
             return WebView.ToView();
@@ -101,48 +105,8 @@ namespace Ao3TrackReader
         {
             if (e.HasFocus)
             {
-                ReadingList.IsOnScreen = false;
-                SettingsPane.IsOnScreen = false;
+                OnWebViewGotFocus();
             }
-        }
-
-
-        private bool ShouldOverrideUrlLoading(WebView sender, Uri args)
-        {
-            jumpButton.IsEnabled = false;
-            TitleEx = "Loading...";
-
-            var uri = Ao3SiteDataLookup.CheckUri(args);
-            if (uri == null)
-            {
-                return true;
-            }
-            if (uri != args)
-            {
-                Navigate(uri);
-                return true;
-            }
-            
-            if (urlEntry != null) urlEntry.Text = args.AbsoluteUri;
-            ReadingList?.PageChange(args);
-            nextPage = null;
-            prevPage = null;
-            prevPageButton.IsEnabled = CanGoBack;
-            nextPageButton.IsEnabled = CanGoForward;
-            helper?.Reset();
-            return false;
-        }
-
-        private void OnPageStarted(WebView sender)
-        {
-            if (urlEntry != null) urlEntry.Text = WebView.Url;
-            ReadingList?.PageChange(Current);
-            WebView.AddJavascriptInterface(helper = new Ao3TrackHelper(this), "Ao3TrackHelperWebkit");
-            ShowPrevPageIndicator = false;
-            ShowNextPageIndicator = false;
-            //WebView.RenderTransform = null;
-            //WebView.Opacity = 1;
-            helper?.Reset();
         }
 
         public class ValueCallback : Java.Lang.Object, IValueCallback
@@ -160,43 +124,20 @@ namespace Ao3TrackReader
             }
         }
 
-
-        private void OnPageFinished(WebView sender)
+        public async Task<string> EvaluateJavascriptAsync(string code)
         {
-            // Inject JS script
-            helper?.Reset();
-            EvaluateJavascript(JavaScriptInject);
+            var cs = new TaskCompletionSource<string>();
+            DoOnMainThread(() => WebView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
+
+            return await cs.Task;
         }
 
-        public void EvaluateJavascript(string code)
+        public void AddJavascriptObject(string name, object obj)
         {
-            DoOnMainThread(() => WebView.EvaluateJavascript(code, new ValueCallback((value) => { })));
-        }
-        public void CallJavascript(string function, params object[] args)
-        {
-            for (var i = 0; i < args.Length; i++)
-            {
-                if (args[i] == null)
-                {
-                    args[i] = "null";
-                    continue;
-                }
-                var type = args[i].GetType();
-                if (type == typeof(bool))
-                    args[i] = args[i].ToString().ToLowerInvariant();
-                else if (type == typeof(double))
-                    args[i] = ((double)args[i]).ToString("r");
-                else if (type == typeof(float))
-                    args[i] = ((float)args[i]).ToString("r");
-                else if (type == typeof(int) || type == typeof(long) || type == typeof(short) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort))
-                    args[i] = args[i].ToString();
-                else
-                    args[i] = args[i].ToString().ToLiteral();
-            }
-            DoOnMainThread(() => WebView.EvaluateJavascript(function + "(" + string.Join(",", args) + ");", new ValueCallback((value) => { })));
+            WebView.AddJavascriptInterface((Java.Lang.Object) obj, name);
         }
 
-        public Uri Current
+        public Uri CurrentUri
         {
             get
             {
@@ -228,10 +169,8 @@ namespace Ao3TrackReader
         {
             if (WebView.CanGoForward()) WebView.GoForward();
             else if (nextPage != null) WebView.LoadUrl(nextPage.AbsoluteUri);
-
         }
-
-
+        
         public double LeftOffset
         {
             get
@@ -244,62 +183,75 @@ namespace Ao3TrackReader
                 WebView.TranslationX = (float)value;
             }
         }
+        
+        TaskCompletionSource<string> contextMenuResult = null;
+        Android.Widget.PopupMenu contextMenu = null;
+        public void CloseContextMenu()
+        {
+            if (contextMenuResult != null)
+            {
+                contextMenuResult.TrySetCanceled();
+                contextMenuResult = null;
+            }
+            if (contextMenu != null)
+            {
+                contextMenu.Dismiss();
+                contextMenu = null;
+            }
+        }
 
         public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
         {
-            var handle = new System.Threading.ManualResetEventSlim();
-            string result = null;
+            CloseContextMenu();
 
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            contextMenuResult = new TaskCompletionSource<string>();
+
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x, y, 0, 0));
+            MainContent.Children.Add(contextMenuPlaceholder);
+            var renderer = Platform.GetRenderer(contextMenuPlaceholder) as NativeViewWrapperRenderer;
+
+            contextMenu = new PopupMenu(Forms.Context, renderer.Control);
+            var menu = contextMenu.Menu;
+
+            for (int i = 0; i < menuItems.Length; i++)
             {
-                Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x, y, 0, 0));
-                MainContent.Children.Add(contextMenuPlaceholder);
-                var renderer = Xamarin.Forms.Platform.Android.Platform.GetRenderer(contextMenuPlaceholder) as NativeViewWrapperRenderer;
-
-                var popupMenu = new Android.Widget.PopupMenu(Forms.Context, renderer.Control);
-                var menu = popupMenu.Menu;
-
-                for (int i = 0; i < menuItems.Length; i++)
+                if (menuItems[i] == "-")
                 {
-                    if (menuItems[i] == "-")
-                    {
-                        menu.Add(Menu.None, i, i, "-").SetEnabled(false);
-                    }
-                    else
-                    {
-                        menu.Add(Menu.None, i, i, menuItems[i]);
-                    }
+                    menu.Add(Menu.None, i, i, "-").SetEnabled(false);
                 }
-                menu.SetGroupEnabled(1, false);
-
-                popupMenu.MenuItemClick += (s1, arg1) =>
+                else
                 {
-                    result = menuItems[arg1.Item.ItemId];
-                };
+                    menu.Add(Menu.None, i, i, menuItems[i]);
+                }
+            }
 
-                popupMenu.DismissEvent += (s2, arg2) =>
-                {
-                    handle.Set();
-                    MainContent.Children.Remove(contextMenuPlaceholder);
-                };
-
-                popupMenu.Show();
-            });
-
-            return Task.Run(() =>
+            contextMenu.MenuItemClick += (s1, arg1) =>
             {
-                handle.Wait();
-                return result;
+                contextMenuResult.TrySetResult(menuItems[arg1.Item.ItemId]);
+            };
+
+            contextMenu.DismissEvent += (s2, arg2) =>
+            {
+                contextMenuResult.TrySetResult("");
+                MainContent.Children.Remove(contextMenuPlaceholder);
+            };
+
+            contextMenu.Show();
+
+            return contextMenuResult.Task.ContinueWith((task) => {
+                contextMenu = null;
+                contextMenuResult = null;
+                return task.Result;
             });
         }
 
         class WebClient : WebViewClient
         {
-            WebViewPage page;
+            WebViewPage wvp;
 
-            public WebClient(WebViewPage page)
+            public WebClient(WebViewPage wvp)
             {
-                this.page = page;
+                this.wvp = wvp;
             }
             public override void OnLoadResource(WebView view, string url)
             {
@@ -368,35 +320,36 @@ namespace Ao3TrackReader
 
             public override void OnPageFinished(WebView view, string url)
             {
-                page.OnPageFinished(view);
                 base.OnPageFinished(view, url);
+                wvp.OnContentLoaded();
             }
 
             public override void OnPageStarted(WebView view, string url, Bitmap favicon)
             {
-                page.OnPageStarted(view);
                 base.OnPageStarted(view, url, favicon);
+                wvp.AddJavascriptObject("Ao3TrackHelperNative", wvp.helper);
+                wvp.OnContentLoading();
             }
 
             [Obsolete]
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
-                return page.ShouldOverrideUrlLoading(view, new Uri(url));
+                return wvp.OnNavigationStarting(new Uri(url));
             }
 
             public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
             {
-                return page.ShouldOverrideUrlLoading(view, new Uri(request.Url.ToString()));
+                return wvp.OnNavigationStarting(new Uri(request.Url.ToString()));
             }
         }
 
         class ChromeClient : WebChromeClient
         {
-            WebViewPage page;
+            WebViewPage wvp;
 
-            public ChromeClient(WebViewPage page)
+            public ChromeClient(WebViewPage wvp)
             {
-                this.page = page;
+                this.wvp = wvp;
             }
 
             public override bool OnConsoleMessage(ConsoleMessage consoleMessage)

@@ -75,8 +75,10 @@ namespace Ao3TrackReader.Controls
 
                         if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
                         {
-                            var viewmodel = new Models.Ao3PageViewModel(model.Value, item.Unread);
-                            viewmodel.TagsVisible = tags_visible;
+                            var viewmodel = new Models.Ao3PageViewModel(model.Value, item.Unread)
+                            {
+                                TagsVisible = tags_visible
+                            };
                             viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                             readingListBacking.Add(viewmodel);
                             vms.Add(viewmodel);
@@ -163,8 +165,7 @@ namespace Ao3TrackReader.Controls
         private void OnCellTapped(object sender, EventArgs e)
         {
             var mi = ((Cell)sender);
-            var item = mi.BindingContext as Models.Ao3PageViewModel;
-            if (item != null)
+            if (mi.BindingContext is Models.Ao3PageViewModel item)
             {
                 GotoLast(item);
             }
@@ -180,8 +181,7 @@ namespace Ao3TrackReader.Controls
         private void OnMenuOpen(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
+            if (mi.CommandParameter is Models.Ao3PageViewModel item)
             {
                 wpv.Navigate(item.Uri);
                 IsOnScreen = false;
@@ -191,8 +191,7 @@ namespace Ao3TrackReader.Controls
         private void OnMenuRefresh(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
+            if (mi.CommandParameter is Models.Ao3PageViewModel item)
             {
                 RefreshAsync(item);
             }
@@ -202,8 +201,7 @@ namespace Ao3TrackReader.Controls
         private void OnMenuDelete(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
-            var item = mi.CommandParameter as Models.Ao3PageViewModel;
-            if (item != null)
+            if (mi.CommandParameter is Models.Ao3PageViewModel item)
             {
                 RemoveAsync(item.Uri.AbsoluteUri);
             }
@@ -212,7 +210,7 @@ namespace Ao3TrackReader.Controls
 
         private void OnAddPage(object sender, EventArgs e)
         {
-            AddAsync(wpv.Current.AbsoluteUri);
+            AddAsync(wpv.CurrentUri.AbsoluteUri);
         }
 
         private void OnRefresh(object sender, EventArgs e)
@@ -242,7 +240,7 @@ namespace Ao3TrackReader.Controls
                     RefreshButton.IsEnabled = true;
                     SyncIndicator.IsRunning = false;
                     SyncIndicator.IsVisible = false;
-                    PageChange(wpv.Current);
+                    PageChange(wpv.CurrentUri);
                 });
             });
         }
@@ -352,7 +350,7 @@ namespace Ao3TrackReader.Controls
                 await Task.WhenAll(tasks);
                 App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
             }
-            PageChange(wpv.Current);
+            PageChange(wpv.CurrentUri);
         }
 
         async Task RemoveAsyncImpl(string href)
@@ -392,8 +390,10 @@ namespace Ao3TrackReader.Controls
             App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = null });
             wpv.DoOnMainThread(() =>
             {
-                var viewmodel = new Models.Ao3PageViewModel(model.Value, null);
-                viewmodel.TagsVisible = tags_visible;
+                var viewmodel = new Models.Ao3PageViewModel(model.Value, null)
+                {
+                    TagsVisible = tags_visible
+                };
                 viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                 readingListBacking.Add(viewmodel);
                 Task.Run(async () =>

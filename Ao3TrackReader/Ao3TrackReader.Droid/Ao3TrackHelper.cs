@@ -7,32 +7,32 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace Ao3TrackReader.Droid
+namespace Ao3TrackReader.Helper
 {
     public class Ao3TrackHelper : Java.Lang.Object
     {
-        WebViewPage handler;
+        WebViewPage wvp;
 
-        public Ao3TrackHelper(WebViewPage handler)
+        public Ao3TrackHelper(WebViewPage wvp)
         {
-            this.handler = handler;
+            this.wvp = wvp;
         }
 
         public string ScriptsToInject
         {
-            [JavascriptInterface, Export("get_ScriptsToInject")]
-            get { return JsonConvert.SerializeObject(handler.ScriptsToInject); }
+            [JavascriptInterface, Export("get_scriptsToInject")]
+            get { return JsonConvert.SerializeObject(wvp.ScriptsToInject); }
         }
 
         public string CssToInject
         {
-            [JavascriptInterface, Export("get_CssToInject")]
-            get { return JsonConvert.SerializeObject(handler.CssToInject); }
+            [JavascriptInterface, Export("get_cssToInject")]
+            get { return JsonConvert.SerializeObject(wvp.CssToInject); }
         }
 
         public int JumpToLastLocationEvent
         {
-            [JavascriptInterface, Export("get_onjumptolastlocationevent")]
+            [JavascriptInterface, Export("get_onjumptolastlocationevent"), Converter("Event")]
             get;
             [JavascriptInterface, Export("set_onjumptolastlocationevent")]
             set;
@@ -42,21 +42,21 @@ namespace Ao3TrackReader.Droid
             Task<object>.Run(() =>
             {
                 if (JumpToLastLocationEvent != 0)
-                    handler.CallJavascript("Ao3TrackCallbacks.Call",JumpToLastLocationEvent, pagejump);
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", JumpToLastLocationEvent, pagejump).Wait(0);
             });
         }
         public bool JumpToLastLocationEnabled
         {
-            [JavascriptInterface, Export("get_JumpToLastLocationEnabled")]
-            get { return (bool)handler.DoOnMainThread(() => handler.JumpToLastLocationEnabled); }
-            [JavascriptInterface, Export("set_JumpToLastLocationEnabled")]
-            set { handler.DoOnMainThread(() => { handler.JumpToLastLocationEnabled = value; }); }
+            [JavascriptInterface, Export("get_jumpToLastLocationEnabled")]
+            get { return (bool)wvp.DoOnMainThread(() => wvp.JumpToLastLocationEnabled); }
+            [JavascriptInterface, Export("set_jumpToLastLocationEnabled")]
+            set { wvp.DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value; }); }
         }
 
 
         public int AlterFontSizeEvent
         {
-            [JavascriptInterface, Export("get_onalterfontsizeevent")]
+            [JavascriptInterface, Export("get_onalterfontsizeevent"), Converter("Event")]
             get;
             [JavascriptInterface, Export("set_onalterfontsizeevent")]
             set;
@@ -66,16 +66,16 @@ namespace Ao3TrackReader.Droid
             Task<object>.Run(() =>
             {
                 if (AlterFontSizeEvent != 0)
-                    handler.CallJavascript("Ao3TrackCallbacks.CallVoid", AlterFontSizeEvent);
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", AlterFontSizeEvent).Wait(0);
             });
         }
 
         public int FontSize
         {
-            [JavascriptInterface, Export("get_FontSize")]
-            get { return (int)handler.DoOnMainThread(() => handler.FontSize); }
-            [JavascriptInterface, Export("set_FontSize")]
-            set { handler.DoOnMainThread(() => { handler.FontSize = value; }); }
+            [JavascriptInterface, Export("get_fontSize")]
+            get { return (int)wvp.DoOnMainThread(() => wvp.FontSize); }
+            [JavascriptInterface, Export("set_fontSize")]
+            set { wvp.DoOnMainThread(() => { wvp.FontSize = value; }); }
         }
 
         public void Reset()
@@ -86,41 +86,41 @@ namespace Ao3TrackReader.Droid
 
 
         [JavascriptInterface, Export("getWorkChaptersAsync")]
-        public void GetWorkChaptersAsync(string works_json, int hCallback)
+        public void GetWorkChaptersAsync([Converter("ToJSON")] string works_json, [Converter("Callback")] int hCallback)
         {
             Task.Run(async () =>
             {
                 var works = JsonConvert.DeserializeObject<long[]>(works_json);
-                var workchapters = await handler.GetWorkChaptersAsync(works);
-                handler.CallJavascript("Ao3TrackCallbacks.Call", hCallback, JsonConvert.SerializeObject(workchapters));
+                var workchapters = await wvp.GetWorkChaptersAsync(works);
+                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0);
             });
         }
 
         [JavascriptInterface, Export("setWorkChapters")]
-        public void SetWorkChapters(string workchapters_json)
+        public void SetWorkChapters([Converter("ToJSON")] string workchapters_json)
         {
             Task.Run(() =>
             {
                 var workchapters = JsonConvert.DeserializeObject<Dictionary<long, WorkChapter>>(workchapters_json);
-                handler.SetWorkChapters(workchapters);
+                wvp.SetWorkChapters(workchapters);
             });
         }
 
         [JavascriptInterface, Export("showContextMenu")]
-        public void ShowContextMenu(double x, double y, string menuItems_json, int hCallback)
+        public void ShowContextMenu(double x, double y, [Converter("ToJson")] string menuItems_json, [Converter("Callback")] int hCallback)
         {
             Task.Run(async () =>
             {
                 var menuItems = JsonConvert.DeserializeObject<string[]>(menuItems_json);
-                string result = await handler.ShowContextMenu(x, y, menuItems);
-                handler.CallJavascript("Ao3TrackCallbacks.Call", hCallback, result);
+                string result = await wvp.ShowContextMenu(x, y, menuItems);
+                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, result).Wait(0);
             });
         }
 
         [JavascriptInterface, Export("addToReadingList")]
         public void AddToReadingList(string href)
         {
-            handler.AddToReadingList(href);
+            wvp.AddToReadingList(href);
         }
         [JavascriptInterface, Export("copyToClipboard")]
         public void CopyToClipboard(string str, string type)
@@ -140,98 +140,98 @@ namespace Ao3TrackReader.Droid
         [JavascriptInterface, Export("setCookies")]
         public void SetCookies(string cookies)
         {
-            handler.SetCookies(cookies);
+            wvp.SetCookies(cookies);
         }
 
 
         public string NextPage
         {
-            [JavascriptInterface, Export("get_NextPage")]
-            get { return handler.NextPage; }
-            [JavascriptInterface, Export("set_NextPage")]
-            set { handler.DoOnMainThread(() => { handler.NextPage = value; }); }
+            [JavascriptInterface, Export("get_nextPage")]
+            get { return wvp.NextPage; }
+            [JavascriptInterface, Export("set_nextPage")]
+            set { wvp.DoOnMainThread(() => { wvp.NextPage = value; }); }
         }
         public string PrevPage
         {
-            [JavascriptInterface, Export("get_PrevPage")]
-            get { return handler.PrevPage; }
-            [JavascriptInterface, Export("set_PrevPage")]
-            set { handler.DoOnMainThread(() => { handler.PrevPage = value; }); }
+            [JavascriptInterface, Export("get_prevPage")]
+            get { return wvp.PrevPage; }
+            [JavascriptInterface, Export("set_prevPage")]
+            set { wvp.DoOnMainThread(() => { wvp.PrevPage = value; }); }
         }
 
         public bool CanGoBack
         {
-            [JavascriptInterface, Export("get_CanGoBack")]
-            get { return (bool)handler.DoOnMainThread(() => handler.CanGoBack); }
+            [JavascriptInterface, Export("get_canGoBack")]
+            get { return (bool)wvp.DoOnMainThread(() => wvp.CanGoBack); }
         }
         public bool CanGoForward
         {
-            [JavascriptInterface, Export("get_CanGoForward")]
-            get { return (bool)handler.DoOnMainThread(() => handler.CanGoForward); }
+            [JavascriptInterface, Export("get_canGoForward")]
+            get { return (bool)wvp.DoOnMainThread(() => wvp.CanGoForward); }
         }
 
         [JavascriptInterface, Export("goBack")]
-        public void GoBack() { handler.DoOnMainThread(() => handler.GoBack()); }
+        public void GoBack() { wvp.DoOnMainThread(() => wvp.GoBack()); }
 
         [JavascriptInterface, Export("goForward")]
-        public void GoForward() { handler.DoOnMainThread(() => handler.GoForward()); }
+        public void GoForward() { wvp.DoOnMainThread(() => wvp.GoForward()); }
 
         public double LeftOffset
         {
-            [JavascriptInterface, Export("get_LeftOffset")]
-            get { return (double)handler.DoOnMainThread(() => handler.LeftOffset); }
-            [JavascriptInterface, Export("set_LeftOffset")]
-            set { handler.DoOnMainThread(() => { handler.LeftOffset = value; }); }
+            [JavascriptInterface, Export("get_leftOffset")]
+            get { return (double)wvp.DoOnMainThread(() => wvp.LeftOffset); }
+            [JavascriptInterface, Export("set_leftOffset")]
+            set { wvp.DoOnMainThread(() => { wvp.LeftOffset = value; }); }
         }
-        public bool ShowPrevPageIndicator
+        public int ShowPrevPageIndicator
         {
-            [JavascriptInterface, Export("get_ShowPrevPageIndicator")]
-            get { return (bool)handler.DoOnMainThread(() => handler.ShowPrevPageIndicator); }
-            [JavascriptInterface, Export("set_ShowPrevPageIndicator")]
-            set { handler.DoOnMainThread(() => { handler.ShowPrevPageIndicator = value; }); }
+            [JavascriptInterface, Export("get_showPrevPageIndicator")]
+            get { return (int)wvp.DoOnMainThread(() => wvp.ShowPrevPageIndicator); }
+            [JavascriptInterface, Export("set_showPrevPageIndicator")]
+            set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
         }
-        public bool ShowNextPageIndicator
+        public int ShowNextPageIndicator
         {
-            [JavascriptInterface, Export("get_ShowNextPageIndicator")]
-            get { return (bool)handler.DoOnMainThread(() => handler.ShowNextPageIndicator); }
-            [JavascriptInterface, Export("set_ShowNextPageIndicator")]
-            set { handler.DoOnMainThread(() => { handler.ShowNextPageIndicator = value; }); }
+            [JavascriptInterface, Export("get_showNextPageIndicator")]
+            get { return (int)wvp.DoOnMainThread(() => wvp.ShowNextPageIndicator); }
+            [JavascriptInterface, Export("set_showNextPageIndicator")]
+            set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
         public string CurrentLocation {
-            [JavascriptInterface, Export("get_CurrentLocation")]
+            [JavascriptInterface, Export("get_currentLocation"), Converter("FromJSON")]
             get
             {
-                var loc = handler.DoOnMainThread(() => handler.CurrentLocation );
+                var loc = wvp.DoOnMainThread(() => wvp.CurrentLocation );
                 if (loc == null) return null;
                 return JsonConvert.SerializeObject(loc);
             }
-            [JavascriptInterface, Export("set_CurrentLocation")]
+            [JavascriptInterface, Export("set_currentLocation"), Converter("ToJSON")]
             set
             {
-                handler.DoOnMainThread(() =>
+                wvp.DoOnMainThread(() =>
                 {
-                    if (value == null || value == "(null)" || value == "null") handler.CurrentLocation = null;
-                    else handler.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
+                    if (value == null || value == "(null)" || value == "null") wvp.CurrentLocation = null;
+                    else wvp.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
                 });
             }
         }
 
         public string PageTitle
         {
-            [JavascriptInterface, Export("get_PageTitle")]
+            [JavascriptInterface, Export("get_pageTitle"), Converter("FromJSON")]
             get {
-                var pagetitle = handler.DoOnMainThread(() => handler.PageTitle);
+                var pagetitle = wvp.DoOnMainThread(() => wvp.PageTitle);
                 if (pagetitle == null) return null;
                 return JsonConvert.SerializeObject(pagetitle);
             }
-            [JavascriptInterface, Export("set_PageTitle")]
+            [JavascriptInterface, Export("set_pageTitle"), Converter("ToJSON")]
             set
             {
-                handler.DoOnMainThread(() =>
+                wvp.DoOnMainThread(() =>
                 {
-                    if (value == null || value == "(null)" || value == "null") handler.PageTitle = null;
-                    else handler.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
+                    if (value == null || value == "(null)" || value == "null") wvp.PageTitle = null;
+                    else wvp.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
                 });
             }
         }

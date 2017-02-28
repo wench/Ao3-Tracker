@@ -12,52 +12,53 @@ using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
 using System.Threading;
 using Ao3TrackReader.Data;
+using Windows.Foundation;
 using Windows.Foundation.Metadata;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : IWebViewPage
+    public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        const string JavaScriptInject = @"(function(){
+        public string JavaScriptInject { get; } = @"(function(){
             var head = document.getElementsByTagName('head')[0];
-            for (var i = 0; i< Ao3TrackHelperUWP.cssToInject.length; i++) {                    
+            for (var i = 0; i< Ao3TrackHelperNative.cssToInject.length; i++) {                    
                 var link = document.createElement('link');
                 link.type = 'text/css';
                 link.rel = 'stylesheet';
-                link.href = Ao3TrackHelperUWP.cssToInject[i];
+                link.href = Ao3TrackHelperNative.cssToInject[i];
                 head.appendChild(link);
             }
-            for (var i = 0; i< Ao3TrackHelperUWP.scriptsToInject.length; i++) {                    
+            for (var i = 0; i< Ao3TrackHelperNative.scriptsToInject.length; i++) {                    
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
-                script.src = Ao3TrackHelperUWP.scriptsToInject[i];
+                script.src = Ao3TrackHelperNative.scriptsToInject[i];
                 head.appendChild(script);
             }
         })();";
 
-        public string[] ScriptsToInject
-        {
-            get { return new[] {
+        public string[] ScriptsToInject { get; } = new[] {
                 "ms-appx-web:///Content/marshal.js",
                 "ms-appx-web:///Content/platform.js",
                 "ms-appx-web:///Content/reader.js",
                 "ms-appx-web:///Content/tracker.js",
                 "ms-appx-web:///Content/touch.js",
                 "ms-appx-web:///Content/unitconv.js"
-            }; }
-        }
-        public string[] CssToInject
+        };
+        public string[] CssToInject { get; } = new[] { "ms-appx-web:///Content/tracker.css" }; 
+
+        private CoreDispatcher Dispatcher { get; set; }
+
+        public bool IsMainThread
         {
-            get { return new[] { "ms-appx-web:///Content/tracker.css" }; }
-
+            get { return Dispatcher.HasThreadAccess; }
         }
-
-        Ao3TrackHelper helper;
 
         WebView WebView { get; set; }
 
-        private Xamarin.Forms.View CreateWebView()
+        public Xamarin.Forms.View CreateWebView()
         {
+            Dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
+
             WebView = new WebView()
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -70,6 +71,7 @@ namespace Ao3TrackReader
             WebView.NewWindowRequested += WebView_NewWindowRequested;
             WebView.GotFocus += WebView_GotFocus;
             WebView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
+            helper = new Ao3TrackHelper(this);
 
             return WebView.ToView();
         }
@@ -97,8 +99,7 @@ namespace Ao3TrackReader
 
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
         {
-            ReadingList.IsOnScreen = false;
-            SettingsPane.IsOnScreen = false;
+            OnWebViewGotFocus();
         }
 
         private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
@@ -112,65 +113,33 @@ namespace Ao3TrackReader
 
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
         {
-            jumpButton.IsEnabled = false;
-
-            var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
-            if (uri == null)
-            {
-                // Handle external uri
-                args.Cancel = true;
-                LeftOffset = 0;
-                return;
-            }
-            else if (uri != args.Uri)
-            {
-                args.Cancel = true;
-                WebView.Navigate(uri);
-                return;
-            }
-
-            TitleEx = "Loading...";
-
-            if (urlEntry != null) urlEntry.Text = args.Uri.AbsoluteUri;
-            ReadingList?.PageChange(args.Uri);
-            WebView.AddWebAllowedObject("Ao3TrackHelperUWP", helper = new Ao3TrackHelper(this));
-            nextPage = null;
-            prevPage = null;
-            prevPageButton.IsEnabled = CanGoBack;
-            nextPageButton.IsEnabled = CanGoForward;
-            ShowPrevPageIndicator = 0;
-            ShowNextPageIndicator = 0;
-            currentLocation = null;
-            currentSavedLocation = null;
-            forceSetLocationButton.IsEnabled = false;
-            helper?.Reset();
+            args.Cancel = OnNavigationStarting(args.Uri);
+            if (!args.Cancel)
+                AddJavascriptObject("Ao3TrackHelperNative", helper);
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
         {
-            if (urlEntry != null) urlEntry.Text = WebView.Source.AbsoluteUri;
-            ReadingList?.PageChange(Current);
-            ShowPrevPageIndicator = 0;
-            ShowNextPageIndicator = 0;            
-            currentLocation = null;
-            currentSavedLocation = null;
-            forceSetLocationButton.IsEnabled = false;
-            helper?.Reset();
-            Task.Run(async () =>
-            {
-                await Task.Delay(300);
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => LeftOffset = 0);
-            });            
+            OnContentLoading();
         }
 
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
         {
-            // Inject JS script
-            WebView.InvokeScriptAsync("eval", new[] { JavaScriptInject }).AsTask();
-            LeftOffset = 0;
+            OnContentLoaded();
         }
 
-        public Uri Current {
+        public async Task<string> EvaluateJavascriptAsync(string code)
+        {
+            return await WebView.InvokeScriptAsync("eval", new[] { code });
+        }
+
+        public void AddJavascriptObject(string name, object obj)
+        {
+            WebView.AddWebAllowedObject(name, obj);
+        }
+
+        public Uri CurrentUri
+        {
             get {
                 return DoOnMainThread(()=> {
                     return WebView.Source;
@@ -226,41 +195,79 @@ namespace Ao3TrackReader
                     }
             }
         }
-
-        public Windows.Foundation.IAsyncOperation<string> ShowContextMenu(double x, double y, string[] menuItems)
+        
+        TaskCompletionSource<string> contextMenuResult = null;
+        MenuFlyout contextMenu = null;
+        public void CloseContextMenu()
         {
-            string result = null;
+            if (contextMenuResult != null)
+            {
+                contextMenuResult.TrySetCanceled();
+                contextMenuResult = null;
+            }
+            if (contextMenu != null)
+            {
+                contextMenu.Hide();
+                contextMenu = null;
+            }
+        }
+
+        public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
+        {
+            CloseContextMenu();
+
+            contextMenuResult = new TaskCompletionSource<string>();
             RoutedEventHandler clicked = (sender, e) =>
             {
                 var item = sender as MenuFlyoutItem;
-                result = item.Text;
+                contextMenuResult?.TrySetResult(item.Text);
             };
-            MenuFlyout menu = new MenuFlyout();
+            contextMenu = new MenuFlyout();
             for (int i = 0; i < menuItems.Length; i++) {
                 if (menuItems[i] == "-") {
-                    menu.Items.Add(new MenuFlyoutSeparator());
+                    contextMenu.Items.Add(new MenuFlyoutSeparator());
                 }
                 else
                 {
                     var item = new MenuFlyoutItem { Text = menuItems[i] };
                     item.Click += clicked;
-                    menu.Items.Add(item);
+                    contextMenu.Items.Add(item);
                 }
             }
 
-            ManualResetEventSlim handle = new ManualResetEventSlim();
-            EventHandler<object> closed = (sender, e) =>
+            contextMenu.Closed += (sender,e) =>
             {
-                handle.Set();
+                contextMenuResult?.TrySetResult("");
             };
-            menu.Closed += closed;
 
-            menu.ShowAt(WebView, new Windows.Foundation.Point(x, y));
-            return Task.Run(() => {
-                handle.Wait();
-                return result;
-            }).AsAsyncOperation();
+            contextMenu.ShowAt(WebView, new Windows.Foundation.Point(x, y));
+            return contextMenuResult.Task.ContinueWith((task)=> {
+                contextMenu = null;
+                contextMenuResult = null;
+                return task.Result;
+            });
 
+        }
+
+        IAsyncOperation<IDictionary<long, WorkChapter>> IWebViewPage.GetWorkChaptersAsync(long[] works)
+        {
+            return GetWorkChaptersAsync(works).AsAsyncOperation();
+        }
+        IAsyncOperation<IDictionary<string, bool>> IWebViewPage.AreUrlsInReadingListAsync(string[] urls)
+        {
+            return AreUrlsInReadingListAsync(urls).AsAsyncOperation();
+        }
+        IAsyncOperation<string> Helper.IWebViewPage.CallJavascriptAsync(string function, params object[] args)
+        {
+            return CallJavascriptAsync(function, args).AsAsyncOperation();
+        }
+        IAsyncOperation<string> Helper.IWebViewPage.EvaluateJavascriptAsync(string code)
+        {
+            return CallJavascriptAsync(code).AsAsyncOperation();
+        }
+        IAsyncOperation<string> Helper.IWebViewPage.ShowContextMenu(double x, double y, string[] menuItems)
+        {
+            return ShowContextMenu(x, y, menuItems).AsAsyncOperation();
         }
     }
 }

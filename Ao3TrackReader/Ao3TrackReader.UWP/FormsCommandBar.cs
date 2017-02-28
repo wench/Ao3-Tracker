@@ -31,14 +31,15 @@ namespace Ao3TrackReader.UWP
                 var uri = new Uri("ms-appx:///" + xitem.Icon.File);
                 item.Icon = new BitmapIcon() { UriSource = uri};
 
-                var aitem = item.DataContext as Ao3TrackReader.Controls.ToolbarItem;
-                if (aitem != null) {
+                if (item.DataContext is Ao3TrackReader.Controls.ToolbarItem aitem)
+                {
                     // Create the binding description.
-                    Binding b = new Binding();
-                    b.Mode = BindingMode.OneWay;
-                    b.Path = new PropertyPath("Foreground");
-                    b.Converter = new ColorConverter();
-
+                    Binding b = new Binding()
+                    {
+                        Mode = BindingMode.OneWay,
+                        Path = new PropertyPath("Foreground"),
+                        Converter = new ColorConverter()
+                    };
                     item.SetBinding(AppBarButton.ForegroundProperty, b);
                 }
             }
@@ -51,7 +52,7 @@ namespace Ao3TrackReader.UWP
             {
                 res = base.MeasureOverride(availableSize);
             }
-            catch(System.Runtime.InteropServices.COMException e)
+            catch(System.Runtime.InteropServices.COMException)
             {
                 res.Height = 48;
             }

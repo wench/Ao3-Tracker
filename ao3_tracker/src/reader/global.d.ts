@@ -49,3 +49,5 @@ declare namespace Ao3Track {
 
     export var Helper : Ao3Track.IAo3TrackHelper;
 }
+
+declare var Ao3TrackHelperNative : any;

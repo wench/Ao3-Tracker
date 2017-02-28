@@ -1,19 +1,9 @@
 /// <reference path="../../../typings/globals/winjs/index.d.ts" />
 
-// tslint:disable-next-line:no-var-keyword
-var Ao3TrackHelperUWP: Ao3Track.UWP.IAo3TrackHelperUWP;
-
 namespace Ao3Track {
     export namespace UWP {
         export interface Native {
             native: never;
-        }
-
-        export interface WorkChapterNative extends Native, IWorkChapter {
-        }
-        export interface WorkChapterExNative extends WorkChapterNative, IWorkChapterEx {
-        }
-        export interface PageTitleNative extends Native, IPageTitle {
         }
 
         export interface IKeyValuePair<K, V> {
@@ -49,25 +39,19 @@ namespace Ao3Track {
         }
 
         export interface ClassNameMap {
-            "WorkChapterNative": WorkChapterNative;
-            "WorkChapterExNative": WorkChapterExNative;
-            "WorkChapterMapNative": IMap<number, WorkChapterNative>;
-            "PageTitleNative": PageTitleNative;
-        }
-        export interface ClassNameSourceMap {
             "WorkChapterNative": IWorkChapter;
             "WorkChapterExNative": IWorkChapterEx;
-            "WorkChapterMapNative": { [key: number]: WorkChapterNative };
+            "WorkChapterMapNative": { [key: number]: IWorkChapter } | IMap<number,IWorkChapter & Native>;
             "PageTitleNative": IPageTitle;
         }
 
-        export interface IAo3TrackHelperUWP {
+        export let helper = Ao3TrackHelperNative as  {
             scriptsToInject: string[];
             cssToInject: string[];
             memberDef: string;
 
             // Create native objects to pass back           
-            createObject<K extends keyof ClassNameMap>(classname: K): ClassNameMap[K];
+            createObject<K extends keyof ClassNameMap>(classname: K): ClassNameMap[K] & Native;
 
             [key:string] : any;
         }
@@ -151,25 +135,25 @@ namespace Ao3Track {
             return proxy;
         }
 
-        export function ToNative<K extends keyof ClassNameMap>(classname: K, source: ClassNameSourceMap[K]): ClassNameMap[K] {
-            return Object.assign(Ao3TrackHelperUWP.createObject(classname), source);
+        export function ToNative<K extends keyof ClassNameMap>(classname: K, source: ClassNameMap[K]): ClassNameMap[K] & UWP.Native{
+            return Object.assign(helper.createObject(classname), source);
         }
     }
 
     export namespace Marshal {
         export namespace Converters {
 
-            export function ToWorkChapterNative(source: IWorkChapter): UWP.ClassNameMap["WorkChapterNative"] {
+            export function ToWorkChapterNative(source: IWorkChapter) {
                 return UWP.ToNative("WorkChapterNative", source);
             }
-            export function ToWorkChapterExNative(source: IWorkChapterEx): UWP.ClassNameMap["WorkChapterExNative"] {
+            export function ToWorkChapterExNative(source: IWorkChapterEx) {
                 return UWP.ToNative("WorkChapterExNative", source);
             }
-            export function ToPageTitleNative(source: IPageTitle): UWP.ClassNameMap["PageTitleNative"] {
+            export function ToPageTitleNative(source: IPageTitle) {
                 return UWP.ToNative("PageTitleNative", source);
             }
-            export function ToWorkChapterMapNative(source: { [key: number]: IWorkChapter }): UWP.ClassNameMap["WorkChapterMapNative"] {
-                let m = Ao3TrackHelperUWP.createObject("WorkChapterMapNative");
+            export function ToWorkChapterMapNative(source: { [key: number]: IWorkChapter }) {
+                let m = UWP.helper.createObject("WorkChapterMapNative") as UWP.IMap<number,IWorkChapter & UWP.Native>;
                 for (let key in source) {
                     m.insert(key as any, ToWorkChapterNative(source[key]));
                 }
@@ -186,6 +170,6 @@ namespace Ao3Track {
         }
     }
 
-    Marshal.MarshalNativeHelper(Ao3TrackHelperUWP.memberDef, Ao3TrackHelperUWP);
+    Marshal.MarshalNativeHelper(UWP.helper.memberDef, UWP.helper);
 }
 

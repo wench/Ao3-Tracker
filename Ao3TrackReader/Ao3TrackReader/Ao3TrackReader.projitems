@@ -35,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DisableableCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IWebViewPageNative.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ListConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageViewModel.cs" />

@@ -227,6 +227,7 @@ namespace Ao3TrackReader.Helper
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
         IAsyncOp_String ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
+        void CloseContextMenu();
         void AddToReadingList(string href);
         void SetCookies(string cookies);
 
@@ -234,5 +235,8 @@ namespace Ao3TrackReader.Helper
 
         void StartWebViewDragAccelerate(double velocity);
         void StopWebViewDragAccelerate();
-    }
+
+        IAsyncOp_String CallJavascriptAsync(string function, params object[] args);
+        IAsyncOp_String EvaluateJavascriptAsync(string code);
+    }   
 }

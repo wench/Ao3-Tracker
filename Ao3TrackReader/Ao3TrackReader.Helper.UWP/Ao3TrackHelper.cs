@@ -16,29 +16,36 @@ namespace Ao3TrackReader.Helper
     {
         static string s_memberDef;
 
-        static Ao3TrackHelper()
-        {
-            var def = new HelperDef();
-            def.FillFromType(typeof(Ao3TrackHelper));
-            s_memberDef = def.Serialize();
-        }
-
         IWebViewPage wvp;
         public Ao3TrackHelper(IWebViewPage wvp)
         {
             this.wvp = wvp;
         }
 
-        [Ignore]
+        internal static MemberDef md_ScriptsToInject = null;
         public string[] ScriptsToInject { get { return wvp.ScriptsToInject; } }
-        [Ignore]
+
+        internal static MemberDef md_CssToInject = null;
         public string[] CssToInject { get { return wvp.CssToInject; } }
-        [Ignore]
-        public string MemberDef { get { return s_memberDef; } }
+
+        internal static MemberDef md_MemberDef = null;
+        public string MemberDef
+        {
+            get
+            {
+                if (s_memberDef == null)
+                {
+                    var def = new HelperDef();
+                    def.FillFromType(typeof(Ao3TrackHelper));
+                    s_memberDef = def.Serialize();
+                }
+                return s_memberDef;
+            }
+        }
 
         public event EventHandler<bool> JumpToLastLocationEvent;
 
-        [Ignore]
+        internal static MemberDef md_OnJumpToLastLocation = null;
         public void OnJumpToLastLocation(bool pagejump)
         {
             Task<object>.Run(() =>
@@ -56,7 +63,7 @@ namespace Ao3TrackReader.Helper
 
         public event EventHandler<object> AlterFontSizeEvent;
 
-        [Ignore]
+        internal static MemberDef md_OnAlterFontSize = null;
         public void OnAlterFontSize()
         {
             Task<object>.Run(() =>
@@ -65,14 +72,14 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        [Ignore]
+        internal static MemberDef md_Reset = null;
         public void Reset()
         {
             JumpToLastLocationEvent = null;
             AlterFontSizeEvent = null;
         }
 
-        [Converter("WrapIMapNum")]
+        internal static MemberDef md_GetWorkChaptersAsync = new MemberDef { @return = "WrapIMapNum" };
         public IAsyncOperation<object> GetWorkChaptersAsync([ReadOnlyArray] long[] works)
         {
             return Task.Run(async () =>
@@ -81,7 +88,6 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
-        [Ignore]
         public object CreateObject(string classname)
         {
             switch (classname)
@@ -102,7 +108,8 @@ namespace Ao3TrackReader.Helper
             return null;
         }
 
-        public void SetWorkChapters([Converter("ToWorkChapterMapNative")] IDictionary<long, WorkChapter> works)
+        internal static MemberDef md_SetWorkChapters = new MemberDef { args = new Dictionary<int, string> { { 0, "ToWorkChapterMapNative" } } };
+        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
             {
@@ -119,6 +126,7 @@ namespace Ao3TrackReader.Helper
         {
             wvp.AddToReadingList(href);
         }
+
         public void CopyToClipboard(string str, string type)
         {
             if (type == "text")
@@ -130,6 +138,7 @@ namespace Ao3TrackReader.Helper
             else if (type == "uri")
             {
                 var dp = new DataPackage();
+                dp.SetText(str);
                 dp.SetWebLink(new Uri(str));
                 Clipboard.SetContent(dp);
             }
@@ -185,21 +194,23 @@ namespace Ao3TrackReader.Helper
             set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
-        public IWorkChapterEx CurrentLocation {
-            get { return (IWorkChapterEx) wvp.DoOnMainThread(() => wvp.CurrentLocation); }
+        internal static MemberDef md_CurrentLocation = new MemberDef { setter = "ToWorkChapterExNative" };
+        public IWorkChapterEx CurrentLocation
+        {
+            get { return (IWorkChapterEx)wvp.DoOnMainThread(() => wvp.CurrentLocation); }
 
-            [Converter("ToWorkChapterExNative")]
             set { wvp.DoOnMainThread(() => { wvp.CurrentLocation = value; }); }
         }
 
-        public PageTitle PageTitle {
-            get { return (PageTitle) wvp.DoOnMainThread(() => wvp.PageTitle); }
+        internal static MemberDef md_PageTitle = new MemberDef { setter = "ToPageTitleNative" };
+        public PageTitle PageTitle
+        {
+            get { return (PageTitle)wvp.DoOnMainThread(() => wvp.PageTitle); }
 
-            [Converter("ToPageTitleNative")]
             set { wvp.DoOnMainThread(() => { wvp.PageTitle = value; }); }
         }
 
-        [Converter("WrapIMapString")]
+        internal static MemberDef md_AreUrlsInReadingListAsync = new MemberDef { @return = "WrapIMapString" };
         public IAsyncOperation<object> AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls)
         {
             return Task.Run(async () =>

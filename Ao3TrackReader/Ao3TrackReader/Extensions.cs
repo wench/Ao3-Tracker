@@ -155,11 +155,5 @@ namespace Ao3TrackReader
         }
 #endif
 
-#if !WINDOWS_UWP
-        public static Task<T> AsAsyncOperation<T>(this Task<T> task)
-        {
-            return task;
-        }
-#endif
     }
 }

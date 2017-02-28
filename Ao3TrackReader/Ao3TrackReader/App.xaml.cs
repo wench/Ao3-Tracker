@@ -38,7 +38,19 @@ namespace Ao3TrackReader
         public static string PlatformIcon(string name)
         {
             string dl = "_" + Theme;
-            return Device.OnPlatform(name + dl, name + dl, "Assets/" + name + dl);
+            switch (Device.RuntimePlatform)
+            {
+                case Device.Android:
+                    return name + dl;
+
+                case Device.Windows:
+                case Device.WinPhone:
+                case "UWP":
+                    return "Assets/" + name + dl;
+
+                default:
+                    throw new NotSupportedException("'" + Device.RuntimePlatform + "' is not a supported platform. Update Ao3TrackReader.App.PlatformIcon()");
+            }
         }
 
         WebViewPage wvp;

@@ -17,25 +17,18 @@ using System.Runtime.CompilerServices;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
-using IAsyncOp_WorkChapterMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
-using IAsyncOp_StringBoolMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<string, bool>>;
-#else
-#if __ANDROID__
+#elif __ANDROID__
 using Android.OS;
-#endif
-using IAsyncOp_WorkChapterMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
-using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>>;
 #endif
 
 using ToolbarItem = Ao3TrackReader.Controls.ToolbarItem;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : ContentPage, IWebViewPage, IPageEx
+    public partial class WebViewPage : ContentPage, IWebViewPage, IPageEx, IWebViewPageNative
     {
-#if WINDOWS_UWP
-        public Windows.UI.Core.CoreDispatcher Dispatcher { get; private set; }
-#endif
+        Ao3TrackHelper helper;
+
         ToolbarItem settingsToolBarItem;
         ToolbarItem readingListToolBarItem;
         ToolbarItem urlBarToolBarItem;
@@ -55,10 +48,6 @@ namespace Ao3TrackReader
         {
             TitleEx = "Loading...";
             InitializeComponent();           
-                
-#if WINDOWS_UWP
-            Dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
-#endif
 
             SetupToolbarCommands();
             SetupToolbar();
@@ -178,7 +167,7 @@ namespace Ao3TrackReader
                 Icon = Icons.AddPage,
                 Command = new Command(() =>
                 {
-                    ReadingList.AddAsync(Current.AbsoluteUri);
+                    ReadingList.AddAsync(CurrentUri.AbsoluteUri);
                 })
             });
 
@@ -223,7 +212,7 @@ namespace Ao3TrackReader
                     }
                     else
                     {
-                        urlEntry.Text = Current.AbsoluteUri;
+                        urlEntry.Text = CurrentUri.AbsoluteUri;
                         urlBar.IsVisible = true;
                         urlEntry.Focus();
                     }
@@ -281,7 +270,7 @@ namespace Ao3TrackReader
 
         public virtual void OnSleep()
         {
-            App.Database.SaveVariable("Sleep:URI", Current.AbsoluteUri);
+            App.Database.SaveVariable("Sleep:URI", CurrentUri.AbsoluteUri);
         }
 
         public virtual void OnResume()
@@ -459,45 +448,21 @@ namespace Ao3TrackReader
 
         static object locker = new object();
 
-        public IAsyncOp_WorkChapterMap GetWorkChaptersAsync(long[] works)
+        public System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>> GetWorkChaptersAsync(long[] works)
         {
-            return App.Storage.getWorkChaptersAsync(works).AsAsyncOperation();
+            return App.Storage.getWorkChaptersAsync(works);
         }
 
-        public IAsyncOp_StringBoolMap AreUrlsInReadingListAsync(string[] urls)
+        public System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>> AreUrlsInReadingListAsync(string[] urls)
         {
-            return ReadingList.AreUrlsInListAsync(urls).AsAsyncOperation();
-        }
-
-        public bool IsMainThread
-        {
-#if WINDOWS_UWP
-            get { return Dispatcher.HasThreadAccess; }
-#elif __ANDROID__
-            get { return Looper.MainLooper == Looper.MyLooper(); }
-#endif
+            return ReadingList.AreUrlsInListAsync(urls);
         }
 
         public T DoOnMainThread<T>(Func<T> function)
         {
-            if (IsMainThread)
-            {
-                return function();
-            }
-            else
-            {
-                T result = default(T);
-                var handle = new ManualResetEventSlim();
-
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                {
-                    result = function();
-                    handle.Set();
-                });
-                handle.Wait();
-
-                return result;
-            }
+            var task = DoOnMainThreadAsync(function);
+            task.Wait();
+            return task.Result;
         }
         public async Task<T> DoOnMainThreadAsync<T>(Func<T> function)
         {
@@ -507,55 +472,26 @@ namespace Ao3TrackReader
             }
             else
             {
-                T result = default(T);
-                var handle = new SemaphoreSlim(0,1);
+                var cs = new TaskCompletionSource<T>();
 
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
-                    result = function();
-                    handle.Release();
+                    cs.SetResult(function());
                 });
-                await handle.WaitAsync();
-
-                return result;
+                return await cs.Task;
             }
         }
 
         object IWebViewPage.DoOnMainThread(MainThreadFunc function)
         {
-            if (IsMainThread)
-            {
-                return function();
-            }
-            else
-            {
-                object result = null;
-                var handle = new ManualResetEventSlim();
-
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                {
-                    result = function();
-                    handle.Set();
-                });
-                handle.Wait();
-
-                return result;
-            }
+            var task = DoOnMainThreadAsync(() => function());
+            task.Wait();
+            return task.Result;
         }
 
         public void DoOnMainThread(MainThreadAction function)
         {
-            if (IsMainThread)
-            {
-                function();
-            }
-            else
-            {
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                {
-                    function();
-                });
-            }
+            DoOnMainThreadAsync(() => function()).Wait();
         }
 
         public async Task DoOnMainThreadAsync(MainThreadAction function)
@@ -566,13 +502,13 @@ namespace Ao3TrackReader
             }
             else
             {
-                var handle = new SemaphoreSlim(0,1);
+                var task = new Task(() => { });
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     function();
-                    handle.Release();
+                    task.Start();
                 });
-                await handle.WaitAsync();
+                await task;
             }
         }
 
@@ -664,7 +600,7 @@ namespace Ao3TrackReader
                 {
                     try
                     {
-                        nextPage = new Uri(Current, value);
+                        nextPage = new Uri(CurrentUri, value);
                     }
                     catch
                     {
@@ -688,7 +624,7 @@ namespace Ao3TrackReader
                 {
                     try
                     {
-                        prevPage = new Uri(Current, value);
+                        prevPage = new Uri(CurrentUri, value);
                     }
                     catch
                     {
@@ -902,5 +838,102 @@ namespace Ao3TrackReader
                     return true;
                 });
         }
+
+        public async Task<string> CallJavascriptAsync(string function, params object[] args)
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (args[i] == null)
+                {
+                    args[i] = "null";
+                    continue;
+                }
+                var type = args[i].GetType();
+                if (type == typeof(bool))
+                    args[i] = args[i].ToString().ToLowerInvariant();
+                else if (type == typeof(double))
+                    args[i] = ((double)args[i]).ToString("r");
+                else if (type == typeof(float))
+                    args[i] = ((float)args[i]).ToString("r");
+                else if (type == typeof(int) || type == typeof(long) || type == typeof(short) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort))
+                    args[i] = args[i].ToString();
+                else if (type == typeof(string))
+                    args[i] = args[i].ToString().ToLiteral();
+                else
+                    args[i] = Newtonsoft.Json.JsonConvert.SerializeObject(args[i]);
+            }
+            return await EvaluateJavascriptAsync(function + "(" + string.Join(",", args) + ");");
+        }
+
+        private void OnWebViewGotFocus()
+        {
+            ReadingList.IsOnScreen = false;
+            SettingsPane.IsOnScreen = false;
+        }
+
+        private bool OnNavigationStarting(Uri uri)
+        {
+            var check = Ao3SiteDataLookup.CheckUri(uri);
+            if (check == null)
+            {
+                // Handle external uri
+                LeftOffset = 0;
+                return true;
+            }
+            else if (check != uri)
+            {
+                Navigate(check);
+                return true;
+            }
+
+            if (check.LocalPath == CurrentUri.LocalPath)
+            {
+                return false;
+            }
+
+            TitleEx = "Loading...";
+
+            jumpButton.IsEnabled = false;
+            CloseContextMenu();
+
+            if (urlEntry != null) urlEntry.Text = uri.AbsoluteUri;
+            ReadingList?.PageChange(uri);
+
+            nextPage = null;
+            prevPage = null;
+            prevPageButton.IsEnabled = CanGoBack;
+            nextPageButton.IsEnabled = CanGoForward;
+            ShowPrevPageIndicator = 0;
+            ShowNextPageIndicator = 0;
+            currentLocation = null;
+            currentSavedLocation = null;
+            forceSetLocationButton.IsEnabled = false;
+            helper?.Reset();
+            return false;
+        }
+
+        void OnContentLoading()
+        {
+            if (urlEntry != null) urlEntry.Text = CurrentUri.AbsoluteUri;
+            ReadingList?.PageChange(CurrentUri);
+            ShowPrevPageIndicator = 0;
+            ShowNextPageIndicator = 0;
+            currentLocation = null;
+            currentSavedLocation = null;
+            forceSetLocationButton.IsEnabled = false;
+            helper?.Reset();
+            Task.Run(async () =>
+            {
+                await Task.Delay(300);
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => LeftOffset = 0);
+            });
+        }
+
+        private void OnContentLoaded()
+        {
+            LeftOffset = 0;
+            EvaluateJavascriptAsync(JavaScriptInject).Wait(0);
+        }
+
     }
 }
