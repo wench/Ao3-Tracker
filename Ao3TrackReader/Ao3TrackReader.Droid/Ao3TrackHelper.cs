@@ -11,6 +11,7 @@ namespace Ao3TrackReader.Helper
 {
     public class Ao3TrackHelper : Java.Lang.Object
     {
+        static string s_memberDef;
         WebViewPage wvp;
 
         public Ao3TrackHelper(WebViewPage wvp)
@@ -18,16 +19,34 @@ namespace Ao3TrackReader.Helper
             this.wvp = wvp;
         }
 
+        [DefIgnore]
         public string ScriptsToInject
         {
             [JavascriptInterface, Export("get_scriptsToInject")]
             get { return JsonConvert.SerializeObject(wvp.ScriptsToInject); }
         }
 
+        [DefIgnore]
         public string CssToInject
         {
             [JavascriptInterface, Export("get_cssToInject")]
             get { return JsonConvert.SerializeObject(wvp.CssToInject); }
+        }
+
+        [DefIgnore]
+        public string MemberDef
+        {
+            [JavascriptInterface, Export("get_memberDef")]
+            get
+            {
+                if (s_memberDef == null)
+                {
+                    var def = new HelperDef();
+                    def.FillFromType(typeof(Ao3TrackHelper));
+                    s_memberDef = def.Serialize();
+                }
+                return s_memberDef;
+            }
         }
 
         public int JumpToLastLocationEvent
