@@ -11,38 +11,38 @@ namespace Ao3TrackReader
         }
 
         [PrimaryKey, Column("id")]
-        public long Workid { get; set; }
+        public long workid { get; set; }
         [Column("chapterid")]
-        public long Chapterid { get; set; }
+        public long chapterid { get; set; }
         [Column("number")]
-        public long Number { get; set; }
+        public long number { get; set; }
         [Column("timestamp")]
         public long Timestamp { get; set; }
         [Column("location")]
-        public long? Location { get; set; }
+        public long? location { get; set; }
         [Column("seq")]
         public long Seq { get; set; }
 
         [Ignore]
-        long? IWorkChapter.Seq { get { return Seq; } set { Seq = value ?? 0; } }
+        long? IWorkChapter.seq { get { return Seq; } set { Seq = value ?? 0; } }
 
         [Ignore]
-        public long Paragraph
+        public long paragraph
         {
             get
             {
-                if (Location == null) return long.MaxValue;
-                return (long)Location / 1000000000L;
+                if (location == null) return long.MaxValue;
+                return (long)location / 1000000000L;
             }
         }
 
         [Ignore]
-        public long Frac
+        public long frac
         {
             get
             {
-                if (Location == null) return long.MaxValue;
-                var offset = (long)Location % 1000000000L;
+                if (location == null) return long.MaxValue;
+                var offset = (long)location % 1000000000L;
                 if (offset == 500000000L) return 100;
                 return offset * 100L / 479001600L;
             }
@@ -50,94 +50,94 @@ namespace Ao3TrackReader
 
         public bool LessThan(Work newitem)
         {
-            if (newitem.Workid != Workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
             if (newitem.Seq > this.Seq) { return true; }
             else if (newitem.Seq < this.Seq) { return false; }
 
-            if (newitem.Number > this.Number) { return true; }
-            else if (newitem.Number < this.Number) { return false; }
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
 
-            if (this.Location == null) { return false; }
-            if (newitem.Location == null) { return true; }
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
 
-            return newitem.Location > this.Location;
+            return newitem.location > this.location;
         }
         public bool LessThan(IWorkChapter newitem)
         {
             if (newitem is IWorkChapterEx) return LessThan(newitem as IWorkChapterEx);
 
-            if (newitem.Seq > this.Seq) { return true; }
-            else if (newitem.Seq < this.Seq) { return false; }
+            if (newitem.seq > this.Seq) { return true; }
+            else if (newitem.seq < this.Seq) { return false; }
 
-            if (newitem.Number > this.Number) { return true; }
-            else if (newitem.Number < this.Number) { return false; }
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
 
-            if (this.Location == null) { return false; }
-            if (newitem.Location == null) { return true; }
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
 
-            return newitem.Location > this.Location;
+            return newitem.location > this.location;
         }
         public bool LessThan(IWorkChapterEx newitem)
         {
-            if (newitem.Workid != Workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
-            if (newitem.Seq > this.Seq) { return true; }
-            else if (newitem.Seq < this.Seq) { return false; }
+            if (newitem.seq > this.Seq) { return true; }
+            else if (newitem.seq < this.Seq) { return false; }
 
-            if (newitem.Number > this.Number) { return true; }
-            else if (newitem.Number < this.Number) { return false; }
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
 
-            if (this.Location == null) { return false; }
-            if (newitem.Location == null) { return true; }
+            if (this.location == null) { return false; }
+            if (newitem.location == null) { return true; }
 
-            return newitem.Location > this.Location;
+            return newitem.location > this.location;
         }
         public bool LessThanOrEqual(Work newitem)
         {
-            if (newitem.Workid != Workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
             if (newitem.Seq > this.Seq) { return true; }
             else if (newitem.Seq < this.Seq) { return false; }
 
-            if (newitem.Number > this.Number) { return true; }
-            else if (newitem.Number < this.Number) { return false; }
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
 
-            if (newitem.Location == null) { return true; }
-            if (this.Location == null) { return false; }
+            if (newitem.location == null) { return true; }
+            if (this.location == null) { return false; }
 
-            return newitem.Location >= this.Location;
+            return newitem.location >= this.location;
         }
 
         public bool LessThanOrEqual(IWorkChapter newitem)
         {
             if (newitem is IWorkChapterEx) return LessThanOrEqual(newitem as IWorkChapterEx);
 
-            if (newitem.Seq > this.Seq) { return true; }
-            else if (newitem.Seq < this.Seq) { return false; }
+            if (newitem.seq > this.Seq) { return true; }
+            else if (newitem.seq < this.Seq) { return false; }
 
-            if (newitem.Number > this.Number) { return true; }
-            else if (newitem.Number < this.Number) { return false; }
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
 
-            if (newitem.Location == null) { return true; }
-            if (this.Location == null) { return false; }
+            if (newitem.location == null) { return true; }
+            if (this.location == null) { return false; }
 
-            return newitem.Location >= this.Location;
+            return newitem.location >= this.location;
         }
         public bool LessThanOrEqual(IWorkChapterEx newitem)
         {
-            if (newitem.Workid != Workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
+            if (newitem.workid != workid) { throw new ArgumentException("Items don't belong to same work", "newitem"); }
 
-            if (newitem.Seq > this.Seq) { return true; }
-            else if (newitem.Seq < this.Seq) { return false; }
+            if (newitem.seq > this.Seq) { return true; }
+            else if (newitem.seq < this.Seq) { return false; }
 
-            if (newitem.Number > this.Number) { return true; }
-            else if (newitem.Number < this.Number) { return false; }
+            if (newitem.number > this.number) { return true; }
+            else if (newitem.number < this.number) { return false; }
 
-            if (newitem.Location == null) { return true; }
-            if (this.Location == null) { return false; }
+            if (newitem.location == null) { return true; }
+            if (this.location == null) { return false; }
 
-            return newitem.Location >= this.Location;
+            return newitem.location >= this.location;
         }
 
         public static bool operator >=(Work left, Work right)

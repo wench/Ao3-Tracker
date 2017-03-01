@@ -9,28 +9,14 @@ using System.Collections.Generic;
 
 namespace Ao3TrackReader.Helper
 {
-    public class Ao3TrackHelper : Java.Lang.Object
+    public class Ao3TrackHelper : Java.Lang.Object, IAo3TrackHelper
     {
         static string s_memberDef;
-        WebViewPage wvp;
+        IWebViewPage wvp;
 
-        public Ao3TrackHelper(WebViewPage wvp)
+        public Ao3TrackHelper(IWebViewPage wvp)
         {
             this.wvp = wvp;
-        }
-
-        [DefIgnore]
-        public string ScriptsToInject
-        {
-            [JavascriptInterface, Export("get_scriptsToInject")]
-            get { return JsonConvert.SerializeObject(wvp.ScriptsToInject); }
-        }
-
-        [DefIgnore]
-        public string CssToInject
-        {
-            [JavascriptInterface, Export("get_cssToInject")]
-            get { return JsonConvert.SerializeObject(wvp.CssToInject); }
         }
 
         [DefIgnore]
@@ -51,12 +37,12 @@ namespace Ao3TrackReader.Helper
 
         public int JumpToLastLocationEvent
         {
-            [JavascriptInterface, Export("get_onjumptolastlocationevent"), Converter("Event")]
+            [JavascriptInterface, Export("get_onjumptolastlocationevent")]
             get;
-            [JavascriptInterface, Export("set_onjumptolastlocationevent")]
+            [JavascriptInterface, Export("set_onjumptolastlocationevent"), Converter("Event")]
             set;
         }
-        public void OnJumpToLastLocation(bool pagejump)
+        void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
             Task<object>.Run(() =>
             {
@@ -75,12 +61,12 @@ namespace Ao3TrackReader.Helper
 
         public int AlterFontSizeEvent
         {
-            [JavascriptInterface, Export("get_onalterfontsizeevent"), Converter("Event")]
+            [JavascriptInterface, Export("get_onalterfontsizeevent")]
             get;
-            [JavascriptInterface, Export("set_onalterfontsizeevent")]
+            [JavascriptInterface, Export("set_onalterfontsizeevent"), Converter("Event")]
             set;
         }
-        public void OnAlterFontSize()
+        void IAo3TrackHelper.OnAlterFontSize()
         {
             Task<object>.Run(() =>
             {
@@ -97,7 +83,7 @@ namespace Ao3TrackReader.Helper
             set { wvp.DoOnMainThread(() => { wvp.FontSize = value; }); }
         }
 
-        public void Reset()
+        void IAo3TrackHelper.Reset()
         {
             JumpToLastLocationEvent = 0;
             AlterFontSizeEvent = 0;
@@ -125,8 +111,14 @@ namespace Ao3TrackReader.Helper
             });
         }
 
+        [JavascriptInterface, Export("hideContextMenu")]
+        public void HideContextMenu()
+        {
+            wvp.HideContextMenu();
+        }
+
         [JavascriptInterface, Export("showContextMenu")]
-        public void ShowContextMenu(double x, double y, [Converter("ToJson")] string menuItems_json, [Converter("Callback")] int hCallback)
+        public void ShowContextMenu(double x, double y, [Converter("ToJSON")] string menuItems_json, [Converter("Callback")] int hCallback)
         {
             Task.Run(async () =>
             {
@@ -147,7 +139,7 @@ namespace Ao3TrackReader.Helper
             var clipboard = Xamarin.Forms.Forms.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
             if (type == "text")
             {
-                ClipData clip = ClipData.NewPlainText("Text from Ao3",str);
+                ClipData clip = ClipData.NewPlainText("Text from Ao3", str);
                 clipboard.PrimaryClip = clip;
             }
             else if (type == "uri")
@@ -217,11 +209,12 @@ namespace Ao3TrackReader.Helper
             set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
-        public string CurrentLocation {
+        public string CurrentLocation
+        {
             [JavascriptInterface, Export("get_currentLocation"), Converter("FromJSON")]
             get
             {
-                var loc = wvp.DoOnMainThread(() => wvp.CurrentLocation );
+                var loc = wvp.DoOnMainThread(() => wvp.CurrentLocation);
                 if (loc == null) return null;
                 return JsonConvert.SerializeObject(loc);
             }
@@ -239,7 +232,8 @@ namespace Ao3TrackReader.Helper
         public string PageTitle
         {
             [JavascriptInterface, Export("get_pageTitle"), Converter("FromJSON")]
-            get {
+            get
+            {
                 var pagetitle = wvp.DoOnMainThread(() => wvp.PageTitle);
                 if (pagetitle == null) return null;
                 return JsonConvert.SerializeObject(pagetitle);
@@ -255,6 +249,38 @@ namespace Ao3TrackReader.Helper
             }
         }
 
+        [JavascriptInterface, Export("areUrlsInReadingListAsync")]
+        public void AreUrlsInReadingListAsync([Converter("ToJSON")] string urls_json, [Converter("Callback")] int hCallback)
+        {
+
+            Task.Run(async () =>
+            {
+                var urls = JsonConvert.DeserializeObject<string[]>(urls_json);
+                var res = await wvp.AreUrlsInReadingListAsync(urls);
+                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res).Wait(0);
+            });
+        }
+
+        [JavascriptInterface, Export("startWebViewDragAccelerate")]
+        public void StartWebViewDragAccelerate(double velocity)
+        {
+            wvp.DoOnMainThread(() => wvp.StartWebViewDragAccelerate(velocity));
+        }
+
+        [JavascriptInterface, Export("stopWebViewDragAccelerate")]
+        public void StopWebViewDragAccelerate()
+        {
+            wvp.StopWebViewDragAccelerate();
+        }
+
+        public double DeviceWidth
+        {
+            [JavascriptInterface, Export("get_deviceWidth")]
+            get
+            {
+                return wvp.DeviceWidth;
+            }
+        }
     }
 }
 

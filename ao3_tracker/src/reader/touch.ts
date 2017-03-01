@@ -1,5 +1,5 @@
 namespace Ao3Track {
-    namespace Touch {
+    export namespace Touch {
        
         // Nonsense to allow for swiping back and foward between pages 
 
@@ -12,7 +12,7 @@ namespace Ao3Track {
         let centre: number = 0;
         let end: number = 0;
         let yLimit: number = 0;
-        let zoomFactor: number = 0;
+        let coordFixup: number = 0;
         let velocity : number = 0;
 
         function swipeCleanup(keepOffset?: boolean) {
@@ -30,17 +30,17 @@ namespace Ao3Track {
 
         function swipeStart(x : number, y : number) : boolean
         {
-            zoomFactor = window.devicePixelRatio;
-            minThreshold = window.innerWidth / 24;
+            coordFixup = Ao3Track.Helper.deviceWidth / (window.innerWidth * (window.screen.deviceXDPI||1) / (window.screen.logicalXDPI||1));
+            end = Ao3Track.Helper.deviceWidth;
+            minThreshold = end / 24;
             yLimit = window.innerHeight / 8;
-            centre = window.innerWidth / 2;
-            end = window.innerWidth;
+            centre = end / 2;
             Helper.stopWebViewDragAccelerate();
 
             lastTime = performance.now() ;
-            lastTouchX =x/zoomFactor;
+            lastTouchX = x*coordFixup;
             startTouchX = lastTouchX - Ao3Track.Helper.leftOffset; 
-            lastTouchY = startTouchY = y/zoomFactor;
+            lastTouchY = startTouchY = y*coordFixup;
 
             if (!Ao3Track.Helper.canGoBack && !Ao3Track.Helper.canGoForward) {
                 swipeCleanup();
@@ -54,8 +54,8 @@ namespace Ao3Track {
 
         function swipeMove(x : number, y : number) : boolean
         {
-            let touchX = x/zoomFactor;
-            lastTouchY = y/zoomFactor;
+            let touchX = x*coordFixup;
+            lastTouchY = y*coordFixup;
 
             let offset = touchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);
@@ -82,8 +82,8 @@ namespace Ao3Track {
 
         function swipeEnd(x : number, y : number) : boolean
         {
-            let touchX = x/zoomFactor;
-            lastTouchY = y/zoomFactor;
+            let touchX = x*coordFixup;
+            lastTouchY = y*coordFixup;
 
             let offset = touchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);
@@ -286,11 +286,11 @@ namespace Ao3Track {
             swipeCleanup();
         }
 
-        function setTouchState() {
+        export function updateTouchState() {
             let styles = getComputedStyle(document.documentElement, '');
 
             // If we can scroll horizontally, we disable swiping
-            if (styles.msScrollLimitXMax !== styles.msScrollLimitXMin) {
+            if (styles.msScrollLimitXMax !== styles.msScrollLimitXMin || document.documentElement.clientWidth !== window.innerWidth) {
                 document.documentElement.classList.remove("mw_ao3track_unzoomed");
                 document.documentElement.classList.add("mw_ao3track_zoomed");
                 swipeCleanup();
@@ -315,11 +315,11 @@ namespace Ao3Track {
         }
 
         document.addEventListener("MSContentZoom", (event) => {
-            setTouchState();
+            updateTouchState();
         });
         document.addEventListener("resize", (event) => {
-            setTouchState();
+            updateTouchState();
         });        
-        setTouchState();
+        updateTouchState();
     }
 }

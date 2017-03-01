@@ -7,6 +7,8 @@ using Android.Webkit;
 using Java.Interop;
 #endif
 
+#pragma warning disable IDE1006
+
 namespace Ao3TrackReader.Helper
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter | AttributeTargets.Event | AttributeTargets.Method, AllowMultiple = false)]
@@ -31,8 +33,8 @@ namespace Ao3TrackReader.Helper
         public string getter { get; set; }
         public string setter { get; set; }
         public int? promise { get; set; }
-        public string gettername { get; set; }
-        public string settername { get; set; }
+        public string getterfunc { get; set; }
+        public string setterfunc { get; set; }
     }
 
     sealed class HelperDef : Dictionary<string, MemberDef>
@@ -162,11 +164,11 @@ namespace Ao3TrackReader.Helper
                         else md.setter = "true";
                     }
 #if __ANDROID__
-                    if (md.settername == null)
+                    if (md.setterfunc == null)
                     {
                         var ax = setter.GetCustomAttribute<ExportAttribute>();
                         if (ax != null)
-                            md.settername = ax.Name;
+                            md.setterfunc = ax.Name;
                         else
                             md.setter = null;
                     }
@@ -186,11 +188,11 @@ namespace Ao3TrackReader.Helper
                         else md.getter = "true";
                     }
 #if __ANDROID__
-                    if (md.gettername == null)
+                    if (md.getterfunc == null)
                     {
                         var ax = getter.GetCustomAttribute<ExportAttribute>();
                         if (ax != null)
-                            md.gettername = ax.Name;
+                            md.getterfunc = ax.Name;
                         else
                             md.getter = null;
                     }
@@ -205,8 +207,10 @@ namespace Ao3TrackReader.Helper
         }
         public string Serialize()
         {
-            var settings = new Newtonsoft.Json.JsonSerializerSettings();
-            settings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            var settings = new Newtonsoft.Json.JsonSerializerSettings()
+            {
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+            };
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, settings);
         }
     }

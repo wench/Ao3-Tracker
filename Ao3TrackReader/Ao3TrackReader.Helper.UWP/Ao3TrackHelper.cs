@@ -9,18 +9,26 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace Ao3TrackReader.Helper
 {
-    public delegate IWorkChapter GetCurrentLocationDel();
-
     [AllowForWeb]
-    public sealed class Ao3TrackHelper
+    public sealed class Ao3TrackHelper : IAo3TrackHelper
     {
         static string s_memberDef;
-
         IWebViewPage wvp;
         public Ao3TrackHelper(IWebViewPage wvp)
         {
             this.wvp = wvp;
         }
+
+        private T DoOnMainThread<T>(Func<T> func)
+        {
+            return (T) wvp.DoOnMainThread(() => func());
+        }
+
+        private void DoOnMainThread(Action func)
+        {
+            wvp.DoOnMainThread(() => func());
+        }
+
 
         internal static MemberDef md_ScriptsToInject = null;
         public string[] ScriptsToInject { get { return wvp.ScriptsToInject; } }
@@ -44,9 +52,7 @@ namespace Ao3TrackReader.Helper
         }
 
         public event EventHandler<bool> JumpToLastLocationEvent;
-
-        internal static MemberDef md_OnJumpToLastLocation = null;
-        public void OnJumpToLastLocation(bool pagejump)
+        void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
             Task<object>.Run(() =>
             {
@@ -54,17 +60,14 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public bool jumpToLastLocationEnabled
+        public bool JumpToLastLocationEnabled
         {
-            get { return (bool)wvp.DoOnMainThread(() => wvp.JumpToLastLocationEnabled); }
-            set { wvp.DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value; }); }
+            get { return DoOnMainThread(() => wvp.JumpToLastLocationEnabled); }
+            set { DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value; }); }
         }
 
-
         public event EventHandler<object> AlterFontSizeEvent;
-
-        internal static MemberDef md_OnAlterFontSize = null;
-        public void OnAlterFontSize()
+        void IAo3TrackHelper.OnAlterFontSize()
         {
             Task<object>.Run(() =>
             {
@@ -72,8 +75,7 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        internal static MemberDef md_Reset = null;
-        public void Reset()
+        void IAo3TrackHelper.Reset()
         {
             JumpToLastLocationEvent = null;
             AlterFontSizeEvent = null;
@@ -117,6 +119,10 @@ namespace Ao3TrackReader.Helper
             });
         }
 
+        public void HideContextMenu()
+        {
+            wvp.HideContextMenu();
+        }
         public IAsyncOperation<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
         {
             return wvp.ShowContextMenu(x, y, menuItems);
@@ -151,63 +157,63 @@ namespace Ao3TrackReader.Helper
         public string NextPage
         {
             get { return wvp.NextPage ?? ""; }
-            set { wvp.DoOnMainThread(() => { wvp.NextPage = value; }); }
+            set { DoOnMainThread(() => { wvp.NextPage = value; }); }
         }
         public string PrevPage
         {
             get { return wvp.PrevPage ?? ""; }
-            set { wvp.DoOnMainThread(() => { wvp.PrevPage = value; }); }
+            set { DoOnMainThread(() => { wvp.PrevPage = value; }); }
         }
 
         public bool CanGoBack
         {
-            get { return (bool)wvp.DoOnMainThread(() => wvp.CanGoBack); }
+            get { return DoOnMainThread(() => wvp.CanGoBack); }
         }
         public bool CanGoForward
         {
-            get { return (bool)wvp.DoOnMainThread(() => wvp.CanGoForward); }
+            get { return DoOnMainThread(() => wvp.CanGoForward); }
         }
-        public void GoBack() { wvp.DoOnMainThread(() => wvp.GoBack()); }
-        public void GoForward() { wvp.DoOnMainThread(() => wvp.GoForward()); }
+        public void GoBack() { DoOnMainThread(() => wvp.GoBack()); }
+        public void GoForward() { DoOnMainThread(() => wvp.GoForward()); }
         public double LeftOffset
         {
-            get { return (double)wvp.DoOnMainThread(() => wvp.LeftOffset); }
-            set { wvp.DoOnMainThread(() => { wvp.LeftOffset = value; }); }
+            get { return DoOnMainThread(() => wvp.LeftOffset); }
+            set { DoOnMainThread(() => { wvp.LeftOffset = value; }); }
         }
         public int FontSizeMax { get { return wvp.FontSizeMax; } }
         public int FontSizeMin { get { return wvp.FontSizeMin; } }
         public int FontSize
         {
-            get { return (int)wvp.DoOnMainThread(() => wvp.FontSize); }
-            set { wvp.DoOnMainThread(() => { wvp.FontSize = value; }); }
+            get { return DoOnMainThread(() => wvp.FontSize); }
+            set { DoOnMainThread(() => { wvp.FontSize = value; }); }
         }
 
         public int ShowPrevPageIndicator
         {
-            get { return (int)wvp.DoOnMainThread(() => wvp.ShowPrevPageIndicator); }
-            set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
+            get { return DoOnMainThread(() => wvp.ShowPrevPageIndicator); }
+            set { DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
         }
 
         public int ShowNextPageIndicator
         {
-            get { return (int)wvp.DoOnMainThread(() => wvp.ShowNextPageIndicator); }
-            set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
+            get { return DoOnMainThread(() => wvp.ShowNextPageIndicator); }
+            set { DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
         internal static MemberDef md_CurrentLocation = new MemberDef { setter = "ToWorkChapterExNative" };
         public IWorkChapterEx CurrentLocation
         {
-            get { return (IWorkChapterEx)wvp.DoOnMainThread(() => wvp.CurrentLocation); }
+            get { return DoOnMainThread(() => wvp.CurrentLocation); }
 
-            set { wvp.DoOnMainThread(() => { wvp.CurrentLocation = value; }); }
+            set { DoOnMainThread(() => { wvp.CurrentLocation = value; }); }
         }
 
         internal static MemberDef md_PageTitle = new MemberDef { setter = "ToPageTitleNative" };
         public PageTitle PageTitle
         {
-            get { return (PageTitle)wvp.DoOnMainThread(() => wvp.PageTitle); }
+            get { return DoOnMainThread(() => wvp.PageTitle); }
 
-            set { wvp.DoOnMainThread(() => { wvp.PageTitle = value; }); }
+            set { DoOnMainThread(() => { wvp.PageTitle = value; }); }
         }
 
         internal static MemberDef md_AreUrlsInReadingListAsync = new MemberDef { @return = "WrapIMapString" };
@@ -221,7 +227,7 @@ namespace Ao3TrackReader.Helper
 
         public void StartWebViewDragAccelerate(double velocity)
         {
-            wvp.DoOnMainThread(() => wvp.StartWebViewDragAccelerate(velocity));
+            DoOnMainThread(() => wvp.StartWebViewDragAccelerate(velocity));
         }
 
         public void StopWebViewDragAccelerate()
@@ -229,5 +235,12 @@ namespace Ao3TrackReader.Helper
             wvp.StopWebViewDragAccelerate();
         }
 
+        public double DeviceWidth
+        {
+            get
+            {
+                return DoOnMainThread(()=>wvp.DeviceWidth);
+            }
+        }
     }
 }

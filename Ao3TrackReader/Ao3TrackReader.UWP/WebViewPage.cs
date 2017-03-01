@@ -19,7 +19,7 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        public string JavaScriptInject { get; } = @"(function(){
+        public string CSSInject { get; } = @"(function(){
             var head = document.getElementsByTagName('head')[0];
             for (var i = 0; i< Ao3TrackHelperNative.cssToInject.length; i++) {                    
                 var link = document.createElement('link');
@@ -138,6 +138,11 @@ namespace Ao3TrackReader
             WebView.AddWebAllowedObject(name, obj);
         }
 
+        async void InjectScripts()
+        {
+            await EvaluateJavascriptAsync(CSSInject);
+        }
+
         public Uri CurrentUri
         {
             get {
@@ -176,6 +181,14 @@ namespace Ao3TrackReader
 
         }
 
+        public double DeviceWidth
+        {
+            get
+            {
+                return WebView.ActualWidth;
+            }
+        }
+
         public double LeftOffset
         {
             get
@@ -198,7 +211,7 @@ namespace Ao3TrackReader
         
         TaskCompletionSource<string> contextMenuResult = null;
         MenuFlyout contextMenu = null;
-        public void CloseContextMenu()
+        public void HideContextMenu()
         {
             if (contextMenuResult != null)
             {
@@ -214,7 +227,7 @@ namespace Ao3TrackReader
 
         public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
         {
-            CloseContextMenu();
+            HideContextMenu();
 
             contextMenuResult = new TaskCompletionSource<string>();
             RoutedEventHandler clicked = (sender, e) =>

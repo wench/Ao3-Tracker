@@ -25,8 +25,10 @@ declare namespace Ao3Track {
         canGoForward: boolean;
         goBack(): void;
         goForward(): void;
+
+        deviceWidth: number;
         leftOffset: number;
-        opacity: number;
+
         showPrevPageIndicator: number;
         showNextPageIndicator: number;
 

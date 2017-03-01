@@ -1,5 +1,15 @@
 
 namespace Ao3Track {
+
+    export function InjectCSS (styles: string){
+            let blob = new Blob([styles],{type: 'text/css', endings: "transparent"});
+            let link = document.createElement('link');
+            link.type = 'text/css';
+            link.rel = 'stylesheet';
+            link.href = URL.createObjectURL(blob);
+            document.getElementsByTagName('head')[0].appendChild(link);
+        };
+
     GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter } ) => void) => {
         Ao3Track.Helper.getWorkChaptersAsync(works, callback);
     };

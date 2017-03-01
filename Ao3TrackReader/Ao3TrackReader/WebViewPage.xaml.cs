@@ -27,19 +27,19 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : ContentPage, IWebViewPage, IPageEx, IWebViewPageNative
     {
-        Ao3TrackHelper helper;
+        IAo3TrackHelper helper;
 
-        ToolbarItem settingsToolBarItem;
-        ToolbarItem readingListToolBarItem;
-        ToolbarItem urlBarToolBarItem;
+        ToolbarItem SettingsToolBarItem { get; set; }
+        ToolbarItem ReadingListToolBarItem { get; set; }
+        ToolbarItem UrlBarToolBarItem { get; set; }
 
-        DisableableCommand jumpButton { get; set; }
-        DisableableCommand incFontSizeButton { get; set; }
-        DisableableCommand decFontSizeButton { get; set; }
-        DisableableCommand nextPageButton { get; set; }
-        DisableableCommand prevPageButton { get; set; }
-        DisableableCommand syncButton { get; set; }
-        DisableableCommand forceSetLocationButton { get; set; }
+        DisableableCommand JumpButton { get; set; }
+        DisableableCommand IncFontSizeButton { get; set; }
+        DisableableCommand DecFontSizeButton { get; set; }
+        DisableableCommand NextPageButton { get; set; }
+        DisableableCommand PrevPageButton { get; set; }
+        DisableableCommand SyncButton { get; set; }
+        DisableableCommand ForceSetLocationButton { get; set; }
 
         public ReadingListView ReadingList { get; private set; }
         public SettingsView SettingsPane { get; private set; }
@@ -83,38 +83,38 @@ namespace Ao3TrackReader
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
             {
-                if (readingListToolBarItem == null) return;
-                if (urlBar.IsVisible == false) urlBarToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-                else urlBarToolBarItem.Foreground = Colors.Highlight.High;
+                if (ReadingListToolBarItem == null) return;
+                if (urlBar.IsVisible == false) UrlBarToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+                else UrlBarToolBarItem.Foreground = Colors.Highlight.High;
             }
         }
 
         private void ReadingList_IsOnScreenChanged(object sender, bool e)
         {
-            if (readingListToolBarItem == null) return;
-            if (e == false) readingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else readingListToolBarItem.Foreground = Colors.Highlight.High;
+            if (ReadingListToolBarItem == null) return;
+            if (e == false) ReadingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else ReadingListToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         private void SettingsPane_IsOnScreenChanged(object sender, bool e)
         {
-            if (settingsToolBarItem == null) return;
-            if (e == false) settingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else settingsToolBarItem.Foreground = Colors.Highlight.High;
+            if (SettingsToolBarItem == null) return;
+            if (e == false) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else SettingsToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         void SetupToolbarCommands()
         {
-            prevPageButton = new DisableableCommand(GoBack, false);
-            nextPageButton = new DisableableCommand(GoForward, false);
-            jumpButton = new DisableableCommand(OnJumpClicked, false);
-            incFontSizeButton = new DisableableCommand(() => FontSize += 10);
-            decFontSizeButton = new DisableableCommand(() => FontSize -= 10);
-            syncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
-            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = false);
-            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
-            syncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
-            forceSetLocationButton = new DisableableCommand(ForceSetLocation);
+            PrevPageButton = new DisableableCommand(GoBack, false);
+            NextPageButton = new DisableableCommand(GoForward, false);
+            JumpButton = new DisableableCommand(OnJumpClicked, false);
+            IncFontSizeButton = new DisableableCommand(() => FontSize += 10);
+            DecFontSizeButton = new DisableableCommand(() => FontSize -= 10);
+            SyncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
+            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => SyncButton.IsEnabled = false);
+            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => SyncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
+            SyncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
+            ForceSetLocationButton = new DisableableCommand(ForceSetLocation);
         }
 
         void SetupToolbar()
@@ -125,7 +125,7 @@ namespace Ao3TrackReader
                 {
                     Text = "Back",
                     Icon = Icons.Back,
-                    Command = prevPageButton
+                    Command = PrevPageButton
                 });
             }
 
@@ -133,7 +133,7 @@ namespace Ao3TrackReader
             {
                 Text = "Forward",
                 Icon = Icons.Forward,
-                Command = nextPageButton
+                Command = NextPageButton
             });
 
             ToolbarItems.Add(new ToolbarItem
@@ -147,10 +147,10 @@ namespace Ao3TrackReader
             {
                 Text = "Jump",
                 Icon = Icons.Redo,
-                Command = jumpButton
+                Command = JumpButton
             });
 
-            ToolbarItems.Add(readingListToolBarItem = new ToolbarItem
+            ToolbarItems.Add(ReadingListToolBarItem = new ToolbarItem
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
@@ -175,31 +175,31 @@ namespace Ao3TrackReader
             {
                 Text = "Font Increase",
                 Icon = Icons.FontUp,
-                Command = incFontSizeButton
+                Command = IncFontSizeButton
             });
 
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Font Decrease",
                 Icon = Icons.FontDown,
-                Command = decFontSizeButton
+                Command = DecFontSizeButton
             });
 
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Sync",
                 Icon = Icons.Sync,
-                Command = syncButton
+                Command = SyncButton
             });
 
             ToolbarItems.Add(new ToolbarItem
             {
                 Text = "Force set location",
                 Icon = Icons.ForceLoc,
-                Command = forceSetLocationButton
+                Command = ForceSetLocationButton
             });
 
-            ToolbarItems.Add(urlBarToolBarItem = new ToolbarItem
+            ToolbarItems.Add(UrlBarToolBarItem = new ToolbarItem
             {
                 Text = "Url Bar",
                 Icon = Icons.Rename,
@@ -225,7 +225,7 @@ namespace Ao3TrackReader
                 Icon = Icons.Font,
                 Command = new Command(() => FontSize = 100)
             });
-            ToolbarItems.Add(settingsToolBarItem = new ToolbarItem
+            ToolbarItems.Add(SettingsToolBarItem = new ToolbarItem
             {
                 Text = "Settings",
                 Icon = Icons.Settings,
@@ -286,10 +286,9 @@ namespace Ao3TrackReader
 
                 DoOnMainThread(() =>
                 {
-                    WorkChapter wc;
-                    if (workchaps.TryGetValue(workid, out wc) && wc.Chapterid != 0)
+                    if (workchaps.TryGetValue(workid, out WorkChapter wc) && wc.chapterid != 0)
                     {
-                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.Chapterid, "#ao3t:jump")));
+                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
                     }
                     else
                     {
@@ -438,8 +437,8 @@ namespace Ao3TrackReader
                 font_size = value;
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
-                    decFontSizeButton.IsEnabled = FontSize > FontSizeMin;
-                    incFontSizeButton.IsEnabled = FontSize < FontSizeMax;
+                    DecFontSizeButton.IsEnabled = FontSize > FontSizeMin;
+                    IncFontSizeButton.IsEnabled = FontSize < FontSizeMax;
                 });
                 helper?.OnAlterFontSize();
             }
@@ -519,9 +518,9 @@ namespace Ao3TrackReader
 
             lock (currentLocationLock)
             {
-                if (currentSavedLocation != null && currentLocation != null && works.TryGetValue(currentLocation.Workid, out var workchap))
+                if (currentSavedLocation != null && currentLocation != null && works.TryGetValue(currentLocation.workid, out var workchap))
                 {
-                    workchap.Workid = currentLocation.Workid;
+                    workchap.workid = currentLocation.workid;
                     UpdateCurrentSavedLocation(workchap);
                 }
             }
@@ -539,11 +538,11 @@ namespace Ao3TrackReader
         {
             set
             {
-                if (jumpButton != null) jumpButton.IsEnabled = value;
+                if (JumpButton != null) JumpButton.IsEnabled = value;
             }
             get
             {
-                return jumpButton?.IsEnabled ?? false;
+                return JumpButton?.IsEnabled ?? false;
             }
         }
 
@@ -607,7 +606,7 @@ namespace Ao3TrackReader
 
                     }
                 }
-                nextPageButton.IsEnabled = CanGoForward;
+                NextPageButton.IsEnabled = CanGoForward;
             }
         }
         private Uri prevPage;
@@ -630,7 +629,7 @@ namespace Ao3TrackReader
                     {
                     }
                 }
-                prevPageButton.IsEnabled = CanGoBack;
+                PrevPageButton.IsEnabled = CanGoBack;
             }
         }
 
@@ -674,14 +673,14 @@ namespace Ao3TrackReader
                 lock (currentLocationLock)
                 {
                     currentLocation = value;
-                    if (currentLocation != null && currentLocation.Workid == currentSavedLocation?.Workid)
+                    if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
                     {
-                        forceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
+                        ForceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                         return;
                     }
                     else if (currentLocation == null)
                     {
-                        forceSetLocationButton.IsEnabled = false;
+                        ForceSetLocationButton.IsEnabled = false;
                         return;
                     }
 
@@ -691,10 +690,10 @@ namespace Ao3TrackReader
                     long workid = 0;
                     lock(currentLocationLock)
                     {
-                        if (currentLocation != null) workid = currentLocation.Workid;
+                        if (currentLocation != null) workid = currentLocation.workid;
                     }
                     var workchap = workid == 0 ? null : (await App.Storage.getWorkChaptersAsync(new[] { workid })).Select(kvp => kvp.Value).FirstOrDefault();
-                    if (workchap != null) workchap.Workid = workid;
+                    if (workchap != null) workchap.workid = workid;
                     UpdateCurrentSavedLocation(workchap);
                 });
             }
@@ -711,10 +710,10 @@ namespace Ao3TrackReader
                     {
                         lock (currentLocationLock)
                         {
-                            if (currentLocation != null && currentLocation.Workid == currentSavedLocation?.Workid)
-                                forceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
+                            if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
+                                ForceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                             else
-                                forceSetLocationButton.IsEnabled = false;
+                                ForceSetLocationButton.IsEnabled = false;
                         }
                     });
                 }
@@ -728,9 +727,9 @@ namespace Ao3TrackReader
             {
                 Task.Run(async () =>
                 {
-                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.Workid })).Select((kp)=>kp.Value).FirstOrDefault();
-                    currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { Seq = (db_workchap?.Seq ?? 0) + 1 };
-                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.Workid] = currentSavedLocation });
+                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                    currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
+                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation });
                 });
             }
         }
@@ -743,9 +742,9 @@ namespace Ao3TrackReader
                 webViewDragAccelerateStopWatch.Reset();
         }
 
-        int swipeOffsetChanged(double offset) 
+        int SwipeOffsetChanged(double offset) 
         {
-            var end = WebViewHolder.Width;
+            var end = DeviceWidth;
             var centre = end / 2;
             if ((!CanGoBack && offset > 0.0) || (!CanGoForward && offset< 0.0)) {
                 offset = 0.0;
@@ -797,7 +796,7 @@ namespace Ao3TrackReader
             webViewDragAccelerateStopWatch.Restart();
             double lastTime = 0;
             double offset = LeftOffset;
-            var offsetCat = swipeOffsetChanged(offset);
+            var offsetCat = SwipeOffsetChanged(offset);
 
             Device.StartTimer(TimeSpan.FromMilliseconds(15),
                 () => {
@@ -824,7 +823,7 @@ namespace Ao3TrackReader
                         return false;
                     }
 
-                    offsetCat = swipeOffsetChanged(offset);
+                    offsetCat = SwipeOffsetChanged(offset);
                     if (offsetCat == 3) {
                         GoBack();
                         return false;
@@ -886,53 +885,56 @@ namespace Ao3TrackReader
                 return true;
             }
 
-            if (check.LocalPath == CurrentUri.LocalPath)
+            if (check.PathAndQuery == CurrentUri.PathAndQuery)
             {
                 return false;
             }
 
             TitleEx = "Loading...";
 
-            jumpButton.IsEnabled = false;
-            CloseContextMenu();
+            JumpButton.IsEnabled = false;
+            HideContextMenu();
 
             if (urlEntry != null) urlEntry.Text = uri.AbsoluteUri;
             ReadingList?.PageChange(uri);
 
             nextPage = null;
             prevPage = null;
-            prevPageButton.IsEnabled = CanGoBack;
-            nextPageButton.IsEnabled = CanGoForward;
+            PrevPageButton.IsEnabled = CanGoBack;
+            NextPageButton.IsEnabled = CanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
             currentSavedLocation = null;
-            forceSetLocationButton.IsEnabled = false;
+            ForceSetLocationButton.IsEnabled = false;
             helper?.Reset();
             return false;
         }
 
         void OnContentLoading()
         {
-            if (urlEntry != null) urlEntry.Text = CurrentUri.AbsoluteUri;
-            ReadingList?.PageChange(CurrentUri);
-            ShowPrevPageIndicator = 0;
-            ShowNextPageIndicator = 0;
-            currentLocation = null;
-            currentSavedLocation = null;
-            forceSetLocationButton.IsEnabled = false;
-            helper?.Reset();
-            Task.Run(async () =>
-            {
-                await Task.Delay(300);
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => LeftOffset = 0);
-            });
         }
 
         private void OnContentLoaded()
         {
-            LeftOffset = 0;
-            EvaluateJavascriptAsync(JavaScriptInject).Wait(0);
+            JumpButton.IsEnabled = false;
+            HideContextMenu();
+
+            if (urlEntry != null) urlEntry.Text = CurrentUri.AbsoluteUri;
+            ReadingList?.PageChange(CurrentUri);
+
+            nextPage = null;
+            prevPage = null;
+            PrevPageButton.IsEnabled = CanGoBack;
+            NextPageButton.IsEnabled = CanGoForward;
+            ShowPrevPageIndicator = 0;
+            ShowNextPageIndicator = 0;
+            currentLocation = null;
+            currentSavedLocation = null;
+            ForceSetLocationButton.IsEnabled = false;
+            helper?.Reset();
+
+            InjectScripts();
         }
 
     }

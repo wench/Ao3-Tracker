@@ -96,11 +96,11 @@ namespace Ao3TrackReader.Data
 
             foreach (var it in database.GetItems())
             {
-                storage[it.Workid] = it;
+                storage[it.workid] = it;
 
-                if (storage[it.Workid].Timestamp > last_sync)
+                if (storage[it.workid].Timestamp > last_sync)
                 {
-                    unsynced[it.Workid] = storage[it.Workid];
+                    unsynced[it.workid] = storage[it.workid];
                 }
             }
             dosync();
@@ -251,7 +251,7 @@ namespace Ao3TrackReader.Data
                         Dictionary<long, Work> newitems = new Dictionary<long, Work>();
                         foreach (var item in items)
                         {
-                            item.Value.Workid = item.Key;
+                            item.Value.workid = item.Key;
                             // Highest time value of incoming item is our new sync time
                             if (item.Value.Timestamp > last_sync)
                             {
@@ -266,7 +266,7 @@ namespace Ao3TrackReader.Data
                                 // Grab the new details
                                 newitems[item.Key] = storage[item.Key] = item.Value;
 
-                                if (old == null || item.Value.Location == null || item.Value.Location == 0 || (old != null && item.Value.Number > old.Number))
+                                if (old == null || item.Value.location == null || item.Value.location == 0 || (old != null && item.Value.number > old.number))
                                 {
                                     WorkEvents.TryGetEvent(item.Key)?.OnChapterNumChanged(this, item.Value);
                                 }
@@ -461,17 +461,17 @@ namespace Ao3TrackReader.Data
                     {
                         if (!storage.TryGetValue(work.Key, out var old) || old.LessThan(work.Value))
                         {
-                            var seq  = work.Value.Seq;
+                            var seq  = work.Value.seq;
                             if (seq == null && old != null) { 
                                 seq = old.Seq;
                             }
 
                             var w = new Work
                             {
-                                Workid = work.Key,
-                                Number = work.Value.Number,
-                                Chapterid = work.Value.Chapterid,
-                                Location = work.Value.Location,
+                                workid = work.Key,
+                                number = work.Value.number,
+                                chapterid = work.Value.chapterid,
+                                location = work.Value.location,
                                 Timestamp = time,
                                 Seq = seq ?? 0,
                             };
@@ -479,7 +479,7 @@ namespace Ao3TrackReader.Data
                             unsynced[work.Key] = newitems[work.Key] = storage[work.Key] = w;
 
                             // Do a delayed since if we finished a chapter, or started a new one 
-                            if (old == null || work.Value.Location == null || work.Value.Location == 0 || work.Value.Number > old.Number || work.Value.Seq > old.Seq)
+                            if (old == null || work.Value.location == null || work.Value.location == 0 || work.Value.number > old.number || work.Value.seq > old.Seq)
                             {
                                 do_delayed = true;
                                 WorkEvents.TryGetEvent(work.Key)?.OnChapterNumChanged(this, w);

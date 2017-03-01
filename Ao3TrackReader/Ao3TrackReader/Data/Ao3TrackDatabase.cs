@@ -63,7 +63,7 @@ namespace Ao3TrackReader
 		{
 			lock (locker)
 			{
-				return database.Table<Work>().FirstOrDefault(x => x.Workid == id);
+				return database.Table<Work>().FirstOrDefault(x => x.workid == id);
 			}
 		}
 
@@ -80,7 +80,7 @@ namespace Ao3TrackReader
 
 				foreach (var item in items)
 				{
-					var row = database.Table<Work>().FirstOrDefault(x => x.Workid == item);
+					var row = database.Table<Work>().FirstOrDefault(x => x.workid == item);
 					if (row != null)
 					{
 						result[item] = row;
@@ -105,18 +105,18 @@ namespace Ao3TrackReader
 
 				foreach (var item in items) {
 
-					var row = database.Table<Work>().FirstOrDefault(x => x.Workid == item.Workid);
+					var row = database.Table<Work>().FirstOrDefault(x => x.workid == item.workid);
 					if (row != null)
 					{
 						if (row.LessThan(item)) { 
 							database.Update(item);
-							newitems[item.Workid] = item;
+							newitems[item.workid] = item;
 						}
 					}
 					else
 					{
 						database.Insert(item);
-						newitems[item.Workid] = item;
+						newitems[item.workid] = item;
 					}
 				}
 

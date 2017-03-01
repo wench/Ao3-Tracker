@@ -6,7 +6,7 @@ namespace Ao3Track {
     let $next = $('head link[rel=next], .chapter.next > a, .pagination > .next > a, .series > a.next, .series a:contains(\xBB)');
     if ($next.length > 0) { SetNextPage(($next[0] as HTMLAnchorElement).href); }
 
-    let $prev = $('.head link[rel=prev], chapter.previous > a, .pagination > .previous > a, .series > a.previous, .series a:contains(\xAB)');
+    let $prev = $('.head link[rel=prev], .chapter.previous > a, .pagination > .previous > a, .series > a.previous, .series a:contains(\xAB)');
     if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
 
     const LOC_PARA_MULTIPLIER = 1000000000;

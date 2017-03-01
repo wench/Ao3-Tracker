@@ -20,11 +20,10 @@ namespace Ao3TrackReader
         bool CanGoForward { get; }
         void GoBack();
         void GoForward();
-        string JavaScriptInject { get; }
         Task<string> EvaluateJavascriptAsync(string code);
         double LeftOffset { get; set; }
 
-        void CloseContextMenu();
+        void HideContextMenu();
         Task<string> ShowContextMenu(double x, double y, string[] menuItems);
     }
 }

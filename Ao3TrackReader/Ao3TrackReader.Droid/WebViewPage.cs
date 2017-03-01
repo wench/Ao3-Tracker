@@ -24,45 +24,25 @@ using Ao3TrackReader.Helper;
 using Ao3TrackReader.Droid;
 using Ao3TrackReader.Data;
 using Java.Lang;
+using System.IO;
 
 namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage
     {
-        public string JavaScriptInject { get; } = @"(function(){
-            var head = document.getElementsByTagName('head')[0];
-            var toInject = JSON.parse(Ao3TrackHelperWebkit.get_CssToInject());
-            console.log(toInject);
-            for (var i = 0; i< toInject.length; i++) {                    
-                var link = document.createElement('link');
-                link.type = 'text/css';
-                link.rel = 'stylesheet';
-                link.href = toInject[i];
-                head.appendChild(link);
-            }
-            toInject = JSON.parse(Ao3TrackHelperWebkit.get_ScriptsToInject());
-            console.log(toInject);
-            for (var i = 0; i< toInject.length; i++) {                    
-                var script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = toInject[i];
-                head.appendChild(script);
-            }
-        })();";
-
         public string[] ScriptsToInject { get; } =
             new[] {
-                "https://ao3track.wenchy.net/polyfills.js",
-                "https://ao3track.wenchy.net/marshal.js",
-                "https://ao3track.wenchy.net/callbacks.js",
-                "https://ao3track.wenchy.net/platform.js",
-                "https://ao3track.wenchy.net/reader.js",
-                "https://ao3track.wenchy.net/tracker.js",
-                "https://ao3track.wenchy.net/unitconv.js",
-                "https://ao3track.wenchy.net/touch.js"
+                "polyfills.js",
+                "marshal.js",
+                "callbacks.js",
+                "platform.js",
+                "reader.js",
+                "tracker.js",
+                "unitconv.js",
+                "touch.js"
             };
 
-        public string[] CssToInject { get; } = { "https://ao3track.wenchy.net/tracker.css" };
+        public string[] CssToInject { get; } = { "tracker.css" };
 
 
         public bool IsMainThread
@@ -84,12 +64,23 @@ namespace Ao3TrackReader
             WebView = new WebView(Forms.Context);
             WebView.SetWebViewClient(webClient = new WebClient(this));
             WebView.SetWebChromeClient(new ChromeClient(this));
-            WebView.Settings.AllowFileAccess = true;
-            WebView.Settings.AllowFileAccessFromFileURLs = true;
             WebView.Settings.AllowContentAccess = true;
             WebView.Settings.JavaScriptEnabled = true;
-            WebView.Settings.AllowUniversalAccessFromFileURLs = true;
-            WebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
+            WebView.Settings.BuiltInZoomControls = true;
+            WebView.Settings.DisplayZoomControls = true;
+            WebView.Settings.UseWideViewPort = true;
+            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
+            {
+                WebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
+            }
+            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.N)
+            {
+                WebView.Settings.DisabledActionModeMenuItems = MenuItems.WebSearch;
+            }
+#if DEBUG
+            WebView.SetWebContentsDebuggingEnabled(true);
+#endif
+            AddJavascriptObject("Ao3TrackHelperNative", helper);
 
             contextMenuPlaceholder = (new Android.Views.View(Forms.Context)).ToView();
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(0, 0, 0, 0));
@@ -134,7 +125,35 @@ namespace Ao3TrackReader
 
         public void AddJavascriptObject(string name, object obj)
         {
-            WebView.AddJavascriptInterface((Java.Lang.Object) obj, name);
+            WebView.AddJavascriptInterface((Java.Lang.Object)obj, name);
+        }
+
+        async void InjectScripts()
+        {
+            while (true)
+            {
+                var type = await EvaluateJavascriptAsync("typeof Ao3TrackHelperNative");
+                if (type == "\"undefined\"") await Task.Delay(100);
+                else break;
+            }
+
+
+            foreach (string s in ScriptsToInject)
+            {
+                using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(s), Encoding.UTF8))
+                {
+                    var content = await sr.ReadToEndAsync();
+                    await EvaluateJavascriptAsync(content);
+                }
+            }
+            foreach (string s in CssToInject)
+            {
+                using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(s), Encoding.UTF8))
+                {
+                    var content = await sr.ReadToEndAsync();
+                    await CallJavascriptAsync("Ao3Track.InjectCSS", content);
+                }
+            }
         }
 
         public Uri CurrentUri
@@ -170,7 +189,15 @@ namespace Ao3TrackReader
             if (WebView.CanGoForward()) WebView.GoForward();
             else if (nextPage != null) WebView.LoadUrl(nextPage.AbsoluteUri);
         }
-        
+
+        public double DeviceWidth
+        {
+            get
+            {
+                return WebView.MeasuredWidth;
+            }
+        }
+
         public double LeftOffset
         {
             get
@@ -180,13 +207,13 @@ namespace Ao3TrackReader
 
             set
             {
-                WebView.TranslationX = (float)value;
+                WebView.TranslationX = (float)(value);
             }
         }
         
         TaskCompletionSource<string> contextMenuResult = null;
         Android.Widget.PopupMenu contextMenu = null;
-        public void CloseContextMenu()
+        public void HideContextMenu()
         {
             if (contextMenuResult != null)
             {
@@ -202,7 +229,7 @@ namespace Ao3TrackReader
 
         public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
         {
-            CloseContextMenu();
+            HideContextMenu();
 
             contextMenuResult = new TaskCompletionSource<string>();
 
@@ -253,82 +280,36 @@ namespace Ao3TrackReader
             {
                 this.wvp = wvp;
             }
-            public override void OnLoadResource(WebView view, string url)
-            {
-                base.OnLoadResource(view, url);
-            }
 
-            public override WebResourceResponse ShouldInterceptRequest(WebView view, IWebResourceRequest request)
-            {
-                if (request.Url.Host == "ao3track.wenchy.net")
-                {
-                    try
-                    {
-                        string file = request.Url.LastPathSegment;
-                        string mime;
-                        string encoding = "UTF-8";
-                        switch (System.IO.Path.GetExtension(file))
-                        {
-                            case ".js":
-                                mime = "application/javascript";
-                                break;
-
-                            case ".css":
-                                mime = "text/css";
-                                break;
-
-                            case ".jpg":
-                            case ".jpeg":
-                                mime = "image/jpeg";
-                                encoding = "cp1252";
-                                break;
-
-                            case ".png":
-                                mime = "image/png";
-                                encoding = "cp1252";
-                                break;
-
-                            case ".gif":
-                                mime = "image/gif";
-                                encoding = "cp1252";
-                                break;
-
-                            case ".htm":
-                            case ".html":
-                                mime = "text/html";
-                                break;
-
-                            default:
-                                mime = "text/plain";
-                                break;
-                        }
-
-
-                        return new WebResourceResponse(
-                            mime,
-                            encoding,
-                            Forms.Context.Assets.Open(file)
-                            );
-                    }
-                    catch
-                    {
-                    }
-                }
-
-                return base.ShouldInterceptRequest(view, request);
-            }
-
+            bool canDoOnContentLoaded = false;
             public override void OnPageFinished(WebView view, string url)
             {
+                var uri = new Uri(url);
+
                 base.OnPageFinished(view, url);
-                wvp.OnContentLoaded();
+                if (canDoOnContentLoaded)
+                {
+                    wvp.OnContentLoaded();
+                    canDoOnContentLoaded = false;
+                }
             }
 
             public override void OnPageStarted(WebView view, string url, Bitmap favicon)
             {
                 base.OnPageStarted(view, url, favicon);
-                wvp.AddJavascriptObject("Ao3TrackHelperNative", wvp.helper);
                 wvp.OnContentLoading();
+                canDoOnContentLoaded = true;
+                wvp.AddJavascriptObject("Ao3TrackHelperNative", wvp.helper);
+            }
+
+            public override void OnPageCommitVisible(WebView view, string url)
+            {
+                base.OnPageCommitVisible(view, url);
+            }
+
+            public override void DoUpdateVisitedHistory(WebView view, string url, bool isReload)
+            {
+                base.DoUpdateVisitedHistory(view, url, isReload);
             }
 
             [Obsolete]
@@ -340,6 +321,12 @@ namespace Ao3TrackReader
             public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
             {
                 return wvp.OnNavigationStarting(new Uri(request.Url.ToString()));
+            }
+
+            public override async void OnScaleChanged(WebView view, float oldScale, float newScale)
+            {
+                base.OnScaleChanged(view, oldScale, newScale);
+                await wvp.CallJavascriptAsync("Ao3Track.Touch.updateTouchState",Array.Empty<object>());
             }
         }
 

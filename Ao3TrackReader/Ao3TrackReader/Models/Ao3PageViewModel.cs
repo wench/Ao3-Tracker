@@ -451,8 +451,8 @@ namespace Ao3TrackReader.Models
                 {
                     WorkChapters = await App.Storage.getWorkChaptersAsync(new[] { baseData.Details.WorkId });
                     var workchap = WorkChapters.FirstOrDefault().Value;
-                    long chapters_finished = workchap?.Number ?? 0;
-                    if (workchap?.Location != null) { chapters_finished--; }
+                    long chapters_finished = workchap?.number ?? 0;
+                    if (workchap?.location != null) { chapters_finished--; }
                     newread = (int)chapters_finished;
                 }
                 else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
@@ -461,8 +461,8 @@ namespace Ao3TrackReader.Models
                     long chapters_finished = 0;
                     foreach (var workchap in WorkChapters.Values)
                     {
-                        chapters_finished += workchap.Number;
-                        if (workchap.Location != null) { chapters_finished--; }
+                        chapters_finished += workchap.number;
+                        if (workchap.location != null) { chapters_finished--; }
 
                     }
                     newread = (int)chapters_finished;
@@ -593,8 +593,8 @@ namespace Ao3TrackReader.Models
                         int chapters_finished = 0;
                         if (WorkChapters.TryGetValue(workmodel.Details.WorkId, out workchap))
                         {
-                            chapters_finished = (int)workchap.Number;
-                            if (workchap.Location != null) { chapters_finished--; }
+                            chapters_finished = (int)workchap.number;
+                            if (workchap.location != null) { chapters_finished--; }
                         }
                         unread = workmodel.Details.Chapters.Available - chapters_finished;
                      }

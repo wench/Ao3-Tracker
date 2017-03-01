@@ -29,6 +29,7 @@ namespace Ao3Track {
         (Ao3Track.Marshal.Converters as any)["false"] = false;
 
         export function MarshalNativeHelper(helperDef: IHelperDef | string, nativeHelper: { [key: string]: any }) {
+            Ao3Track.Helper = {} as any;
             if (typeof helperDef === "string") {
                 helperDef = JSON.parse(helperDef) as IHelperDef;
             }

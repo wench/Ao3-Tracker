@@ -287,8 +287,8 @@ namespace Ao3TrackReader.Controls
                     int chapters_finished = 0;
                     if (item.WorkChapters.TryGetValue(workid, out var workchap))
                     {
-                        chapters_finished = (int)workchap.Number;
-                        if (workchap.Location != null) { chapters_finished--; }
+                        chapters_finished = (int)workchap.number;
+                        if (workchap.location != null) { chapters_finished--; }
                     }
                     if (chapters_finished < workmodel.Details.Chapters.Available) break;
                 }
