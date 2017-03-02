@@ -1,6 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
             x:Class="Ao3TrackReader.Controls.SettingsView">
+    <local:PaneView.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+            </Style>
+            <Style TargetType="local:TextView">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+            </Style>
+        </ResourceDictionary>
+    </local:PaneView.Resources>
     <local:PaneView.Content>
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">

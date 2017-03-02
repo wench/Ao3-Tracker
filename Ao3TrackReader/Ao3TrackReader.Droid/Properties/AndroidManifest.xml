@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" package="Ao3TrackReader.Droid">
-	<uses-sdk android:minSdkVersion="17" />
+	<uses-sdk android:minSdkVersion="19" />
 	<application android:label="Ao3TrackReader.Droid"></application>
 </manifest>

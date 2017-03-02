@@ -1,15 +1,19 @@
 // Options page
-html, html.mw_ao3track_zoomed {
-    touch-action: pinch-zoom pan-x pan-y;
+html {
+    &, &.mw_ao3track_zoomed, &.mw_ao3track_zoomed * {
+        touch-action: pinch-zoom pan-x pan-y;
+    }
+
+    &.mw_ao3track_unzoomed, &.mw_ao3track_unzoomed * {
+        touch-action: pinch-zoom pan-y;
+    }
 }
 
-html.mw_ao3track_unzoomed {
-    touch-action: pinch-zoom pan-y;
-}
-
-span.mw_ao3track_unitconv {
-    display: inline-block;
-    border-bottom: thin dotted currentColor;
+span {
+    &.mw_ao3track_unitconv {
+        display: inline-block;
+        border-bottom: thin dotted currentColor;
+    }
 }
 
 #ao3t-options {

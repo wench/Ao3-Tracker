@@ -5,6 +5,7 @@ namespace Ao3Track {
 
         let startTouchX: number = 0;
         let startTouchY: number = 0;
+        let startTime : number = 0;
         let lastTime : number = 0;
         let lastTouchX: number = 0;
         let lastTouchY: number = 0;
@@ -20,9 +21,9 @@ namespace Ao3Track {
             if (!keepOffset) Ao3Track.Helper.leftOffset = 0.0;
             Ao3Track.Helper.showPrevPageIndicator = 0;
             Ao3Track.Helper.showNextPageIndicator = 0;
-            document.removeEventListener("touchmove", touchMoveHandler);
-            document.removeEventListener("touchend", touchEndHandler);
-            document.removeEventListener("touchcancel", touchCancelHandler);
+            window.removeEventListener("touchmove", touchMoveHandler);
+            window.removeEventListener("touchend", touchEndHandler);
+            window.removeEventListener("touchcancel", touchCancelHandler);
             window.removeEventListener("pointermove", pointerMoveHandler);
             window.removeEventListener("pointerup", pointerEndHandler);
             window.removeEventListener("pointercancel", pointerCancelHandler);
@@ -30,22 +31,23 @@ namespace Ao3Track {
 
         function swipeStart(x : number, y : number) : boolean
         {
-            coordFixup = Ao3Track.Helper.deviceWidth / (window.innerWidth * (window.screen.deviceXDPI||1) / (window.screen.logicalXDPI||1));
+            coordFixup = Ao3Track.Helper.deviceWidth / (window.innerWidth * (window.screen.deviceXDPI||192) / (window.screen.logicalXDPI||192));
             end = Ao3Track.Helper.deviceWidth;
             minThreshold = end / 24;
             yLimit = window.innerHeight / 8;
             centre = end / 2;
             Helper.stopWebViewDragAccelerate();
 
-            lastTime = performance.now() ;
+            startTime = lastTime = performance.now() ;
             lastTouchX = x*coordFixup;
             startTouchX = lastTouchX - Ao3Track.Helper.leftOffset; 
             lastTouchY = startTouchY = y*coordFixup;
 
+/*
             if (!Ao3Track.Helper.canGoBack && !Ao3Track.Helper.canGoForward) {
                 swipeCleanup();
                 return false;
-            }
+            }*/
             
             swipeOffsetChanged(lastTouchX - startTouchX, 0);
 
@@ -82,6 +84,9 @@ namespace Ao3Track {
 
         function swipeEnd(x : number, y : number) : boolean
         {
+            let offset = lastTouchX - startTouchX;
+            let offsetY = Math.abs(lastTouchY - startTouchY);            
+            /*
             let touchX = x*coordFixup;
             lastTouchY = y*coordFixup;
 
@@ -102,6 +107,7 @@ namespace Ao3Track {
                 velocity = (touchX-lastTouchX) * 1000.0 / (now-lastTime); // pixels/s
                 lastTouchX = touchX;
             }
+            */
 
             swipeCleanup(true);
 
@@ -113,6 +119,25 @@ namespace Ao3Track {
             else if (offsetCat === -3) {
                 Ao3Track.Helper.goForward();
                 return true;
+            }
+            else if (offsetCat === 0) {
+                if (Math.abs(offset) < 8 && offsetY < 8 && (performance.now() - startTime) > 1000) {
+                    let devToClient = window.innerWidth / Ao3Track.Helper.deviceWidth;
+                    let ev = new MouseEvent("contextmenu",{
+                        clientX: (lastTouchX * devToClient) - window.screenLeft,
+                        clientY: (lastTouchY * devToClient) - window.screenTop,
+                        bubbles: true,
+                        cancelable: true,
+                        button: 0   
+                    });
+                    let el = document.elementFromPoint(ev.clientX,ev.clientY);
+                    if (el) {
+                        el.dispatchEvent(ev);
+                        if (ev.defaultPrevented) return true;
+                    }
+                }
+                swipeCleanup();
+                return false;
             }
             
             Helper.startWebViewDragAccelerate(velocity);
@@ -237,8 +262,15 @@ namespace Ao3Track {
                 return;
             }
 
-            if (swipeEnd(event.screenX,event.screenY))
-                event.preventDefault();            
+            if (swipeEnd(event.screenX,event.screenY)) {
+                event.preventDefault();
+                let handle = (ev: MouseEvent) => {
+                    ev.preventDefault();
+                    event.target.removeEventListener("click",handle);
+                };
+
+                event.target.addEventListener("click",handle);
+            }
         }
         function pointerCancelHandler(event: PointerEvent) {
             swipeCleanup();
@@ -279,8 +311,15 @@ namespace Ao3Track {
                 swipeCleanup();
                 return;
             }
-            if (swipeEnd(touch.screenX,touch.screenY))
+            if (swipeEnd(touch.screenX,touch.screenY)) {
                 event.preventDefault();
+                let handle = (ev: MouseEvent) => {
+                    ev.preventDefault();
+                    event.target.removeEventListener("click",handle);
+                };
+
+                event.target.addEventListener("click",handle);
+            }
         }
         function touchCancelHandler(event: TouchEvent) {
             swipeCleanup();
@@ -295,7 +334,7 @@ namespace Ao3Track {
                 document.documentElement.classList.add("mw_ao3track_zoomed");
                 swipeCleanup();
                 if ('ontouchstart' in window) {
-                    document.removeEventListener("touchstart", touchStartHandler);
+                    window.removeEventListener("touchstart", touchStartHandler);
                 }
                 else if ('PointerEvent' in window) {
                     window.removeEventListener("pointerdown", pointerDownHandler);
@@ -306,7 +345,7 @@ namespace Ao3Track {
                 document.documentElement.classList.add("mw_ao3track_unzoomed");
                 swipeCleanup();
                 if ('ontouchstart' in window) {
-                    document.addEventListener("touchstart", touchStartHandler);
+                    window.addEventListener("touchstart", touchStartHandler);
                 }
                 else if ('PointerEvent' in window) {
                     window.addEventListener("pointerdown", pointerDownHandler);

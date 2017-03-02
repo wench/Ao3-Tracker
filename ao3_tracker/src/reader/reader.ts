@@ -68,14 +68,15 @@ namespace Ao3Track {
         Ao3Track.Helper.areUrlsInReadingListAsync(urls,callback);
     };
 
-    function contextMenuHandler(ev: PointerEvent) {
+    function contextMenuHandler(ev: MouseEvent) {
         for (let target = ev.target as (HTMLElement|null); target && target !== document.body; target = target.parentElement) {
             let a = target as HTMLAnchorElement;
             if (target.tagName === "A" && a.href && a.href !== "") {
                 ev.preventDefault();
                 ev.stopPropagation();
 
-                Ao3Track.Helper.showContextMenu(ev.clientX, ev.clientY, [
+                let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
+                Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, [
                     "Open", 
                     "Open and Add", 
                     "Add to Reading list", 

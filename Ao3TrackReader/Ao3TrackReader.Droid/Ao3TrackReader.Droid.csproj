@@ -304,6 +304,18 @@
     <AndroidResource Include="..\Icons\200\font_light.scale-200.png">
       <Link>Resources\drawable-hdpi\font_light.png</Link>
     </AndroidResource>
+    <AndroidResource Include="..\Icons\forceloc_dark.png">
+      <Link>Resources\drawable\forceloc_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\forceloc_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\forceloc_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\forceloc_light.png">
+      <Link>Resources\drawable\forceloc_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\forceloc_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\forceloc_light.png</Link>
+    </AndroidResource>
     <AndroidResource Include="..\Icons\forward_dark.png">
       <Link>Resources\drawable\forward_dark.png</Link>
     </AndroidResource>

@@ -67,7 +67,7 @@ namespace Ao3TrackReader
             WebView.Settings.AllowContentAccess = true;
             WebView.Settings.JavaScriptEnabled = true;
             WebView.Settings.BuiltInZoomControls = true;
-            WebView.Settings.DisplayZoomControls = true;
+            WebView.Settings.DisplayZoomControls = false;
             WebView.Settings.UseWideViewPort = true;
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
@@ -75,10 +75,13 @@ namespace Ao3TrackReader
             }
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.N)
             {
-                WebView.Settings.DisabledActionModeMenuItems = MenuItems.WebSearch;
+                WebView.Settings.DisabledActionModeMenuItems = MenuItems.ProcessText | MenuItems.Share | MenuItems.WebSearch;
             }
 #if DEBUG
             WebView.SetWebContentsDebuggingEnabled(true);
+#else
+            WebView.SetWebContentsDebuggingEnabled(false);
+
 #endif
             AddJavascriptObject("Ao3TrackHelperNative", helper);
 
@@ -143,7 +146,7 @@ namespace Ao3TrackReader
                 using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(s), Encoding.UTF8))
                 {
                     var content = await sr.ReadToEndAsync();
-                    await EvaluateJavascriptAsync(content);
+                    await EvaluateJavascriptAsync(content + "\n//# sourceURL=file:///"+s);
                 }
             }
             foreach (string s in CssToInject)

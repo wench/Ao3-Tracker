@@ -35,7 +35,7 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        public int JumpToLastLocationEvent
+        public int onjumptolastlocationevent
         {
             [JavascriptInterface, Export("get_onjumptolastlocationevent")]
             get;
@@ -46,8 +46,8 @@ namespace Ao3TrackReader.Helper
         {
             Task<object>.Run(() =>
             {
-                if (JumpToLastLocationEvent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", JumpToLastLocationEvent, pagejump).Wait(0);
+                if (onjumptolastlocationevent != 0)
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onjumptolastlocationevent, pagejump).Wait(0);
             });
         }
         public bool JumpToLastLocationEnabled
@@ -58,8 +58,8 @@ namespace Ao3TrackReader.Helper
             set { wvp.DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value; }); }
         }
 
-
-        public int AlterFontSizeEvent
+        
+        public int onalterfontsizeevent
         {
             [JavascriptInterface, Export("get_onalterfontsizeevent")]
             get;
@@ -70,8 +70,8 @@ namespace Ao3TrackReader.Helper
         {
             Task<object>.Run(() =>
             {
-                if (AlterFontSizeEvent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", AlterFontSizeEvent).Wait(0);
+                if (onalterfontsizeevent != 0)
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", onalterfontsizeevent).Wait(0);
             });
         }
 
@@ -85,8 +85,8 @@ namespace Ao3TrackReader.Helper
 
         void IAo3TrackHelper.Reset()
         {
-            JumpToLastLocationEvent = 0;
-            AlterFontSizeEvent = 0;
+            onjumptolastlocationevent = 0;
+            onalterfontsizeevent = 0;
         }
 
 

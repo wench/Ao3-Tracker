@@ -253,7 +253,8 @@ namespace Ao3TrackReader
                 contextMenuResult?.TrySetResult("");
             };
 
-            contextMenu.ShowAt(WebView, new Windows.Foundation.Point(x, y));
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() => contextMenu.ShowAt(WebView, new Windows.Foundation.Point(x, y)));
+
             return contextMenuResult.Task.ContinueWith((task)=> {
                 contextMenu = null;
                 contextMenuResult = null;
