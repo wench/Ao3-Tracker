@@ -66,7 +66,7 @@ namespace Ao3TrackReader
 
             Uri uri = null;
             if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out uri))
-                uri = Data.Ao3SiteDataLookup.CheckUri(new Uri(uri, "#ao3t:jump"));
+                uri = Data.Ao3SiteDataLookup.CheckUri(uri);
 
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
 
@@ -270,7 +270,13 @@ namespace Ao3TrackReader
 
         public virtual void OnSleep()
         {
-            App.Database.SaveVariable("Sleep:URI", CurrentUri.AbsoluteUri);
+            var loc = CurrentLocation;
+            var uri = CurrentUri;
+            if (loc != null)
+            {
+                uri = new Uri(uri, "#ao3tjump:" + loc.number.ToString() + ":" + loc.chapterid.ToString() + (loc.location == null? "" : (":" +loc.location.ToString())));
+            }
+            App.Database.SaveVariable("Sleep:URI", uri.AbsoluteUri);
         }
 
         public virtual void OnResume()
@@ -288,11 +294,11 @@ namespace Ao3TrackReader
                 {
                     if (workchaps.TryGetValue(workid, out WorkChapter wc) && wc.chapterid != 0)
                     {
-                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3t:jump")));
+                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3tjump")));
                     }
                     else
                     {
-                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "#ao3t:jump")));
+                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "#ao3tjump")));
                     }
                 });
             });

@@ -16,8 +16,23 @@ namespace Ao3Track {
     let $feedback_actions = $('#feedback > .actions');
     let $chapter_text = $();
 
-    let jumpnow = window.location.hash === "#ao3t:jump";
-    if (jumpnow) {
+    let jumpnow : IWorkChapter | boolean = false;
+    let jump = window.location.hash.split(":");
+    if (jump.length >= 1 && jump[0] === "#ao3tjump") {
+        if (jump.length === 1) {
+            jumpnow = true;
+        } else if (jump.length === 3 || jump.length === 4) {
+            jumpnow = {
+                number: parseInt(jump[1]),
+                chapterid: parseInt(jump[2]),
+                location: jump.length===4?parseInt(jump[3]):null,
+                seq: null
+            };       
+            if (isNaN(jumpnow.number) || isNaN(jumpnow.chapterid) || (jumpnow.location !== null && isNaN(jumpnow.location)) )
+                jumpnow = false;
+        }
+    }
+    if (jumpnow !== false) {
         history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('#')));
     }
 
@@ -90,7 +105,7 @@ namespace Ao3Track {
 
         // Change page!
         if (!had_chapter && dojump) {
-            window.location.replace('/works/' + workid + (workchap.chapterid ? '/chapters/' + workchap.chapterid.toString() : '') + "#ao3t:jump");
+            window.location.replace('/works/' + workid + (workchap.chapterid ? '/chapters/' + workchap.chapterid.toString() : '') + "#ao3tjump");
         }
     };
 
@@ -185,7 +200,7 @@ namespace Ao3Track {
                 let $c = $e.parent();
                 let $a = $c.find(".chapter > .title > a");
 
-                let rnum = $chapter.attr('id').match(regex_chapter);
+                let rnum = $c.attr('id').match(regex_chapter);
                 let rid = $a.attr('href').match(regex_work_url);
 
                 if (rnum !== null && typeof (rnum[1]) !== 'undefined' && rid !== null && typeof rid[2] !== 'undefined') {
@@ -267,7 +282,7 @@ namespace Ao3Track {
         let chapters_finished = workchap.number;
         if (workchap.location !== null) { chapters_finished--; }
         let chapter_path = '/works/' + workid + (workchap.chapterid ? '/chapters/' + str_id : '');
-        $chapters.prepend('<a href="' + chapter_path + '#ao3t:jump">' + chapters_finished.toString() + '</a>/');
+        $chapters.prepend('<a href="' + chapter_path + '#ao3tjump">' + chapters_finished.toString() + '</a>/');
 
         if (chapters_text === null) { return; }
 
@@ -278,7 +293,7 @@ namespace Ao3Track {
 
             if (chapter_count > chapters_finished) {
                 let unread = chapter_count - chapters_finished;
-                $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3t:jump" target="_blank">' + unread + "\xA0unread chapter" + (unread === 1 ? '' : 's') + '</a>)</span>');
+                $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3tjump" target="_blank">' + unread + "\xA0unread chapter" + (unread === 1 ? '' : 's') + '</a>)</span>');
             }
 
             if (inreadinglist) {                
@@ -287,6 +302,7 @@ namespace Ao3Track {
         }
     }
 
+   if (typeof jumpnow === "object" ) { scrollToLocation(workid, jumpnow, false); }
 
     let workchaps: { [key: number]: IWorkChapter } | null = null;
     let readinglist: { [key: string]: boolean } | null = null;
@@ -298,7 +314,7 @@ namespace Ao3Track {
                 let workchap = workchaps[works[i]] || { number: 1, chapterid: 0, location: 0, seq: 0};
                 if (works[i] === workid) {
                     EnableLastLocationJump(workid, workchap);
-                    if (jumpnow) { scrollToLocation(workid, workchap, false); }
+                    if (jumpnow === true) { scrollToLocation(workid, workchap, false); }
                 }
 
                 ExtendWorkSummary($($works[i]), works[i], workchap, inreadinglist);

@@ -236,7 +236,7 @@ namespace Ao3TrackReader
 
             contextMenuResult = new TaskCompletionSource<string>();
 
-            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x, y, 0, 0));
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / WebView.Width, y * Height / WebView.Height, 0, 0));
             MainContent.Children.Add(contextMenuPlaceholder);
             var renderer = Platform.GetRenderer(contextMenuPlaceholder) as NativeViewWrapperRenderer;
 
