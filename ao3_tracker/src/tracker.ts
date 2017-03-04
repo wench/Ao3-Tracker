@@ -270,7 +270,10 @@ namespace Ao3Track {
         });
     }
 
-    let regex_chapter_count = /^(\d+)\//;
+    let regex_chapter_count = /^(\d+)\/(\d+|\?)/;
+    const in_reading_list_html = '<abbr class="ao3-track-inlist" title="Ao3Track: In Reading List">' + String.fromCodePoint(0x1F4DA) + "</abbr>";
+    const unfinished_html = '<abbr class="ao3-track-inlist" title="Ao3Track: Unread chapters">' + String.fromCodePoint(0x1F4D1) + "</abbr>";
+    const read_all_html  = '<abbr class="ao3-track-readall" title="Ao3Track: Read all chapters">' + String.fromCodePoint(0x1F4DC) + "</abbr>";
 
     export function ExtendWorkSummary($work: JQuery, workid: number, workchap: IWorkChapter, inreadinglist : boolean) {
         $work.find(".stats .lastchapters").remove();
@@ -290,14 +293,19 @@ namespace Ao3Track {
         if ($blurb_heading.length) {
 
             let chapter_count = parseInt(chapters_text[1]);
+            let chapter_total = chapters_text[2] !== "?" ? parseInt(chapters_text[1]):null;
 
             if (chapter_count > chapters_finished) {
                 let unread = chapter_count - chapters_finished;
                 $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3tjump" target="_blank">' + unread + "\xA0unread chapter" + (unread === 1 ? '' : 's') + '</a>)</span>');
+                $blurb_heading.prepend(unfinished_html);                
+            }
+            else if (chapter_total === chapters_finished) {
+                $blurb_heading.prepend(read_all_html);                
             }
 
             if (inreadinglist) {                
-                $blurb_heading.prepend('<abbr class="ao3-track-inlist" title="In Ao3Track Reading List">' + String.fromCodePoint(0x1F4DA) + "</abbr>");
+                $blurb_heading.prepend(in_reading_list_html);
             }
         }
     }
@@ -330,5 +338,21 @@ namespace Ao3Track {
     Ao3Track.GetWorkChapters(works, (response) => {
         workchaps = response;
         if (readinglist !== null) iterateWorks(workchaps, readinglist);
+    });
+
+    let $serieses = $('.series a[href^="/series/');
+    Ao3Track.AreUrlsInReadingList($serieses.toArray().map((e) => {
+        let a = e as HTMLAnchorElement;
+        if (a === null) return "";
+        return a.href;
+    }), (response)=> {
+        $serieses.each((i,e)=>{
+            let a = e as HTMLAnchorElement;
+            if (a === null) return;
+            
+            if (response[a.href]) {
+                $(a).prepend(in_reading_list_html);
+            }
+        });
     });
 }

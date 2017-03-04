@@ -420,8 +420,7 @@ namespace Ao3TrackReader.Controls
                         {
                             result[kvp.Key] = true;
                             urlmap.Remove(kvp.Key);
-                            if (urlmap.Count == 0) return true;
-                            break;
+                            if (urlmap.Count == 0) return true;                           
                         }
                     }
                     return false;
