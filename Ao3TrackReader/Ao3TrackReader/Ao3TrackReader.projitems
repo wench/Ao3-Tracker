@@ -13,6 +13,8 @@
       <SubType>Code</SubType>
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)AutoUpdateCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ToolbarItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\BackgroundSwitch.cs" />

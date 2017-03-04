@@ -284,7 +284,7 @@ namespace Ao3TrackReader
             App.Database.DeleteVariable("Sleep:URI");
         }
 
-        public void NavigateToLast(long workid)
+        public void NavigateToLast(long workid, bool fullwork)
         {
             Task.Run(async () =>
             {
@@ -292,17 +292,27 @@ namespace Ao3TrackReader
 
                 DoOnMainThread(() =>
                 {
-                    if (workchaps.TryGetValue(workid, out WorkChapter wc) && wc.chapterid != 0)
+                    UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
+                    if (!fullwork && workchaps.TryGetValue(workid, out var wc) && wc.chapterid != 0)
                     {
-                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "/chapters/", wc.chapterid, "#ao3tjump")));
+                        uri.Path = uri.Path += "/chapters/" + wc.chapterid;
                     }
-                    else
-                    {
-                        Navigate(new Uri(string.Concat("http://archiveofourown.org/works/", workid, "#ao3tjump")));
-                    }
+                    if (fullwork) uri.Query = "view_full_work=true";
+                    uri.Fragment = "ao3tjump";
+                    Navigate(uri.Uri);
                 });
             });
+        }
 
+        public void Navigate(long workid, bool fullwork)
+        {
+            DoOnMainThread(() =>
+            {
+                UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
+                if (fullwork) uri.Query = "view_full_work=true";
+                uri.Fragment = "ao3tjump";
+                Navigate(uri.Uri);
+            });
         }
 
         private void UrlCancel_Clicked(object sender, EventArgs e)

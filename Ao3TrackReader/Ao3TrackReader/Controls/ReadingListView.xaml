@@ -18,10 +18,12 @@
                     <DataTemplate>
                         <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
                             <ViewCell.ContextActions>
-                                <MenuItem Text="Open at Last Location" Command="{Binding MenuOpenLastCommand, Source={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open"    Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Refresh" Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
-                                <MenuItem Text="Delete"  Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
+                                <MenuItem Text="Open at Last Location"           Command="{local:MenuOpenLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open"                            Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open Full Work at Last Location" Command="{local:MenuOpenFullWorkLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open Full Work"                  Command="{local:MenuOpenFullWorkCommand ReadingList={x:Reference root}}"  CommandParameter="{Binding .}" />
+                                <MenuItem Text="Refresh"                         Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
+                                <MenuItem Text="Delete"                          Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
                             </ViewCell.ContextActions>
                             <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
                                 <Grid.ColumnDefinitions>

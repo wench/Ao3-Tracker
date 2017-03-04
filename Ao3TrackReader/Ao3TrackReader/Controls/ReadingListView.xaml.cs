@@ -13,12 +13,12 @@ namespace Ao3TrackReader.Controls
     public partial class ReadingListView : PaneView
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
-        private readonly WebViewPage wpv;
+        private readonly WebViewPage wvp;
         SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(20);
 
-        public ReadingListView(WebViewPage wpv)
+        public ReadingListView(WebViewPage wvp)
         {
-            this.wpv = wpv;
+            this.wvp = wvp;
 
             InitializeComponent();
 
@@ -88,7 +88,7 @@ namespace Ao3TrackReader.Controls
             }
             SyncToServerAsync();
 
-            wpv.DoOnMainThread(() =>
+            wvp.DoOnMainThread(() =>
             {
                 ListView.ItemsSource = readingListBacking;
             });
@@ -106,7 +106,7 @@ namespace Ao3TrackReader.Controls
             }
             await Task.WhenAll(tasks);
 
-            wpv.DoOnMainThread(() =>
+            wvp.DoOnMainThread(() =>
             {
                 RefreshButton.IsEnabled = true;
                 SyncIndicator.IsRunning = false;
@@ -167,14 +167,7 @@ namespace Ao3TrackReader.Controls
             var mi = ((Cell)sender);
             if (mi.BindingContext is Models.Ao3PageViewModel item)
             {
-                GotoLast(item);
-            }
-        }
-
-        public Command MenuOpenLastCommand {
-            get {
-                return new Command<Models.Ao3PageViewModel>((item)=>GotoLast(item),
-                    (item) => item != null && (item.BaseData.Type == Models.Ao3PageType.Work || item.BaseData.Type == Models.Ao3PageType.Series));
+                Goto(item,true,false);
             }
         }
 
@@ -183,8 +176,7 @@ namespace Ao3TrackReader.Controls
             var mi = ((MenuItem)sender);
             if (mi.CommandParameter is Models.Ao3PageViewModel item)
             {
-                wpv.Navigate(item.Uri);
-                IsOnScreen = false;
+                Goto(item,false,false);
             }
         }
 
@@ -210,7 +202,7 @@ namespace Ao3TrackReader.Controls
 
         private void OnAddPage(object sender, EventArgs e)
         {
-            AddAsync(wpv.CurrentUri.AbsoluteUri);
+            AddAsync(wvp.CurrentUri.AbsoluteUri);
         }
 
         private void OnRefresh(object sender, EventArgs e)
@@ -235,12 +227,12 @@ namespace Ao3TrackReader.Controls
 
                 await Task.WhenAll(tasks);
 
-                wpv.DoOnMainThread(() =>
+                wvp.DoOnMainThread(() =>
                 {
                     RefreshButton.IsEnabled = true;
                     SyncIndicator.IsRunning = false;
                     SyncIndicator.IsVisible = false;
-                    PageChange(wpv.CurrentUri);
+                    PageChange(wvp.CurrentUri);
                 });
             });
         }
@@ -271,13 +263,14 @@ namespace Ao3TrackReader.Controls
             ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
         }
 
-        void GotoLast(Models.Ao3PageViewModel item)
+        public void Goto(Models.Ao3PageViewModel item, bool latest, bool fullwork)
         {
             if (item.BaseData.Type == Models.Ao3PageType.Work && item.BaseData.Details != null && item.BaseData.Details.WorkId != 0)
             {
-                wpv.NavigateToLast(item.BaseData.Details.WorkId);
+                if (latest) wvp.NavigateToLast(item.BaseData.Details.WorkId, fullwork);
+                else wvp.Navigate(item.BaseData.Details.WorkId, fullwork);
             }
-            else if (item.BaseData.Type == Models.Ao3PageType.Series && item.BaseData.SeriesWorks?.Count > 0)
+            else if (latest && item.BaseData.Type == Models.Ao3PageType.Series && item.BaseData.SeriesWorks?.Count > 0)
             {
                 long workid = 0;
 
@@ -293,12 +286,12 @@ namespace Ao3TrackReader.Controls
                     if (chapters_finished < workmodel.Details.Chapters.Available) break;
                 }
 
-                if (workid != 0) wpv.NavigateToLast(workid);
-                else wpv.Navigate(item.Uri);
+                if (workid != 0) wvp.NavigateToLast(workid,true);
+                else wvp.Navigate(item.Uri);
             }
             else
             {
-                wpv.Navigate(item.Uri);
+                wvp.Navigate(item.Uri);
             }
             IsOnScreen = false;
         }
@@ -306,7 +299,7 @@ namespace Ao3TrackReader.Controls
         public void PageChange(Uri uri)
         {
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
-            wpv.DoOnMainThread(() => {                
+            wvp.DoOnMainThread(() => {                
                 if (uri == null) UpdateSelectedItem(null);
                 else UpdateSelectedItem(readingListBacking.FindInAll((m) => m.HasUri(uri)));
             });
@@ -350,7 +343,7 @@ namespace Ao3TrackReader.Controls
                 await Task.WhenAll(tasks);
                 App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
             }
-            PageChange(wpv.CurrentUri);
+            PageChange(wvp.CurrentUri);
         }
 
         async Task RemoveAsyncImpl(string href)
@@ -359,7 +352,7 @@ namespace Ao3TrackReader.Controls
             var viewmodel = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href);
             if (viewmodel == null) return;
             viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
-            await wpv.DoOnMainThreadAsync(() =>
+            await wvp.DoOnMainThreadAsync(() =>
             {
                 if (viewmodel == selectedItem) UpdateSelectedItem(null);
                 readingListBacking.Remove(viewmodel);
@@ -388,7 +381,7 @@ namespace Ao3TrackReader.Controls
                 return;
 
             App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = null });
-            wpv.DoOnMainThread(() =>
+            wvp.DoOnMainThread(() =>
             {
                 var viewmodel = new Models.Ao3PageViewModel(model.Value, null)
                 {
@@ -493,7 +486,7 @@ namespace Ao3TrackReader.Controls
                         var pvm = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
                         if (pvm != null)
                         {
-                            await wpv.DoOnMainThreadAsync(() =>
+                            await wvp.DoOnMainThreadAsync(() =>
                             {
                                 readingListBacking.Remove(pvm);
                                 pvm.Dispose();
@@ -502,7 +495,7 @@ namespace Ao3TrackReader.Controls
                     }
                     App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Unread = viewmodel.Unread });
                 }
-                wpv.DoOnMainThread(() =>
+                wvp.DoOnMainThread(() =>
                 {
                     viewmodel.BaseData = model.Value;
                     //if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == viewmodel.Uri.AbsoluteUri) == null)
