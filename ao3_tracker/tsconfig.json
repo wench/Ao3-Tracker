@@ -7,10 +7,8 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "strictNullChecks": true,
-        "alwaysStrict": true,
-        "sourceMap": true,
-        "outDir": "./build",
-        "typeRoots": ["./typings"]
+        "alwaysStrict": false,
+        "sourceMap": false
     },
     "includes": ["./*.ts"]
 }

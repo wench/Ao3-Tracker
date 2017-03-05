@@ -1,5 +1,10 @@
+interface Window {
+    jQuery: JQueryStatic;
+}
 
 namespace Ao3Track {
+    export let jQuery = window.jQuery.noConflict(true);
+    export let $ = jQuery;
 
     export function InjectCSS (styles: string){
             let blob = new Blob([styles],{type: 'text/css', endings: "transparent"});

@@ -37,6 +37,7 @@ namespace Ao3TrackReader
         })();";
 
         public string[] ScriptsToInject { get; } = new[] {
+                "ms-appx-web:///Content/jquery-3.1.1.js",
                 "ms-appx-web:///Content/marshal.js",
                 "ms-appx-web:///Content/platform.js",
                 "ms-appx-web:///Content/reader.js",

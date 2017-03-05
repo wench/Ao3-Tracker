@@ -32,6 +32,7 @@ namespace Ao3TrackReader
     {
         public string[] ScriptsToInject { get; } =
             new[] {
+                "jquery-3.1.1.js",
                 "polyfills.js",
                 "marshal.js",
                 "callbacks.js",

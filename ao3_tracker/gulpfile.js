@@ -8,13 +8,7 @@ var preprocess = require('gulp-preprocess');
 var merge = require('merge-stream');
 const url = require('url');
 
-var tsOptions = {
-    module: "none",
-    noImplicitAny: true,
-    removeComments: true,
-    preserveConstEnums: true,
-    strictNullChecks: true
-};
+var tsOptions = require('./tsconfig.json').compilerOptions;
 
 var tsOptions_ES5 = Object.assign({ 
     target: "ES5" 
@@ -142,7 +136,7 @@ function extras() {
 gulp.task('extras', extras);
 
 function libs() {
-    return gulp.src('src/lib/**/*')
+    return gulp.src('lib/**/*')
         .pipe(gulp.dest('build/browser/edge/lib'))
         .pipe(gulp.dest('build/browser/chrome/lib'));
 }
@@ -165,13 +159,13 @@ var build = gulp.series(scripts, styles, images, pages, json, extras, libs, read
 gulp.task('default', build);
 
 gulp.task('watch', gulp.series(build, function() {
-    gulp.watch('src/**/*.ts', scripts);
+    gulp.watch('src/**/*.ts', [scripts, reader.scripts]);
     gulp.watch('src/**/*.less', styles);
     gulp.watch('src/**/*.png', images);
     gulp.watch('src/**/*.html', pages);
     gulp.watch('src/**/*.json', json);
     gulp.watch('src/extras/**/*', extras);
-    gulp.watch('src/lib/**/*', libs);
+    gulp.watch('lib/**/*', libs);
 }));
 
 
