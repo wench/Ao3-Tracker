@@ -6,10 +6,10 @@ namespace Ao3Track {
         export type Type = TypeConverter;
 
         export interface IMemberDef {
-            return?: Type;
+            return?: Type | string;
             args?: { [key: number]: Type };
-            getter?: Type | boolean;
-            setter?: Type | boolean;
+            getter?: Type | boolean | string;
+            setter?: Type | boolean | string;
             promise?: number;
             getterfunc?: string;
             setterfunc?: string;
@@ -51,6 +51,8 @@ namespace Ao3Track {
 
                 // It's a function!
                 if (def.args !== undefined) {
+                    let newprop: PropertyDescriptor = { enumerable: false };
+                    
                     let func = (nativeHelper[name] as Function).bind(nativeHelper) as Function;
 
                     for (let i in def.args) {
@@ -61,7 +63,7 @@ namespace Ao3Track {
                     if (def.return || Object.keys(def.args).length > 0 || def.promise !== undefined) {
                         let argconv = def.args;
                         let retconv = def.return || null;
-                        (Ao3Track.Helper as any)[name] = function () {
+                        newprop.value = function () {
                             let args: any[] = [].slice.call(arguments);
                             for (let i in argconv) {
                                 args[i] = argconv[i](args[i]);
@@ -83,8 +85,9 @@ namespace Ao3Track {
                         };
                     }
                     else {
-                        (Ao3Track.Helper as any)[name] = func;
+                        newprop.value = func;
                     }
+                    Object.defineProperty(Ao3Track.Helper, name, newprop);
                 }
                 // It's a property
                 else if (def.getter || def.setter) {
