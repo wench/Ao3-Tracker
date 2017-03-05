@@ -26,6 +26,7 @@ namespace Ao3TrackReader.Helper
             public string[] args;
         }
 
+        [DefIgnore]
         public override void DidReceiveScriptMessage(WKUserContentController userContentController, WKScriptMessage message)
         {
             var smsg = message.Body.ToString();
@@ -101,7 +102,7 @@ namespace Ao3TrackReader.Helper
             set
             {
                 _onjumptolastlocationevent = value;
-                wvp.JumpToLastLocationEnabled = value != 0;
+                wvp.DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value != 0; });
             }
         }
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)

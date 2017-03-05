@@ -63,7 +63,8 @@ namespace Ao3TrackReader.Helper
         {
             add 
             {
-                wvp.JumpToLastLocationEnabled = value != null;
+                DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value != null; });
+
                 return EventRegistrationTokenTable<EventHandler<bool>>
                     .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
                     .AddEventHandler(value);

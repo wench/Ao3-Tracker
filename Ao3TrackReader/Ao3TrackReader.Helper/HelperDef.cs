@@ -36,8 +36,8 @@ namespace Ao3TrackReader.Helper
         public string getterfunc { get; set; }
         public string setterfunc { get; set; }
 
-        public MethodInfo mi;
-        public PropertyInfo pi;
+        internal MethodInfo mi;
+        internal PropertyInfo pi;
     }
 
     sealed class HelperDef : Dictionary<string, MemberDef>
