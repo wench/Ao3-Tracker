@@ -45,7 +45,6 @@ namespace Ao3TrackReader
 
         public string[] CssToInject { get; } = { "tracker.css" };
 
-
         public bool IsMainThread
         {
             get { return Looper.MainLooper == Looper.MyLooper(); }
@@ -132,31 +131,19 @@ namespace Ao3TrackReader
             WebView.AddJavascriptInterface((Java.Lang.Object)obj, name);
         }
 
-        async void InjectScripts()
+        void OnInjectingScripts()
         {
-            while (true)
-            {
-                var type = await EvaluateJavascriptAsync("typeof Ao3TrackHelperNative");
-                if (type == "\"undefined\"") await Task.Delay(100);
-                else break;
-            }
+        }
 
+        void OnInjectedScripts()
+        {
+        }
 
-            foreach (string s in ScriptsToInject)
+        async Task<string> ReadFile(string name)
+        {
+            using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(name), Encoding.UTF8))
             {
-                using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(s), Encoding.UTF8))
-                {
-                    var content = await sr.ReadToEndAsync();
-                    await EvaluateJavascriptAsync(content + "\n//# sourceURL=file:///"+s);
-                }
-            }
-            foreach (string s in CssToInject)
-            {
-                using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(s), Encoding.UTF8))
-                {
-                    var content = await sr.ReadToEndAsync();
-                    await CallJavascriptAsync("Ao3Track.InjectCSS", content);
-                }
+                return await sr.ReadToEndAsync();
             }
         }
 

@@ -35,6 +35,9 @@ namespace Ao3TrackReader.Helper
         public int? promise { get; set; }
         public string getterfunc { get; set; }
         public string setterfunc { get; set; }
+
+        public MethodInfo mi;
+        public PropertyInfo pi;
     }
 
     sealed class HelperDef : Dictionary<string, MemberDef>
@@ -46,7 +49,6 @@ namespace Ao3TrackReader.Helper
                 if (mi.IsSpecialName) continue;
 
 #if __ANDROID__
-                
                 if (mi.GetCustomAttribute<JavascriptInterfaceAttribute>() == null)
                     continue;
 #endif
@@ -103,6 +105,7 @@ namespace Ao3TrackReader.Helper
                     }
                 }
 #endif
+                md.mi = mi;
                 Add(name, md);
             }
 
@@ -151,9 +154,9 @@ namespace Ao3TrackReader.Helper
                 name = name.Substring(0, 1).ToLower() + name.Substring(1);
 
                 var setter = pi.GetSetMethod();
-                if (setter != null && setter.GetCustomAttribute<DefIgnoreAttribute>() == null)
+                if (setter != null && setter.GetCustomAttribute<DefIgnoreAttribute>() == null && setter.IsPublic)
 #if __ANDROID__
-                if (setter != null && setter.GetCustomAttribute<JavascriptInterfaceAttribute>() != null)
+                if (setter != null && setter.GetCustomAttribute<DefIgnoreAttribute>() == null && setter.IsPublic && setter.GetCustomAttribute<JavascriptInterfaceAttribute>() != null)
 #endif
                 {
 
@@ -176,9 +179,9 @@ namespace Ao3TrackReader.Helper
                 }
 
                 var getter = pi.GetGetMethod();
-                if (getter != null && getter.GetCustomAttribute<DefIgnoreAttribute>() == null)
+                if (getter != null && getter.GetCustomAttribute<DefIgnoreAttribute>() == null && getter.IsPublic)
 #if __ANDROID__
-                if (getter != null && getter.GetCustomAttribute<JavascriptInterfaceAttribute>() != null)
+                if (getter != null && getter.GetCustomAttribute<DefIgnoreAttribute>() == null && getter.IsPublic && getter.GetCustomAttribute<JavascriptInterfaceAttribute>() != null)
 #endif
                 {
                     if (md.getter == null)
@@ -202,6 +205,7 @@ namespace Ao3TrackReader.Helper
                 if (md.setter == null && md.getter == null)
                     continue;
 
+                md.pi = pi;
                 Add(name, md);
             }
         }

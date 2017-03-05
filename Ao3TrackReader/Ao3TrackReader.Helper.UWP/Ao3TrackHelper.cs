@@ -21,7 +21,7 @@ namespace Ao3TrackReader.Helper
 
         private T DoOnMainThread<T>(Func<T> func)
         {
-            return (T) wvp.DoOnMainThread(() => func());
+            return (T)wvp.DoOnMainThread(() => func());
         }
 
         private void DoOnMainThread(Action func)
@@ -51,34 +51,48 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        public event EventHandler<bool> JumpToLastLocationEvent;
-        void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
+        void IAo3TrackHelper.Reset()
         {
-            Task<object>.Run(() =>
-            {
-                JumpToLastLocationEvent?.Invoke(this, pagejump);
-            });
+            _JumpToLastLocationEvent = null;
+            AlterFontSizeEvent = null;
         }
 
-        public bool JumpToLastLocationEnabled
+
+        private EventRegistrationTokenTable<EventHandler<bool>> _JumpToLastLocationEvent;
+        public event EventHandler<bool> JumpToLastLocationEvent
         {
-            get { return DoOnMainThread(() => wvp.JumpToLastLocationEnabled); }
-            set { DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value; }); }
+            add 
+            {
+                wvp.JumpToLastLocationEnabled = value != null;
+                return EventRegistrationTokenTable<EventHandler<bool>>
+                    .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
+                    .AddEventHandler(value);
+            }
+
+            remove
+            {
+                EventRegistrationTokenTable<EventHandler<bool>>
+                    .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
+                    .RemoveEventHandler(value);
+            }
+        }
+        void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
+        {
+            EventHandler<bool> temp =
+                EventRegistrationTokenTable<EventHandler<bool>>
+                .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
+                .InvocationList;
+
+            temp?.Invoke(this, pagejump);
         }
 
         public event EventHandler<object> AlterFontSizeEvent;
-        void IAo3TrackHelper.OnAlterFontSize()
+        void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             Task<object>.Run(() =>
             {
-                AlterFontSizeEvent?.Invoke(this, null);
+                AlterFontSizeEvent?.Invoke(this, fontSize);
             });
-        }
-
-        void IAo3TrackHelper.Reset()
-        {
-            JumpToLastLocationEvent = null;
-            AlterFontSizeEvent = null;
         }
 
         internal static MemberDef md_GetWorkChaptersAsync = new MemberDef { @return = "WrapIMapNum" };
@@ -90,6 +104,7 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
+        internal static MemberDef md_CreateObject = null;
         public object CreateObject(string classname)
         {
             switch (classname)

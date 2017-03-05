@@ -25,27 +25,14 @@ namespace Ao3TrackReader
         };
 
 
-        const string ms_regexEscapes = @"[\a\b\f\n\r\t\v\\""]";
-
         public static string ToLiteral(this string i_string)
         {
-            return "\"" + Regex.Replace(i_string, ms_regexEscapes, (m) =>
-            {
-                {
-                    string match = m.ToString();
-                    if (m_replaceDict.ContainsKey(match))
-                    {
-                        return m_replaceDict[match];
-                    }
-
-                    throw new NotSupportedException();
-                }
-            }) + "\"";
+            return Newtonsoft.Json.JsonConvert.SerializeObject(i_string);
         }
 
         public static string ToLiteral(this char c)
         {
-            return c == '\'' ? @"'\''" : string.Format("'{0}'", c);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(c.ToString());
         }
 
         public static string HtmlDecode(this string str)

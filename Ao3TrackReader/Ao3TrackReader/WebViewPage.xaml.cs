@@ -456,7 +456,7 @@ namespace Ao3TrackReader
                     DecFontSizeButton.IsEnabled = FontSize > FontSizeMin;
                     IncFontSizeButton.IsEnabled = FontSize < FontSizeMax;
                 });
-                helper?.OnAlterFontSize();
+                helper?.OnAlterFontSize(value);
             }
         }
 
@@ -864,18 +864,7 @@ namespace Ao3TrackReader
                     continue;
                 }
                 var type = args[i].GetType();
-                if (type == typeof(bool))
-                    args[i] = args[i].ToString().ToLowerInvariant();
-                else if (type == typeof(double))
-                    args[i] = ((double)args[i]).ToString("r");
-                else if (type == typeof(float))
-                    args[i] = ((float)args[i]).ToString("r");
-                else if (type == typeof(int) || type == typeof(long) || type == typeof(short) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort))
-                    args[i] = args[i].ToString();
-                else if (type == typeof(string))
-                    args[i] = args[i].ToString().ToLiteral();
-                else
-                    args[i] = Newtonsoft.Json.JsonConvert.SerializeObject(args[i]);
+                args[i] = Newtonsoft.Json.JsonConvert.SerializeObject(args[i]);
             }
             return await EvaluateJavascriptAsync(function + "(" + string.Join(",", args) + ");");
         }
@@ -951,6 +940,24 @@ namespace Ao3TrackReader
             helper?.Reset();
 
             InjectScripts();
+        }
+
+        async void InjectScripts()
+        {
+            OnInjectingScripts();
+
+            foreach (string s in ScriptsToInject)
+            {
+                var content = await ReadFile(s);
+                await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
+            }
+            foreach (string s in CssToInject)
+            {
+                var content = await ReadFile(s);
+                await CallJavascriptAsync("Ao3Track.InjectCSS", content);
+            }
+            helper?.OnAlterFontSize(FontSize);
+            OnInjectedScripts();
         }
 
     }

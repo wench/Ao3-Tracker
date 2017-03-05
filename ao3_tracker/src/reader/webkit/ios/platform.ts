@@ -1,13 +1,7 @@
-interface Message
-{
-    type: "SET"|"CALL";
-    name: string;
-    data: string;
-}
 
 interface MessageHandler
 {
-    postMessage: (message: Message) => void;
+    postMessage: (message: Ao3Track.iOS.Message) => void;
 }
 
 interface MessageHandlers
@@ -46,32 +40,53 @@ namespace Ao3Track {
 
         // IOS doesn't doesn't a global containing the helper interface, instead it just sets a global containing the HelperDef
 
-        export let helperDef : Marshal.IHelperDef = JSON.parse(Ao3TrackHelperNative);
+        export interface SetMessage
+        {
+            type: "SET";
+            name: keyof IAo3TrackHelperProperties;
+            value: string;
+        }
+        export interface CallMessage
+        {
+            type: "CALL";
+            name: keyof IAo3TrackHelperMethods;
+            args: string[];
+        }
+
+        export type Message = SetMessage | CallMessage;
+
+        export let helperDef : Marshal.IHelperDef = Ao3TrackHelperNative;
 
         export let helper = {  
             _values: { } as { [key: string]: any },
-            setValue: function(name: string, value: any) {
+
+            setValue: function(name: keyof IAo3TrackHelperProperties, value: any) {
                 this.values[name] = value;
             },
 
-            _setValueInternal: function(name: string, value: any) {
+            _setValueInternal: function(name: keyof IAo3TrackHelperProperties, value: any) {
                 this.values[name] = value;
                 window.webkit.messageHandlers.ao3track.postMessage({ 
                     type: "SET",
                     name: name,
-                    data: JSON.stringify(value)
+                    value: JSON.stringify(value)
                 });
             },   
 
-            _getValueInternal: function(name: string) : any {
+            _getValueInternal: function(name: keyof IAo3TrackHelperProperties) : any {
                 return this.values[name];
             },    
 
-            _callFunctionInternal: function(name: string, args: any[]) {
+            _callFunctionInternal: function(name: keyof IAo3TrackHelperMethods, args: any[]|IArguments) {
+                let strArgs : string[] = [];
+                for(let a of args)
+                {
+                    strArgs.push(JSON.stringify(a));
+                }
                 window.webkit.messageHandlers.ao3track.postMessage({ 
                     type: "CALL",
                     name: name,
-                    data: JSON.stringify(Object.assign({}, args))
+                    args: strArgs                    
                 });
             }     
         };
@@ -83,14 +98,14 @@ namespace Ao3Track {
             if (def.args !== undefined) {
                 let newprop: PropertyDescriptor = { enumerable: false };
                 newprop.value = function(...args:any[]) {
-                    helper._callFunctionInternal(name,[].slice.call(arguments));
+                    helper._callFunctionInternal(name as any,arguments);
                 };
                 Object.defineProperty(helper, name, newprop);
             }
             else if (def.getter || def.setter) {
                 let newprop: PropertyDescriptor = { enumerable: true };
-                if (def.getter) newprop.get = () => helper._getValueInternal(name);
-                if (def.setter) newprop.set = (value) => helper._setValueInternal(name,value);
+                if (def.getter) newprop.get = () => helper._getValueInternal(name as any);
+                if (def.setter) newprop.set = (value) => helper._setValueInternal(name as any,value);
                 Object.defineProperty(helper, name, newprop);
             }
         }

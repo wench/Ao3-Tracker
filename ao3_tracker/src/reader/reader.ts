@@ -36,7 +36,6 @@ namespace Ao3Track {
     if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
 
     DisableLastLocationJump = () => {
-        Ao3Track.Helper.jumpToLastLocationEnabled = false;
         Ao3Track.Helper.onjumptolastlocationevent = null;
     };
 
@@ -52,18 +51,16 @@ namespace Ao3Track {
                 Ao3Track.scrollToLocation(workid,lastloc,false); 
             }
         };
-        Ao3Track.Helper.jumpToLastLocationEnabled = true;
     };
 
     // Font size up/down support 
-    let updatefontsize = () => {
+    Ao3Track.Helper.onalterfontsizeevent = (ev) => {
+        let fontsize = Number(ev);
         let inner = document.getElementById("inner");
         if (inner) {
-            inner.style.fontSize = Ao3Track.Helper.fontSize.toString() + "%";
+            inner.style.fontSize = fontsize.toString() + "%";
         }
     };
-    Ao3Track.Helper.onalterfontsizeevent = updatefontsize;
-    updatefontsize();
 
     SetCurrentLocation = (current : IWorkChapterEx) => {
         Ao3Track.Helper.currentLocation = current;

@@ -19,33 +19,16 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        public string CSSInject { get; } = @"(function(){
-            var head = document.getElementsByTagName('head')[0];
-            for (var i = 0; i< Ao3TrackHelperNative.cssToInject.length; i++) {                    
-                var link = document.createElement('link');
-                link.type = 'text/css';
-                link.rel = 'stylesheet';
-                link.href = Ao3TrackHelperNative.cssToInject[i];
-                head.appendChild(link);
-            }
-            for (var i = 0; i< Ao3TrackHelperNative.scriptsToInject.length; i++) {                    
-                var script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = Ao3TrackHelperNative.scriptsToInject[i];
-                head.appendChild(script);
-            }
-        })();";
-
         public string[] ScriptsToInject { get; } = new[] {
-                "ms-appx-web:///Content/jquery-3.1.1.js",
-                "ms-appx-web:///Content/marshal.js",
-                "ms-appx-web:///Content/platform.js",
-                "ms-appx-web:///Content/reader.js",
-                "ms-appx-web:///Content/tracker.js",
-                "ms-appx-web:///Content/touch.js",
-                "ms-appx-web:///Content/unitconv.js"
+                "jquery-3.1.1.js",
+                "marshal.js",
+                "platform.js",
+                "reader.js",
+                "tracker.js",
+                "touch.js",
+                "unitconv.js"
         };
-        public string[] CssToInject { get; } = new[] { "ms-appx-web:///Content/tracker.css" }; 
+        public string[] CssToInject { get; } = new[] { "tracker.css" };
 
         private CoreDispatcher Dispatcher { get; set; }
 
@@ -139,9 +122,18 @@ namespace Ao3TrackReader
             WebView.AddWebAllowedObject(name, obj);
         }
 
-        async void InjectScripts()
+        void OnInjectingScripts()
         {
-            await EvaluateJavascriptAsync(CSSInject);
+        }
+
+        void OnInjectedScripts()
+        {
+        }
+
+        async Task<string> ReadFile(string name)
+        {
+            var file = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Content/" + name));
+            return await Windows.Storage.FileIO.ReadTextAsync(file);
         }
 
         public Uri CurrentUri

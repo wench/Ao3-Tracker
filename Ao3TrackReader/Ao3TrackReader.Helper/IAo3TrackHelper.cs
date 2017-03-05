@@ -6,8 +6,9 @@ namespace Ao3TrackReader.Helper
 {
     public interface IAo3TrackHelper
     {
+        string MemberDef { get; }
         void Reset();
-        void OnAlterFontSize();
+        void OnAlterFontSize(int fontSize);
         void OnJumpToLastLocation(bool pagejump);
     }
 }

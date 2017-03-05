@@ -10,21 +10,34 @@ declare namespace Ao3Track {
         primarytag?: string | null;
     }    
 
-    export interface IAo3TrackHelper {
+    export interface IAo3TrackHelperMethods {
         getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) : void;
-
         setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void;
 
+        goBack(): void;
+        goForward(): void;
+
+        showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void;
+        hideContextMenu() : void;
+        
+        copyToClipboard(str: string, type: string): void;
+        setCookies(cookies: string): void;
+
+        addToReadingList(href: string): void;
+        areUrlsInReadingListAsync(urls: string[], callback: (result: { [key:string]:boolean})=> void) : void;     
+
+        startWebViewDragAccelerate(velocity: number) : void;
+        stopWebViewDragAccelerate(): void;
+    }
+
+    export interface IAo3TrackHelperProperties {
         onjumptolastlocationevent: ((pagejump: boolean) => void) | null;
-
-        jumpToLastLocationEnabled: boolean;
-
+        onalterfontsizeevent: ((ev: number) => void) | null;
+        
         nextPage: string;
         prevPage: string;
         canGoBack: boolean;
         canGoForward: boolean;
-        goBack(): void;
-        goForward(): void;
 
         deviceWidth: number;
         leftOffset: number;
@@ -32,21 +45,11 @@ declare namespace Ao3Track {
         showPrevPageIndicator: number;
         showNextPageIndicator: number;
 
-        onalterfontsizeevent: ((ev: any) => void) | null;
-        fontSize: number;
-
-        showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void;
-        addToReadingList(href: string): void;
-        copyToClipboard(str: string, type: string): void;
-        setCookies(cookies: string): void;
-
         currentLocation: IWorkChapterEx | null;
         pageTitle : IPageTitle | null;
+    }
 
-        areUrlsInReadingListAsync : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;     
-
-        startWebViewDragAccelerate(velocity: number) : void;
-        stopWebViewDragAccelerate(): void;
+    export interface IAo3TrackHelper extends IAo3TrackHelperMethods, IAo3TrackHelperProperties {
     }
 
     export var Helper : Ao3Track.IAo3TrackHelper;
