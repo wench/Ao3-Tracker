@@ -402,29 +402,31 @@ namespace Ao3TrackReader.Controls
         {
             return await Task.Run(() =>
             {
-                var urlmap = new Dictionary<string, Uri>();
+                var urlmap = new List<KeyValuePair<string, Uri>>();
                 IDictionary<string, bool> result = new Dictionary<string, bool>();
 
                 foreach (var url in urls)
                 {
                     var uri = Data.Ao3SiteDataLookup.ReadingListlUri(url);
-                    if (uri != null) urlmap[url] = uri;
+                    if (uri != null) urlmap.Add(new KeyValuePair<string, Uri>(url,uri));
                     result[url] = false;
                 }
 
-                readingListBacking.ForEachInAll((m) =>
+                foreach (var m in readingListBacking.AllSafe)
                 {
-                    foreach (var kvp in urlmap)
+                    for (var i = 0; i < urlmap.Count; i++)
                     {
+                        var kvp = urlmap[i];
                         if (m.HasUri(kvp.Value))
                         {
                             result[kvp.Key] = true;
-                            urlmap.Remove(kvp.Key);
-                            if (urlmap.Count == 0) return true;                           
+                            urlmap.RemoveAt(i);
+                            i--;
                         }
                     }
-                    return false;
-                });
+                    if (urlmap.Count == 0)
+                        break;
+                }
 
                 return result;
             });

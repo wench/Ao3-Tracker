@@ -459,6 +459,9 @@ namespace Ao3TrackReader.Data
 
                     foreach (var work in works)
                     {
+                        if (work.Value.workid == 0) work.Value.workid = work.Key;
+                        else if (work.Value.workid != work.Key) throw new ArgumentException("Value.workid != Key", nameof(works));
+
                         if (!storage.TryGetValue(work.Key, out var old) || old.LessThan(work.Value))
                         {
                             var seq  = work.Value.seq;
