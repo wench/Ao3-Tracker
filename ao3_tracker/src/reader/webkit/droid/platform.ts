@@ -9,13 +9,11 @@ namespace Ao3Track {
         type hCallback<T> = number;
 
         export let helper = Ao3TrackHelperNative as {
-            get_scriptsToInject(): string;
-            get_cssToInject(): string;
-            get_memberDef(): string;
+            get_helperDefJson(): string;
 
             [key:string] : any;       
         };
     }
-    Marshal.MarshalNativeHelper(Droid.helper.get_memberDef(), Droid.helper);
+    Marshal.MarshalNativeHelper(Droid.helper.get_helperDefJson(), Droid.helper);
 }
 

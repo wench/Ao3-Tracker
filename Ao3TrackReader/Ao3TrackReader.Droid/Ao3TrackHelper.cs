@@ -11,7 +11,6 @@ namespace Ao3TrackReader.Helper
 {
     public class Ao3TrackHelper : Java.Lang.Object, IAo3TrackHelper
     {
-        static string s_memberDef;
         IWebViewPage wvp;
 
         public Ao3TrackHelper(IWebViewPage wvp)
@@ -19,35 +18,41 @@ namespace Ao3TrackReader.Helper
             this.wvp = wvp;
         }
 
-        [DefIgnore]
-        public string MemberDef
+        static HelperDef s_def;
+        static HelperDef HelperDef
         {
-            [JavascriptInterface, Export("get_memberDef")]
             get
             {
-                if (s_memberDef == null)
+                if (s_def == null)
                 {
-                    var def = new HelperDef();
-                    def.FillFromType(typeof(Ao3TrackHelper));
-                    s_memberDef = def.Serialize();
+                    s_def = new HelperDef();
+                    s_def.FillFromType(typeof(Ao3TrackHelper));
                 }
-                return s_memberDef;
+                return s_def;
+            }
+        }
+
+        static string s_helperDefJson;
+        [DefIgnore]
+        public string HelperDefJson
+        {
+            [JavascriptInterface, Export("get_helperDefJson")]
+            get
+            {
+                if (s_helperDefJson == null) s_helperDefJson = HelperDef.Serialize();
+                return s_helperDefJson;
             }
         }
 
         void IAo3TrackHelper.Reset()
         {
-            onjumptolastlocationevent = 0;
-            onalterfontsizeevent = 0;
+            _onjumptolastlocationevent = 0;
+            _onalterfontsizeevent = 0;
         }
 
         int _onjumptolastlocationevent;
         public int onjumptolastlocationevent
         {
-            private get
-            {
-                return _onjumptolastlocationevent;
-            }
             [JavascriptInterface, Export("set_onjumptolastlocationevent"), Converter("Event")]
             set
             {
@@ -59,30 +64,26 @@ namespace Ao3TrackReader.Helper
         {
             Task.Run(() =>
             {
-                if (onjumptolastlocationevent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onjumptolastlocationevent, pagejump).Wait(0);
+                if (_onjumptolastlocationevent != 0)
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onjumptolastlocationevent, pagejump).Wait(0);
             });
         }
 
         int _onalterfontsizeevent;
         public int onalterfontsizeevent
         {
-            private get { return _onalterfontsizeevent; }
             [JavascriptInterface, Export("set_onalterfontsizeevent"), Converter("Event")]
             set
             {
+                if (value != 0) wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize).Wait(0);
                 _onalterfontsizeevent = value;
             }
         }
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
-            Task.Run(() =>
-            {
-                if (onalterfontsizeevent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", onalterfontsizeevent, fontSize).Wait(0);
-            });
+            if (_onalterfontsizeevent != 0)
+                wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", _onalterfontsizeevent, fontSize).Wait(0);
         }
-
 
         [JavascriptInterface, Export("getWorkChaptersAsync")]
         public void GetWorkChaptersAsync([Converter("ToJSON")] string works_json, [Converter("Callback")] int hCallback)
@@ -127,6 +128,7 @@ namespace Ao3TrackReader.Helper
         {
             wvp.AddToReadingList(href);
         }
+
         [JavascriptInterface, Export("copyToClipboard")]
         public void CopyToClipboard(string str, string type)
         {
@@ -142,24 +144,20 @@ namespace Ao3TrackReader.Helper
                 clipboard.PrimaryClip = clip;
             }
         }
+
         [JavascriptInterface, Export("setCookies")]
         public void SetCookies(string cookies)
         {
             wvp.SetCookies(cookies);
         }
 
-
         public string NextPage
         {
-            [JavascriptInterface, Export("get_nextPage")]
-            get { return wvp.NextPage; }
             [JavascriptInterface, Export("set_nextPage")]
             set { wvp.DoOnMainThread(() => { wvp.NextPage = value; }); }
         }
         public string PrevPage
         {
-            [JavascriptInterface, Export("get_prevPage")]
-            get { return wvp.PrevPage; }
             [JavascriptInterface, Export("set_prevPage")]
             set { wvp.DoOnMainThread(() => { wvp.PrevPage = value; }); }
         }
@@ -190,28 +188,17 @@ namespace Ao3TrackReader.Helper
         }
         public int ShowPrevPageIndicator
         {
-            [JavascriptInterface, Export("get_showPrevPageIndicator")]
-            get { return (int)wvp.DoOnMainThread(() => wvp.ShowPrevPageIndicator); }
             [JavascriptInterface, Export("set_showPrevPageIndicator")]
             set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
         }
         public int ShowNextPageIndicator
         {
-            [JavascriptInterface, Export("get_showNextPageIndicator")]
-            get { return (int)wvp.DoOnMainThread(() => wvp.ShowNextPageIndicator); }
             [JavascriptInterface, Export("set_showNextPageIndicator")]
             set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
         public string CurrentLocation
         {
-            [JavascriptInterface, Export("get_currentLocation"), Converter("FromJSON")]
-            get
-            {
-                var loc = wvp.DoOnMainThread(() => wvp.CurrentLocation);
-                if (loc == null) return null;
-                return JsonConvert.SerializeObject(loc);
-            }
             [JavascriptInterface, Export("set_currentLocation"), Converter("ToJSON")]
             set
             {
@@ -225,13 +212,6 @@ namespace Ao3TrackReader.Helper
 
         public string PageTitle
         {
-            [JavascriptInterface, Export("get_pageTitle"), Converter("FromJSON")]
-            get
-            {
-                var pagetitle = wvp.DoOnMainThread(() => wvp.PageTitle);
-                if (pagetitle == null) return null;
-                return JsonConvert.SerializeObject(pagetitle);
-            }
             [JavascriptInterface, Export("set_pageTitle"), Converter("ToJSON")]
             set
             {

@@ -46,9 +46,7 @@ namespace Ao3Track {
         }
 
         export let helper = Ao3TrackHelperNative as  {
-            scriptsToInject: string[];
-            cssToInject: string[];
-            memberDef: string;
+            helperDefJson: string;
 
             // Create native objects to pass back           
             createObject<K extends keyof ClassNameMap>(classname: K): ClassNameMap[K] & Native;
@@ -170,6 +168,6 @@ namespace Ao3Track {
         }
     }
 
-    Marshal.MarshalNativeHelper(UWP.helper.memberDef, UWP.helper);
+    Marshal.MarshalNativeHelper(UWP.helper.helperDefJson, UWP.helper);
 }
 

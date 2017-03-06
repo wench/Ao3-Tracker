@@ -15,6 +15,7 @@ using System.IO;
 using UIKit;
 using CoreGraphics;
 using ObjCRuntime;
+using Foundation;
 
 namespace Ao3TrackReader
 {
@@ -122,7 +123,7 @@ namespace Ao3TrackReader
 
         void OnInjectingScripts()
         {
-            EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.MemberDef + ";").Wait();
+            EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";").Wait();
         }
 
         void OnInjectedScripts()
@@ -131,6 +132,14 @@ namespace Ao3TrackReader
             CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "canGoBack", CanGoBack).Wait(0);
             CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "canGoForward", CanGoForward).Wait(0);
             CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "deviceWidth", DeviceWidth).Wait(0);
+        }
+
+        async Task<string> ReadFile(string name)
+        {
+            using (StreamReader sr = new StreamReader(Path.Combine(NSBundle.MainBundle.BundlePath, "Content", name), Encoding.UTF8))
+            {
+                return await sr.ReadToEndAsync();
+            }
         }
 
         public Uri CurrentUri

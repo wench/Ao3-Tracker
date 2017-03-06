@@ -334,9 +334,6 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.css">
-      <Link>Content\tracker.css</Link>
-    </Content>
     <Content Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
       <Link>Content\jquery-3.1.1.js</Link>
     </Content>
@@ -346,14 +343,17 @@
     <Content Include="..\..\ao3_tracker\build\reader\uwp\platform.js">
       <Link>Content\platform.js</Link>
     </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.js">
-      <Link>Content\tracker.js</Link>
-    </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\reader.js">
       <Link>Content\reader.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\touch.js">
       <Link>Content\touch.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.css">
+      <Link>Content\tracker.css</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\tracker.js">
+      <Link>Content\tracker.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\unitconv.js">
       <Link>Content\unitconv.js</Link>

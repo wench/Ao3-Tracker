@@ -956,7 +956,6 @@ namespace Ao3TrackReader
                 var content = await ReadFile(s);
                 await CallJavascriptAsync("Ao3Track.InjectCSS", content);
             }
-            helper?.OnAlterFontSize(FontSize);
             OnInjectedScripts();
         }
 

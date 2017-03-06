@@ -9,8 +9,6 @@ namespace Ao3TrackReader.Helper
 {
     public class Ao3TrackHelper : WKScriptMessageHandler, IAo3TrackHelper
     {
-        static string s_memberDef;
-        static HelperDef s_def;
         IWebViewPage wvp;
 
         public Ao3TrackHelper(IWebViewPage wvp)
@@ -58,6 +56,7 @@ namespace Ao3TrackReader.Helper
             throw new ArgumentException();
         }
 
+        static HelperDef s_def;
         static HelperDef HelperDef
         {
             get
@@ -71,33 +70,27 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-
+        static string s_helperDefJson;
         [DefIgnore]
-        public string MemberDef
+        public string HelperDefJson
         {
             get
             {
-                if (s_memberDef == null)
-                {
-                    s_memberDef = HelperDef.Serialize();
-                }
-                return s_memberDef;
+                if (s_helperDefJson == null) s_helperDefJson = HelperDef.Serialize();
+                return s_helperDefJson;
             }
         }
 
         void IAo3TrackHelper.Reset()
         {
-            onjumptolastlocationevent = 0;
-            onalterfontsizeevent = 0;
+            _onjumptolastlocationevent = 0;
+            _onalterfontsizeevent = 0;
         }
 
         int _onjumptolastlocationevent;
         public int onjumptolastlocationevent
         {
-            get
-            {
-                throw new NotSupportedException();
-            }
+            private get { return _onjumptolastlocationevent; }
             [Converter("Event")]
             set
             {
@@ -107,10 +100,9 @@ namespace Ao3TrackReader.Helper
         }
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
-            Task<object>.Run(() =>
+            Task<object>.Run(async () =>
             {
-                if (onjumptolastlocationevent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onjumptolastlocationevent, pagejump).Wait(0);
+                if (onjumptolastlocationevent != 0) await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onjumptolastlocationevent, pagejump);
             });
         }
 
@@ -118,42 +110,37 @@ namespace Ao3TrackReader.Helper
         int _onalterfontsizeevent;
         public int onalterfontsizeevent
         {
-            get
-            {
-                throw new NotSupportedException();
-            }
+            private get { return _onalterfontsizeevent; }
             [Converter("Event")]
             set
             {
+                if (value != 0) wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize).Wait(0);
                 _onalterfontsizeevent = value;
             }
         }
 
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
-            Task<object>.Run(() =>
+            Task<object>.Run(async () =>
             {
-                if (onalterfontsizeevent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onalterfontsizeevent, fontSize).Wait(0);
+                if (onalterfontsizeevent != 0) await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onalterfontsizeevent, fontSize);
             });
         }
 
 
-        public void GetWorkChaptersAsync([Converter("ToJSON")] string works_json, [Converter("Callback")] int hCallback)
+        public void GetWorkChaptersAsync(long[] works, [Converter("Callback")] int hCallback)
         {
             Task.Run(async () =>
             {
-                var works = JsonConvert.DeserializeObject<long[]>(works_json);
                 var workchapters = await wvp.GetWorkChaptersAsync(works);
                 wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0);
             });
         }
 
-        public void SetWorkChapters([Converter("ToJSON")] string workchapters_json)
+        public void SetWorkChapters(Dictionary<long, WorkChapter> workchapters)
         {
             Task.Run(() =>
             {
-                var workchapters = JsonConvert.DeserializeObject<Dictionary<long, WorkChapter>>(workchapters_json);
                 wvp.SetWorkChapters(workchapters);
             });
         }
@@ -163,13 +150,12 @@ namespace Ao3TrackReader.Helper
             wvp.HideContextMenu();
         }
 
-        public void ShowContextMenu(double x, double y, [Converter("ToJSON")] string menuItems_json, [Converter("Callback")] int hCallback)
+        public void ShowContextMenu(double x, double y, string[] menuItems, [Converter("Callback")] int hCallback)
         {
             Task.Run(async () =>
             {
-                var menuItems = JsonConvert.DeserializeObject<string[]>(menuItems_json);
                 string result = await wvp.ShowContextMenu(x, y, menuItems);
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, result).Wait(0);
+                await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, result);
             });
         }
 
@@ -202,7 +188,6 @@ namespace Ao3TrackReader.Helper
 
         public string NextPage
         {
-            get { throw new NotSupportedException(); }
             set { wvp.DoOnMainThread(() => {
                 wvp.NextPage = value;
                 wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "canGoForward", wvp.CanGoForward).Wait(0);
@@ -211,7 +196,6 @@ namespace Ao3TrackReader.Helper
         }
         public string PrevPage
         {
-            get { throw new NotSupportedException(); }
             set { wvp.DoOnMainThread(() => {
                 wvp.PrevPage = value;
                 wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "canGoBack", wvp.CanGoBack).Wait(0);
@@ -238,58 +222,41 @@ namespace Ao3TrackReader.Helper
         }
         public int ShowPrevPageIndicator
         {
-            get { throw new NotSupportedException(); }
             set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
         }
         public int ShowNextPageIndicator
         {
-            get { throw new NotSupportedException(); }
             set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
         }
 
-        public string CurrentLocation
+        public WorkChapter CurrentLocation
         {
-            [Converter("FromJSON")]
-            get
-            {
-                throw new NotSupportedException();
-            }
-            [Converter("ToJSON")]
             set
             {
                 wvp.DoOnMainThread(() =>
                 {
-                    if (value == null || value == "(null)" || value == "null") wvp.CurrentLocation = null;
-                    else wvp.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
+                    wvp.CurrentLocation = value;
                 });
             }
         }
 
-        public string PageTitle
+        public PageTitle PageTitle
         {
-            [Converter("FromJSON")]
-            get
-            {
-                throw new NotSupportedException();
-            }
-            [Converter("ToJSON")]
             set
             {
                 wvp.DoOnMainThread(() =>
                 {
-                    if (value == null || value == "(null)" || value == "null") wvp.PageTitle = null;
-                    else wvp.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
+                    wvp.PageTitle = value;
                 });
             }
         }
 
-        public void AreUrlsInReadingListAsync([Converter("ToJSON")] string urls_json, [Converter("Callback")] int hCallback)
+        public void AreUrlsInReadingListAsync(string[] urls, [Converter("Callback")] int hCallback)
         {
             Task.Run(async () =>
             {
-                var urls = JsonConvert.DeserializeObject<string[]>(urls_json);
                 var res = await wvp.AreUrlsInReadingListAsync(urls);
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res).Wait(0);
+                await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res);
             });
         }
 

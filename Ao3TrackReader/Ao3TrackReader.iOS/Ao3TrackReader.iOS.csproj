@@ -119,6 +119,38 @@
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
+      <Link>Content\jquery-3.1.1.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\callbacks.js">
+      <Link>Content\callbacks.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\marshal.js">
+      <Link>Content\marshal.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\platform.js">
+      <Link>Content\platform.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\polyfills.js">
+      <Link>Content\polyfills.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\reader.js">
+      <Link>Content\reader.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\touch.js">
+      <Link>Content\touch.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\tracker.css">
+      <Link>Content\tracker.css</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\tracker.js">
+      <Link>Content\tracker.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\ios\unitconv.js">
+      <Link>Content\unitconv.js</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch\HtmlAgilityPack.dll</HintPath>
     </Reference>
@@ -171,6 +203,9 @@
       <HintPath>..\..\packages\Xamarin.Forms.2.3.4.192-pre2\lib\Xamarin.iOS10\Xamarin.Forms.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.iOS" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\" />
   </ItemGroup>
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition="Exists('..\Ao3TrackReader\Ao3TrackReader.projitems')" />
   <Import Project="..\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems" Label="Shared" />
