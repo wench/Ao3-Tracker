@@ -64,56 +64,8 @@ namespace Ao3TrackReader.Droid
         void UpdateControl(TextView view)
         {
             if (view.TextTree == null) return;
-            Control.TextFormatted = Convert(view.TextTree.Flatten(new StateNode { Foreground = view.TextColor }).TrimNewLines());
+            Control.TextFormatted = view.TextTree.ConvertToSpannable(new StateNode { Foreground = view.TextColor });
         }
 
-        SpannableString Convert(ICollection<TextNode> nodes)
-        {
-            var s = new SpannableString(string.Concat(nodes as IEnumerable<TextNode>));
-            int start = 0;
-            foreach (var n in nodes)
-            {
-                if (string.IsNullOrEmpty(n.Text)) continue;
-
-                if (n.Bold != null || n.Italic != null || n.FontSize != null || n.Foreground != null)
-                {
-                    TypefaceStyle style = 0;
-                    if (n.Bold == true && n.Italic == true)
-                        style = TypefaceStyle.BoldItalic;
-                    else if (n.Bold == true)
-                        style = TypefaceStyle.Bold;
-                    else if (n.Italic == true)
-                        style = TypefaceStyle.Italic;
-                    else
-                        style = TypefaceStyle.Normal;
-
-
-                    ColorStateList color = null;
-                    if (n.Foreground != null) color = ColorStateList.ValueOf(new AColor(
-                            (byte)(n.Foreground.Value.R * 255),
-                            (byte)(n.Foreground.Value.G * 255),
-                            (byte)(n.Foreground.Value.B * 255),
-                            (byte)(n.Foreground.Value.A * 255)
-                        ));
-
-                    int fontSize = -1;
-                    if (n.FontSize != null) fontSize = (int)n.FontSize.Value;
-
-                    s.SetSpan(new TextAppearanceSpan(null, style, fontSize, color, null), start, start + n.Text.Length, SpanTypes.InclusiveExclusive);
-                }
-                if (n.Sub == true)
-                    s.SetSpan(new SubscriptSpan(), start, start + n.Text.Length, SpanTypes.InclusiveExclusive);
-                if (n.Super == true)
-                    s.SetSpan(new SuperscriptSpan(), start, start + n.Text.Length, SpanTypes.InclusiveExclusive);
-                if (n.Strike == true)
-                    s.SetSpan(new StrikethroughSpan(), start, start + n.Text.Length, SpanTypes.InclusiveExclusive);
-                if (n.Underline == true)
-                    s.SetSpan(new UnderlineSpan(), start, start + n.Text.Length, SpanTypes.InclusiveExclusive);
-
-                start += n.Text.Length;
-            }
-
-            return s;
-        }
     }
 }

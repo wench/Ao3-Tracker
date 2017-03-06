@@ -10,13 +10,13 @@ const url = require('url');
 
 var tsOptions = require('./tsconfig.json').compilerOptions;
 
-var tsOptions_ES5 = Object.assign({ 
+var tsOptions_ES5 = Object.assign({},tsOptions,{ 
     target: "ES5" 
-},tsOptions);
+});
 
-var tsOptions_ES6 = Object.assign({ 
+var tsOptions_ES6 = Object.assign({},tsOptions,{ 
     target: "ES6" 
-},tsOptions);
+});
 
 var browser_scripts = [
     'src/*.ts',

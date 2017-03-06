@@ -15,5 +15,9 @@ namespace Ao3TrackReader.Controls
             get { return (Color)GetValue(ForegroundProperty); }
             set { SetValue(ForegroundProperty, value); }
         }
+
+#if __ANDROID__
+        internal Android.Views.IMenuItem MenuItem { get; set; }
+#endif
     }
 }

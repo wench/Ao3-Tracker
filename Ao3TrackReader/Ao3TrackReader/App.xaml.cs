@@ -24,6 +24,15 @@ namespace Ao3TrackReader
             get; private set;
         }
 
+        public new NavigationPage MainPage {
+            get { return (NavigationPage) base.MainPage; }
+            set { base.MainPage = value; }
+        }
+
+        public new static App Current
+        {
+            get { return (App) Xamarin.Forms.Application.Current; }
+        }
 
         static App()
         {

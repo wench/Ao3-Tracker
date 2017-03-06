@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+  <color name="LightHighlight">#970000</color>
+  <color name="LightHighlightMedium">#99970000</color>
+  <color name="LightHighlightMediumLow">#66970000</color>
+  <color name="LightHighlightLow">#33970000</color>
+  <color name="DarkHighlight">#5998d6</color>
+  <color name="DarkHighlightMedium">#995998d6</color>
+  <color name="DarkHighlightMediumLow">#665998d6</color>
+  <color name="DarkHighlightLow">#335998d6</color>
+
+  <style name="LightTheme" parent="android:Theme.Holo.Light">
+    <item name="android:colorPressedHighlight">@color/LightHighlight</item>
+    <item name="android:colorLongPressedHighlight">@color/LightHighlight</item>
+    <item name="android:colorFocusedHighlight">@color/LightHighlight</item>
+    <item name="android:colorActivatedHighlight">@color/LightHighlight</item>
+    <item name="android:activatedBackgroundIndicator">@color/LightHighlight</item>
+  </style>
+  <style name="DarkTheme" parent="android:Theme.Holo">
+    <item name="android:colorPressedHighlight">@color/DarkHighlight</item>
+    <item name="android:colorLongPressedHighlight">@color/DarkHighlight</item>
+    <item name="android:colorFocusedHighlight">@color/DarkHighlight</item>
+    <item name="android:colorActivatedHighlight">@color/DarkHighlight</item>
+    <item name="android:activatedBackgroundIndicator">@color/DarkHighlight</item>
+  </style>
+</resources>

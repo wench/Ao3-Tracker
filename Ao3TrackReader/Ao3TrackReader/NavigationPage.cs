@@ -11,7 +11,7 @@ using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 
 namespace Ao3TrackReader
 {
-    class NavigationPage : Xamarin.Forms.NavigationPage, IPageEx
+    public class NavigationPage : Xamarin.Forms.NavigationPage, IPageEx
     {
         public NavigationPage(WebViewPage page) : base(page)
         {

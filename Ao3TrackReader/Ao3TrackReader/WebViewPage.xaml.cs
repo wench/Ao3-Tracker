@@ -246,10 +246,10 @@ namespace Ao3TrackReader
                 {
                     SetupToolbar();
                 }
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && false
                 else 
                 {
-                    int onscreen = ((int)width - 60) / 48;
+                    int onscreen = Math.Max(6,((int)width - 60) / 48);
                     var items = ToolbarItems;
 
                     for (var i = 0; i < onscreen && i < ToolbarItems.Count; i++)
