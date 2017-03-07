@@ -1,3 +1,19 @@
+/*
+Copyright 2017 Alexis Ryan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -166,16 +182,16 @@ namespace Ao3TrackReader
             WebView.Reload();
         }
 
-        public bool CanGoBack { get { return WebView.CanGoBack() || prevPage != null; } }
+        public bool SwipeCanGoBack { get { return WebView.CanGoBack() || prevPage != null; } }
 
-        public bool CanGoForward { get { return WebView.CanGoForward() || nextPage != null; } }
+        public bool SwipeCanGoForward { get { return WebView.CanGoForward() || nextPage != null; } }
 
-        public void GoBack()
+        public void SwipeGoBack()
         {
             if (WebView.CanGoBack()) WebView.GoBack();
             else if (prevPage != null) WebView.LoadUrl(prevPage.AbsoluteUri);
         }
-        public void GoForward()
+        public void SwipeGoForward()
         {
             if (WebView.CanGoForward()) WebView.GoForward();
             else if (nextPage != null) WebView.LoadUrl(nextPage.AbsoluteUri);

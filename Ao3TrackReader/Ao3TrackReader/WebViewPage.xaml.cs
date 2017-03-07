@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*
+Copyright 2017 Alexis Ryan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -105,8 +121,8 @@ namespace Ao3TrackReader
 
         void SetupToolbarCommands()
         {
-            PrevPageButton = new DisableableCommand(GoBack, false);
-            NextPageButton = new DisableableCommand(GoForward, false);
+            PrevPageButton = new DisableableCommand(SwipeGoBack, false);
+            NextPageButton = new DisableableCommand(SwipeGoForward, false);
             JumpButton = new DisableableCommand(OnJumpClicked, false);
             IncFontSizeButton = new DisableableCommand(() => FontSize += 10);
             DecFontSizeButton = new DisableableCommand(() => FontSize -= 10);
@@ -622,7 +638,7 @@ namespace Ao3TrackReader
 
                     }
                 }
-                NextPageButton.IsEnabled = CanGoForward;
+                NextPageButton.IsEnabled = SwipeCanGoForward;
             }
         }
         private Uri prevPage;
@@ -645,7 +661,7 @@ namespace Ao3TrackReader
                     {
                     }
                 }
-                PrevPageButton.IsEnabled = CanGoBack;
+                PrevPageButton.IsEnabled = SwipeCanGoBack;
             }
         }
 
@@ -672,9 +688,9 @@ namespace Ao3TrackReader
                 ReadingList.IsOnScreen = false;
                 return true;
             }
-            else if (CanGoBack)
+            else if (SwipeCanGoBack)
             {
-                GoBack();
+                SwipeGoBack();
                 return true;
             }
             return false;
@@ -762,7 +778,7 @@ namespace Ao3TrackReader
         {
             var end = DeviceWidth;
             var centre = end / 2;
-            if ((!CanGoBack && offset > 0.0) || (!CanGoForward && offset< 0.0)) {
+            if ((!SwipeCanGoBack && offset > 0.0) || (!SwipeCanGoForward && offset< 0.0)) {
                 offset = 0.0;
             }
             else if (offset< -end) 
@@ -776,24 +792,24 @@ namespace Ao3TrackReader
             LeftOffset = offset;
             
 
-            if (CanGoForward && offset< -centre) {
+            if (SwipeCanGoForward && offset< -centre) {
                 ShowNextPageIndicator = 2;
                 if (offset <= -end) return -3;
                 return -2;
             }
-            else if (CanGoForward && offset< 0) {
+            else if (SwipeCanGoForward && offset< 0) {
                 ShowNextPageIndicator = 1;
             }
             else {
                 ShowNextPageIndicator = 0;
             }
 
-            if (CanGoBack && offset >= centre) {
+            if (SwipeCanGoBack && offset >= centre) {
                 ShowPrevPageIndicator = 2;
                 if (offset >= end) return 3;
                 return 2;
             }
-            else if (CanGoBack && offset > 0)
+            else if (SwipeCanGoBack && offset > 0)
             {
                 ShowPrevPageIndicator = 1;
             }
@@ -841,11 +857,11 @@ namespace Ao3TrackReader
 
                     offsetCat = SwipeOffsetChanged(offset);
                     if (offsetCat == 3) {
-                        GoBack();
+                        SwipeGoBack();
                         return false;
                     }
                     else if (offsetCat == -3) {
-                        GoForward();
+                        SwipeGoForward();
                         return false;
                     }
 
@@ -905,8 +921,8 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            PrevPageButton.IsEnabled = CanGoBack;
-            NextPageButton.IsEnabled = CanGoForward;
+            PrevPageButton.IsEnabled = SwipeCanGoBack;
+            NextPageButton.IsEnabled = SwipeCanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
@@ -930,8 +946,8 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            PrevPageButton.IsEnabled = CanGoBack;
-            NextPageButton.IsEnabled = CanGoForward;
+            PrevPageButton.IsEnabled = SwipeCanGoBack;
+            NextPageButton.IsEnabled = SwipeCanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;

@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*
+Copyright 2017 Alexis Ryan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+using System;
 using Android.Webkit;
 using Android.Content;
 using Ao3TrackReader.Helper;
@@ -162,22 +178,16 @@ namespace Ao3TrackReader.Helper
             set { wvp.DoOnMainThread(() => { wvp.PrevPage = value; }); }
         }
 
-        public bool CanGoBack
+        public bool SwipeCanGoBack
         {
-            [JavascriptInterface, Export("get_canGoBack")]
-            get { return (bool)wvp.DoOnMainThread(() => wvp.CanGoBack); }
+            [JavascriptInterface, Export("get_swipeCanGoBack")]
+            get { return (bool)wvp.DoOnMainThread(() => wvp.SwipeCanGoBack); }
         }
-        public bool CanGoForward
+        public bool SwipeCanGoForward
         {
-            [JavascriptInterface, Export("get_canGoForward")]
-            get { return (bool)wvp.DoOnMainThread(() => wvp.CanGoForward); }
+            [JavascriptInterface, Export("get_swipeCanGoForward")]
+            get { return (bool)wvp.DoOnMainThread(() => wvp.SwipeCanGoForward); }
         }
-
-        [JavascriptInterface, Export("goBack")]
-        public void GoBack() { wvp.DoOnMainThread(() => wvp.GoBack()); }
-
-        [JavascriptInterface, Export("goForward")]
-        public void GoForward() { wvp.DoOnMainThread(() => wvp.GoForward()); }
 
         public double LeftOffset
         {

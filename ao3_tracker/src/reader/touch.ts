@@ -1,3 +1,19 @@
+/*
+Copyright 2017 Alexis Ryan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 namespace Ao3Track {
     export namespace Touch {
        
@@ -82,45 +98,15 @@ namespace Ao3Track {
             return true;
         }
 
-        function swipeEnd(x : number, y : number) : boolean
+        function swipeEnd() : boolean
         {
             let offset = lastTouchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);            
-            /*
-            let touchX = x*coordFixup;
-            lastTouchY = y*coordFixup;
-
-            let offset = touchX - startTouchX;
-            let offsetY = Math.abs(lastTouchY - startTouchY);
-
-            if ((!Ao3Track.Helper.canGoBack && offset > 0.0) || (!Ao3Track.Helper.canGoForward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) ||
-                (offsetY >= yLimit) || offset === 0) {
-                swipeCleanup();
-                return false;
-            }
-
-            let now = performance.now();
-            if (now <= lastTime) now = lastTime + 1;
-            
-            if (touchX !== lastTouchX)
-            {
-                velocity = (touchX-lastTouchX) * 1000.0 / (now-lastTime); // pixels/s
-                lastTouchX = touchX;
-            }
-            */
 
             swipeCleanup(true);
 
             let offsetCat = swipeOffsetChanged(offset, offsetY);
-            if (offsetCat === 3) {
-                Ao3Track.Helper.goBack();
-                return true;
-            }
-            else if (offsetCat === -3) {
-                Ao3Track.Helper.goForward();
-                return true;
-            }
-            else if (offsetCat === 0) {
+            if (offsetCat === 0) {
                 if (Math.abs(offset) < 8 && offsetY < 8 && (performance.now() - startTime) > 1000) {
                     let devToClient = window.innerWidth / Ao3Track.Helper.deviceWidth;
                     let ev = new MouseEvent("contextmenu",{
@@ -142,12 +128,12 @@ namespace Ao3Track {
             
             Helper.startWebViewDragAccelerate(velocity);
             
-            return true;
+            return false;
         }   
 
         function swipeOffsetChanged(offset : number, offsetY : number) : number
         {
-            if ((!Ao3Track.Helper.canGoBack && offset > 0.0) || (!Ao3Track.Helper.canGoForward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) ||
+            if ((!Ao3Track.Helper.swipeCanGoBack && offset > 0.0) || (!Ao3Track.Helper.swipeCanGoForward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) ||
                 (offsetY >= yLimit)) {
                 offset = 0.0;
             }
@@ -162,24 +148,24 @@ namespace Ao3Track {
             Ao3Track.Helper.leftOffset = offset;
             
 
-            if (Ao3Track.Helper.canGoForward && offset < -centre && offsetY < yLimit) {
+            if (Ao3Track.Helper.swipeCanGoForward && offset < -centre && offsetY < yLimit) {
                 Ao3Track.Helper.showNextPageIndicator = 2;
                 if (offset <= -end) return -3;
                 return -2;
             }
-            else if (Ao3Track.Helper.canGoForward && offset < 0 && offsetY < yLimit) {
+            else if (Ao3Track.Helper.swipeCanGoForward && offset < 0 && offsetY < yLimit) {
                 Ao3Track.Helper.showNextPageIndicator = 1;
             }
             else {
                 Ao3Track.Helper.showNextPageIndicator = 0;
             }
 
-            if (Ao3Track.Helper.canGoBack && offset >= centre && offsetY < yLimit) {
+            if (Ao3Track.Helper.swipeCanGoBack && offset >= centre && offsetY < yLimit) {
                 Ao3Track.Helper.showPrevPageIndicator = 2;
                 if (offset >= end) return 3;
                 return 2;
             }
-            else if (Ao3Track.Helper.canGoBack && offset > 0 && offsetY < yLimit)
+            else if (Ao3Track.Helper.swipeCanGoBack && offset > 0 && offsetY < yLimit)
             {
                 Ao3Track.Helper.showPrevPageIndicator = 1;
             }
@@ -262,10 +248,11 @@ namespace Ao3Track {
                 return;
             }
 
-            if (swipeEnd(event.screenX,event.screenY)) {
+            if (swipeEnd()) {
                 event.preventDefault();
+                let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
-                    ev.preventDefault();
+                    if (Date.now() <= limit)  ev.preventDefault();
                     event.target.removeEventListener("click",handle);
                 };
 
@@ -273,7 +260,16 @@ namespace Ao3Track {
             }
         }
         function pointerCancelHandler(event: PointerEvent) {
-            swipeCleanup();
+            if (swipeEnd()) {
+                event.preventDefault();
+                let limit = Date.now() + 100;
+                let handle = (ev: MouseEvent) => {
+                    if (Date.now() <= limit)  ev.preventDefault();
+                    event.target.removeEventListener("click",handle);
+                };
+
+                event.target.addEventListener("click",handle);
+            }
         }
 
         //
@@ -311,10 +307,11 @@ namespace Ao3Track {
                 swipeCleanup();
                 return;
             }
-            if (swipeEnd(touch.screenX,touch.screenY)) {
+            if (swipeEnd()) {
                 event.preventDefault();
+                let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
-                    ev.preventDefault();
+                    if (Date.now() <= limit)  ev.preventDefault();
                     event.target.removeEventListener("click",handle);
                 };
 
@@ -322,7 +319,16 @@ namespace Ao3Track {
             }
         }
         function touchCancelHandler(event: TouchEvent) {
-            swipeCleanup();
+            if (swipeEnd()) {
+                event.preventDefault();
+                let limit = Date.now() + 100;
+                let handle = (ev: MouseEvent) => {
+                    if (Date.now() <= limit)  ev.preventDefault();
+                    event.target.removeEventListener("click",handle);
+                };
+
+                event.target.addEventListener("click",handle);
+            }
         }
 
         export function updateTouchState() {

@@ -24,6 +24,13 @@ namespace Ao3TrackReader.Helper
             public string[] args;
         }
 
+        private object Deserialize(string value, Type type)
+        {
+            // If destination is a string, then the value passes through unchanged. A minor optimization
+            if (type == typeof(string)) return value;
+            else return JsonConvert.DeserializeObject(value, type);
+        }
+
         [DefIgnore]
         public override void DidReceiveScriptMessage(WKUserContentController userContentController, WKScriptMessage message)
         {
@@ -33,7 +40,7 @@ namespace Ao3TrackReader.Helper
             {
                 if (msg.type == "SET" && md.pi?.CanWrite == true)
                 {
-                    md.pi.SetValue(this, JsonConvert.DeserializeObject(msg.value, md.pi.PropertyType));
+                    md.pi.SetValue(this, Deserialize(msg.value, md.pi.PropertyType));
                     return;
                 }
                 else if (msg.type == "CALL" && md.mi != null)
@@ -44,7 +51,7 @@ namespace Ao3TrackReader.Helper
                         var args = new object[msg.args.Length];
                         for (int i = 0; i < msg.args.Length; i++)
                         {
-                            args[i] = JsonConvert.DeserializeObject(msg.args[i], ps[i].ParameterType);
+                            args[i] = Deserialize(msg.args[i], ps[i].ParameterType);
                         }
 
                         md.mi.Invoke(this, args);
@@ -190,7 +197,7 @@ namespace Ao3TrackReader.Helper
         {
             set { wvp.DoOnMainThread(() => {
                 wvp.NextPage = value;
-                wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "canGoForward", wvp.CanGoForward).Wait(0);
+                wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoForward", wvp.SwipeCanGoForward).Wait(0);
             }); }
 
         }
@@ -198,22 +205,18 @@ namespace Ao3TrackReader.Helper
         {
             set { wvp.DoOnMainThread(() => {
                 wvp.PrevPage = value;
-                wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "canGoBack", wvp.CanGoBack).Wait(0);
+                wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoBack", wvp.SwipeCanGoBack).Wait(0);
             }); }
         }
 
-        public bool CanGoBack
+        public bool SwipeCanGoBack
         {
             get { throw new NotSupportedException(); }
         }
-        public bool CanGoForward
+        public bool SwipeCanGoForward
         {
             get { throw new NotSupportedException(); }
         }
-
-        public void GoBack() { wvp.DoOnMainThread(() => wvp.GoBack()); }
-
-        public void GoForward() { wvp.DoOnMainThread(() => wvp.GoForward()); }
 
         public double LeftOffset
         {

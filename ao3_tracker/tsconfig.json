@@ -4,11 +4,12 @@
         "target": "es6",
         "module": "none",
         "noImplicitAny": true,
-        "removeComments": false,
+        "removeComments": true,
         "preserveConstEnums": true,
         "strictNullChecks": true,
         "alwaysStrict": false,
-        "sourceMap": false
+        "sourceMap": false,
+        "pretty": true
     },
     "includes": ["./*.ts"]
 }
