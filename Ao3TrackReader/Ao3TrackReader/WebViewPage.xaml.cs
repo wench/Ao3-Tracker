@@ -57,6 +57,10 @@ namespace Ao3TrackReader
         DisableableCommand SyncButton { get; set; }
         DisableableCommand ForceSetLocationButton { get; set; }
 
+        List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
+        DisableableCommand<string> ContextMenuOpenAdd;
+        DisableableCommand<string> ContextMenuAdd;
+
         public ReadingListView ReadingList { get; private set; }
         public SettingsView SettingsPane { get; private set; }
 
@@ -67,6 +71,7 @@ namespace Ao3TrackReader
 
             SetupToolbarCommands();
             SetupToolbar();
+            SetupContextMenu();
 
             Panes.Children.Add(SettingsPane = new SettingsView(this));
             Panes.Children.Add(ReadingList = new ReadingListView(this));
@@ -251,6 +256,28 @@ namespace Ao3TrackReader
                     SettingsPane.IsOnScreen = !SettingsPane.IsOnScreen;
                 })
             });
+        }
+
+        void SetupContextMenu()
+        {
+            ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<string>>>();
+
+            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Open", new DisableableCommand<string>((url) => {
+                Navigate(new Uri(url));
+            })));
+
+            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Open and Add", ContextMenuOpenAdd = new DisableableCommand<string>((url) => {
+                AddToReadingList(url);
+                Navigate(new Uri(url));
+            })));
+
+            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<string>((url) => {
+                AddToReadingList(url);
+            })));
+
+            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) => {
+                CopyToClipboard(url, "url");
+            })));
         }
 
         protected override void OnSizeAllocated(double width, double height)

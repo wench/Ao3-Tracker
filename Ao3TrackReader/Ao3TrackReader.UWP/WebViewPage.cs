@@ -30,6 +30,7 @@ using System.Threading;
 using Ao3TrackReader.Data;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Ao3TrackReader
 {
@@ -72,6 +73,21 @@ namespace Ao3TrackReader
             WebView.GotFocus += WebView_GotFocus;
             WebView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
             helper = new Ao3TrackHelper(this);
+
+            contextMenu = new MenuFlyout();
+            foreach (var kvp in ContextMenuItems)
+            {
+                if (kvp.Key == "-")
+                {
+                    contextMenu.Items.Add(new MenuFlyoutSeparator());
+                }
+                else
+                {
+                    var item = new MenuFlyoutItem { Text = kvp.Key };
+                    item.Command = kvp.Value;
+                    contextMenu.Items.Add(item);
+                }
+            }
 
             return WebView.ToView();
         }
@@ -217,59 +233,47 @@ namespace Ao3TrackReader
                     }
             }
         }
-        
-        TaskCompletionSource<string> contextMenuResult = null;
-        MenuFlyout contextMenu = null;
-        public void HideContextMenu()
+
+        public void CopyToClipboard(string str, string type)
         {
-            if (contextMenuResult != null)
+            if (type == "text")
             {
-                contextMenuResult.TrySetCanceled();
-                contextMenuResult = null;
+                var dp = new DataPackage();
+                dp.SetText(str);
+                Clipboard.SetContent(dp);
             }
-            if (contextMenu != null)
+            else if (type == "url")
             {
-                contextMenu.Hide();
-                contextMenu = null;
+                var dp = new DataPackage();
+                dp.SetText(str);
+                dp.SetWebLink(new Uri(str));
+                Clipboard.SetContent(dp);
             }
         }
 
-        public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
+        MenuFlyout contextMenu;
+        public void HideContextMenu()
+        {
+            contextMenu.Hide();
+        }
+
+        public async void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
             HideContextMenu();
 
-            contextMenuResult = new TaskCompletionSource<string>();
-            RoutedEventHandler clicked = (sender, e) =>
+            var res = await AreUrlsInReadingListAsync(new[] { url });
+            ContextMenuOpenAdd.IsEnabled = !res[url];
+            ContextMenuAdd.IsEnabled = !res[url];
+
+            foreach (var baseitem in contextMenu.Items)
             {
-                var item = sender as MenuFlyoutItem;
-                contextMenuResult?.TrySetResult(item.Text);
-            };
-            contextMenu = new MenuFlyout();
-            for (int i = 0; i < menuItems.Length; i++) {
-                if (menuItems[i] == "-") {
-                    contextMenu.Items.Add(new MenuFlyoutSeparator());
-                }
-                else
+                if (baseitem is MenuFlyoutItem item)
                 {
-                    var item = new MenuFlyoutItem { Text = menuItems[i] };
-                    item.Click += clicked;
-                    contextMenu.Items.Add(item);
+                    item.CommandParameter = url;
                 }
             }
 
-            contextMenu.Closed += (sender,e) =>
-            {
-                contextMenuResult?.TrySetResult("");
-            };
-
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() => contextMenu.ShowAt(WebView, new Windows.Foundation.Point(x, y)));
-
-            return contextMenuResult.Task.ContinueWith((task)=> {
-                contextMenu = null;
-                contextMenuResult = null;
-                return task.Result;
-            });
-
+            contextMenu.ShowAt(WebView, new Windows.Foundation.Point(x, y));
         }
 
         IAsyncOperation<IDictionary<long, WorkChapter>> IWebViewPage.GetWorkChaptersAsync(long[] works)
@@ -288,9 +292,6 @@ namespace Ao3TrackReader
         {
             return CallJavascriptAsync(code).AsAsyncOperation();
         }
-        IAsyncOperation<string> Helper.IWebViewPage.ShowContextMenu(double x, double y, string[] menuItems)
-        {
-            return ShowContextMenu(x, y, menuItems).AsAsyncOperation();
-        }
+
     }
 }

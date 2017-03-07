@@ -30,10 +30,8 @@ declare namespace Ao3Track {
         getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) : void;
         setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void;
 
-        showContextMenu(x: number, y: number, menuItems: string[], callback: (selected: string | null)=>void): void;
-        hideContextMenu() : void;
+        showContextMenu(x: number, y: number, url: string, innerHtml: string): void;
         
-        copyToClipboard(str: string, type: string): void;
         setCookies(cookies: string): void;
 
         addToReadingList(href: string): void;

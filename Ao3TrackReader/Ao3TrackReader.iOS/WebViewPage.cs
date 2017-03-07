@@ -213,7 +213,12 @@ namespace Ao3TrackReader
                 else WebView.Transform = CGAffineTransform.MakeTranslation(new nfloat(value), 0);
             }
         }
-        
+
+        public void CopyToClipboard(string str, string type)
+        {
+
+        }
+
         TaskCompletionSource<string> contextMenuResult = null;
         //Android.Widget.PopupMenu contextMenu = null;
         public void HideContextMenu()

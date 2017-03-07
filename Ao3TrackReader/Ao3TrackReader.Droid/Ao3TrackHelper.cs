@@ -122,43 +122,16 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        [JavascriptInterface, Export("hideContextMenu")]
-        public void HideContextMenu()
-        {
-            wvp.HideContextMenu();
-        }
-
         [JavascriptInterface, Export("showContextMenu")]
-        public void ShowContextMenu(double x, double y, [Converter("ToJSON")] string menuItems_json, [Converter("Callback")] int hCallback)
+        public void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
-            Task.Run(async () =>
-            {
-                var menuItems = JsonConvert.DeserializeObject<string[]>(menuItems_json);
-                string result = await wvp.ShowContextMenu(x, y, menuItems);
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, result).Wait(0);
-            });
+            wvp.DoOnMainThread(() => wvp.ShowContextMenu(x, y, url, innerHtml));
         }
 
         [JavascriptInterface, Export("addToReadingList")]
         public void AddToReadingList(string href)
         {
             wvp.AddToReadingList(href);
-        }
-
-        [JavascriptInterface, Export("copyToClipboard")]
-        public void CopyToClipboard(string str, string type)
-        {
-            var clipboard = Xamarin.Forms.Forms.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
-            if (type == "text")
-            {
-                ClipData clip = ClipData.NewPlainText("Text from Ao3", str);
-                clipboard.PrimaryClip = clip;
-            }
-            else if (type == "uri")
-            {
-                ClipData clip = ClipData.NewRawUri(str, Android.Net.Uri.Parse(str));
-                clipboard.PrimaryClip = clip;
-            }
         }
 
         [JavascriptInterface, Export("setCookies")]

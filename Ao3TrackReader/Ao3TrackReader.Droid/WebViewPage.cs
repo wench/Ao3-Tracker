@@ -101,10 +101,35 @@ namespace Ao3TrackReader
 #endif
             AddJavascriptObject("Ao3TrackHelperNative", helper);
 
-            contextMenuPlaceholder = (new Android.Views.View(Forms.Context)).ToView();
+            var placeholder = new Android.Views.View(Forms.Context);
+            contextMenuPlaceholder = placeholder.ToView();
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(0, 0, 0, 0));
             Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, AbsoluteLayoutFlags.None);
             helper = new Ao3TrackHelper(this);
+
+            contextMenu = new PopupMenu(Forms.Context, placeholder);
+            var menu = contextMenu.Menu;
+
+            for (int i = 0; i < ContextMenuItems.Count; i++)
+            {
+                var kvp = ContextMenuItems[i];
+                if (kvp.Key == "-")
+                {
+                    menu.Add(Menu.None, i, i, "-").SetEnabled(false);
+                }
+                else
+                {
+                    menu.Add(Menu.None, i, i, kvp.Key);
+                }
+            }
+
+            contextMenu.MenuItemClick += (s1, arg1) =>
+            {
+                if (ContextMenuItems[arg1.Item.ItemId].Value != null)
+                    ContextMenuItems[arg1.Item.ItemId].Value.Execute(contextMenuUrl);
+            };
+
+            MainContent.Children.Add(contextMenuPlaceholder);
 
             WebView.FocusChange += WebView_FocusChange;
 
@@ -217,66 +242,48 @@ namespace Ao3TrackReader
                 WebView.TranslationX = (float)(value);
             }
         }
-        
-        TaskCompletionSource<string> contextMenuResult = null;
-        Android.Widget.PopupMenu contextMenu = null;
-        public void HideContextMenu()
+
+        public void CopyToClipboard(string str, string type)
         {
-            if (contextMenuResult != null)
+            var clipboard = Xamarin.Forms.Forms.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
+            if (type == "text")
             {
-                contextMenuResult.TrySetCanceled();
-                contextMenuResult = null;
+                ClipData clip = ClipData.NewPlainText("Text from Ao3", str);
+                clipboard.PrimaryClip = clip;
             }
-            if (contextMenu != null)
+            else if (type == "uri")
             {
-                contextMenu.Dismiss();
-                contextMenu = null;
+                ClipData clip = ClipData.NewRawUri(str, Android.Net.Uri.Parse(str));
+                clipboard.PrimaryClip = clip;
             }
         }
 
-        public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
+        Android.Widget.PopupMenu contextMenu;
+        string contextMenuUrl;
+        public void HideContextMenu()
+        {
+            contextMenu.Dismiss();
+        }
+
+        public async void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
             HideContextMenu();
 
-            contextMenuResult = new TaskCompletionSource<string>();
-
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / WebView.Width, y * Height / WebView.Height, 0, 0));
-            MainContent.Children.Add(contextMenuPlaceholder);
-            var renderer = Platform.GetRenderer(contextMenuPlaceholder) as NativeViewWrapperRenderer;
 
-            contextMenu = new PopupMenu(Forms.Context, renderer.Control);
-            var menu = contextMenu.Menu;
+            var res = await AreUrlsInReadingListAsync(new[] { url });
+            ContextMenuOpenAdd.IsEnabled = !res[url];
+            ContextMenuAdd.IsEnabled = !res[url];
 
-            for (int i = 0; i < menuItems.Length; i++)
+            for (int i = 0; i < ContextMenuItems.Count; i++)
             {
-                if (menuItems[i] == "-")
-                {
-                    menu.Add(Menu.None, i, i, "-").SetEnabled(false);
-                }
-                else
-                {
-                    menu.Add(Menu.None, i, i, menuItems[i]);
-                }
+                if (ContextMenuItems[i].Value != null)
+                    contextMenu.Menu.GetItem(i).SetEnabled(ContextMenuItems[i].Value.CanExecute(url));
             }
 
-            contextMenu.MenuItemClick += (s1, arg1) =>
-            {
-                contextMenuResult.TrySetResult(menuItems[arg1.Item.ItemId]);
-            };
-
-            contextMenu.DismissEvent += (s2, arg2) =>
-            {
-                contextMenuResult.TrySetResult("");
-                MainContent.Children.Remove(contextMenuPlaceholder);
-            };
+            contextMenuUrl = url;
 
             contextMenu.Show();
-
-            return contextMenuResult.Task.ContinueWith((task) => {
-                contextMenu = null;
-                contextMenuResult = null;
-                return task.Result;
-            });
         }
 
         class WebClient : WebViewClient

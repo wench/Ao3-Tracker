@@ -31,6 +31,7 @@ namespace Ao3Track {
         let yLimit: number = 0;
         let coordFixup: number = 0;
         let velocity : number = 0;
+        let manualContextMenu = false;
 
         function swipeCleanup(keepOffset?: boolean) {
             Helper.stopWebViewDragAccelerate();
@@ -107,7 +108,7 @@ namespace Ao3Track {
 
             let offsetCat = swipeOffsetChanged(offset, offsetY);
             if (offsetCat === 0) {
-                if (Math.abs(offset) < 8 && offsetY < 8 && (performance.now() - startTime) > 1000) {
+                if (manualContextMenu && Math.abs(offset) < 8 && offsetY < 8 && (performance.now() - startTime) > 1000) {
                     let devToClient = window.innerWidth / Ao3Track.Helper.deviceWidth;
                     let ev = new MouseEvent("contextmenu",{
                         clientX: (lastTouchX * devToClient) - window.screenLeft,

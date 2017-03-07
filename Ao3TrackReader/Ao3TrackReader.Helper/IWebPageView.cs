@@ -82,8 +82,7 @@ namespace Ao3TrackReader.Helper
         int FontSize { get; set; }
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
-        IAsyncOp_String ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems);
-        void HideContextMenu();
+        void ShowContextMenu(double x, double y, string url, string innerHtml);
         void AddToReadingList(string href);
         void SetCookies(string cookies);
 

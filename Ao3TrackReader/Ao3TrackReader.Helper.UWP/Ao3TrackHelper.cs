@@ -174,36 +174,14 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public void HideContextMenu()
+        public void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
-            wvp.HideContextMenu();
-        }
-
-        public IAsyncOperation<string> ShowContextMenu(double x, double y, [ReadOnlyArray] string[] menuItems)
-        {
-            return wvp.ShowContextMenu(x, y, menuItems);
+            wvp.DoOnMainThread(() => wvp.ShowContextMenu(x, y, url, innerHtml));
         }
 
         public void AddToReadingList(string href)
         {
             wvp.AddToReadingList(href);
-        }
-
-        public void CopyToClipboard(string str, string type)
-        {
-            if (type == "text")
-            {
-                var dp = new DataPackage();
-                dp.SetText(str);
-                Clipboard.SetContent(dp);
-            }
-            else if (type == "uri")
-            {
-                var dp = new DataPackage();
-                dp.SetText(str);
-                dp.SetWebLink(new Uri(str));
-                Clipboard.SetContent(dp);
-            }
         }
 
         public void SetCookies(string cookies)

@@ -152,40 +152,14 @@ namespace Ao3TrackReader.Helper
             });
         }
 
-        public void HideContextMenu()
+        public void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
-            wvp.HideContextMenu();
+            wvp.ShowContextMenu(x, y, url, innerHtml);
         }
-
-        public void ShowContextMenu(double x, double y, string[] menuItems, [Converter("Callback")] int hCallback)
-        {
-            Task.Run(async () =>
-            {
-                string result = await wvp.ShowContextMenu(x, y, menuItems);
-                await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, result);
-            });
-        }
-
 
         public void AddToReadingList(string href)
         {
             wvp.AddToReadingList(href);
-        }
-
-        public void CopyToClipboard(string str, string type)
-        {
-            /*
-            var clipboard = Xamarin.Forms.Forms.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
-            if (type == "text")
-            {
-                ClipData clip = ClipData.NewPlainText("Text from Ao3", str);
-                clipboard.PrimaryClip = clip;
-            }
-            else if (type == "uri")
-            {
-                ClipData clip = ClipData.NewRawUri(str, Android.Net.Uri.Parse(str));
-                clipboard.PrimaryClip = clip;
-            }*/
         }
 
         public void SetCookies(string cookies)

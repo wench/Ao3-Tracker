@@ -94,40 +94,7 @@ namespace Ao3Track {
                 ev.stopPropagation();
 
                 let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
-                Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, [
-                    "Open", 
-                    "Open and Add", 
-                    "Add to Reading list", 
-                    "Copy Link"
-                ], (item) => {
-                    switch (item)
-                    {
-                        case "Open":
-                        {
-                            window.location.href = a.href;
-                        }
-                        break;
-
-                        case "Open and Add":
-                        {
-                            Ao3Track.Helper.addToReadingList(a.href);
-                            window.location.href = a.href;
-                        }
-                        break;
-                        
-                        case "Add to Reading list":
-                        {
-                            Ao3Track.Helper.addToReadingList(a.href);
-                        }
-                        break;
-
-                        case "Copy Link":
-                        {
-                            Ao3Track.Helper.copyToClipboard(a.href,"uri");
-                        }
-                        break;
-                    }
-                });
+                Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, a.href, a.innerHTML);
                 return;
             }
         }

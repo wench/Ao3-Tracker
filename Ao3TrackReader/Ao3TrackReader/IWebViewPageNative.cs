@@ -40,6 +40,6 @@ namespace Ao3TrackReader
         double LeftOffset { get; set; }
 
         void HideContextMenu();
-        Task<string> ShowContextMenu(double x, double y, string[] menuItems);
+        void ShowContextMenu(double x, double y, string uri, string innerHtml);
     }
 }
