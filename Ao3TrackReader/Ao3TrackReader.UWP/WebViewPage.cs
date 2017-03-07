@@ -60,7 +60,7 @@ namespace Ao3TrackReader
         {
             Dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
 
-            WebView = new WebView()
+            WebView = new WebView(WebViewExecutionMode.SeparateThread)
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
