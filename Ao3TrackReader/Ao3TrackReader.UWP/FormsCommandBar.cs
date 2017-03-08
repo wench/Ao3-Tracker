@@ -44,8 +44,11 @@ namespace Ao3TrackReader.UWP
                 var xitem = item.DataContext as Xamarin.Forms.ToolbarItem;
                 if (xitem == null) return;
                 item.ClearValue(AppBarButton.IconProperty);
-                var uri = new Uri("ms-appx:///" + xitem.Icon.File);
-                item.Icon = new BitmapIcon() { UriSource = uri};
+                if (!string.IsNullOrWhiteSpace(xitem.Icon?.File))
+                {
+                    var uri = new Uri("ms-appx:///" + xitem.Icon.File);
+                    item.Icon = new BitmapIcon() { UriSource = uri };
+                }
 
                 if (item.DataContext is Ao3TrackReader.Controls.ToolbarItem aitem)
                 {

@@ -48,6 +48,7 @@ namespace Ao3TrackReader
         ToolbarItem SettingsToolBarItem { get; set; }
         ToolbarItem ReadingListToolBarItem { get; set; }
         ToolbarItem UrlBarToolBarItem { get; set; }
+        ToolbarItem HelpPaneToolBarItem { get; set; }
 
         DisableableCommand JumpButton { get; set; }
         DisableableCommand IncFontSizeButton { get; set; }
@@ -61,8 +62,7 @@ namespace Ao3TrackReader
         DisableableCommand<string> ContextMenuOpenAdd;
         DisableableCommand<string> ContextMenuAdd;
 
-        public ReadingListView ReadingList { get; private set; }
-        public SettingsView SettingsPane { get; private set; }
+        public ReadingListView ReadingList { get { return ReadingListPane; } }
 
         public WebViewPage()
         {
@@ -72,13 +72,6 @@ namespace Ao3TrackReader
             SetupToolbarCommands();
             SetupToolbar();
             SetupContextMenu();
-
-            Panes.Children.Add(SettingsPane = new SettingsView(this));
-            Panes.Children.Add(ReadingList = new ReadingListView(this));
-
-            SettingsPane.IsOnScreenChanged += SettingsPane_IsOnScreenChanged;
-            ReadingList.IsOnScreenChanged += ReadingList_IsOnScreenChanged;
-            urlBar.PropertyChanged += UrlBar_PropertyChanged;
 
             WebViewHolder.Content = CreateWebView();
 
@@ -110,6 +103,15 @@ namespace Ao3TrackReader
             }
         }
 
+        private void TogglePane(PaneView pane)
+        {
+            foreach (var c in Panes.Children)
+            {
+                if (c != pane) c.IsOnScreen = false;
+            }
+            pane.IsOnScreen = !pane.IsOnScreen;
+        }
+
         private void ReadingList_IsOnScreenChanged(object sender, bool e)
         {
             if (ReadingListToolBarItem == null) return;
@@ -122,6 +124,13 @@ namespace Ao3TrackReader
             if (SettingsToolBarItem == null) return;
             if (e == false) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
             else SettingsToolBarItem.Foreground = Colors.Highlight.High;
+        }
+
+        private void HelpPane_IsOnScreenChanged(object sender, bool e)
+        {
+            if (HelpPaneToolBarItem == null) return;
+            if (e == false) HelpPaneToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else HelpPaneToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         void SetupToolbarCommands()
@@ -177,11 +186,7 @@ namespace Ao3TrackReader
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
-                Command = new Command(() =>
-                {
-                    SettingsPane.IsOnScreen = false;
-                    ReadingList.IsOnScreen = !ReadingList.IsOnScreen;
-                })
+                Command = new Command(() =>  TogglePane(ReadingList))
             });
 
             ToolbarItems.Add(new ToolbarItem
@@ -252,12 +257,17 @@ namespace Ao3TrackReader
             {
                 Text = "Settings",
                 Icon = Icons.Settings,
-                Command = new Command(() =>
-                {
-                    ReadingList.IsOnScreen = false;
-                    SettingsPane.IsOnScreen = !SettingsPane.IsOnScreen;
-                })
+                Order = ToolbarItemOrder.Secondary,
+                Command = new Command(() => TogglePane(SettingsPane))
             });
+            ToolbarItems.Add(HelpPaneToolBarItem = new ToolbarItem
+            {
+                Text = "Help",
+                //Icon = Icons.Settings,
+                Order = ToolbarItemOrder.Secondary,
+                Command = new Command(() => TogglePane(HelpPane))
+            });
+            
         }
 
         void SetupContextMenu()

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
+             x:Class="Ao3TrackReader.Controls.HelpView">
+  <local:PaneView.Content>
+        <StackLayout Spacing="0">
+            <StackLayout VerticalOptions="Start" Orientation="Horizontal">
+                <Label Text="Help" FontSize="Medium" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+            </StackLayout>            
+        </StackLayout>
+    </local:PaneView.Content>
+</local:PaneView>

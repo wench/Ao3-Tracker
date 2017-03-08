@@ -29,20 +29,21 @@ namespace Ao3TrackReader.Controls
     public partial class ReadingListView : PaneView
     {
         GroupList<Models.Ao3PageViewModel> readingListBacking;
-        private readonly WebViewPage wvp;
         SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(20);
 
-        public ReadingListView(WebViewPage wvp)
+        public ReadingListView()
         {
-            this.wvp = wvp;
-
             InitializeComponent();
 
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
 
             ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+        }
 
+        protected override void OnWebViewPageSet()
+        {
+            base.OnWebViewPageSet();
             Device.BeginInvokeOnMainThread(() => Task.Run(async () => { await RestoreReadingList(); }));
         }
 
@@ -128,11 +129,6 @@ namespace Ao3TrackReader.Controls
                 SyncIndicator.IsRunning = false;
                 SyncIndicator.IsVisible = false;
             });
-        }
-
-        private void OnClose(object sender, EventArgs e)
-        {
-            IsOnScreen = false;
         }
 
         protected override void OnIsOnScreenChanging(bool newValue)

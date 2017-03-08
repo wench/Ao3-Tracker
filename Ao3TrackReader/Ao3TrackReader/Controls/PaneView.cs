@@ -27,6 +27,12 @@ namespace Ao3TrackReader.Controls
     public class PaneView : ContentView
     {
         double old_width;
+
+        private WebViewPage _wvp;
+        public WebViewPage wvp { get { return _wvp; }
+            set { _wvp = value; OnWebViewPageSet(); }
+        }
+
         public PaneView()
         {
             TranslationX = old_width = 480;
@@ -35,6 +41,16 @@ namespace Ao3TrackReader.Controls
             //IsVisible = false;
         }
 
+        protected virtual void OnClose(object sender, EventArgs e)
+        {
+            IsOnScreen = false;
+        }
+
+        protected virtual void OnWebViewPageSet()
+        {
+
+        }
+        
         public bool IsOnScreen
         {
             get

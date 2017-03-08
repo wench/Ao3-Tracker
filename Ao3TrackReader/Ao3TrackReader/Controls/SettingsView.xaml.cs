@@ -28,12 +28,11 @@ namespace Ao3TrackReader.Controls
     public partial class SettingsView : PaneView
     {
         bool isCreateUser;
-        WebViewPage wpv;
+
         Dictionary<string, string> themes;
 
-        public SettingsView (WebViewPage wpv)
+        public SettingsView () 
         {
-            this.wpv = wpv;
             InitializeComponent();
 
             isCreateUser = false;
@@ -53,11 +52,6 @@ namespace Ao3TrackReader.Controls
                 SelectCurrentTheme();
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
             }
-        }
-
-        public void OnClose(object sender, EventArgs e)
-        {
-            IsOnScreen = false;
         }
 
         public void OnHttpsSwitch(object sender, EventArgs e)
@@ -117,7 +111,7 @@ namespace Ao3TrackReader.Controls
                         errors = await App.Storage.UserLogin(s_username, s_password);
                     }
                 }
-                wpv.DoOnMainThread(() => 
+                wvp.DoOnMainThread(() => 
                 { 
                     if (errors?.Count > 0)
                     {
@@ -152,7 +146,7 @@ namespace Ao3TrackReader.Controls
                     else
                     {
                         UpdateSyncForm();
-                        wpv.ReadingList.SyncToServerAsync();
+                        wvp.ReadingList.SyncToServerAsync();
                     }
                     syncSubmitButton.IsEnabled = true;
                     syncIndicator.IsRunning = false;
@@ -167,7 +161,7 @@ namespace Ao3TrackReader.Controls
             Task.Run(async () =>
             {
                 await App.Storage.UserLogout();
-                wpv.DoOnMainThread(() =>
+                wvp.DoOnMainThread(() =>
                 {
                     UpdateSyncForm();
                 });

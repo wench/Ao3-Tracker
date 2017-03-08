@@ -27,10 +27,14 @@ limitations under the License.
                 <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
                         AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
                 <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
-                <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"/>
+                <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All">
+                    <local:HelpView x:Name="HelpPane" wvp="{x:Reference root}" IsOnScreenChanged="HelpPane_IsOnScreenChanged" />
+                    <local:SettingsView x:Name="SettingsPane" wvp="{x:Reference root}" IsOnScreenChanged="SettingsPane_IsOnScreenChanged" />
+                    <local:ReadingListView x:Name="ReadingListPane" wvp="{x:Reference root}" IsOnScreenChanged="ReadingList_IsOnScreenChanged" />
+                </local:PaneContainer>
             </AbsoluteLayout>
             <StackLayout x:Name="urlBar" Orientation="Horizontal" Spacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
-                         VerticalOptions="End" HorizontalOptions="Fill">
+                         VerticalOptions="End" HorizontalOptions="Fill" PropertyChanged="UrlBar_PropertyChanged">
                 <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" HorizontalOptions="FillAndExpand" />
                 <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="-1" VerticalOptions="Center" HorizontalOptions="End" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" HorizontalOptions="End" />
