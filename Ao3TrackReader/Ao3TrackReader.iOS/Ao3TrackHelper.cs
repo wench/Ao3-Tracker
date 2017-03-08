@@ -7,7 +7,7 @@ using WebKit;
 
 namespace Ao3TrackReader.Helper
 {
-    public class Ao3TrackHelper : WKScriptMessageHandler, IAo3TrackHelper
+    public class Ao3TrackHelper : IAo3TrackHelper
     {
         IWebViewPage wvp;
 
@@ -16,55 +16,8 @@ namespace Ao3TrackReader.Helper
             this.wvp = wvp;
         }
 
-        class Message
-        {
-            public string type;
-            public string name;
-            public string value;
-            public string[] args;
-        }
-
-        private object Deserialize(string value, Type type)
-        {
-            // If destination is a string, then the value passes through unchanged. A minor optimization
-            if (type == typeof(string)) return value;
-            else return JsonConvert.DeserializeObject(value, type);
-        }
-
-        [DefIgnore]
-        public override void DidReceiveScriptMessage(WKUserContentController userContentController, WKScriptMessage message)
-        {
-            var smsg = message.Body.ToString();
-            var msg = JsonConvert.DeserializeObject<Message>(smsg);
-            if (HelperDef.TryGetValue(msg.name, out var md))
-            {
-                if (msg.type == "SET" && md.pi?.CanWrite == true)
-                {
-                    md.pi.SetValue(this, Deserialize(msg.value, md.pi.PropertyType));
-                    return;
-                }
-                else if (msg.type == "CALL" && md.mi != null)
-                {
-                    var ps = md.mi.GetParameters();
-                    if (msg.args.Length == ps.Length)
-                    {
-                        var args = new object[msg.args.Length];
-                        for (int i = 0; i < msg.args.Length; i++)
-                        {
-                            args[i] = Deserialize(msg.args[i], ps[i].ParameterType);
-                        }
-
-                        md.mi.Invoke(this, args);
-                        return;
-                    }
-                }
-            }
-
-            throw new ArgumentException();
-        }
-
         static HelperDef s_def;
-        static HelperDef HelperDef
+        public HelperDef HelperDef
         {
             get
             {
@@ -107,9 +60,10 @@ namespace Ao3TrackReader.Helper
         }
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
-            Task<object>.Run(async () =>
+            wvp.DoOnMainThread(() =>
             {
-                if (onjumptolastlocationevent != 0) await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onjumptolastlocationevent, pagejump);
+                if (_onjumptolastlocationevent != 0)
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onjumptolastlocationevent, pagejump).Wait(0);
             });
         }
 
@@ -121,17 +75,15 @@ namespace Ao3TrackReader.Helper
             [Converter("Event")]
             set
             {
-                if (value != 0) wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize).Wait(0);
+                if (value != 0) wvp.DoOnMainThread(async () => await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize));
                 _onalterfontsizeevent = value;
             }
         }
 
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
-            Task<object>.Run(async () =>
-            {
-                if (onalterfontsizeevent != 0) await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", onalterfontsizeevent, fontSize);
-            });
+            if (_onalterfontsizeevent != 0)
+                wvp.DoOnMainThread(async () => await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onalterfontsizeevent, fontSize));
         }
 
 
@@ -140,7 +92,7 @@ namespace Ao3TrackReader.Helper
             Task.Run(async () =>
             {
                 var workchapters = await wvp.GetWorkChaptersAsync(works);
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0);
+                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0));
             });
         }
 
@@ -169,17 +121,17 @@ namespace Ao3TrackReader.Helper
 
         public string NextPage
         {
-            set { wvp.DoOnMainThread(() => {
+            set { wvp.DoOnMainThread(async () => {
                 wvp.NextPage = value;
-                wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoForward", wvp.SwipeCanGoForward).Wait(0);
+                await wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoForward", wvp.SwipeCanGoForward);
             }); }
 
         }
         public string PrevPage
         {
-            set { wvp.DoOnMainThread(() => {
+            set { wvp.DoOnMainThread(async () => {
                 wvp.PrevPage = value;
-                wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoBack", wvp.SwipeCanGoBack).Wait(0);
+                await wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoBack", wvp.SwipeCanGoBack);
             }); }
         }
 

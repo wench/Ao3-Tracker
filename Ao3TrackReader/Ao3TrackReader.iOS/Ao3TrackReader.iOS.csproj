@@ -25,7 +25,9 @@
     <ConsolePause>false</ConsolePause>
     <MtouchArch>i386, x86_64</MtouchArch>
     <MtouchLink>None</MtouchLink>
-    <MtouchDebug>true</MtouchDebug>
+    <MtouchDebug>True</MtouchDebug>
+    <IOSDebugOverWiFi>False</IOSDebugOverWiFi>
+    <IOSDebuggerPort>10000</IOSDebuggerPort>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -46,10 +48,24 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <MtouchArch>ARMv7, ARM64</MtouchArch>
+    <MtouchArch>ARMv7s, ARM64</MtouchArch>
     <CodesignKey>iPhone Developer</CodesignKey>
-    <MtouchDebug>true</MtouchDebug>
+    <MtouchDebug>True</MtouchDebug>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <IOSDebugOverWiFi>False</IOSDebugOverWiFi>
+    <IOSDebuggerPort>10000</IOSDebuggerPort>
+    <MtouchLink>SdkOnly</MtouchLink>
+    <MtouchProfiling>False</MtouchProfiling>
+    <MtouchFastDev>False</MtouchFastDev>
+    <MtouchNoSymbolStrip>False</MtouchNoSymbolStrip>
+    <MtouchUseLlvm>False</MtouchUseLlvm>
+    <MtouchUseThumb>False</MtouchUseThumb>
+    <MtouchEnableBitcode>False</MtouchEnableBitcode>
+    <MtouchUseSGen>False</MtouchUseSGen>
+    <MtouchUseRefCounting>False</MtouchUseRefCounting>
+    <OptimizePNGs>True</OptimizePNGs>
+    <MtouchFloat32>False</MtouchFloat32>
+    <DeviceSpecificBuild>False</DeviceSpecificBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -119,36 +135,230 @@
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
-      <Link>Content\jquery-3.1.1.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\callbacks.js">
-      <Link>Content\callbacks.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\marshal.js">
-      <Link>Content\marshal.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\platform.js">
-      <Link>Content\platform.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\polyfills.js">
-      <Link>Content\polyfills.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\reader.js">
-      <Link>Content\reader.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\touch.js">
-      <Link>Content\touch.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\tracker.css">
-      <Link>Content\tracker.css</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\tracker.js">
-      <Link>Content\tracker.js</Link>
-    </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\ios\unitconv.js">
-      <Link>Content\unitconv.js</Link>
-    </Content>
+    <BundleResource Include="..\Icons\addpage_dark.png">
+      <Link>Resources\addpage_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\addpage_dark.scale-200.png">
+      <Link>Resources\addpage_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\addpage_light.png">
+      <Link>Resources\addpage_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\addpage_light.scale-200.png">
+      <Link>Resources\addpage_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\back_dark.png">
+      <Link>Resources\back_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\back_dark.scale-200.png">
+      <Link>Resources\back_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\back_light.png">
+      <Link>Resources\back_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\back_light.scale-200.png">
+      <Link>Resources\back_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\bookmarks_dark.png">
+      <Link>Resources\bookmarks_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\bookmarks_dark.scale-200.png">
+      <Link>Resources\bookmarks_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\bookmarks_light.png">
+      <Link>Resources\bookmarks_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\bookmarks_light.scale-200.png">
+      <Link>Resources\bookmarks_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\close_dark.png">
+      <Link>Resources\close_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\close_dark.scale-200.png">
+      <Link>Resources\close_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\close_light.png">
+      <Link>Resources\close_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\close_light.scale-200.png">
+      <Link>Resources\close_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\filter_dark.png">
+      <Link>Resources\filter_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\filter_dark.scale-200.png">
+      <Link>Resources\filter_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\filter_light.png">
+      <Link>Resources\filter_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\filter_light.scale-200.png">
+      <Link>Resources\filter_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\fontdown_dark.png">
+      <Link>Resources\fontdown_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\fontdown_dark.scale-200.png">
+      <Link>Resources\fontdown_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\fontdown_light.png">
+      <Link>Resources\fontdown_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\fontdown_light.scale-200.png">
+      <Link>Resources\fontdown_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\fontup_dark.png">
+      <Link>Resources\fontup_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\fontup_dark.scale-200.png">
+      <Link>Resources\fontup_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\fontup_light.png">
+      <Link>Resources\fontup_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\fontup_light.scale-200.png">
+      <Link>Resources\fontup_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\font_dark.png">
+      <Link>Resources\font_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\font_dark.scale-200.png">
+      <Link>Resources\font_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\font_light.png">
+      <Link>Resources\font_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\font_light.scale-200.png">
+      <Link>Resources\font_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\forward_dark.png">
+      <Link>Resources\forward_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\forward_dark.scale-200.png">
+      <Link>Resources\forward_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\forward_light.png">
+      <Link>Resources\forward_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\forward_light.scale-200.png">
+      <Link>Resources\forward_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\redo_dark.png">
+      <Link>Resources\redo_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\redo_dark.scale-200.png">
+      <Link>Resources\redo_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\redo_light.png">
+      <Link>Resources\redo_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\redo_light.scale-200.png">
+      <Link>Resources\redo_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\refresh_dark.png">
+      <Link>Resources\refresh_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\refresh_dark.scale-200.png">
+      <Link>Resources\refresh_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\refresh_light.png">
+      <Link>Resources\refresh_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\refresh_light.scale-200.png">
+      <Link>Resources\refresh_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\rename_dark.png">
+      <Link>Resources\rename_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\rename_dark.scale-200.png">
+      <Link>Resources\rename_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\rename_light.png">
+      <Link>Resources\rename_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\rename_light.scale-200.png">
+      <Link>Resources\rename_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\settings_dark.png">
+      <Link>Resources\settings_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\settings_dark.scale-200.png">
+      <Link>Resources\settings_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\settings_light.png">
+      <Link>Resources\settings_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\settings_light.scale-200.png">
+      <Link>Resources\settings_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\sync_dark.png">
+      <Link>Resources\sync_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\sync_dark.scale-200.png">
+      <Link>Resources\sync_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\sync_light.png">
+      <Link>Resources\sync_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\sync_light.scale-200.png">
+      <Link>Resources\sync_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\tag_dark.png">
+      <Link>Resources\tag_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\tag_dark.scale-200.png">
+      <Link>Resources\tag_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\tag_light.png">
+      <Link>Resources\tag_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\tag_light.scale-200.png">
+      <Link>Resources\tag_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\forceloc_dark.png">
+      <Link>Resources\forceloc_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\forceloc_dark.scale-200.png">
+      <Link>Resources\forceloc_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\forceloc_light.png">
+      <Link>Resources\forceloc_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\forceloc_light.scale-200.png">
+      <Link>Resources\forceloc_light%402x.png</Link>
+    </BundleResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
+      <Link>Resources\Content\jquery-3.1.1.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\callbacks.js">
+      <Link>Resources\Content\callbacks.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\marshal.js">
+      <Link>Resources\Content\marshal.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\platform.js">
+      <Link>Resources\Content\platform.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\polyfills.js">
+      <Link>Resources\Content\polyfills.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\reader.js">
+      <Link>Resources\Content\reader.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\touch.js">
+      <Link>Resources\Content\touch.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\tracker.css">
+      <Link>Resources\Content\tracker.css</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\tracker.js">
+      <Link>Resources\Content\tracker.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\unitconv.js">
+      <Link>Resources\Content\unitconv.js</Link>
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, processorArchitecture=MSIL">
@@ -159,6 +369,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLite-net, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\sqlite-net-pcl.1.3.1\lib\netstandard1.1\SQLite-net.dll</HintPath>
     </Reference>
     <Reference Include="SQLitePCLRaw.batteries_green, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a84b7dcfb1391f7f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\SQLitePCLRaw.bundle_green.1.1.2\lib\Xamarin.iOS10\SQLitePCLRaw.batteries_green.dll</HintPath>
@@ -173,6 +386,7 @@
       <HintPath>..\..\packages\SQLitePCLRaw.provider.sqlite3.ios_unified.1.1.2\lib\Xamarin.iOS10\SQLitePCLRaw.provider.sqlite3.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -205,7 +419,15 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\" />
+    <ImageAsset Include="Resources\Images.xcassets\AppIcons.appiconset\Contents.json">
+      <InProject>false</InProject>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\Images.imageset\Contents.json">
+      <InProject>false</InProject>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\LaunchImages.launchimage\Contents.json">
+      <InProject>false</InProject>
+    </ImageAsset>
   </ItemGroup>
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition="Exists('..\Ao3TrackReader\Ao3TrackReader.projitems')" />
   <Import Project="..\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems" Label="Shared" />

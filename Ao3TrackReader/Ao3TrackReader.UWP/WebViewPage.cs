@@ -54,24 +54,24 @@ namespace Ao3TrackReader
             get { return Dispatcher.HasThreadAccess; }
         }
 
-        WebView WebView { get; set; }
+        WebView webView { get; set; }
 
         public Xamarin.Forms.View CreateWebView()
         {
             Dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
 
-            WebView = new WebView(WebViewExecutionMode.SeparateThread)
+            webView = new WebView(WebViewExecutionMode.SeparateThread)
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
 
-            WebView.NavigationStarting += WebView_NavigationStarting;
-            WebView.DOMContentLoaded += WebView_DOMContentLoaded;
-            WebView.ContentLoading += WebView_ContentLoading;
-            WebView.NewWindowRequested += WebView_NewWindowRequested;
-            WebView.GotFocus += WebView_GotFocus;
-            WebView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
+            webView.NavigationStarting += WebView_NavigationStarting;
+            webView.DOMContentLoaded += WebView_DOMContentLoaded;
+            webView.ContentLoading += WebView_ContentLoading;
+            webView.NewWindowRequested += WebView_NewWindowRequested;
+            webView.GotFocus += WebView_GotFocus;
+            webView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
             helper = new Ao3TrackHelper(this);
 
             contextMenu = new MenuFlyout();
@@ -89,7 +89,7 @@ namespace Ao3TrackReader
                 }
             }
 
-            return WebView.ToView();
+            return webView.ToView();
         }
 
         public bool ShowBackOnToolbar
@@ -123,7 +123,7 @@ namespace Ao3TrackReader
             var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
             if (uri != null) {
                 args.Handled = true;
-                WebView.Navigate(uri);
+                webView.Navigate(uri);
             }
         }
 
@@ -146,20 +146,22 @@ namespace Ao3TrackReader
 
         public async Task<string> EvaluateJavascriptAsync(string code)
         {
-            return await WebView.InvokeScriptAsync("eval", new[] { code });
+            return await webView.InvokeScriptAsync("eval", new[] { code });
         }
 
         public void AddJavascriptObject(string name, object obj)
         {
-            WebView.AddWebAllowedObject(name, obj);
+            webView.AddWebAllowedObject(name, obj);
         }
 
-        void OnInjectingScripts()
+        Task OnInjectingScripts()
         {
+            return Task.CompletedTask;
         }
 
-        void OnInjectedScripts()
+        Task OnInjectedScripts()
         {
+            return Task.CompletedTask;
         }
 
         async Task<string> ReadFile(string name)
@@ -172,7 +174,7 @@ namespace Ao3TrackReader
         {
             get {
                 return DoOnMainThread(()=> {
-                    return WebView.Source;
+                    return webView.Source;
                     });
             }
         }
@@ -182,26 +184,26 @@ namespace Ao3TrackReader
             uri = Ao3SiteDataLookup.CheckUri(uri);
             if (uri == null) return;
             helper?.Reset();
-            WebView.Navigate(uri);
+            webView.Navigate(uri);
         }
 
         public void Refresh()
         {
-            WebView.Refresh();
+            webView.Refresh();
         }
 
-        public bool SwipeCanGoBack { get { return WebView.CanGoBack || prevPage != null; } }
+        public bool SwipeCanGoBack { get { return webView.CanGoBack || prevPage != null; } }
 
-        public bool SwipeCanGoForward { get { return WebView.CanGoForward || nextPage != null; } }
+        public bool SwipeCanGoForward { get { return webView.CanGoForward || nextPage != null; } }
 
         public void SwipeGoBack()
         {
-            if (WebView.CanGoBack) WebView.GoBack();
+            if (webView.CanGoBack) webView.GoBack();
             else if (prevPage != null) Navigate(prevPage);
         }
         public void SwipeGoForward()
         {
-            if (WebView.CanGoForward) WebView.GoForward();
+            if (webView.CanGoForward) webView.GoForward();
             else if (nextPage != null) Navigate(nextPage);
 
         }
@@ -210,7 +212,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                return WebView.ActualWidth;
+                return webView.ActualWidth;
             }
         }
 
@@ -218,18 +220,18 @@ namespace Ao3TrackReader
         {
             get
             {
-                    TranslateTransform v = WebView.RenderTransform as TranslateTransform;
+                    TranslateTransform v = webView.RenderTransform as TranslateTransform;
                     return v?.X ?? 0.0;
             }
             set
             {
                     if (value == 0.0)
                     {
-                        WebView.RenderTransform = null;
+                        webView.RenderTransform = null;
                     }
                     else
                     {
-                        WebView.RenderTransform = new TranslateTransform { X = value, Y = 0.0 };
+                        webView.RenderTransform = new TranslateTransform { X = value, Y = 0.0 };
                     }
             }
         }
@@ -273,7 +275,7 @@ namespace Ao3TrackReader
                 }
             }
 
-            contextMenu.ShowAt(WebView, new Windows.Foundation.Point(x, y));
+            contextMenu.ShowAt(webView, new Windows.Foundation.Point(x, y));
         }
 
         IAsyncOperation<IDictionary<long, WorkChapter>> IWebViewPage.GetWorkChaptersAsync(long[] works)

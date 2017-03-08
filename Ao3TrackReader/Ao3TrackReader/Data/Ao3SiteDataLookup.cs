@@ -98,10 +98,12 @@ namespace Ao3TrackReader.Data
             //httpClientHandler.MaxConnectionsPerServer = 8;
             httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
             HttpClient = new HttpClient(httpClientHandler);
+#if __IOS__
+            use_https = true;
+#else
             if (!App.Database.TryGetVariable("UseHttps", bool.TryParse, out use_https))
-            {
                 App.Database.SaveVariable("UseHttps", use_https.ToString());
-            }
+#endif
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dd"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dt"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;

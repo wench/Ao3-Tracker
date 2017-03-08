@@ -356,7 +356,7 @@ namespace Ao3Track {
         if (readinglist !== null) iterateWorks(workchaps, readinglist);
     });
 
-    let $serieses = $('.series a[href^="/series/');
+    let $serieses = $('.series a[href^="/series/"]');
     Ao3Track.AreUrlsInReadingList($serieses.toArray().map((e) => {
         let a = e as HTMLAnchorElement;
         if (a === null) return "";

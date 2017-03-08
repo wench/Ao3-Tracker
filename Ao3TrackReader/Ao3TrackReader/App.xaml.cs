@@ -73,6 +73,9 @@ namespace Ao3TrackReader
                 case "UWP":
                     return "Assets/" + name + dl;
 
+                case Device.iOS:
+                    return name + dl;
+
                 default:
                     throw new NotSupportedException("'" + Device.RuntimePlatform + "' is not a supported platform. Update Ao3TrackReader.App.PlatformIcon()");
             }

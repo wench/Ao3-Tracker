@@ -26,10 +26,19 @@ namespace Ao3TrackReader.Controls
         public static readonly BindableProperty ForegroundProperty =
           BindableProperty.Create("Foreground", typeof(Color), typeof(ToolbarItem), defaultValue: Color.Default);
 
+        public static readonly BindableProperty DescriptionProperty =
+          BindableProperty.Create("Description", typeof(FormattedString), typeof(ToolbarItem), defaultValue: null);
+
         public Color Foreground
         {
             get { return (Color)GetValue(ForegroundProperty); }
             set { SetValue(ForegroundProperty, value); }
+        }
+
+        public FormattedString Description
+        {
+            get { return (FormattedString)GetValue(DescriptionProperty); }
+            set { SetValue(DescriptionProperty, value); }
         }
 
 #if __ANDROID__

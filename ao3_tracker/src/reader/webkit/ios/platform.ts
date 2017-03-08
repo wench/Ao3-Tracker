@@ -17,7 +17,7 @@ limitations under the License.
 
 interface MessageHandler
 {
-    postMessage: (message: Ao3Track.iOS.Message) => void;
+    postMessage: (message: string) => void;
 }
 
 interface MessageHandlers
@@ -68,8 +68,12 @@ namespace Ao3Track {
             name: keyof IAo3TrackHelperMethods;
             args: string[];
         }
+        export interface InitMessage
+        {
+            type: "INIT";
+        }
 
-        export type Message = SetMessage | CallMessage;
+        export type Message = SetMessage | CallMessage | InitMessage;
 
         export let helperDef : Marshal.IHelperDef = Ao3TrackHelperNative;
 
@@ -83,20 +87,20 @@ namespace Ao3Track {
             _values: { } as { [key: string]: any },
 
             setValue: function(name: keyof IAo3TrackHelperProperties, value: any) {
-                this.values[name] = value;
+                helper._values[name] = value;
             },
 
             _setValueInternal: function(name: keyof IAo3TrackHelperProperties, value: any) {
-                this.values[name] = value;
-                window.webkit.messageHandlers.ao3track.postMessage({ 
+                helper._values[name] = value;
+                window.webkit.messageHandlers.ao3track.postMessage(JSON.stringify({ 
                     type: "SET",
                     name: name,
                     value: serialize(value)
-                });
+                }));
             },   
 
             _getValueInternal: function(name: keyof IAo3TrackHelperProperties) : any {
-                return this.values[name];
+                return helper._values[name];
             },    
 
             _callFunctionInternal: function(name: keyof IAo3TrackHelperMethods, args: any[]|IArguments) {
@@ -106,11 +110,11 @@ namespace Ao3Track {
                     let a = args[i];
                     strArgs.push(serialize(a));
                 }
-                window.webkit.messageHandlers.ao3track.postMessage({ 
+                window.webkit.messageHandlers.ao3track.postMessage(JSON.stringify({ 
                     type: "CALL",
                     name: name,
                     args: strArgs                    
-                });
+                }));
             }     
         };
            
@@ -134,4 +138,7 @@ namespace Ao3Track {
         }
     }
     Marshal.MarshalNativeHelper(iOS.helperDef, iOS.helper);
+
+    window.webkit.messageHandlers.ao3track.postMessage(JSON.stringify({ type: "INIT" }));
+
 }

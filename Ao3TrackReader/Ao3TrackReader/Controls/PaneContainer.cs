@@ -39,6 +39,7 @@ namespace Ao3TrackReader.Controls
 
         public PaneContainer()
 		{
+            RecalculateVisbility();
 		}
 
         protected double PaneWidth(double width)
@@ -67,6 +68,29 @@ namespace Ao3TrackReader.Controls
             AbsoluteLayout.SetLayoutBounds(child, new Rectangle(1, 0, PaneWidth(Width), 1));
             AbsoluteLayout.SetLayoutFlags(child, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
             base.OnChildAdded(child);
+
+            child.PropertyChanged += Child_PropertyChanged;
+        }
+
+        protected override void OnChildRemoved(Element child)
+        {
+            child.PropertyChanged -= Child_PropertyChanged;
+        }
+
+        private void Child_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
+            {
+                RecalculateVisbility();
+            }
+        }
+
+        void RecalculateVisbility()
+        {
+            bool visible = false;
+            foreach (var child in Children) visible |= child.IsVisible;
+
+            IsVisible = visible;
         }
     }
 }

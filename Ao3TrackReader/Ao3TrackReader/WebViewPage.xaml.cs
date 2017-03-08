@@ -140,6 +140,8 @@ namespace Ao3TrackReader
 
         void SetupToolbar()
         {
+            ToolbarItems.Clear();
+
             if (ShowBackOnToolbar)
             {
                 ToolbarItems.Add(new ToolbarItem
@@ -933,7 +935,7 @@ namespace Ao3TrackReader
                 return true;
             }
 
-            if (check.PathAndQuery == CurrentUri.PathAndQuery)
+            if (check.PathAndQuery == CurrentUri.PathAndQuery && check.Fragment != CurrentUri.Fragment)
             {
                 return false;
             }
@@ -987,7 +989,7 @@ namespace Ao3TrackReader
 
         async void InjectScripts()
         {
-            OnInjectingScripts();
+            await OnInjectingScripts();
 
             foreach (string s in ScriptsToInject)
             {
@@ -999,7 +1001,7 @@ namespace Ao3TrackReader
                 var content = await ReadFile(s);
                 await CallJavascriptAsync("Ao3Track.InjectCSS", content);
             }
-            OnInjectedScripts();
+            await OnInjectedScripts();
         }
 
     }

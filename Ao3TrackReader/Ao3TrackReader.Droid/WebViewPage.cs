@@ -67,7 +67,7 @@ namespace Ao3TrackReader
         }
 
 
-        WebView WebView { get; set; }
+        WebView webView { get; set; }
         WebClient webClient;
         Xamarin.Forms.View contextMenuPlaceholder;
 
@@ -77,14 +77,14 @@ namespace Ao3TrackReader
 
         public Xamarin.Forms.View CreateWebView()
         {
-            WebView = new WebView(Forms.Context);
-            WebView.SetWebViewClient(webClient = new WebClient(this));
-            WebView.SetWebChromeClient(new ChromeClient(this));
-            WebView.Settings.AllowContentAccess = true;
-            WebView.Settings.JavaScriptEnabled = true;
-            WebView.Settings.BuiltInZoomControls = true;
-            WebView.Settings.DisplayZoomControls = false;
-            WebView.Settings.UseWideViewPort = true;
+            webView = new WebView(Forms.Context);
+            webView.SetWebViewClient(webClient = new WebClient(this));
+            webView.SetWebChromeClient(new ChromeClient(this));
+            webView.Settings.AllowContentAccess = true;
+            webView.Settings.JavaScriptEnabled = true;
+            webView.Settings.BuiltInZoomControls = true;
+            webView.Settings.DisplayZoomControls = false;
+            webView.Settings.UseWideViewPort = true;
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
             {
 #if DEBUG
@@ -95,11 +95,11 @@ namespace Ao3TrackReader
             }
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
-                WebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
+                webView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
             }
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.N)
             {
-                WebView.Settings.DisabledActionModeMenuItems = MenuItems.ProcessText | MenuItems.Share | MenuItems.WebSearch;
+                webView.Settings.DisabledActionModeMenuItems = MenuItems.ProcessText | MenuItems.Share | MenuItems.WebSearch;
             }
 
             AddJavascriptObject("Ao3TrackHelperNative", helper);
@@ -134,9 +134,9 @@ namespace Ao3TrackReader
 
             MainContent.Children.Add(contextMenuPlaceholder);
 
-            WebView.FocusChange += WebView_FocusChange;
+            webView.FocusChange += WebView_FocusChange;
 
-            return WebView.ToView();
+            return webView.ToView();
         }
 
         private void WebView_FocusChange(object sender, Android.Views.View.FocusChangeEventArgs e)
@@ -167,26 +167,28 @@ namespace Ao3TrackReader
             var cs = new TaskCompletionSource<string>();
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
             {
-                DoOnMainThread(() => WebView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
+                DoOnMainThread(() => webView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
             }
             else
             {
-                WebView.LoadUrl(helper.GetEvalJavascriptUrl(code,cs));
+                webView.LoadUrl(helper.GetEvalJavascriptUrl(code,cs));
             }
             return await cs.Task;
         }
 
         public void AddJavascriptObject(string name, object obj)
         {
-            WebView.AddJavascriptInterface((Java.Lang.Object)obj, name);
+            webView.AddJavascriptInterface((Java.Lang.Object)obj, name);
         }
 
-        void OnInjectingScripts()
+        Task OnInjectingScripts()
         {
+            return Task.CompletedTask;
         }
 
-        void OnInjectedScripts()
+        Task OnInjectedScripts()
         {
+            return Task.CompletedTask;
         }
 
         async Task<string> ReadFile(string name)
@@ -203,7 +205,7 @@ namespace Ao3TrackReader
             {
                 return DoOnMainThread(() =>
                 {
-                    if (!string.IsNullOrWhiteSpace(WebView.Url)) return new Uri(WebView.Url);
+                    if (!string.IsNullOrWhiteSpace(webView.Url)) return new Uri(webView.Url);
                     else return new Uri("about:blank");
                 });
             }
@@ -212,34 +214,34 @@ namespace Ao3TrackReader
         public void Navigate(Uri uri)
         {
             helper?.Reset();
-            WebView.LoadUrl(uri.AbsoluteUri);
+            webView.LoadUrl(uri.AbsoluteUri);
         }
 
         public void Refresh()
         {
-            WebView.Reload();
+            webView.Reload();
         }
 
-        public bool SwipeCanGoBack { get { return WebView.CanGoBack() || prevPage != null; } }
+        public bool SwipeCanGoBack { get { return webView.CanGoBack() || prevPage != null; } }
 
-        public bool SwipeCanGoForward { get { return WebView.CanGoForward() || nextPage != null; } }
+        public bool SwipeCanGoForward { get { return webView.CanGoForward() || nextPage != null; } }
 
         public void SwipeGoBack()
         {
-            if (WebView.CanGoBack()) WebView.GoBack();
-            else if (prevPage != null) WebView.LoadUrl(prevPage.AbsoluteUri);
+            if (webView.CanGoBack()) webView.GoBack();
+            else if (prevPage != null) webView.LoadUrl(prevPage.AbsoluteUri);
         }
         public void SwipeGoForward()
         {
-            if (WebView.CanGoForward()) WebView.GoForward();
-            else if (nextPage != null) WebView.LoadUrl(nextPage.AbsoluteUri);
+            if (webView.CanGoForward()) webView.GoForward();
+            else if (nextPage != null) webView.LoadUrl(nextPage.AbsoluteUri);
         }
 
         public double DeviceWidth
         {
             get
             {
-                return WebView.MeasuredWidth;
+                return webView.MeasuredWidth;
             }
         }
 
@@ -247,12 +249,12 @@ namespace Ao3TrackReader
         {
             get
             {
-                return WebView.TranslationX;
+                return webView.TranslationX;
             }
 
             set
             {
-                WebView.TranslationX = (float)(value);
+                webView.TranslationX = (float)(value);
             }
         }
 
@@ -282,7 +284,7 @@ namespace Ao3TrackReader
         {
             HideContextMenu();
 
-            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / WebView.Width, y * Height / WebView.Height, 0, 0));
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / webView.Width, y * Height / webView.Height, 0, 0));
 
             var res = await AreUrlsInReadingListAsync(new[] { url });
             ContextMenuOpenAdd.IsEnabled = !res[url];

@@ -32,6 +32,7 @@ using UIKit;
 using CoreGraphics;
 using ObjCRuntime;
 using Foundation;
+using Newtonsoft.Json;
 
 namespace Ao3TrackReader
 {
@@ -82,7 +83,7 @@ namespace Ao3TrackReader
         }
 
 
-        WKWebView WebView { get; set; }
+        WKWebView webView { get; set; }
         WKUserContentController userContentController;
 
         public bool ShowBackOnToolbar { get {
@@ -97,17 +98,17 @@ namespace Ao3TrackReader
 
             var configuration = new WKWebViewConfiguration();
             configuration.UserContentController = userContentController = new WKUserContentController();
+            userContentController.AddScriptMessageHandler(new ScriptMessageHandler(this), "ao3track");
             configuration.Preferences = preferences;
 
-            WebView = new WKWebView(configuration);
-            WebView.NavigationDelegate = new NavigationDelegate(this);
+            webView = new WKWebView(configuration);
+            webView.NavigationDelegate = new NavigationDelegate(this);
 
-            var h = new Ao3TrackHelper(this);
-            helper = h;
-            userContentController.AddScriptMessageHandler(h, "ao3track");
+            helper = new Ao3TrackHelper(this);
 
-            WebView.FocuseChanged += WebView_FocusChange;
-            var xview = WebView.ToView();
+            webView.FocuseChanged += WebView_FocusChange;
+
+            var xview = webView.ToView();
             xview.SizeChanged += Xview_SizeChanged;
 
             return xview;
@@ -128,8 +129,8 @@ namespace Ao3TrackReader
 
         public async Task<string> EvaluateJavascriptAsync(string code)
         {
-            var result = await WebView.EvaluateJavaScriptAsync(code);
-            return result.ToString();
+            var result = await webView.EvaluateJavaScriptAsync(code);
+            return result?.ToString();
         }
 
         public void AddJavascriptObject(string name, object obj)
@@ -137,17 +138,14 @@ namespace Ao3TrackReader
             
         }
 
-        void OnInjectingScripts()
+        async Task OnInjectingScripts()
         {
-            EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";").Wait();
+            await EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";");
         }
 
-        void OnInjectedScripts()
+        Task OnInjectedScripts()
         {
-            CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "leftOffset", LeftOffset).Wait(0);
-            CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoBack", SwipeCanGoBack).Wait(0);
-            CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoForward", SwipeCanGoForward).Wait(0);
-            CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "deviceWidth", DeviceWidth).Wait(0);
+            return Task.CompletedTask;
         }
 
         async Task<string> ReadFile(string name)
@@ -162,33 +160,37 @@ namespace Ao3TrackReader
         {
             get
             {
-                return DoOnMainThread(() => new Uri(WebView.Url.AbsoluteString));
+                return DoOnMainThread(() =>
+                {
+                    if (!string.IsNullOrWhiteSpace(webView.Url?.AbsoluteString)) return new Uri(webView.Url.AbsoluteString);
+                    else return new Uri("about:blank");
+                });
             }
         }
 
         public void Navigate(Uri uri)
         {
             helper?.Reset();
-            WebView.LoadRequest(new Foundation.NSUrlRequest(new Foundation.NSUrl(uri.AbsoluteUri)));
+            webView.LoadRequest(new Foundation.NSUrlRequest(new Foundation.NSUrl(uri.AbsoluteUri)));
         }
 
         public void Refresh()
         {
-            WebView.Reload();
+            webView.Reload();
         }
 
-        public bool SwipeCanGoBack { get { return WebView.CanGoBack || prevPage != null; } }
+        public bool SwipeCanGoBack { get { return webView.CanGoBack || prevPage != null; } }
 
-        public bool SwipeCanGoForward { get { return WebView.CanGoForward || nextPage != null; } }
+        public bool SwipeCanGoForward { get { return webView.CanGoForward || nextPage != null; } }
 
         public void SwipeGoBack()
         {
-            if (WebView.CanGoBack) WebView.GoBack();
+            if (webView.CanGoBack) webView.GoBack();
             else if (prevPage != null) Navigate(prevPage);
         }
         public void SwipeGoForward()
         {
-            if (WebView.CanGoForward) WebView.GoForward();
+            if (webView.CanGoForward) webView.GoForward();
             else if (nextPage != null) Navigate(nextPage);
         }
 
@@ -196,7 +198,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                return WebView.Frame.Width;
+                return webView.Frame.Width;
             }
         }
 
@@ -204,13 +206,13 @@ namespace Ao3TrackReader
         {
             get
             {
-                return WebView.Transform.x0;
+                return webView.Transform.x0;
             }
 
             set
             {
-                if (value == 0) WebView.Transform = CGAffineTransform.MakeIdentity();
-                else WebView.Transform = CGAffineTransform.MakeTranslation(new nfloat(value), 0);
+                if (value == 0) webView.Transform = CGAffineTransform.MakeIdentity();
+                else webView.Transform = CGAffineTransform.MakeTranslation(new nfloat(value), 0);
             }
         }
 
@@ -219,29 +221,18 @@ namespace Ao3TrackReader
 
         }
 
-        TaskCompletionSource<string> contextMenuResult = null;
         //Android.Widget.PopupMenu contextMenu = null;
         public void HideContextMenu()
         {
-            if (contextMenuResult != null)
-            {
-                contextMenuResult.TrySetCanceled();
-                contextMenuResult = null;
-            }
             /*
-            if (contextMenu != null)
-            {
                 contextMenu.Dismiss();
-                contextMenu = null;
-            }
             */
         }
 
-        public Task<string> ShowContextMenu(double x, double y, string[] menuItems)
+        public void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
             HideContextMenu();
 
-            contextMenuResult = new TaskCompletionSource<string>();
             /*
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / WebView.Width, y * Height / WebView.Height, 0, 0));
             MainContent.Children.Add(contextMenuPlaceholder);
@@ -274,12 +265,6 @@ namespace Ao3TrackReader
             };
 
             contextMenu.Show();*/
-            contextMenuResult.SetResult("");
-            return contextMenuResult.Task.ContinueWith((task) => {
-                //contextMenu = null;
-                contextMenuResult = null;
-                return task.Result;
-            });
         }
 
         class NavigationDelegate : WKNavigationDelegate
@@ -315,6 +300,77 @@ namespace Ao3TrackReader
                     decisionHandler(WKNavigationActionPolicy.Allow);
             }
         }
+
+        class ScriptMessageHandler : WKScriptMessageHandler
+        {
+            WebViewPage wvp;
+            public ScriptMessageHandler(WebViewPage wvp)
+            {
+                this.wvp = wvp;
+            }
+
+            public class Message
+            {
+                public string type;
+                public string name;
+                public string value;
+                public string[] args;
+            }
+
+            private object Deserialize(string value, Type type)
+            {
+                // If destination is a string, then the value passes through unchanged. A minor optimization
+                if (type == typeof(string)) return value;
+                else return JsonConvert.DeserializeObject(value, type);
+            }
+
+            public override void DidReceiveScriptMessage(WKUserContentController userContentController, WKScriptMessage message)
+            {
+                var smsg = message.Body.ToString();
+                var msg = JsonConvert.DeserializeObject<Message>(smsg);
+
+                if (msg.type == "INIT")
+                {
+                    wvp.DoOnMainThread(async () =>
+                    {
+                        await wvp.EvaluateJavascriptAsync(string.Format(
+                            "Ao3Track.iOS.helper.setValue({0},{1});Ao3Track.iOS.helper.setValue({2},{3});Ao3Track.iOS.helper.setValue({4},{5});Ao3Track.iOS.helper.setValue({6},{7});",
+                            JsonConvert.SerializeObject("leftOffset"), JsonConvert.SerializeObject(wvp.LeftOffset),
+                            JsonConvert.SerializeObject("swipeCanGoBack"), JsonConvert.SerializeObject(wvp.SwipeCanGoBack),
+                            JsonConvert.SerializeObject("swipeCanGoForward"), JsonConvert.SerializeObject(wvp.SwipeCanGoForward),
+                            JsonConvert.SerializeObject("deviceWidth"), JsonConvert.SerializeObject(wvp.DeviceWidth)));
+                    });
+                    return;
+                }
+                else if (wvp.helper.HelperDef.TryGetValue(msg.name, out var md))
+                {
+                    if (msg.type == "SET" && md.pi?.CanWrite == true)
+                    {
+                        md.pi.SetValue(wvp.helper, Deserialize(msg.value, md.pi.PropertyType));
+                        return;
+                    }
+                    else if (msg.type == "CALL" && md.mi != null)
+                    {
+                        var ps = md.mi.GetParameters();
+                        if (msg.args.Length == ps.Length)
+                        {
+                            var args = new object[msg.args.Length];
+                            for (int i = 0; i < msg.args.Length; i++)
+                            {
+                                args[i] = Deserialize(msg.args[i], ps[i].ParameterType);
+                            }
+
+                            md.mi.Invoke(wvp.helper, args);
+                            return;
+                        }
+                    }
+                }
+
+                throw new ArgumentException();
+            }
+
+        }
+
     }
 
 }

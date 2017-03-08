@@ -23,6 +23,7 @@ namespace Ao3TrackReader.Helper
     public interface IAo3TrackHelper
     {
         string HelperDefJson { get; }
+        HelperDef HelperDef { get; }
         void Reset();
         void OnAlterFontSize(int fontSize);
         void OnJumpToLastLocation(bool pagejump);
