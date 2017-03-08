@@ -72,27 +72,27 @@ namespace Ao3TrackReader.Helper
 
         void IAo3TrackHelper.Reset()
         {
-            _JumpToLastLocationEvent = null;
-            _AlterFontSizeEvent = null;
+            EventRegistrationTokenTable<EventHandler<object>>.GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent).InvocationList = null;
+            EventRegistrationTokenTable<EventHandler<object>>.GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent).InvocationList = null;
         }
 
-        private EventRegistrationTokenTable<EventHandler<bool>> _JumpToLastLocationEvent;
-        public event EventHandler<bool> JumpToLastLocationEvent
+        private EventRegistrationTokenTable<EventHandler<object>> _JumpToLastLocationEvent;
+        public event EventHandler<object> JumpToLastLocationEvent
         {
             add
             {
                 DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = true; });
 
-                return EventRegistrationTokenTable<EventHandler<bool>>
+                return EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
-                    .AddEventHandler(value);
+                    .AddEventHandler((s, e) => { Task.Run(() => value(s, e)); });
             }
 
             remove
             {
                 DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = false; });
 
-                EventRegistrationTokenTable<EventHandler<bool>>
+                EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
                     .RemoveEventHandler(value);
             }
@@ -100,28 +100,30 @@ namespace Ao3TrackReader.Helper
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
             var handlers =
-                EventRegistrationTokenTable<EventHandler<bool>>
+                EventRegistrationTokenTable<EventHandler<object>>
                 .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
                 .InvocationList;
 
-            handlers?.Invoke(this, pagejump);
+            //DoOnMainThread(() => {
+                handlers?.Invoke(this, pagejump);
+            //});
         }
 
-        private EventRegistrationTokenTable<EventHandler<int>> _AlterFontSizeEvent;
-        public event EventHandler<int> AlterFontSizeEvent
+        private EventRegistrationTokenTable<EventHandler<object>> _AlterFontSizeEvent;
+        public event EventHandler<object> AlterFontSizeEvent
         {
             add
             {
                 value.Invoke(this, wvp.FontSize);
 
-                return EventRegistrationTokenTable<EventHandler<int>>
+                return EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent)
-                    .AddEventHandler(value);
+                    .AddEventHandler((s,e)=> { Task.Run(()=>value(s, e)); });
             }
 
             remove
             {
-                EventRegistrationTokenTable<EventHandler<int>>
+                EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent)
                     .RemoveEventHandler(value);
             }
@@ -129,11 +131,13 @@ namespace Ao3TrackReader.Helper
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             var handlers =
-                EventRegistrationTokenTable<EventHandler<int>>
+                EventRegistrationTokenTable<EventHandler<object>>
                 .GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent)
                 .InvocationList;
 
-            handlers?.Invoke(this, fontSize);
+            //DoOnMainThread(() => {
+                handlers?.Invoke(this, fontSize);
+            //});
         }
 
         internal static MemberDef md_GetWorkChaptersAsync = new MemberDef { @return = "WrapIMapNum" };

@@ -496,12 +496,12 @@ namespace Ao3TrackReader
                 }
 
                 font_size = value;
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                DoOnMainThread(() =>
                 {
+                    helper?.OnAlterFontSize(value);
                     DecFontSizeButton.IsEnabled = FontSize > FontSizeMin;
                     IncFontSizeButton.IsEnabled = FontSize < FontSizeMax;
                 });
-                helper?.OnAlterFontSize(value);
             }
         }
 
@@ -549,9 +549,9 @@ namespace Ao3TrackReader
             return task.Result;
         }
 
-        public void DoOnMainThread(MainThreadAction function)
+        public async void DoOnMainThread(MainThreadAction function)
         {
-            DoOnMainThreadAsync(() => function()).Wait();
+            await DoOnMainThreadAsync(() => function());
         }
 
         public async Task DoOnMainThreadAsync(MainThreadAction function)
