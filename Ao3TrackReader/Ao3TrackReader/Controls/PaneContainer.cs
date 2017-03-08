@@ -39,7 +39,6 @@ namespace Ao3TrackReader.Controls
 
         public PaneContainer()
 		{
-            RecalculateVisbility();
 		}
 
         protected double PaneWidth(double width)
@@ -61,6 +60,7 @@ namespace Ao3TrackReader.Controls
                 AbsoluteLayout.SetLayoutBounds(child, new Rectangle(1, 0, paneWidth, 1));
             }
             base.OnSizeAllocated(width, height);
+            if (width > 0) RecalculateVisbility();
         }
 
         protected override void OnChildAdded(Element child)
