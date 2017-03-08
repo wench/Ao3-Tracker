@@ -32,6 +32,7 @@ namespace Ao3TrackReader.Controls
             TranslationX = old_width = 480;
             WidthRequest = old_width;
             BackgroundColor = Ao3TrackReader.Resources.Colors.Alt.Trans.High;
+            IsVisible = false;
         }
 
         public bool IsOnScreen
@@ -88,7 +89,7 @@ namespace Ao3TrackReader.Controls
         {
             if (width > 0)
             {
-                bool wasshowing = TranslationX < old_width / 2;
+                bool wasshowing = IsVisible && TranslationX < old_width / 2;
                 if (old_width != width) this.AbortAnimation("OffOnAnim");
                 old_width = width;
 

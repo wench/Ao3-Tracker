@@ -23,10 +23,13 @@ namespace Ao3TrackReader.Helper
     public interface IAo3TrackHelper
     {
         string HelperDefJson { get; }
-        HelperDef HelperDef { get; }
         void Reset();
         void OnAlterFontSize(int fontSize);
         void OnJumpToLastLocation(bool pagejump);
+
+#if __IOS__
+        HelperDef HelperDef { get; }
+#endif
 
 #if __ANDROID__
         string GetEvalJavascriptUrl(string code, System.Threading.Tasks.TaskCompletionSource<string> cs);

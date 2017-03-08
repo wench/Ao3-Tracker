@@ -69,12 +69,21 @@ namespace Ao3TrackReader.Controls
             AbsoluteLayout.SetLayoutFlags(child, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional | AbsoluteLayoutFlags.YProportional);
             base.OnChildAdded(child);
 
-            child.PropertyChanged += Child_PropertyChanged;
+            var c = child as PaneView;
+            c.PropertyChanged += Child_PropertyChanged;
+            c.IsOnScreenChanged += Child_IsOnScreenChanged;
+        }
+
+        private void Child_IsOnScreenChanged(object sender, bool e)
+        {
+            RecalculateVisbility();
         }
 
         protected override void OnChildRemoved(Element child)
         {
-            child.PropertyChanged -= Child_PropertyChanged;
+            var c = child as PaneView;
+            c.PropertyChanged -= Child_PropertyChanged;
+            c.IsOnScreenChanged -= Child_IsOnScreenChanged;
         }
 
         private void Child_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

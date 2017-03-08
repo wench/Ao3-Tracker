@@ -42,7 +42,7 @@ namespace Ao3TrackReader.Helper
     {
     }
 
-    public sealed class MemberDef
+    sealed class MemberDef
     {
         public string @return { get; set; }
         public Dictionary<int, string> args { get; set; }
@@ -56,7 +56,7 @@ namespace Ao3TrackReader.Helper
         internal PropertyInfo pi;
     }
 
-    public sealed class HelperDef : Dictionary<string, MemberDef>
+    sealed class HelperDef : Dictionary<string, MemberDef>
     {
         public void FillFromType(Type type)
         {

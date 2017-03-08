@@ -45,7 +45,8 @@ namespace Ao3TrackReader.Helper
         }
 
         static HelperDef s_def;
-        static HelperDef HelperDef
+        internal static MemberDef md_HelperDef = null;
+        internal HelperDef HelperDef
         {
             get
             {
