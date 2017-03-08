@@ -32,6 +32,10 @@ namespace Ao3TrackReader.Helper
         public Ao3TrackHelper(IWebViewPage wvp)
         {
             this.wvp = wvp;
+            if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Kitkat)
+            {
+                evals = new Dictionary<int, Tuple<string, TaskCompletionSource<string>>>();
+            }
         }
 
         static HelperDef s_def;
@@ -60,6 +64,45 @@ namespace Ao3TrackReader.Helper
             }
         }
 
+        // Old version of android is really annoying. Doesn't have WebView.EvaluateJavascript method
+        // but navigating to a javascript: url will work
+        // So using the injected object and a javascript url, we can effectively emulate the entire functionality of the missing method
+
+        int evalindex = 0;
+        Dictionary<int, Tuple<string, TaskCompletionSource<string>>> evals;
+
+        string IAo3TrackHelper.GetEvalJavascriptUrl(string code, TaskCompletionSource<string> cs)
+        {
+            if (evals == null) throw new PlatformNotSupportedException("This function is intended for Android API 18 and earlier");
+
+            var def = new Tuple<string, TaskCompletionSource<string>>(code, cs);
+            evals.Add(++evalindex, def);
+
+            if (cs != null) return string.Format("javascript:Ao3TrackHelperNative.setEvalResult({0}, eval(Ao3TrackHelperNative.getEvalCode({0})))", evalindex);
+            else return string.Format("javascript:eval(Ao3TrackHelperNative.getEvalCode({0}))", evalindex);
+        }
+
+        [DefIgnore, JavascriptInterface, Export("getEvalCode")]
+        public string GetEvalCode(int index)
+        {
+            if (evals.TryGetValue(index, out var def))
+            {
+                if (def.Item2 == null) evals.Remove(index);
+                return def.Item1;
+            }
+            return "";
+        }
+
+        [DefIgnore, JavascriptInterface, Export("setEvalResult")]
+        public void SetEvalResult(int index, string result)
+        {
+            if (evals.TryGetValue(index, out var def))
+            {
+                if (def.Item2 != null) def.Item2.TrySetResult(result);
+                evals.Remove(index);               
+            }
+        }
+
         void IAo3TrackHelper.Reset()
         {
             _onjumptolastlocationevent = 0;
@@ -78,7 +121,7 @@ namespace Ao3TrackReader.Helper
         }
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
-            Task.Run(() =>
+            wvp.DoOnMainThread(() => 
             {
                 if (_onjumptolastlocationevent != 0)
                     wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onjumptolastlocationevent, pagejump).Wait(0);
@@ -91,14 +134,14 @@ namespace Ao3TrackReader.Helper
             [JavascriptInterface, Export("set_onalterfontsizeevent"), Converter("Event")]
             set
             {
-                if (value != 0) wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize).Wait(0);
+                if (value != 0) wvp.DoOnMainThread(()=>wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize).Wait(0));
                 _onalterfontsizeevent = value;
             }
         }
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", _onalterfontsizeevent, fontSize).Wait(0);
+                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", _onalterfontsizeevent, fontSize).Wait(0));
         }
 
         [JavascriptInterface, Export("getWorkChaptersAsync")]
@@ -108,7 +151,7 @@ namespace Ao3TrackReader.Helper
             {
                 var works = JsonConvert.DeserializeObject<long[]>(works_json);
                 var workchapters = await wvp.GetWorkChaptersAsync(works);
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0);
+                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0));
             });
         }
 
@@ -214,7 +257,7 @@ namespace Ao3TrackReader.Helper
             {
                 var urls = JsonConvert.DeserializeObject<string[]>(urls_json);
                 var res = await wvp.AreUrlsInReadingListAsync(urls);
-                wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res).Wait(0);
+                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res).Wait(0));
             });
         }
 

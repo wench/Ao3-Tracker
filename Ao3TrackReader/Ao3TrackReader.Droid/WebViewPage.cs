@@ -85,6 +85,14 @@ namespace Ao3TrackReader
             WebView.Settings.BuiltInZoomControls = true;
             WebView.Settings.DisplayZoomControls = false;
             WebView.Settings.UseWideViewPort = true;
+            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
+            {
+#if DEBUG
+                WebView.SetWebContentsDebuggingEnabled(true);
+#else
+                WebView.SetWebContentsDebuggingEnabled(false);
+#endif
+            }
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
                 WebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
@@ -93,12 +101,7 @@ namespace Ao3TrackReader
             {
                 WebView.Settings.DisabledActionModeMenuItems = MenuItems.ProcessText | MenuItems.Share | MenuItems.WebSearch;
             }
-#if DEBUG
-            WebView.SetWebContentsDebuggingEnabled(true);
-#else
-            WebView.SetWebContentsDebuggingEnabled(false);
 
-#endif
             AddJavascriptObject("Ao3TrackHelperNative", helper);
 
             var placeholder = new Android.Views.View(Forms.Context);
@@ -162,8 +165,14 @@ namespace Ao3TrackReader
         public async Task<string> EvaluateJavascriptAsync(string code)
         {
             var cs = new TaskCompletionSource<string>();
-            DoOnMainThread(() => WebView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
-
+            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
+            {
+                DoOnMainThread(() => WebView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
+            }
+            else
+            {
+                WebView.LoadUrl(helper.GetEvalJavascriptUrl(code,cs));
+            }
             return await cs.Task;
         }
 
@@ -192,7 +201,11 @@ namespace Ao3TrackReader
         {
             get
             {
-                return DoOnMainThread(() => new Uri(WebView.Url));
+                return DoOnMainThread(() =>
+                {
+                    if (!string.IsNullOrWhiteSpace(WebView.Url)) return new Uri(WebView.Url);
+                    else return new Uri("about:blank");
+                });
             }
         }
 
@@ -358,7 +371,7 @@ namespace Ao3TrackReader
                 int lineNumber = consoleMessage.LineNumber();
                 string message = consoleMessage.Message();
                 var messageLevel = consoleMessage.InvokeMessageLevel();
-                var sourceId = consoleMessage.SourceId();
+                var sourceId = consoleMessage.SourceId() ?? "";
                 if (sourceId.StartsWith("https://ao3track.wenchy.net/")) sourceId = "Assets/"+sourceId.Substring(28);
                 System.Diagnostics.Debug.WriteLine(string.Format(" {0}({1}): {2}: {3}",sourceId,lineNumber,messageLevel.Name(),message));
                 return true;
