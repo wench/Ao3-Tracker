@@ -21,13 +21,16 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-    public class ToolbarItem : Xamarin.Forms.ToolbarItem
+    public class ToolbarItem : Xamarin.Forms.ToolbarItem, IHelpInfo
     {
         public static readonly BindableProperty ForegroundProperty =
           BindableProperty.Create("Foreground", typeof(Color), typeof(ToolbarItem), defaultValue: Color.Default);
 
         public static readonly BindableProperty DescriptionProperty =
           BindableProperty.Create("Description", typeof(FormattedString), typeof(ToolbarItem), defaultValue: null);
+
+        public static readonly BindableProperty IsVisibleProperty =
+          BindableProperty.Create("IsVisible", typeof(bool), typeof(ToolbarItem), defaultValue: true);
 
         public Color Foreground
         {
@@ -41,8 +44,22 @@ namespace Ao3TrackReader.Controls
             set { SetValue(DescriptionProperty, value); }
         }
 
+        public bool IsVisible
+        {
+            get { return (bool)GetValue(IsVisibleProperty); }
+            set { SetValue(IsVisibleProperty, value); }
+        }
+
+
+
 #if __ANDROID__
         internal Android.Views.IMenuItem MenuItem { get; set; }
 #endif
+
+        string IGroupable.Group => "Toolbar";
+
+        string IGroupable.GroupType => "";
+
+        bool IGroupable.ShouldHide => false;
     }
 }

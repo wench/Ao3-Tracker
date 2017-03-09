@@ -45,10 +45,7 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
-        ToolbarItem SettingsToolBarItem { get; set; }
-        ToolbarItem ReadingListToolBarItem { get; set; }
-        ToolbarItem UrlBarToolBarItem { get; set; }
-        ToolbarItem HelpPaneToolBarItem { get; set; }
+        public Dictionary<string, ToolbarItem> AllToolbarItems { get; } = new Dictionary<string, ToolbarItem>();
 
         DisableableCommand JumpButton { get; set; }
         DisableableCommand IncFontSizeButton { get; set; }
@@ -67,11 +64,13 @@ namespace Ao3TrackReader
         public WebViewPage()
         {
             TitleEx = "Loading...";
+
+            SetupToolbar();
+
             InitializeComponent();           
 
-            SetupToolbarCommands();
-            SetupToolbar();
             SetupContextMenu();
+            UpdateToolbar();
 
             WebViewHolder.Content = CreateWebView();
 
@@ -97,9 +96,38 @@ namespace Ao3TrackReader
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
             {
-                if (ReadingListToolBarItem == null) return;
-                if (urlBar.IsVisible == false) UrlBarToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-                else UrlBarToolBarItem.Foreground = Colors.Highlight.High;
+                if (AllToolbarItems.TryGetValue("Url Bar", out var tbi))
+                {
+                    if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                    else tbi.Foreground = Colors.Highlight.High;
+                }
+            }
+        }
+
+        private void ReadingList_IsOnScreenChanged(object sender, bool e)
+        {
+            if (AllToolbarItems.TryGetValue("Reading List", out var tbi))
+            {
+                if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                else tbi.Foreground = Colors.Highlight.High;
+            }
+        }
+
+        private void SettingsPane_IsOnScreenChanged(object sender, bool e)
+        {
+            if (AllToolbarItems.TryGetValue("Settings", out var tbi))
+            {
+                if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                else tbi.Foreground = Colors.Highlight.High;
+            }
+        }
+
+        private void HelpPane_IsOnScreenChanged(object sender, bool e)
+        {
+            if (AllToolbarItems.TryGetValue("Help", out var tbi))
+            {
+                if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                else tbi.Foreground = Colors.Highlight.High;
             }
         }
 
@@ -112,84 +140,62 @@ namespace Ao3TrackReader
             if (pane != null) pane.IsOnScreen = !pane.IsOnScreen;
         }
 
-        private void ReadingList_IsOnScreenChanged(object sender, bool e)
+        void AddToolBarItem(ToolbarItem tbi)
         {
-            if (ReadingListToolBarItem == null) return;
-            if (e == false) ReadingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else ReadingListToolBarItem.Foreground = Colors.Highlight.High;
+            AllToolbarItems.Add(tbi.Text, tbi);
         }
 
-        private void SettingsPane_IsOnScreenChanged(object sender, bool e)
-        {
-            if (SettingsToolBarItem == null) return;
-            if (e == false) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else SettingsToolBarItem.Foreground = Colors.Highlight.High;
-        }
-
-        private void HelpPane_IsOnScreenChanged(object sender, bool e)
-        {
-            if (HelpPaneToolBarItem == null) return;
-            if (e == false) HelpPaneToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else HelpPaneToolBarItem.Foreground = Colors.Highlight.High;
-        }
-
-        void SetupToolbarCommands()
+        void SetupToolbar()
         {
             PrevPageButton = new DisableableCommand(SwipeGoBack, false);
             NextPageButton = new DisableableCommand(SwipeGoForward, false);
             JumpButton = new DisableableCommand(OnJumpClicked, false);
             IncFontSizeButton = new DisableableCommand(() => FontSize += 10);
             DecFontSizeButton = new DisableableCommand(() => FontSize -= 10);
+            ForceSetLocationButton = new DisableableCommand(ForceSetLocation);
+
             SyncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
             App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => SyncButton.IsEnabled = false);
             App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => SyncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
             SyncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
-            ForceSetLocationButton = new DisableableCommand(ForceSetLocation);
-        }
 
-        void SetupToolbar()
-        {
-            ToolbarItems.Clear();
-
-            if (ShowBackOnToolbar)
+            AddToolBarItem(new ToolbarItem
             {
-                ToolbarItems.Add(new ToolbarItem
-                {
-                    Text = "Back",
-                    Icon = Icons.Back,
-                    Command = PrevPageButton
-                });
-            }
+                Text = "Back",
+                Icon = Icons.Back,
+                Command = PrevPageButton
+            });
+            UpdateBackButton();
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Forward",
                 Icon = Icons.Forward,
                 Command = NextPageButton
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Refresh",
                 Icon = Icons.Refresh,
                 Command = new Command(Refresh)
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Jump",
                 Icon = Icons.Redo,
                 Command = JumpButton
             });
 
-            ToolbarItems.Add(ReadingListToolBarItem = new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Reading List",
                 Icon = Icons.Bookmarks,
-                Command = new Command(() =>  TogglePane(ReadingList))
+                Command = new Command(() => TogglePane(ReadingList))
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Add to Reading List",
                 Icon = Icons.AddPage,
@@ -199,35 +205,35 @@ namespace Ao3TrackReader
                 })
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Font Increase",
                 Icon = Icons.FontUp,
                 Command = IncFontSizeButton
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Font Decrease",
                 Icon = Icons.FontDown,
                 Command = DecFontSizeButton
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Sync",
                 Icon = Icons.Sync,
                 Command = SyncButton
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Force set location",
                 Icon = Icons.ForceLoc,
                 Command = ForceSetLocationButton
             });
 
-            ToolbarItems.Add(UrlBarToolBarItem = new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Url Bar",
                 Icon = Icons.Rename,
@@ -247,27 +253,79 @@ namespace Ao3TrackReader
                 })
             });
 
-            ToolbarItems.Add(new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Reset Font Size",
                 Icon = Icons.Font,
                 Command = new Command(() => FontSize = 100)
             });
-            ToolbarItems.Add(SettingsToolBarItem = new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Settings",
                 Icon = Icons.Settings,
                 Order = ToolbarItemOrder.Secondary,
                 Command = new Command(() => TogglePane(SettingsPane))
             });
-            ToolbarItems.Add(HelpPaneToolBarItem = new ToolbarItem
+            AddToolBarItem(new ToolbarItem
             {
                 Text = "Help",
                 //Icon = Icons.Settings,
                 Order = ToolbarItemOrder.Secondary,
                 Command = new Command(() => TogglePane(HelpPane))
             });
-            
+
+            foreach (var tbi in AllToolbarItems)
+            {
+                tbi.Value.PropertyChanged += Value_PropertyChanged;
+            }
+        }
+
+        public void UpdateBackButton()
+        {
+            var mode = App.GetInteractionMode();
+
+            bool? show = null;
+            if (mode == InteractionMode.Phone || mode == InteractionMode.Tablet)
+            {
+                App.Database.TryGetVariable("ShowBackButton", bool.TryParse, out show);
+            }
+
+            bool def;
+            if (mode == InteractionMode.Phone) def = false;
+            else if (mode == InteractionMode.Tablet) def = true;
+            else def = true;
+
+            AllToolbarItems["Back"].IsVisible = show ?? def;
+        }
+
+        private void Value_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName=="IsVisible")
+            {
+                UpdateToolbar();
+            }
+        }
+
+        void UpdateToolbar()
+        {
+            int i = 0;
+            foreach (var tbi in AllToolbarItems)
+            {
+                var c = i < ToolbarItems.Count ? ToolbarItems[i] : null;
+
+                if (tbi.Value.IsVisible)
+                {
+                    if (tbi.Value != c)
+                    {
+                        ToolbarItems.Insert(i, tbi.Value);
+                    }
+                    i++;
+                }
+                else if (tbi.Value == c)
+                {
+                    ToolbarItems.RemoveAt(i);
+                }
+            }
         }
 
         void SetupContextMenu()
@@ -295,32 +353,7 @@ namespace Ao3TrackReader
         protected override void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-            {
-                if (ToolbarItems.Count == 0)
-                {
-                    SetupToolbar();
-                }
-#if !WINDOWS_UWP && false
-                else 
-                {
-                    int onscreen = Math.Max(6,((int)width - 60) / 48);
-                    var items = ToolbarItems;
-
-                    for (var i = 0; i < onscreen && i < ToolbarItems.Count; i++)
-                    {
-                        items[i].Order = ToolbarItemOrder.Primary;
-                    }
-                    for (var i = onscreen; i < ToolbarItems.Count; i++)
-                    {
-                        items[i].Order = ToolbarItemOrder.Secondary;
-                    }
-                    var item = items[items.Count - 1];
-                    items.RemoveAt(items.Count - 1);
-                    items.Add(item);
-                }
-#endif
-            });
+            UpdateBackButton();
         }
 
         public virtual void OnSleep()

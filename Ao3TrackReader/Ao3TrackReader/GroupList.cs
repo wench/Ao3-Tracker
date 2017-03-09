@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace Ao3TrackReader
 {
-    public interface IGroupable<in T> : IComparable<T>
+    public interface IGroupable
     {
         string Group { get; }
         string GroupType { get; }
@@ -32,7 +32,7 @@ namespace Ao3TrackReader
     }
 
     public class GroupSubList<T> : ObservableCollection<T>, INotifyPropertyChanged, INotifyPropertyChanging
-        where T : IGroupable<T>
+        where T : IGroupable
     {
         public GroupSubList(string group)
         {
@@ -61,6 +61,13 @@ namespace Ao3TrackReader
 
         public void AddSorted(T item)
         {
+            var comparable = item as IComparable<T>;
+            if (comparable == null)
+            {
+                Add(item);
+                return;
+            }
+
             int i = 0;
             for (; i < Count; i++)
             {
@@ -68,7 +75,7 @@ namespace Ao3TrackReader
                 {
                     throw new ArgumentException("Attempting to add item already in group", "iten");
                 }
-                else if (item.CompareTo(this[i]) < 0)
+                else if (comparable.CompareTo(this[i]) < 0)
                 {
                     break;
                 }
@@ -79,6 +86,12 @@ namespace Ao3TrackReader
 
         public void ResortItem(T item)
         {
+            var comparable = item as IComparable<T>;
+            if (comparable == null)
+            {
+                return;
+            }
+
             int oldindex = -1;
             int newindex = -1;
             for (int i = 0; i < Count && (newindex == -1 || oldindex == -1); i++)
@@ -87,7 +100,7 @@ namespace Ao3TrackReader
                 {
                     oldindex = i;
                 }
-                else if (newindex == -1 && item.CompareTo(this[i]) < 0)
+                else if (newindex == -1 && comparable.CompareTo(this[i]) < 0)
                 {
                     newindex = i;
                 }
@@ -119,7 +132,7 @@ namespace Ao3TrackReader
     }
 
     public class GroupList<T> : ObservableCollection<GroupSubList<T>>
-        where T : IGroupable<T>, INotifyPropertyChanged
+        where T : IGroupable, INotifyPropertyChanged
     {
         GroupSubList<T> hidden = new GroupSubList<T>("<Hidden>");
         Dictionary<T, GroupSubList<T>> allItems = new Dictionary<T, GroupSubList<T>>();

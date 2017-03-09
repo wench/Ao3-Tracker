@@ -28,6 +28,14 @@ using Button = Ao3TrackReader.Controls.Button;
 
 namespace Ao3TrackReader
 {
+    public enum InteractionMode
+    {
+        Unknown = -1,
+        Phone = 0,
+        Tablet = 1,
+        PC = 2
+    }
+
     public partial class App : Application
     {
         public static Ao3TrackDatabase Database
@@ -78,6 +86,56 @@ namespace Ao3TrackReader
 
                 default:
                     throw new NotSupportedException("'" + Device.RuntimePlatform + "' is not a supported platform. Update Ao3TrackReader.App.PlatformIcon()");
+            }
+        }
+
+
+        public static InteractionMode GetInteractionMode()
+        {
+#if WINDOWS_UWP
+            if (Windows.Foundation.Metadata.ApiInformation.IsEventPresent("Windows.Phone.UI.Input.HardwareButtons", "BackPressed"))
+            {
+                if (typeof(Windows.Phone.UI.Input.HardwareButtons) == null)
+                {
+                    var eh = new EventHandler<Windows.Phone.UI.Input.BackPressedEventArgs>((sender, e) => { });
+                    Windows.Phone.UI.Input.HardwareButtons.BackPressed += eh;
+                    Windows.Phone.UI.Input.HardwareButtons.BackPressed -= eh;
+                }
+                return InteractionMode.Phone;
+            }
+            if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.ViewManagement.UIViewSettings", "UserInteractionMode"))
+            {
+                var s = Windows.UI.ViewManagement.UIViewSettings.GetForCurrentView();
+
+                if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Touch)
+                    return InteractionMode.Tablet;
+                else if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Mouse)
+                    return InteractionMode.PC;
+            }
+#elif __ANDROID__
+            // Good enough for android for now
+            switch (Xamarin.Forms.Device.Idiom)
+            {
+                case TargetIdiom.Phone:
+                    return InteractionMode.Phone;
+
+                case TargetIdiom.Tablet:
+                    return InteractionMode.Tablet;
+
+                case TargetIdiom.Desktop:
+                    return InteractionMode.PC;
+            }
+#endif
+
+            return InteractionMode.Unknown;
+        }
+
+        public static bool HaveOSBackButton
+        {
+            get
+            {
+                var mode = GetInteractionMode();
+                return mode == InteractionMode.Phone || mode == InteractionMode.Tablet;
             }
         }
 

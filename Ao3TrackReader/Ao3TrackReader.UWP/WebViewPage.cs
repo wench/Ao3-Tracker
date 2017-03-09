@@ -92,27 +92,6 @@ namespace Ao3TrackReader
             return webView.ToView();
         }
 
-        public bool ShowBackOnToolbar
-        {
-            get
-            {
-                try {
-                    if (Windows.Foundation.Metadata.ApiInformation.IsEventPresent("Windows.Phone.UI.Input.HardwareButtons", "BackPressed"))
-                    {
-                        var eh = new EventHandler<Windows.Phone.UI.Input.BackPressedEventArgs>((sender, e) => { });
-                        Windows.Phone.UI.Input.HardwareButtons.BackPressed += eh;
-                        Windows.Phone.UI.Input.HardwareButtons.BackPressed -= eh;
-                        return false;
-                    }
-                }
-                catch (Exception)
-                {
-
-                }
-                return true;
-            }
-        }
-
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
         {
             OnWebViewGotFocus();

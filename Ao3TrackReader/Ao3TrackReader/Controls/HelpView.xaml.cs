@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,23 +9,37 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-	public partial class HelpView : PaneView
+    public interface IHelpInfo: IGroupable, INotifyPropertyChanged
+    {
+        string Text { get; }
+        FormattedString Description { get; }
+        FileImageSource Icon { get; }
+    }
+    
+    public partial class HelpView : PaneView
 	{
-		public HelpView ()
+        GroupList<IHelpInfo> helpBacking;
+
+        public HelpView ()
 		{
 			InitializeComponent ();
-		}
+
+            helpBacking = new GroupList<IHelpInfo>();
+        }
 
         protected override void OnWebViewPageSet()
         {
             base.OnWebViewPageSet();
 
-            ToolBarListView.ItemsSource = wvp.ToolbarItems;
+            foreach (var item in wvp.AllToolbarItems)
+                helpBacking.Add(item.Value);
+
+            ListView.ItemsSource = helpBacking;
         }
 
-        private void ToolBarListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
-            if (e.SelectedItem != null) ToolBarListView.SelectedItem = null;
+            if (e.SelectedItem != null) ListView.SelectedItem = null;
         }
     }
 }

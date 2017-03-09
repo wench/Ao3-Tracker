@@ -63,7 +63,7 @@ namespace Ao3TrackReader
         {
             public WKWebView(WKWebViewConfiguration configuration) : base(new CoreGraphics.CGRect(0, 0, 360, 512), configuration)
             {
-               
+
             }
             public event EventHandler<bool> FocuseChanged;
 
@@ -86,9 +86,8 @@ namespace Ao3TrackReader
         WKWebView webView { get; set; }
         WKUserContentController userContentController;
 
-        public bool ShowBackOnToolbar { get {
-                return true;
-            } }
+        public static bool HaveOSBackButton { get; } = false;
+
 
         public Xamarin.Forms.View CreateWebView()
         {

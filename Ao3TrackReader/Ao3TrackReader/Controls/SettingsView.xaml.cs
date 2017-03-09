@@ -22,6 +22,8 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Ao3TrackReader.Resources;
+using Ao3TrackReader.Models;
+using Span = Xamarin.Forms.Span;
 
 namespace Ao3TrackReader.Controls
 {
@@ -29,19 +31,28 @@ namespace Ao3TrackReader.Controls
     {
         bool isCreateUser;
 
-        Dictionary<string, string> themes;
+        List<KeyedItem<string>> themes;
+        KeyedItem<string> defaultTheme;
+        private List<KeyedItem<bool?>> backButtonMode;
 
-        public SettingsView () 
+        public SettingsView()
         {
             InitializeComponent();
 
             isCreateUser = false;
 
-            themes = new Dictionary<string, string> {
-                { "light", "Light" },
-                { "dark", "Dark" }
+            themes = new List<KeyedItem<string>> {
+                (defaultTheme = new KeyedItem<string> ("light", "Light" )),
+                new KeyedItem<string> ( "dark", "Dark" )
             };
-            themeList.ItemsSource = themes.Values;
+            themeDropDown.ItemsSource = themes;
+
+            backButtonMode = new List<KeyedItem<bool?>> {
+                new KeyedItem<bool?>(null,"Auto"),
+                new KeyedItem<bool?>(true,"Shown Always"),
+                new KeyedItem<bool?>(false,"Never Shown")
+            };
+            backButtonModeDropDown.ItemsSource = backButtonMode;
         }
 
         protected override void OnIsOnScreenChanging(bool newValue)
@@ -50,6 +61,7 @@ namespace Ao3TrackReader.Controls
             {
                 UpdateSyncForm();
                 SelectCurrentTheme();
+                SelectBackButtonMode();
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
             }
         }
@@ -171,32 +183,65 @@ namespace Ao3TrackReader.Controls
         void SelectCurrentTheme()
         {
             string theme = Ao3TrackReader.App.Database.GetVariable("Theme");
-            if (string.IsNullOrWhiteSpace(theme)) theme = "light";
-            string name;
-            if (!themes.TryGetValue(theme, out name))
+            KeyedItem<string> item = defaultTheme;
+            foreach (var i in themes)
             {
-                var pair = themes.First();
-                theme = pair.Key;
-                name = pair.Value;
+                if (i.Key == theme)
+                {
+                    item = i;
+                    break;
+                }
             }
-            App.Database.SaveVariable("Theme",theme);
-            themeList.SelectedItem = name;
+            App.Database.SaveVariable("Theme",item.Key);
+            themeDropDown.SelectedItem = item;
         }
 
         void OnThemeSelected(object sender, SelectedItemChangedEventArgs e)
         {
-            if (e.SelectedItem == null)
+            var item = e.SelectedItem as KeyedItem<string>;
+            if (item == null)
             {
                 SelectCurrentTheme();
                 return;
             }
-            string name = (string)e.SelectedItem;
-            string theme = themes.Where((pair) => pair.Value == name).Select((pair) => pair.Key).FirstOrDefault();
-            if (theme != null)
+            App.Database.SaveVariable("Theme", item.Key);
+        }
+
+        void SelectBackButtonMode()
+        {
+            if (!App.HaveOSBackButton)
             {
-                App.Database.SaveVariable("Theme", theme);
+                backButtonForm.IsVisible = false;
+                return;
+            }
+            backButtonForm.IsVisible = true;
+
+            bool? show = null;
+            App.Database.TryGetVariable("ShowBackButton", bool.TryParse, out show);
+
+            KeyedItem<bool?> item = backButtonMode[0];
+            foreach (var i in backButtonMode)
+            {
+                if (i.Key == show)
+                {
+                    item = i;
+                    break;
+                }
+            }
+            App.Database.SaveVariable("ShowBackButton", item.Key);
+            backButtonModeDropDown.SelectedItem = item;
+        }
+
+        void OnBackButtonModeSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            var item = e.SelectedItem as KeyedItem<bool?>;
+            if (item != null)
+            {
+                App.Database.SaveVariable("ShowBackButton", item.Key);
+                wvp.UpdateBackButton();
             }
         }
+
 
         private void UpdateSyncForm()
         {

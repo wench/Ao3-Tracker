@@ -35,7 +35,7 @@ namespace Ao3TrackReader.Models
     // <ICON>  
 
 
-    public class Ao3PageViewModel : IGroupable<Ao3PageViewModel>, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+    public class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
     {
         public Ao3PageViewModel(Ao3PageModel baseData, int? unread)
         {

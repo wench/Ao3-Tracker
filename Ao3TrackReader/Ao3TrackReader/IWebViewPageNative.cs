@@ -26,8 +26,6 @@ namespace Ao3TrackReader
     {
         bool IsMainThread { get; }
 
-        bool ShowBackOnToolbar { get; }
-
         Xamarin.Forms.View CreateWebView();
         Uri CurrentUri { get; }
         void Navigate(Uri uri);

@@ -73,25 +73,30 @@ limitations under the License.
                         </StackLayout>
                     </StackLayout>
 
-                    <Label Text="Secure Browsing" FontSize="Medium" Margin="0,12,0,0"/>
-                    <StackLayout Orientation="Horizontal">
-                        <Label Text="Using HTTPS for secure browing" FontSize="Micro" HorizontalOptions="StartAndExpand" />
-                        <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
+                    <StackLayout Spacing="8" x:Name="secureBrowsingForm">
+                        <Label Text="Secure Browsing" FontSize="Medium" Margin="0,12,0,0"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Using HTTPS for secure browsing on Ao3" FontSize="Micro" HorizontalOptions="StartAndExpand" />
+                            <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
                     </StackLayout>
 
-                    <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
-                    <Label Text="You must restart the app to apply a new theme" FontSize="Micro" />
-                    <ListView x:Name="themeList" ItemSelected="OnThemeSelected" WidthRequest="100" HorizontalOptions="Start">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <ViewCell>
-                                    <AbsoluteLayout Margin="4,4,4,4" Padding="4" BackgroundColor="{StaticResource BaseTransVeryLowColor}">
-                                        <Label Text="{Binding .}" TextColor="{StaticResource BaseMediumColor}" FontSize="Micro" HorizontalTextAlignment="Center" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" />
-                                    </AbsoluteLayout>
-                                </ViewCell>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <StackLayout Spacing="8" x:Name="backButtonForm">
+                        <Label Text="Toolbar Settings" FontSize="Medium" Margin="0,12,0,0"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Show Back Button on Toolbar" FontSize="Micro" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="backButtonModeDropDown" ItemSelected="OnBackButtonModeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
+                    </StackLayout>
+
+                    <StackLayout Spacing="8" x:Name="themeForm">
+                        <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Select the Application Theme" FontSize="Micro" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="themeDropDown" ItemSelected="OnThemeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
+                        <Label Text="You must restart the app to apply a new theme" FontSize="11" />
+                    </StackLayout>
                 </StackLayout>
             </ScrollView>
         </StackLayout>

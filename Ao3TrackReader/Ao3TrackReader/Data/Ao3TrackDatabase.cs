@@ -189,7 +189,7 @@ namespace Ao3TrackReader
                 {
                     if (row.value != null) 
                     {
-                        if (!tryparse(row.value, out T res))
+                        if (tryparse(row.value, out T res))
                         {
                             result = res;
                             return true;
