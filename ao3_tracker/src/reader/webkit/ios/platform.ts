@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 interface MessageHandler
 {
     postMessage: (message: string) => void;
@@ -54,8 +53,6 @@ namespace Ao3Track {
         // leftOffset is a little more complicated. Don't really want to call into js everytime it updates, but it's one possibility. Alternitavely 
         // change it from a property to methods, with the get being async 
 
-        // IOS doesn't doesn't a global containing the helper interface, instead it just sets a global containing the HelperDef
-
         export interface SetMessage
         {
             type: "SET";
@@ -75,6 +72,7 @@ namespace Ao3Track {
 
         export type Message = SetMessage | CallMessage | InitMessage;
 
+        // IOS doesn't have a global containing the helper interface, instead it just sets a global containing the HelperDef
         export let helperDef : Marshal.IHelperDef = Ao3TrackHelperNative;
 
         function serialize(val: any) {
