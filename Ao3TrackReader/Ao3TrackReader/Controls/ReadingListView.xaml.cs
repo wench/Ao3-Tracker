@@ -298,7 +298,7 @@ namespace Ao3TrackReader.Controls
                     if (chapters_finished < workmodel.Details.Chapters.Available) break;
                 }
 
-                if (workid != 0) wvp.NavigateToLast(workid,true);
+                if (workid != 0) wvp.NavigateToLast(workid,false);
                 else wvp.Navigate(item.Uri);
             }
             else
