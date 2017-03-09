@@ -109,7 +109,7 @@ namespace Ao3TrackReader
             {
                 if (c != pane) c.IsOnScreen = false;
             }
-            pane.IsOnScreen = !pane.IsOnScreen;
+            if (pane != null) pane.IsOnScreen = !pane.IsOnScreen;
         }
 
         private void ReadingList_IsOnScreenChanged(object sender, bool e)
@@ -717,17 +717,15 @@ namespace Ao3TrackReader
 
         protected override bool OnBackButtonPressed()
         {
-            if (SettingsPane.IsOnScreen)
+            foreach (var p in Panes.Children)
             {
-                SettingsPane.IsOnScreen = false;
-                return true;
+                if (p.IsOnScreen)
+                {
+                    p.IsOnScreen = false;
+                    return true;
+                }
             }
-            else if (ReadingList.IsOnScreen)
-            {
-                ReadingList.IsOnScreen = false;
-                return true;
-            }
-            else if (SwipeCanGoBack)
+            if (SwipeCanGoBack)
             {
                 SwipeGoBack();
                 return true;
@@ -926,8 +924,7 @@ namespace Ao3TrackReader
 
         private void OnWebViewGotFocus()
         {
-            ReadingList.IsOnScreen = false;
-            SettingsPane.IsOnScreen = false;
+            TogglePane(null);
         }
 
         private bool OnNavigationStarting(Uri uri)

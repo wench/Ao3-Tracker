@@ -39,7 +39,8 @@ namespace Ao3TrackReader.Controls
 
         public PaneContainer()
 		{
-		}
+            InputTransparent = true;
+        }
 
         protected double PaneWidth(double width)
         {
@@ -99,7 +100,7 @@ namespace Ao3TrackReader.Controls
             bool visible = false;
             foreach (var child in Children) visible |= child.IsVisible;
 
-            IsVisible = visible;
+            InputTransparent = !visible;
         }
     }
 }

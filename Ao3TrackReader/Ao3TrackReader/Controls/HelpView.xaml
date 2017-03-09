@@ -6,7 +6,16 @@
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Help" FontSize="Medium" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
-            </StackLayout>            
+            </StackLayout>
+
+            <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" SeparatorVisibility="None"  Margin="4,0,0,0" x:Name="ToolBarListView" ItemSelected="ToolBarListView_ItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ImageCell Text="{Binding Text}" Detail="{Binding Description}" ImageSource="{Binding Icon}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
         </StackLayout>
     </local:PaneView.Content>
 </local:PaneView>

@@ -14,5 +14,17 @@ namespace Ao3TrackReader.Controls
 		{
 			InitializeComponent ();
 		}
-	}
+
+        protected override void OnWebViewPageSet()
+        {
+            base.OnWebViewPageSet();
+
+            ToolBarListView.ItemsSource = wvp.ToolbarItems;
+        }
+
+        private void ToolBarListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem != null) ToolBarListView.SelectedItem = null;
+        }
+    }
 }

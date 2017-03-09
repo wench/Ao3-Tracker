@@ -19,7 +19,7 @@ limitations under the License.
     <ContentPage.Content>
         <StackLayout x:Name="MainLayout" Spacing="0">
             <local:TextView TextTree="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
-                            FontSize="14" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
+                            FontSize="13" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
                             HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
                 <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
