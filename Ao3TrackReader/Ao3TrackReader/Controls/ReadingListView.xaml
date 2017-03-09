@@ -28,7 +28,13 @@ limitations under the License.
                 </ContentView>
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End" />
             </StackLayout>
+
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" x:Name="ListView">
+                <ListView.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding Group}" Detail="{Binding GroupType}" TextColor="{StaticResource HighlightColor}" DetailColor="{StaticResource BaseMediumColor}"/>
+                    </DataTemplate>
+                </ListView.GroupHeaderTemplate>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
@@ -64,17 +70,27 @@ limitations under the License.
                                             <ColumnDefinition Width="25" />
                                             <ColumnDefinition Width="25" />
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" />
                                         <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" />
                                         <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" />
                                         <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" />
-                                        <StackLayout Spacing="3" Margin="0" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" IsClippedToBounds="True">
-                                            <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
-                                            <local:TextView TextTree="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0"/>
-                                        </StackLayout>
-                                        <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="11" Margin="0" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" />
+                                        <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0" Grid.Column="2" Grid.RowSpan="2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="70" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackLayout Spacing="3">
+                                                <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" MinimumHeightRequest="17" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
+                                                <local:TextView TextTree="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" MinimumHeightRequest="15" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalTextAlignment="Start" />
+                                            </StackLayout>
+                                            
+                                            <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="11" HorizontalTextAlignment="End" Margin="0" Grid.Row="0" Grid.Column="1" />
+                                        </Grid>
                                     </Grid>
                                     <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="10" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
                                     <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
@@ -85,11 +101,6 @@ limitations under the License.
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-                <ListView.GroupHeaderTemplate>
-                    <DataTemplate>
-                        <TextCell Text="{Binding Group}" Detail="{Binding GroupType}" TextColor="{StaticResource HighlightColor}" DetailColor="{StaticResource BaseMediumColor}"/>
-                    </DataTemplate>
-                </ListView.GroupHeaderTemplate>
             </ListView>
         </StackLayout>
     </local:PaneView.Content>
