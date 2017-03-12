@@ -58,6 +58,17 @@ namespace Ao3TrackReader
             get { return (App) Xamarin.Forms.Application.Current; }
         }
 
+        public static void Log(Exception e)
+        {
+            // Anything we do here must be wrapped, cause the app might be in an impossible state
+            try
+            {
+            }
+            catch
+            {
+            }
+        }
+
         static App()
         {
             Database = new Ao3TrackDatabase();

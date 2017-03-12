@@ -47,12 +47,13 @@ namespace Ao3TrackReader.UWP
             this.InitializeComponent();
             this.Suspending += OnSuspending;
 
-#if DEBUG
             UnhandledException += (sender, e) =>
             {
+                Ao3TrackReader.App.Log(e.Exception);
+#if DEBUG
                 e.Handled = true;
-            };
 #endif
+            };
 
             switch (Ao3TrackReader.App.Theme) {
                 case "light":

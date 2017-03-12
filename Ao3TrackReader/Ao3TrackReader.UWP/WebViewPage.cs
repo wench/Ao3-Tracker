@@ -133,19 +133,22 @@ namespace Ao3TrackReader
             webView.AddWebAllowedObject(name, obj);
         }
 
-        Task OnInjectingScripts()
+        Task OnInjectingScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }
 
-        Task OnInjectedScripts()
+        Task OnInjectedScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }
 
-        async Task<string> ReadFile(string name)
+        async Task<string> ReadFile(string name, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
             var file = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Content/" + name));
+
+            ct.ThrowIfCancellationRequested();
             return await Windows.Storage.FileIO.ReadTextAsync(file);
         }
 

@@ -133,8 +133,9 @@ namespace Ao3TrackReader.Data
                     {
                         continue;
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        App.Log(e);
                         break;
                     }
                     finally

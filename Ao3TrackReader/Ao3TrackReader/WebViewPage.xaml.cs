@@ -972,6 +972,7 @@ namespace Ao3TrackReader
             TogglePane(null);
         }
 
+        private CancellationTokenSource cancelInject;
         private bool OnNavigationStarting(Uri uri)
         {
             var check = Ao3SiteDataLookup.CheckUri(uri);
@@ -992,6 +993,16 @@ namespace Ao3TrackReader
                 return false;
             }
 
+            try
+            {
+                cancelInject?.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+
+            }
+
+            cancelInject = new CancellationTokenSource();
             TitleEx = "Loading...";
 
             JumpButton.IsEnabled = false;
@@ -1036,30 +1047,59 @@ namespace Ao3TrackReader
             ForceSetLocationButton.IsEnabled = false;
             helper?.Reset();
 
-            InjectScripts();
+            InjectScripts(cancelInject);
         }
 
-        async void InjectScripts()
+        async void InjectScripts(CancellationTokenSource cts)
         {
             try
             {
-                await OnInjectingScripts();
+                var ct = cts.Token;
+                ct.ThrowIfCancellationRequested();
+                await OnInjectingScripts(ct);
 
                 foreach (string s in ScriptsToInject)
                 {
-                    var content = await ReadFile(s);
+                    ct.ThrowIfCancellationRequested();
+                    var content = await ReadFile(s, ct);
+
+                    ct.ThrowIfCancellationRequested();
                     await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
                 }
+
                 foreach (string s in CssToInject)
                 {
-                    var content = await ReadFile(s);
+                    ct.ThrowIfCancellationRequested();
+                    var content = await ReadFile(s, ct);
+
+                    ct.ThrowIfCancellationRequested();
                     await CallJavascriptAsync("Ao3Track.InjectCSS", content);
                 }
-                await OnInjectedScripts();
+
+                ct.ThrowIfCancellationRequested();
+                await OnInjectedScripts(ct);
             }
-            catch(Exception)
+            catch (AggregateException ae)
+            {
+                foreach (Exception e in ae.InnerExceptions)
+                {
+                    if (!(e is OperationCanceledException))
+                    {
+                        App.Log(e);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
             {
 
+            }
+            catch (Exception e)
+            {
+                App.Log(e);
+            }
+            finally
+            {
+                cts.Dispose();
             }
         }
 
