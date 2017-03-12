@@ -105,29 +105,29 @@ namespace Ao3TrackReader
             }
         }
 
-        private void ReadingList_IsOnScreenChanged(object sender, bool e)
+        private void ReadingList_IsOnScreenChanged(object sender, bool onscreen)
         {
             if (AllToolbarItems.TryGetValue("Reading List", out var tbi))
             {
-                if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                if (!onscreen) tbi.Foreground = Xamarin.Forms.Color.Default;
                 else tbi.Foreground = Colors.Highlight.High;
             }
         }
 
-        private void SettingsPane_IsOnScreenChanged(object sender, bool e)
+        private void SettingsPane_IsOnScreenChanged(object sender, bool onscreen)
         {
             if (AllToolbarItems.TryGetValue("Settings", out var tbi))
             {
-                if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                if (!onscreen) tbi.Foreground = Xamarin.Forms.Color.Default;
                 else tbi.Foreground = Colors.Highlight.High;
             }
         }
 
-        private void HelpPane_IsOnScreenChanged(object sender, bool e)
+        private void HelpPane_IsOnScreenChanged(object sender, bool onscreen)
         {
             if (AllToolbarItems.TryGetValue("Help", out var tbi))
             {
-                if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
+                if (!onscreen) tbi.Foreground = Xamarin.Forms.Color.Default;
                 else tbi.Foreground = Colors.Highlight.High;
             }
         }
