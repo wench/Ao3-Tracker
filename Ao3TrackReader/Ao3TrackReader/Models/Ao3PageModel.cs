@@ -135,6 +135,9 @@ namespace Ao3TrackReader.Models
 
         public string SearchQuery { get; set; }
 
+        public string SortColumn { get; set; }
+        public string SortDirection { get; set; }
+
         public IReadOnlyCollection<Ao3PageModel> SeriesWorks { get; set; }
     }
 }

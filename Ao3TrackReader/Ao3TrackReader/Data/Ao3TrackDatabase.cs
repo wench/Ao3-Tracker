@@ -64,6 +64,7 @@ namespace Ao3TrackReader
             database.CreateTable<TagCache>();
             database.CreateTable<LanguageCache>();
             database.CreateTable<ReadingList>();
+            database.CreateTable<SortColumn>();
 
             database.Query<Work>("UPDATE Work SET seq=0 WHERE seq IS NULL");
         }
@@ -325,32 +326,59 @@ namespace Ao3TrackReader
 			}
 		}
 
-		public string GetLanguage(int id)
-		{
-			lock (locker)
-			{
-				var row = database.Table<LanguageCache>().FirstOrDefault(x => x.id == id);
-				return row?.name;
-			}
-		}
+        public string GetLanguage(int id)
+        {
+            lock (locker)
+            {
+                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.id == id);
+                return row?.name;
+            }
+        }
 
-		public void SetLanguage(string name, int id)
-		{
-			lock (locker)
-			{
-				var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
-				if (row != null)
-				{
-					row.id = id;
-					database.Update(row);
-				}
-				else
-				{
-					database.Insert(new LanguageCache { name = name, id = id });
-				}
-			}
+        public void SetLanguage(string name, int id)
+        {
+            lock (locker)
+            {
+                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    row.id = id;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new LanguageCache { name = name, id = id });
+                }
+            }
 
-		}
+        }
+
+        public string GetSortColumn(string id)
+        {
+            lock (locker)
+            {
+                var row = database.Table<SortColumn>().FirstOrDefault(x => x.id == id);
+                return row?.name;
+            }
+        }
+
+        public void SetSortColumn(string name, string id)
+        {
+            lock (locker)
+            {
+                var row = database.Table<SortColumn>().FirstOrDefault(x => x.name == name);
+                if (row != null)
+                {
+                    row.id = id;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new SortColumn { name = name, id = id });
+                }
+            }
+
+        }
 
         public IEnumerable<ReadingList> GetReadingListItems()
         {

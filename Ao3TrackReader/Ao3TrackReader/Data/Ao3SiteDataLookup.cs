@@ -160,8 +160,8 @@ namespace Ao3TrackReader.Data
 
             public WorkWorker()
             {
-                start = new SemaphoreSlim(0,1);
-                finished = new SemaphoreSlim(0,10);
+                start = new SemaphoreSlim(0, 1);
+                finished = new SemaphoreSlim(0, 10);
                 works = new List<long>();
             }
 
@@ -218,7 +218,7 @@ namespace Ao3TrackReader.Data
 
                 return doc;
             }
-           
+
             public static async Task<HtmlNode> LookupSummaryAsync(long workid)
             {
                 WorkWorker worker = null;
@@ -484,6 +484,38 @@ namespace Ao3TrackReader.Data
                 return name;
             }
 
+            name = await FetchSearchLanguagesSortColumns(langid: langid);
+
+            return name;
+        }
+        static public string LookupSortColumnQuick(string sortcolumn)
+        {
+            string name = App.Database.GetSortColumn(sortcolumn);
+            if (!string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+
+            return null;
+        }
+
+        static public async Task<string> LookupSortColumnAsync(string sortcolumn)
+        {
+            string name = App.Database.GetSortColumn(sortcolumn);
+            if (!string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+
+            name = await FetchSearchLanguagesSortColumns(sortcolumn: sortcolumn);
+
+            return name;
+        }
+
+        static async Task<string> FetchSearchLanguagesSortColumns(int? langid = null, string sortcolumn = null)
+        {
+            string name = null;
+
             var uri = new Uri(Scheme + @"://archiveofourown.org/works/search");
 
             var response = await HttpRequestAsync(uri);
@@ -492,8 +524,8 @@ namespace Ao3TrackReader.Data
             {
                 HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
 
-                var langselect = doc.GetElementbyId("work_search_language_id");
-                foreach (var opt in langselect.Elements("option"))
+                var select = doc.GetElementbyId("work_search_language_id");
+                foreach (var opt in select.Elements("option"))
                 {
                     var value = opt.Attributes["value"];
 
@@ -510,6 +542,20 @@ namespace Ao3TrackReader.Data
 
                 }
 
+
+                select = doc.GetElementbyId("work_search_sort_column");
+                foreach (var opt in select.Elements("option"))
+                {
+                    var value = opt.Attributes["value"];
+
+                    if (value != null && !string.IsNullOrEmpty(value.Value) && !string.IsNullOrWhiteSpace(opt.InnerText))
+                    {
+                        string i = value.Value.HtmlDecode().Trim();
+                        var n = opt.InnerText.HtmlDecode().Trim();
+                        App.Database.SetSortColumn(n, i);
+                        if (i == sortcolumn) name = n;
+                    }
+                }
             }
 
             return name;
@@ -1583,6 +1629,28 @@ namespace Ao3TrackReader.Data
                 return new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Label, 0));
             }));
 
+            if (query.ContainsKey("work_search[sort_column]"))
+            {
+                model.SortColumn = await LookupSortColumnAsync(query["work_search[sort_column]"][0]);
+            }
+            else
+            {
+                model.SortColumn = await LookupSortColumnAsync("");
+            }
+
+            if (query.ContainsKey("work_search[sort_direction]"))
+            {
+                switch (query["work_search[sort_direction]"][0])
+                {
+                    case "asc":
+                        model.SortDirection = "Ascending";
+                        break;
+                    case "desc":
+                        model.SortDirection = "Descending";
+                        break;
+                }
+            }
+
             if (query.ContainsKey("work_search[query]"))
             {
                 model.SearchQuery = query["work_search[query]"][0];
@@ -1726,6 +1794,28 @@ namespace Ao3TrackReader.Data
 
             tlist.Add(new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Label, 0)));
 
+            if (query.ContainsKey("work_search[sort_column]"))
+            {
+                model.SortColumn = LookupSortColumnQuick(query["work_search[sort_column]"][0]);
+            }
+            else
+            {
+                model.SortColumn = LookupSortColumnQuick("");
+            }
+
+            if (query.ContainsKey("work_search[sort_direction]"))
+            {
+                switch (query["work_search[sort_direction]"][0])
+                {
+                    case "asc":
+                        model.SortDirection = "Ascending";
+                        break;
+                    case "desc":
+                        model.SortDirection = "Descending";
+                        break;
+                }
+            }
+
             if (query.ContainsKey("work_search[query]"))
             {
                 model.SearchQuery = query["work_search[query]"][0];
@@ -1808,6 +1898,9 @@ namespace Ao3TrackReader.Data
             { 23, "category-slash"},
             { 2246, "category-multi"},
             { 24, "category-other"},
+        };
+
+        static Dictionary<string, string> SortColumnToName = new Dictionary<string, string> {
         };
 
     }

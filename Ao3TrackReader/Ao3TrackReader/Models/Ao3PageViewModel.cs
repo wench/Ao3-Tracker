@@ -586,6 +586,22 @@ namespace Ao3TrackReader.Models
                 if (baseData.Details.Hits != null) d.Add("Hits:\xA0" + baseData.Details.Hits.ToString());
             }
 
+            if (!string.IsNullOrWhiteSpace(baseData.SortColumn))
+            {
+                if (!string.IsNullOrWhiteSpace(baseData.SortDirection))
+                {
+                    d.Add("Order: " + baseData.SortColumn + " " + baseData.SortDirection);
+                }
+                else
+                {
+                    d.Add("Order: " + baseData.SortColumn);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(baseData.SortDirection))
+            {
+                d.Add("Order: " + baseData.SortDirection);
+            }
+
             string ds = string.Join("   ", d);
             if (!string.IsNullOrWhiteSpace(baseData.SearchQuery)) ds = ("Query: " + baseData.SearchQuery + "\n" + ds).Trim();
             if (string.IsNullOrWhiteSpace(ds)) ds = ("Uri: " + Uri.AbsoluteUri).Trim();

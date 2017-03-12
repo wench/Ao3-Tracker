@@ -49,6 +49,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\KeyedItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\LanguageCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ReadingList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\SortColumn.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TagCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
