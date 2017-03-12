@@ -77,9 +77,7 @@ namespace Ao3TrackReader.Helper
         int ShowNextPageIndicator { get; set; }
         string[] ScriptsToInject { get; }
         string[] CssToInject { get; }
-        int FontSizeMax { get; }
-        int FontSizeMin { get; }
-        int FontSize { get; set; }
+        int FontSize { get; }
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
         void ShowContextMenu(double x, double y, string url, string innerHtml);

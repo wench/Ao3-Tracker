@@ -67,7 +67,7 @@ namespace Ao3TrackReader
 
             SetupToolbar();
 
-            InitializeComponent();           
+            InitializeComponent();
 
             SetupContextMenu();
             UpdateToolbar();
@@ -84,7 +84,8 @@ namespace Ao3TrackReader
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
 
             // retore font size!
-            if (!App.Database.TryGetVariable("FontSize", int.TryParse, out font_size)) FontSize = 100;
+            if (!App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
+            else LogFontSize = 0;
 
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
@@ -150,8 +151,8 @@ namespace Ao3TrackReader
             PrevPageButton = new DisableableCommand(SwipeGoBack, false);
             NextPageButton = new DisableableCommand(SwipeGoForward, false);
             JumpButton = new DisableableCommand(OnJumpClicked, false);
-            IncFontSizeButton = new DisableableCommand(() => FontSize += 10);
-            DecFontSizeButton = new DisableableCommand(() => FontSize -= 10);
+            IncFontSizeButton = new DisableableCommand(() => LogFontSize++);
+            DecFontSizeButton = new DisableableCommand(() => LogFontSize--);
             ForceSetLocationButton = new DisableableCommand(ForceSetLocation);
 
             SyncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
@@ -257,7 +258,7 @@ namespace Ao3TrackReader
             {
                 Text = "Reset Font Size",
                 Icon = Icons.Font,
-                Command = new Command(() => FontSize = 100)
+                Command = new Command(() => LogFontSize = 0)
             });
             AddToolBarItem(new ToolbarItem
             {
@@ -300,7 +301,7 @@ namespace Ao3TrackReader
 
         private void Value_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName=="IsVisible")
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
             {
                 UpdateToolbar();
             }
@@ -362,7 +363,7 @@ namespace Ao3TrackReader
             var uri = CurrentUri;
             if (loc != null)
             {
-                uri = new Uri(uri, "#ao3tjump:" + loc.number.ToString() + ":" + loc.chapterid.ToString() + (loc.location == null? "" : (":" +loc.location.ToString())));
+                uri = new Uri(uri, "#ao3tjump:" + loc.number.ToString() + ":" + loc.chapterid.ToString() + (loc.location == null ? "" : (":" + loc.location.ToString())));
             }
             App.Database.SaveVariable("Sleep:URI", uri.AbsoluteUri);
         }
@@ -505,7 +506,7 @@ namespace Ao3TrackReader
                 if (pageTitle.Fandoms != null && pageTitle.Fandoms.Length != 0)
                 {
                     ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
-                    
+
                     bool first = true;
                     foreach (var fandom in pageTitle.Fandoms)
                     {
@@ -515,6 +516,8 @@ namespace Ao3TrackReader
                             first = false;
 
                         ts.Nodes.Add(fandom.Replace(' ', '\xA0'));
+                        if (Xamarin.Forms.Device.Idiom == TargetIdiom.Phone)
+                            break;
                     }
                 }
 
@@ -522,30 +525,39 @@ namespace Ao3TrackReader
             }
         }
 
-        public int FontSizeMax { get { return 300; } }
-        public int FontSizeMin { get { return 10; } }
-        private int font_size = 0;
-        public int FontSize
+        public int LogFontSizeMax { get { return 30; } }
+        public int LogFontSizeMin { get { return -30; } }
+        private int log_font_size = 0;
+
+        public int LogFontSize
         {
-            get { return font_size; }
+            get { return log_font_size; }
+
             set
             {
-                if (font_size != value) 
+                if (log_font_size != value)
                 {
                     Task.Run(() =>
                     {
-                        App.Database.SaveVariable("FontSize", value);
+                        App.Database.SaveVariable("LogFontSize", value);
                     });
                 }
 
-                font_size = value;
+                log_font_size = value;
+                if (log_font_size < LogFontSizeMin) log_font_size = LogFontSizeMin;
+                if (log_font_size > LogFontSizeMax) log_font_size = LogFontSizeMax;
+
                 DoOnMainThread(() =>
                 {
-                    helper?.OnAlterFontSize(value);
-                    DecFontSizeButton.IsEnabled = FontSize > FontSizeMin;
-                    IncFontSizeButton.IsEnabled = FontSize < FontSizeMax;
+                    DecFontSizeButton.IsEnabled = log_font_size > LogFontSizeMin;
+                    IncFontSizeButton.IsEnabled = log_font_size < LogFontSizeMax;
+                    helper?.OnAlterFontSize(FontSize);
                 });
             }
+        }
+        public int FontSize
+        {
+            get { return (int) Math.Round(100.0 * Math.Pow(1.05,LogFontSize),MidpointRounding.AwayFromZero); }
         }
 
 
@@ -1029,19 +1041,26 @@ namespace Ao3TrackReader
 
         async void InjectScripts()
         {
-            await OnInjectingScripts();
+            try
+            {
+                await OnInjectingScripts();
 
-            foreach (string s in ScriptsToInject)
-            {
-                var content = await ReadFile(s);
-                await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
+                foreach (string s in ScriptsToInject)
+                {
+                    var content = await ReadFile(s);
+                    await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
+                }
+                foreach (string s in CssToInject)
+                {
+                    var content = await ReadFile(s);
+                    await CallJavascriptAsync("Ao3Track.InjectCSS", content);
+                }
+                await OnInjectedScripts();
             }
-            foreach (string s in CssToInject)
+            catch(Exception)
             {
-                var content = await ReadFile(s);
-                await CallJavascriptAsync("Ao3Track.InjectCSS", content);
+
             }
-            await OnInjectedScripts();
         }
 
     }
