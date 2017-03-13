@@ -52,6 +52,17 @@ namespace Ao3Track {
         history.replaceState({}, document.title, window.location.href.substr(0, window.location.href.indexOf('#')));
     }
 
+    let search_params : { [key:string]: string[] } =  { };
+
+    let s = window.location.search;
+    if (s.startsWith("?")) s = s.substr(1);
+    decodeURIComponent(s).split("&").forEach((value,index,array)=>{
+        let pair = value.split("=",2);
+        let a = search_params[pair[0]] || [];
+        a.push(pair[1] || '');
+        search_params[pair[0]] = a;
+    }); 
+
     let regex_work_url = /^(?:\/collections\/[^\/?#]+)?\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
     let work_chapter = window.location.pathname.match(regex_work_url);
     let workid = 0;
@@ -370,5 +381,58 @@ namespace Ao3Track {
                 $(a).prepend(in_reading_list_html);
             }
         });
+    });
+
+    // Add sort direction to the work-filters form
+    $("form#work-filters").each((index,form) => {
+        let $form = $(form);
+
+        if ($form.find('input[name="work_search[sort_direction]"], select[name="work_search[sort_direction]"]').length !== 0)
+            return;
+
+        let $sort_column = $form.find('select[name="work_search[sort_column]"]');
+        if ($sort_column.length === 0) 
+            return;
+
+        let $sort_colomn_dd = $sort_column.parent("dd");
+        if ($sort_colomn_dd.length === 0) 
+            return;
+
+        let sort_direction = search_params["work_search[sort_direction]"] !== undefined ? search_params["work_search[sort_direction]"][0] || "" : "";
+
+        let unset_option = document.createElement("option");
+        unset_option.text="";
+        unset_option.value="";
+
+        let asc_option = document.createElement("option");
+        asc_option.text="Ascending";
+        asc_option.value="asc";
+
+        let desc_option = document.createElement("option");
+        desc_option.text="Descending";
+        desc_option.value="desc";
+        
+        let select = document.createElement("select");
+        select.id = "work_search_sort_direction";
+        select.name = "work_search[sort_direction]";
+        select.options.add(unset_option);
+        select.options.add(asc_option);
+        select.options.add(desc_option);
+
+        unset_option.selected = sort_direction === unset_option.value;
+        asc_option.selected = sort_direction === asc_option.value;
+        desc_option.selected = sort_direction === desc_option.value;
+
+        let dd = document.createElement("dd");
+        dd.appendChild(select);
+
+        let label = document.createElement("label");
+        label.innerText = "Sort Direction";
+        label.htmlFor = "work_search_sort_direction";
+
+        let dt = document.createElement("dt");
+        dt.appendChild(label);
+
+        $sort_colomn_dd.after([dt, dd]);
     });
 }
