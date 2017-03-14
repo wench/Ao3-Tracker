@@ -39,6 +39,15 @@ namespace Ao3TrackReader.Controls
         {
             InitializeComponent();
 
+            var v = App.Version;
+            aboutText.FormattedText = new FormattedString();
+            aboutText.FormattedText.Spans.Add(new Span { Text = "Ao3Track Reader Version " + v.Major + "." + v.Minor + "." + v.Build + "\n" });
+            aboutText.FormattedText.Spans.Add(new Span { Text = App.Copyright + "\n" });
+            aboutText.FormattedText.Spans.Add(new Span { Text = "Distributed under the terms of '" + App.License.Name + "':\n" });
+            aboutText.FormattedText.Spans.Add(new Span { Text = App.License.uri.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
+            aboutText.FormattedText.Spans.Add(new Span { Text = "Source Code for this build available at:\n" });
+            aboutText.FormattedText.Spans.Add(new Span { Text = App.Source.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
+
             isCreateUser = false;
 
             themes = new List<KeyedItem<string>> {
@@ -123,8 +132,8 @@ namespace Ao3TrackReader.Controls
                         errors = await App.Storage.UserLogin(s_username, s_password);
                     }
                 }
-                wvp.DoOnMainThread(() => 
-                { 
+                wvp.DoOnMainThread(() =>
+                {
                     if (errors?.Count > 0)
                     {
                         foreach (var error in errors)
@@ -192,7 +201,7 @@ namespace Ao3TrackReader.Controls
                     break;
                 }
             }
-            App.Database.SaveVariable("Theme",item.Key);
+            App.Database.SaveVariable("Theme", item.Key);
             themeDropDown.SelectedItem = item;
         }
 
@@ -277,7 +286,7 @@ namespace Ao3TrackReader.Controls
                     emailLabel.IsVisible = false;
                     email.IsVisible = false;
                 }
-                usernameErrors.IsVisible= false;
+                usernameErrors.IsVisible = false;
                 passwordErrors.IsVisible = false;
                 verifyErrors.IsVisible = false;
                 emailErrors.IsVisible = false;

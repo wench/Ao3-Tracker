@@ -38,6 +38,46 @@ namespace Ao3TrackReader
 
     public partial class App : Application
     {
+        public static (int Major, int Minor, int Build) Version
+        {
+            get
+            {
+#if WINDOWS_UWP
+                var v = Windows.ApplicationModel.Package.Current.Id.Version;
+                return (v.Major,v.Minor,v.Build);
+#elif __ANDROID__
+#elif __IOS__
+#else
+#endif
+            }
+        }
+
+        public static string Copyright
+        {
+            get
+            {
+                return "Copyright © 2017 Alexis Ryan";
+            }
+        }
+
+        public static (string Name, Uri uri) License
+        {
+            get
+            {
+                return ("Apache License, Version 2.0", new Uri("http://www.apache.org/licenses/LICENSE-2.0"));
+            }
+        }
+
+        public static Uri Source
+        {
+            get
+            {
+                var v = Version;
+                return new Uri("https://github.com/wench/Ao3-Tracker/releases/v" + v.Major + "." + v.Minor + "." + v.Build);
+            }
+        }
+
+
         public static Ao3TrackDatabase Database
         {
             get; private set;
