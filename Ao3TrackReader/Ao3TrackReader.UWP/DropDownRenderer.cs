@@ -41,9 +41,9 @@ namespace Ao3TrackReader.UWP
                 Control.SelectionChanged += Control_SelectionChanged;
             }
 
-            if (e.OldElement != null)
+            if (e.OldElement is DropDown old)
             {
-                Element.ItemSelected -= Element_ItemSelected;
+                old.ItemSelected -= Element_ItemSelected;
                 Control.ItemsSource = null;
             }
 

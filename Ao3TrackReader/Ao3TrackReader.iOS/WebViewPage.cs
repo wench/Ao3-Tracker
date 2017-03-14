@@ -33,6 +33,7 @@ using CoreGraphics;
 using ObjCRuntime;
 using Foundation;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace Ao3TrackReader
 {
@@ -83,7 +84,7 @@ namespace Ao3TrackReader
         }
 
 
-        WKWebView webView { get; set; }
+        WKWebView webView;
         WKUserContentController userContentController;
 
         public static bool HaveOSBackButton { get; } = false;
@@ -91,18 +92,22 @@ namespace Ao3TrackReader
 
         public Xamarin.Forms.View CreateWebView()
         {
-            var preferences = new WKPreferences();
-            preferences.JavaScriptEnabled = true;
-            preferences.JavaScriptCanOpenWindowsAutomatically = false;
-
-            var configuration = new WKWebViewConfiguration();
-            configuration.UserContentController = userContentController = new WKUserContentController();
+            var preferences = new WKPreferences()
+            {
+                JavaScriptEnabled = true,
+                JavaScriptCanOpenWindowsAutomatically = false
+            };
+            var configuration = new WKWebViewConfiguration()
+            {
+                UserContentController = userContentController = new WKUserContentController()
+            };
             userContentController.AddScriptMessageHandler(new ScriptMessageHandler(this), "ao3track");
             configuration.Preferences = preferences;
 
-            webView = new WKWebView(configuration);
-            webView.NavigationDelegate = new NavigationDelegate(this);
-
+            webView = new WKWebView(configuration)
+            {
+                NavigationDelegate = new NavigationDelegate(this)
+            };
             helper = new Ao3TrackHelper(this);
 
             webView.FocuseChanged += WebView_FocusChange;
@@ -137,17 +142,17 @@ namespace Ao3TrackReader
             
         }
 
-        async Task OnInjectingScripts()
+        async Task OnInjectingScripts(CancellationToken ct)
         {
             await EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";");
         }
 
-        Task OnInjectedScripts()
+        Task OnInjectedScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }
 
-        async Task<string> ReadFile(string name)
+        async Task<string> ReadFile(string name, CancellationToken ct)
         {
             using (StreamReader sr = new StreamReader(Path.Combine(NSBundle.MainBundle.BundlePath, "Content", name), Encoding.UTF8))
             {

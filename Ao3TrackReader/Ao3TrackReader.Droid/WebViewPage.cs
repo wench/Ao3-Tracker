@@ -41,6 +41,7 @@ using Ao3TrackReader.Droid;
 using Ao3TrackReader.Data;
 using Java.Lang;
 using System.IO;
+using System.Threading;
 
 namespace Ao3TrackReader
 {
@@ -67,7 +68,7 @@ namespace Ao3TrackReader
         }
 
 
-        WebView webView { get; set; }
+        WebView webView;
         WebClient webClient;
         Xamarin.Forms.View contextMenuPlaceholder;
 
@@ -181,17 +182,17 @@ namespace Ao3TrackReader
             webView.AddJavascriptInterface((Java.Lang.Object)obj, name);
         }
 
-        Task OnInjectingScripts()
+        Task OnInjectingScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }
 
-        Task OnInjectedScripts()
+        Task OnInjectedScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }
 
-        async Task<string> ReadFile(string name)
+        async Task<string> ReadFile(string name, CancellationToken ct)
         {
             using (StreamReader sr = new StreamReader(Forms.Context.Assets.Open(name), Encoding.UTF8))
             {
@@ -214,6 +215,7 @@ namespace Ao3TrackReader
         public void Navigate(Uri uri)
         {
             helper?.Reset();
+            OnNavigationStarting(uri);
             webView.LoadUrl(uri.AbsoluteUri);
         }
 
@@ -229,12 +231,12 @@ namespace Ao3TrackReader
         public void SwipeGoBack()
         {
             if (webView.CanGoBack()) webView.GoBack();
-            else if (prevPage != null) webView.LoadUrl(prevPage.AbsoluteUri);
+            else if (prevPage != null) Navigate(prevPage);
         }
         public void SwipeGoForward()
         {
             if (webView.CanGoForward()) webView.GoForward();
-            else if (nextPage != null) webView.LoadUrl(nextPage.AbsoluteUri);
+            else if (nextPage != null) Navigate(nextPage);
         }
 
         public double DeviceWidth

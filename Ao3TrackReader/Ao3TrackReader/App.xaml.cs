@@ -46,6 +46,12 @@ namespace Ao3TrackReader
                 var v = Windows.ApplicationModel.Package.Current.Id.Version;
                 return (v.Major,v.Minor,v.Build);
 #elif __ANDROID__
+                //Android.Resource.Attribute.VersionCode
+                var Context = Android.App.Application.Context.ApplicationContext;
+                var pm = Context.PackageManager;
+                var pi = pm.GetPackageInfo(Context.PackageName, 0);
+                var v = pi.VersionName.ToString().Split('.');
+                return (int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
 #elif __IOS__
 #else
 #endif

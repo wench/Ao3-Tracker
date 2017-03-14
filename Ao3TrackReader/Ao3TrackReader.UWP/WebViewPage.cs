@@ -47,14 +47,14 @@ namespace Ao3TrackReader
         };
         public string[] CssToInject { get; } = new[] { "tracker.css" };
 
-        private CoreDispatcher Dispatcher { get; set; }
+        private CoreDispatcher Dispatcher;
 
         public bool IsMainThread
         {
             get { return Dispatcher.HasThreadAccess; }
         }
 
-        WebView webView { get; set; }
+        WebView webView;
 
         public Xamarin.Forms.View CreateWebView()
         {

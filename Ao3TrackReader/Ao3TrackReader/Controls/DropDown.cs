@@ -55,7 +55,6 @@ namespace Ao3TrackReader.Controls
         public virtual void OnItemSelected(object item)
         {
             ItemSelected?.Invoke(this, new SelectedItemChangedEventArgs(item));
-
         }
 
         public event EventHandler<SelectedItemChangedEventArgs> ItemSelected;

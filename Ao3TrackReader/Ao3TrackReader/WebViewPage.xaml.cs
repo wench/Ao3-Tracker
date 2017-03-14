@@ -38,6 +38,7 @@ using Android.OS;
 #endif
 
 using ToolbarItem = Ao3TrackReader.Controls.ToolbarItem;
+using OperationCanceledException = System.OperationCanceledException;
 
 namespace Ao3TrackReader
 {
@@ -331,24 +332,29 @@ namespace Ao3TrackReader
 
         void SetupContextMenu()
         {
-            ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<string>>>();
+            ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<string>>>
+            {
+                new KeyValuePair<string, DisableableCommand<string>>("Open", new DisableableCommand<string>((url) =>
+                {
+                    Navigate(new Uri(url));
+                })),
 
-            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Open", new DisableableCommand<string>((url) => {
-                Navigate(new Uri(url));
-            })));
+                new KeyValuePair<string, DisableableCommand<string>>("Open and Add", ContextMenuOpenAdd = new DisableableCommand<string>((url) =>
+                {
+                    AddToReadingList(url);
+                    Navigate(new Uri(url));
+                })),
 
-            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Open and Add", ContextMenuOpenAdd = new DisableableCommand<string>((url) => {
-                AddToReadingList(url);
-                Navigate(new Uri(url));
-            })));
+                new KeyValuePair<string, DisableableCommand<string>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<string>((url) =>
+                {
+                    AddToReadingList(url);
+                })),
 
-            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<string>((url) => {
-                AddToReadingList(url);
-            })));
-
-            ContextMenuItems.Add(new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) => {
-                CopyToClipboard(url, "url");
-            })));
+                new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) =>
+                {
+                    CopyToClipboard(url, "url");
+                }))
+            };
         }
 
         protected override void OnSizeAllocated(double width, double height)

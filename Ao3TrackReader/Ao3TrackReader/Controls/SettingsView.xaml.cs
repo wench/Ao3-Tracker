@@ -227,6 +227,8 @@ namespace Ao3TrackReader.Controls
 
         void OnThemeSelected(object sender, SelectedItemChangedEventArgs e)
         {
+            if (!IsOnScreen) return;
+
             var item = e.SelectedItem as KeyedItem<string>;
             if (item == null)
             {
@@ -263,6 +265,8 @@ namespace Ao3TrackReader.Controls
 
         void OnBackButtonModeSelected(object sender, SelectedItemChangedEventArgs e)
         {
+            if (!App.HaveOSBackButton || !IsOnScreen) return;
+
             var item = e.SelectedItem as KeyedItem<bool?>;
             if (item != null)
             {
@@ -332,6 +336,8 @@ namespace Ao3TrackReader.Controls
 
         void OnUnitConvSelected(object sender, SelectedItemChangedEventArgs e)
         {
+            if (!IsOnScreen) return;
+
             string varname;
             if (sender == unitConvTempDropDown) varname = "UnitConvOptions.tempToC";
             else if (sender == unitConvDistDropDown) varname = "UnitConvOptions.distToM";

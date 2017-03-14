@@ -42,9 +42,7 @@ namespace Ao3TrackReader.Droid
                     SetTheme(Ao3TrackReader.Droid.Resource.Style.DarkTheme);
                     break;
             }
-
             base.OnCreate(bundle);
-
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
             var app = new Ao3TrackReader.App();
