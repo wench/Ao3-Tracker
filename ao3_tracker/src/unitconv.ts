@@ -64,10 +64,8 @@ namespace Ao3Track {
                 super(regex);
             }
             process(values: (string | number)[]): string {
-                let value = Math.floor((toFloat(values[2]) - 32) * 10 * 5 / 9) / 10;
-                if (values[1]) {
-                    value = -value;
-                }
+                let mul = values[1]?-1:1;
+                let value = Math.floor((toFloat(values[2])*mul - 32) * 10 * 5 / 9) / 10;
                 return value.toString() + "\xB0 C";
             }
         }
