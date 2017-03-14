@@ -204,6 +204,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\Drawable\Icon.png" />
+    <AndroidResource Include="Resources\Drawable-ldpi\Icon.png" />
+    <AndroidResource Include="Resources\Drawable-mdpi\Icon.png" />
+    <AndroidResource Include="Resources\Drawable-hdpi\Icon.png" />
+    <AndroidResource Include="Resources\Drawable-xhdpi\Icon.png" />
+    <AndroidResource Include="Resources\Drawable-xxhdpi\Icon.png" />
+    <AndroidResource Include="Resources\Drawable-xxxhdpi\Icon.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="..\Icons\addpage_dark.png">
