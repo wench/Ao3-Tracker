@@ -18,7 +18,7 @@ namespace Ao3Track {
 
     sendMessage = (request: MessageRequest) => {
         chrome.runtime.sendMessage({type: request.type, data: request.data}, request.sendResponse);
-    }
+    };
 
     GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => {
         sendMessage({type: "GET", data: works, sendResponse: callback});
@@ -99,5 +99,9 @@ namespace Ao3Track {
 
     AreUrlsInReadingList = (urls: string[], callback: (result: { [key:string]:boolean})=> void)  => {
         sendMessage({ type: "RL_ISINLIST", data: urls, sendResponse: callback });
+    };
+
+    GetUnitConvOptions = (callback: (result: IUnitConvOptions)=>void) => {
+        callback({tempToC: true, distToM: true, volumeToM: true, weightToM: true});
     };
 }

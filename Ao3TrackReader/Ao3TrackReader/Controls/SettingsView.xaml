@@ -89,6 +89,27 @@ limitations under the License.
                         </StackLayout>
                     </StackLayout>
 
+                    <StackLayout Spacing="8" x:Name="unitConvForm">
+                        <Label Text="Unit Conversions" FontSize="Medium" Margin="0,12,0,0"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Convert Temperature" FontSize="Micro" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="unitConvTempDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Convert Length/Distance" FontSize="Micro" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="unitConvDistDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Convert Volume" FontSize="Micro" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="unitConvVolumeDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Convert Weight" FontSize="Micro" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="unitConvWeightDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                        </StackLayout>
+                        <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." FontSize="11" />
+                    </StackLayout>
+
                     <StackLayout Spacing="8" x:Name="themeForm">
                         <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">

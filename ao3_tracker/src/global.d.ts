@@ -37,6 +37,13 @@ interface IWorkChapterTS extends IWorkChapter {
     timestamp: timestamp;
 }
 
+interface IUnitConvOptions {
+    tempToC?: boolean;
+    distToM?: boolean;
+    volumeToM?: boolean;
+    weightToM?: boolean;
+}
+
 declare namespace Ao3Track {
     export let GetWorkChapters : (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => void;
     export let SetWorkChapters : (workchapters: { [key: number]: IWorkChapter; }) => void;
@@ -46,4 +53,5 @@ declare namespace Ao3Track {
     export let EnableLastLocationJump : (workid: number, lastloc: IWorkChapter) => void;
     export let SetCurrentLocation : (current : IWorkChapterEx) => void;    
     export let AreUrlsInReadingList : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;
+    export let GetUnitConvOptions : (callback: (result :IUnitConvOptions)=>void) => void;
 }

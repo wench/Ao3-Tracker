@@ -91,5 +91,7 @@ namespace Ao3TrackReader.Helper
 
         IAsyncOp_String CallJavascriptAsync(string function, params object[] args);
         IAsyncOp_String EvaluateJavascriptAsync(string code);
+
+        IUnitConvOptions UnitConvOptions { get; }
     }
 }

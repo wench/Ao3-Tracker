@@ -278,5 +278,14 @@ namespace Ao3TrackReader.Helper
                 return DoOnMainThread(() => wvp.DeviceWidth);
             }
         }
+
+        public IAsyncOperation<object> getUnitConvOptions()
+        {
+            return Task.Run(() =>
+            {
+                return (object) wvp.UnitConvOptions;
+            }).AsAsyncOperation();
+        }
+
     }
 }

@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IAo3TrackHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HelperDef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IWebPageView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IUnitConvOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WorkChapter.cs" />
   </ItemGroup>
 </Project>

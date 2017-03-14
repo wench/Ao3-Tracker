@@ -52,6 +52,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\SortColumn.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TagCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\UnitConvOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PageEx.cs" />

@@ -86,6 +86,10 @@ namespace Ao3Track {
         Ao3Track.Helper.areUrlsInReadingListAsync(urls,callback);
     };
 
+    GetUnitConvOptions = (callback: (result: IUnitConvOptions)=>void) => {
+        Ao3Track.Helper.getUnitConvOptions(callback);
+    };
+
     function contextMenuHandler(ev: MouseEvent) {
         for (let target = ev.target as (HTMLElement|null); target && target !== document.body; target = target.parentElement) {
             let a = target as HTMLAnchorElement;

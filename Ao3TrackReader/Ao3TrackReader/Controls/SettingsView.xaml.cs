@@ -34,6 +34,8 @@ namespace Ao3TrackReader.Controls
         List<KeyedItem<string>> themes;
         KeyedItem<string> defaultTheme;
         private List<KeyedItem<bool?>> backButtonMode;
+        private List<KeyedItem<bool?>> unitConvModeTemp;
+        private List<KeyedItem<bool?>> unitConvMode;
 
         public SettingsView()
         {
@@ -62,6 +64,23 @@ namespace Ao3TrackReader.Controls
                 new KeyedItem<bool?>(false,"Never Shown")
             };
             backButtonModeDropDown.ItemsSource = backButtonMode;
+
+            unitConvMode = new List<KeyedItem<bool?>> {
+                new KeyedItem<bool?>(null,"Disabled"),
+                new KeyedItem<bool?>(true,"US to Metric"),
+                new KeyedItem<bool?>(false,"Metric to US")
+            };
+            unitConvDistDropDown.ItemsSource = unitConvMode;
+            unitConvVolumeDropDown.ItemsSource = unitConvMode;
+            unitConvWeightDropDown.ItemsSource = unitConvMode;
+
+            unitConvModeTemp = new List<KeyedItem<bool?>> {
+                new KeyedItem<bool?>(null,"Disabled"),
+                new KeyedItem<bool?>(true,"\x00B0F to \x00B0C"),
+                new KeyedItem<bool?>(false,"\x00B0C to \x00B0F")
+            };
+            unitConvTempDropDown.ItemsSource = unitConvModeTemp;
+
         }
 
         protected override void OnIsOnScreenChanging(bool newValue)
@@ -72,6 +91,7 @@ namespace Ao3TrackReader.Controls
                 SelectCurrentTheme();
                 SelectBackButtonMode();
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
+                UpdateUnitConv();
             }
         }
 
@@ -291,6 +311,37 @@ namespace Ao3TrackReader.Controls
                 verifyErrors.IsVisible = false;
                 emailErrors.IsVisible = false;
             }
+        }
+
+        private void UpdateUnitConv()
+        {
+            bool? v;
+
+            App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out v);
+            unitConvTempDropDown.SelectedItem = unitConvModeTemp.Find((i) => i.Key == v);
+
+            App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out v);
+            unitConvDistDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
+
+            App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out v);
+            unitConvVolumeDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
+
+            App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out v);
+            unitConvWeightDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
+        }
+
+        void OnUnitConvSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            string varname;
+            if (sender == unitConvTempDropDown) varname = "UnitConvOptions.tempToC";
+            else if (sender == unitConvDistDropDown) varname = "UnitConvOptions.distToM";
+            else if (sender == unitConvVolumeDropDown) varname = "UnitConvOptions.volumeToM";
+            else if (sender == unitConvWeightDropDown) varname = "UnitConvOptions.weightToM";
+            else return;
+
+            var val = (KeyedItem<bool?>)e.SelectedItem;
+
+            App.Database.SaveVariable(varname, val.Key);
         }
     }
 }

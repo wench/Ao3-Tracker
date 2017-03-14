@@ -39,6 +39,8 @@ declare namespace Ao3Track {
 
         startWebViewDragAccelerate(velocity: number) : void;
         stopWebViewDragAccelerate(): void;
+
+        getUnitConvOptions(callback:(result: IUnitConvOptions)=>void): void;
     }
 
     export interface IAo3TrackHelperProperties {

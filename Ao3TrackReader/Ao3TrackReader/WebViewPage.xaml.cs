@@ -1103,5 +1103,20 @@ namespace Ao3TrackReader
             }
         }
 
+        public IUnitConvOptions UnitConvOptions {
+            get
+            {
+                var r = new Models.UnitConvOptions();
+
+                bool? v;
+                if (App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out v)) r.tempToC = v;
+                if (App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out v)) r.distToM = v;
+                if (App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out v)) r.volumeToM = v;
+                if (App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out v)) r.weightToM = v;
+
+                return r;
+            }
+        }
+
     }
 }
