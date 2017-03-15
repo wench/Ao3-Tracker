@@ -19,7 +19,7 @@ limitations under the License.
   <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <Label Text="Help" FontSize="Medium" />
+                <Label Text="Help" FontSize="{StaticResource LargeFontSize}" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 

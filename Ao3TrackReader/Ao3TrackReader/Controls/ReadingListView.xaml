@@ -85,16 +85,16 @@ limitations under the License.
                                             </Grid.ColumnDefinitions>
 
                                             <StackLayout Spacing="3">
-                                                <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="14" MinimumHeightRequest="17" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
-                                                <local:TextView TextTree="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" MinimumHeightRequest="15" FontSize="11" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalTextAlignment="Start" />
+                                                <local:TextView TextTree="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="{StaticResource SmallFontSize}" MinimumHeightRequest="17" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
+                                                <local:TextView TextTree="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" MinimumHeightRequest="15" FontSize="{StaticResource MicroFontSize}" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalTextAlignment="Start" />
                                             </StackLayout>
-                                            
-                                            <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="11" HorizontalTextAlignment="End" Margin="0" Grid.Row="0" Grid.Column="1" />
+
+                                            <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="{StaticResource MicroFontSize}" HorizontalTextAlignment="End" Margin="0" Grid.Row="0" Grid.Column="1" />
                                         </Grid>
                                     </Grid>
-                                    <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="10" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
-                                    <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="10" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
-                                    <local:TextView TextTree="{Binding Details}" FontSize="11" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
+                                    <local:TextView TextTree="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="{StaticResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
+                                    <local:TextView TextTree="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{StaticResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
+                                    <local:TextView TextTree="{Binding Details}" FontSize="{StaticResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
                                 </Grid>
                                 <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumHighColor}"/>
                             </Grid>

@@ -37,6 +37,11 @@ limitations under the License.
                 <Setter Property="ImageWidth" Value="20" />
                 <Setter Property="ImageHeight" Value="20" />
             </Style>
+            <x:Double x:Key="LargeFontSize">22</x:Double>
+            <x:Double x:Key="MediumFontSize">18</x:Double>
+            <x:Double x:Key="SmallFontSize">14</x:Double>
+            <x:Double x:Key="MicroFontSize">11</x:Double>
+            <x:Double x:Key="TinyFontSize">10</x:Double>
         </res:ResourceDictionary>
     </Application.Resources>
 </Application>
