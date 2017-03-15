@@ -281,6 +281,13 @@ namespace Ao3TrackReader.Helper
                 return wvp.DeviceWidth;
             }
         }
+
+        [JavascriptInterface, Export("getUnitConvOptions")]
+        public void GetUnitConvOptions([Converter("Callback")] int hCallback)
+        {
+            wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, wvp.UnitConvOptions).Wait(0));
+        }
+
     }
 }
 

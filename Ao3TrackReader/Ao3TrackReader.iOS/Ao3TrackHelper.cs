@@ -223,6 +223,10 @@ namespace Ao3TrackReader.Helper
             }
         }
 
+        public void GetUnitConvOptions([Converter("Callback")] int hCallback)
+        {
+            wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, wvp.UnitConvOptions).Wait(0));
+        }
 
     }
 }

@@ -279,7 +279,7 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        public IAsyncOperation<object> getUnitConvOptions()
+        public IAsyncOperation<object> GetUnitConvOptions()
         {
             return Task.Run(() =>
             {
