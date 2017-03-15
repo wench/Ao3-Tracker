@@ -37,11 +37,47 @@ limitations under the License.
                 <Setter Property="ImageWidth" Value="20" />
                 <Setter Property="ImageHeight" Value="20" />
             </Style>
+
             <x:Double x:Key="LargeFontSize">22</x:Double>
             <x:Double x:Key="MediumFontSize">18</x:Double>
             <x:Double x:Key="SmallFontSize">14</x:Double>
             <x:Double x:Key="MicroFontSize">11</x:Double>
             <x:Double x:Key="TinyFontSize">10</x:Double>
+
+            <local:EmptyStringBool x:Key="EmptyStringBoolConverter" />
+
+            <DataTemplate x:Key="CellGroupHeaderTemplate">
+                <ViewCell>
+                    <StackLayout>
+                        <Label Text="{Binding Group}"     FontSize="{StaticResource MediumFontSize}" TextColor="{StaticResource HighlightColor}" />
+                        <Label Text="{Binding GroupType}" FontSize="{StaticResource SmallFontSize}"  TextColor="{StaticResource BaseMediumColor}"  />
+                    </StackLayout>
+                </ViewCell>
+            </DataTemplate>
+            
+            <DataTemplate x:Key="HelpViewCellTemplate">
+                <ViewCell>
+                    <Grid RowSpacing="6" Margin="4,4,4,4" Padding="6" BackgroundColor="{StaticResource BaseTransVeryLowColor}" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid ColumnSpacing="6" Margin="0" Padding="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Source="{Binding Icon}" HeightRequest="20" WidthRequest="20" />
+                            <Label FormattedText="{Binding Text}" TextColor="{StaticResource HighlightColor}" FontSize="{StaticResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Column="1" VerticalTextAlignment="Center"/>
+                        </Grid>
+                        <Label FormattedText="{Binding Description}" FontSize="{StaticResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" />
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            
         </res:ResourceDictionary>
     </Application.Resources>
 </Application>

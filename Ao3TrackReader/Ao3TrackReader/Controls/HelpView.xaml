@@ -24,18 +24,8 @@ limitations under the License.
             </StackLayout>
 
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" 
-                      x:Name="ListView" ItemSelected="ListView_ItemSelected">
-                <ListView.GroupHeaderTemplate>
-                    <DataTemplate>
-                        <TextCell Text="{Binding Group}" Detail="{Binding GroupType}" TextColor="{StaticResource HighlightColor}" DetailColor="{StaticResource BaseMediumColor}"/>
-                    </DataTemplate>
-                </ListView.GroupHeaderTemplate>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ImageCell Text="{Binding Text}" Detail="{Binding Description}" ImageSource="{Binding Icon}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                      x:Name="ListView" ItemSelected="ListView_ItemSelected" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}"
+                      ItemTemplate="{StaticResource HelpViewCellTemplate}" />
         </StackLayout>
     </local:PaneView.Content>
 </local:PaneView>

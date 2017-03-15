@@ -15,6 +15,7 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)AutoUpdateCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\DropDown.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\EmptyStringBool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\HelpView.xaml.cs">
       <DependentUpon>HelpView.xaml</DependentUpon>
       <SubType>Code</SubType>
