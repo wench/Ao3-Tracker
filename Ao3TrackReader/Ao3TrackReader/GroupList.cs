@@ -223,6 +223,18 @@ namespace Ao3TrackReader
         }
 
         bool show_hidden = false;
+        private bool doSorting;
+
+        public GroupList()
+        {
+            this.doSorting = true;
+        }
+
+        public GroupList(bool doSorting)
+        {
+            this.doSorting = doSorting;
+        }
+
         private bool IsHidden(T item)
         {
             return (!show_hidden && item.ShouldHide);
@@ -305,7 +317,7 @@ namespace Ao3TrackReader
                         g = this[i];
                         break;
                     }
-                    else if (c > 0)
+                    else if (doSorting && c > 0)
                     {
                         break;
                     }
@@ -336,7 +348,9 @@ namespace Ao3TrackReader
                     RemoveFromGroup(item);
                 }
 
-                g.AddSorted(item);
+                if (doSorting) g.AddSorted(item);
+                else g.Add(item);
+
                 allItems[item] = g;
             }
         }
@@ -372,7 +386,7 @@ namespace Ao3TrackReader
                         }
                         else
                         {
-                            g.ResortItem(item);
+                            if (doSorting) g.ResortItem(item);
                         }
                     }
                 }

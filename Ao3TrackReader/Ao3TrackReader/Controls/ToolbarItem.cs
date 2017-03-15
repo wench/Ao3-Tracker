@@ -21,7 +21,7 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-    public class ToolbarItem : Xamarin.Forms.ToolbarItem, IHelpInfo
+    public class ToolbarItem : Xamarin.Forms.ToolbarItem, Models.IHelpInfo
     {
         public static readonly BindableProperty ForegroundProperty =
           BindableProperty.Create("Foreground", typeof(Color), typeof(ToolbarItem), defaultValue: Color.Default);

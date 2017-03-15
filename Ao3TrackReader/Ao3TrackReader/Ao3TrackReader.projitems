@@ -47,6 +47,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ListConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ao3PageViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\HelpInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\KeyedItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\LanguageCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ReadingList.cs" />

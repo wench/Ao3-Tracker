@@ -17,11 +17,12 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Ao3TrackReader.Models;
 using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-    class Button : Xamarin.Forms.Button
+    class Button : Xamarin.Forms.Button, Models.IHelpInfo
     {
         public static readonly Xamarin.Forms.BindableProperty ImageHeightProperty =
           Xamarin.Forms.BindableProperty.Create("ImageHeight", typeof(double), typeof(Button), defaultValue: 0.0);
@@ -39,5 +40,16 @@ namespace Ao3TrackReader.Controls
             set { SetValue(ImageWidthProperty, value); }
         }
 
+        string IHelpInfo.Text => HelpView.GetText(this);
+
+        FormattedString IHelpInfo.Description => HelpView.GetDescription(this);
+
+        FileImageSource IHelpInfo.Icon => Image;
+
+        string IGroupable.Group => HelpView.GetGroup(this);
+
+        string IGroupable.GroupType => "";
+
+        bool IGroupable.ShouldHide => false;
     }
 }

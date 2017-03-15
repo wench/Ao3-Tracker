@@ -28,9 +28,9 @@ limitations under the License.
                         AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="24" />
                 <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
                 <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All">
-                    <local:HelpView x:Name="HelpPane" wvp="{x:Reference root}" IsOnScreenChanged="HelpPane_IsOnScreenChanged" />
                     <local:SettingsView x:Name="SettingsPane" wvp="{x:Reference root}" IsOnScreenChanged="SettingsPane_IsOnScreenChanged" />
                     <local:ReadingListView x:Name="ReadingListPane" wvp="{x:Reference root}" IsOnScreenChanged="ReadingList_IsOnScreenChanged" />
+                    <local:HelpView x:Name="HelpPane" wvp="{x:Reference root}" IsOnScreenChanged="HelpPane_IsOnScreenChanged" />
                 </local:PaneContainer>
             </AbsoluteLayout>
             <Grid x:Name="urlBar" ColumnSpacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 

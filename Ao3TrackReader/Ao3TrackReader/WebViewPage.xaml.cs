@@ -46,7 +46,11 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
-        public Dictionary<string, ToolbarItem> AllToolbarItems { get; } = new Dictionary<string, ToolbarItem>();
+        Dictionary<string, ToolbarItem> AllToolbarItems { get; } = new Dictionary<string, ToolbarItem>();
+
+        public IEnumerable<Models.IHelpInfo> HelpItems {
+            get { return AllToolbarItems.Values; }
+        }
 
         DisableableCommand JumpButton { get; set; }
         DisableableCommand IncFontSizeButton { get; set; }
@@ -70,6 +74,7 @@ namespace Ao3TrackReader
 
             InitializeComponent();
 
+            HelpPane.Init();
             SetupContextMenu();
             UpdateToolbar();
 

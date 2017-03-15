@@ -143,6 +143,20 @@ namespace Ao3TrackReader.Controls
             }
         }
 
+        public IEnumerable<Models.IHelpInfo> HelpItems {
+            get
+            {
+                foreach (var v in buttonBar.Children)
+                {
+                    if (v is Models.IHelpInfo info)
+                    {
+                        if (!string.IsNullOrWhiteSpace(info.Text) && !string.IsNullOrWhiteSpace(info.Group))
+                            yield return new Models.HelpInfoAdapter(info);
+                    }
+                }
+            }
+        }
+
         Models.Ao3PageViewModel selectedItem;
         private void UpdateSelectedItem(Models.Ao3PageViewModel newselected)
         {

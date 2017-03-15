@@ -22,40 +22,78 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Ao3TrackReader.Models;
 
 namespace Ao3TrackReader.Controls
 {
-    public interface IHelpInfo: IGroupable, INotifyPropertyChanged
-    {
-        string Text { get; }
-        FormattedString Description { get; }
-        FileImageSource Icon { get; }
-    }
-    
+
     public partial class HelpView : PaneView
 	{
+        public static readonly Xamarin.Forms.BindableProperty TextProperty =
+          Xamarin.Forms.BindableProperty.CreateAttached("Text", typeof(string), typeof(HelpView), defaultValue: null);
+
+        public static readonly Xamarin.Forms.BindableProperty DescriptionProperty =
+          Xamarin.Forms.BindableProperty.CreateAttached("Description", typeof(FormattedString), typeof(HelpView), defaultValue: null);
+
+        public static readonly Xamarin.Forms.BindableProperty GroupProperty =
+          Xamarin.Forms.BindableProperty.CreateAttached("Group", typeof(string), typeof(HelpView), defaultValue: null);
+
         GroupList<IHelpInfo> helpBacking;
 
         public HelpView ()
 		{
 			InitializeComponent ();
 
-            helpBacking = new GroupList<IHelpInfo>();
+            helpBacking = new GroupList<IHelpInfo>(false);
         }
 
-        protected override void OnWebViewPageSet()
+        public void Init()
         {
-            base.OnWebViewPageSet();
+            if (helpBacking.Count == 0)
+            {
+                foreach (var item in wvp.HelpItems)
+                    helpBacking.Add(item);
 
-            foreach (var item in wvp.AllToolbarItems)
-                helpBacking.Add(item.Value);
+                foreach (var item in wvp.ReadingList.HelpItems)
+                    helpBacking.Add(item);
 
-            ListView.ItemsSource = helpBacking;
+                ListView.ItemsSource = helpBacking;
+            }
         }
 
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
             if (e.SelectedItem != null) ListView.SelectedItem = null;
+        }
+
+        public static string GetText(BindableObject view)
+        {
+            return (string)view.GetValue(TextProperty);
+        }
+
+        public static void SetText(BindableObject view, string value)
+        {
+            view.SetValue(TextProperty, value);
+        }
+
+        public static FormattedString GetDescription(BindableObject view)
+        {
+            return (FormattedString)view.GetValue(DescriptionProperty);
+        }
+
+        public static void SetDescription(BindableObject view, FormattedString value)
+        {
+            view.SetValue(DescriptionProperty, value);
+        }
+
+        public static string GetGroup(BindableObject view)
+        {
+            return (string)view.GetValue(GroupProperty);
+        }
+
+        public static void SetGroup(BindableObject view, string value)
+        {
+            view.SetValue(GroupProperty, value);
         }
     }
 }
