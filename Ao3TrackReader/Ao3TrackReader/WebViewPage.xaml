@@ -33,12 +33,21 @@ limitations under the License.
                     <local:ReadingListView x:Name="ReadingListPane" wvp="{x:Reference root}" IsOnScreenChanged="ReadingList_IsOnScreenChanged" />
                 </local:PaneContainer>
             </AbsoluteLayout>
-            <StackLayout x:Name="urlBar" Orientation="Horizontal" Spacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
+            <Grid x:Name="urlBar" ColumnSpacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
                          VerticalOptions="End" HorizontalOptions="Fill" PropertyChanged="UrlBar_PropertyChanged">
-                <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" HorizontalOptions="FillAndExpand" />
-                <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="-1" VerticalOptions="Center" HorizontalOptions="End" />
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" HorizontalOptions="End" />
-            </StackLayout>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+
+                <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" Grid.Column="0"/>
+                <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="-1" Grid.Column="1"/>
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" Grid.Column="2"/>
+            </Grid>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
