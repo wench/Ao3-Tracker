@@ -237,6 +237,18 @@
     <Content Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Assets\forward_light.scale-200.png</Link>
     </Content>
+    <Content Include="..\Icons\help_dark.png">
+      <Link>Assets\help_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\help_dark.scale-200.png">
+      <Link>Assets\help_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\help_light.png">
+      <Link>Assets\help_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\help_light.scale-200.png">
+      <Link>Assets\help_light.scale-200.png</Link>
+    </Content>
     <Content Include="..\Icons\redo_dark.png">
       <Link>Assets\redo_dark.png</Link>
     </Content>

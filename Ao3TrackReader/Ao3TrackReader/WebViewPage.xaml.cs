@@ -271,7 +271,7 @@ namespace Ao3TrackReader
             AddToolBarItem(new ToolbarItem
             {
                 Text = "Help",
-                //Icon = Icons.Settings,
+                Icon = Icons.Help,
                 Order = ToolbarItemOrder.Secondary,
                 Command = new Command(() => TogglePane(HelpPane))
             });
