@@ -49,7 +49,7 @@ namespace Ao3TrackReader.Droid
 
             if (e.OldElement is DropDown old)
             {
-                old.ItemSelected -= Element_ItemSelected;
+                old.SelectedIndexChanged -= Element_ItemSelected;
                 Control.Adapter = null;
                 itemSource = null;
             }
@@ -57,7 +57,7 @@ namespace Ao3TrackReader.Droid
             if (e.NewElement != null)
             {
                 UpdateItemSource();
-                Element.ItemSelected += Element_ItemSelected;
+                Element.SelectedIndexChanged += Element_ItemSelected;
             }
         }
 
@@ -95,11 +95,11 @@ namespace Ao3TrackReader.Droid
             if (index != -1) Control.SetSelection(index);
         }
 
-        private void Element_ItemSelected(object sender, Xamarin.Forms.SelectedItemChangedEventArgs e)
+        private void Element_ItemSelected(object sender, EventArgs e)
         {
             if (itemSource != null)
             {
-                int index = itemSource.IndexOf(e.SelectedItem);
+                int index = itemSource.IndexOf(Element.SelectedItem);
                 if (index != -1 && index != Control.SelectedItemPosition)
                     Control.SetSelection(index);
             }           
@@ -107,8 +107,8 @@ namespace Ao3TrackReader.Droid
 
         private void Control_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            if (Element != null && itemSource != null && e.Position >= 0 && e.Position < itemSource.Count && itemSource[e.Position] != Element.SelectedItem)
-                Element.OnItemSelected(itemSource[e.Position]);
+            if (Element != null && itemSource != null && e.Position >= 0 && e.Position < itemSource.Count && e.Position != Element.SelectedIndex)
+                Element.SelectedIndex = e.Position;
         }
     }
 }

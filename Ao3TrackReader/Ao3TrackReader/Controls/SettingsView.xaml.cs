@@ -225,11 +225,11 @@ namespace Ao3TrackReader.Controls
             themeDropDown.SelectedItem = item;
         }
 
-        void OnThemeSelected(object sender, SelectedItemChangedEventArgs e)
+        void OnThemeSelected(object sender, EventArgs e)
         {
             if (!IsOnScreen) return;
 
-            var item = e.SelectedItem as KeyedItem<string>;
+            var item = themeDropDown.SelectedItem as KeyedItem<string>;
             if (item == null)
             {
                 SelectCurrentTheme();
@@ -263,11 +263,11 @@ namespace Ao3TrackReader.Controls
             backButtonModeDropDown.SelectedItem = item;
         }
 
-        void OnBackButtonModeSelected(object sender, SelectedItemChangedEventArgs e)
+        void OnBackButtonModeSelected(object sender, EventArgs e)
         {
             if (!App.HaveOSBackButton || !IsOnScreen) return;
 
-            var item = e.SelectedItem as KeyedItem<bool?>;
+            var item = backButtonModeDropDown.SelectedItem as KeyedItem<bool?>;
             if (item != null)
             {
                 App.Database.SaveVariable("ShowBackButton", item.Key);
@@ -334,7 +334,7 @@ namespace Ao3TrackReader.Controls
             unitConvWeightDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
         }
 
-        void OnUnitConvSelected(object sender, SelectedItemChangedEventArgs e)
+        void OnUnitConvSelected(object sender, EventArgs e)
         {
             if (!IsOnScreen) return;
 
@@ -345,7 +345,8 @@ namespace Ao3TrackReader.Controls
             else if (sender == unitConvWeightDropDown) varname = "UnitConvOptions.weightToM";
             else return;
 
-            var val = (KeyedItem<bool?>)e.SelectedItem;
+            var dropdown = sender as DropDown;
+            var val = (KeyedItem<bool?>)dropdown.SelectedItem;
 
             App.Database.SaveVariable(varname, val.Key);
         }

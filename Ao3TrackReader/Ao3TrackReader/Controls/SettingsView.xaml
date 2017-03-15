@@ -85,7 +85,7 @@ limitations under the License.
                         <Label Text="Toolbar Settings" FontSize="Medium" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Show Back Button on Toolbar" FontSize="Micro" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="backButtonModeDropDown" ItemSelected="OnBackButtonModeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="backButtonModeDropDown" SelectedIndexChanged="OnBackButtonModeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                     </StackLayout>
 
@@ -93,19 +93,19 @@ limitations under the License.
                         <Label Text="Unit Conversions" FontSize="Medium" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Temperature" FontSize="Micro" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvTempDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvTempDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Length/Distance" FontSize="Micro" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvDistDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvDistDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Volume" FontSize="Micro" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvVolumeDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvVolumeDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Weight" FontSize="Micro" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvWeightDropDown" ItemSelected="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvWeightDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                         <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." FontSize="11" />
                     </StackLayout>
@@ -114,7 +114,7 @@ limitations under the License.
                         <Label Text="Theme" FontSize="Medium" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Select the Application Theme" FontSize="Micro" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="themeDropDown" ItemSelected="OnThemeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="themeDropDown" SelectedIndexChanged="OnThemeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                         <Label Text="You must restart the app to apply a new theme" FontSize="11" />
                     </StackLayout>

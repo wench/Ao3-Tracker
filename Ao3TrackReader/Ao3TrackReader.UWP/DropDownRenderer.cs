@@ -43,7 +43,7 @@ namespace Ao3TrackReader.UWP
 
             if (e.OldElement is DropDown old)
             {
-                old.ItemSelected -= Element_ItemSelected;
+                old.SelectedIndexChanged -= Element_ItemSelected;
                 Control.ItemsSource = null;
             }
 
@@ -51,18 +51,20 @@ namespace Ao3TrackReader.UWP
             {
                 Control.ItemsSource = Element.ItemsSource;
                 Control.SelectedItem = Element.SelectedItem;
-                Element.ItemSelected += Element_ItemSelected;
+                Element.SelectedIndexChanged += Element_ItemSelected;
             }
         }
 
-        private void Element_ItemSelected(object sender, Xamarin.Forms.SelectedItemChangedEventArgs e)
+        private void Element_ItemSelected(object sender, EventArgs e)
         {
-            Control.SelectedItem = e.SelectedItem;
+            if (Control.SelectedItem != Element.SelectedItem)
+                Control.SelectedItem = Element.SelectedItem;
         }
 
         private void Control_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (Element != null) Element.OnItemSelected(Control.SelectedItem);
+            if (Element != null && Element.SelectedItem != Control.SelectedItem)
+                Element.SelectedItem = Control.SelectedItem;
         }
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -73,23 +75,6 @@ namespace Ao3TrackReader.UWP
             {
                 Control.ItemsSource = Element.ItemsSource;
             }
-        }
-
-        public override SizeRequest GetDesiredSize(double widthConstraint, double heightConstraint)
-        {
-            var ret = base.GetDesiredSize(widthConstraint, heightConstraint);
-            return ret;
-        }
-
-        protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size availableSize)
-        {
-            var ret = base.MeasureOverride(availableSize);
-            return ret;
-        }
-        protected override Windows.Foundation.Size ArrangeOverride(Windows.Foundation.Size finalSize)
-        {
-            var ret = base.ArrangeOverride(finalSize);
-            return ret;
         }
     }
 }

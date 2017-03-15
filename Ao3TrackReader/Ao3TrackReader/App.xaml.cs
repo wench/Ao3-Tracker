@@ -53,7 +53,12 @@ namespace Ao3TrackReader
                 var v = pi.VersionName.ToString().Split('.');
                 return (int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
 #elif __IOS__
+                var bundle = Foundation.NSBundle.MainBundle;
+                var vi = bundle.ObjectForInfoDictionary("CFBundleVersion");
+                var v = vi.ToString().Split('.');
+                return (int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
 #else
+                return (0,0,0);
 #endif
             }
         }

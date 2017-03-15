@@ -214,9 +214,8 @@ namespace Ao3TrackReader
 
         public void Navigate(Uri uri)
         {
-            helper?.Reset();
-            OnNavigationStarting(uri);
-            webView.LoadUrl(uri.AbsoluteUri);
+            if (OnNavigationStarting(uri) == false)
+                webView.LoadUrl(uri.AbsoluteUri);
         }
 
         public void Refresh()
