@@ -46,6 +46,7 @@
     <EnableProguard>False</EnableProguard>
     <AndroidSupportedAbis>armeabi;armeabi-v7a;x86</AndroidSupportedAbis>
     <Debugger>.Net (Xamarin)</Debugger>
+    <JavaMaximumHeapSize>1G</JavaMaximumHeapSize>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -344,7 +345,7 @@
     </AndroidResource>
     <AndroidResource Include="..\Icons\200\help_light.scale-200.png">
       <Link>Resources\drawable-hdpi\help_light.png</Link>
-    </AndroidResource>    
+    </AndroidResource>
     <AndroidResource Include="..\Icons\redo_dark.png">
       <Link>Resources\drawable\redo_dark.png</Link>
     </AndroidResource>
@@ -461,6 +462,7 @@
   </ItemGroup>
   <Import Project="..\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems" Label="Shared" />
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" />
+  <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -502,6 +504,9 @@
   <Import Project="..\..\packages\Xamarin.Android.Support.v7.AppCompat.25.2.0-beta1\build\MonoAndroid70\Xamarin.Android.Support.v7.AppCompat.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.v7.AppCompat.25.2.0-beta1\build\MonoAndroid70\Xamarin.Android.Support.v7.AppCompat.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.Design.25.2.0-beta1\build\MonoAndroid70\Xamarin.Android.Support.Design.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Design.25.2.0-beta1\build\MonoAndroid70\Xamarin.Android.Support.Design.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.v7.MediaRouter.25.2.0-beta1\build\MonoAndroid70\Xamarin.Android.Support.v7.MediaRouter.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.v7.MediaRouter.25.2.0-beta1\build\MonoAndroid70\Xamarin.Android.Support.v7.MediaRouter.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>$(SolutionDir)Ao3TrackReader/Ao3TrackReader.Version.Build/bin/$(ConfigurationName)/Ao3TrackReader.Version.Build.exe $(ProjectDir)Properties/AndroidManifest.xml /manifest/@android:versionName=String /manifest/@android:versionCode=Integer</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
      Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

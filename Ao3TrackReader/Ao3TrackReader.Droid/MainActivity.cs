@@ -120,6 +120,7 @@ namespace Ao3TrackReader.Droid
             int remaining = (int)App.Current.MainPage.Width;
             remaining -= 50;    // App icon
             remaining -= 50;    // Overflow button
+            int minimum = 5;
 
             for (var i = 0; i < menu.Size(); i++)
             {
@@ -138,8 +139,9 @@ namespace Ao3TrackReader.Droid
                     if (item.Icon != null)
                     {
                         int iconsize = 50;
-                        if (remaining >= iconsize)
+                        if (remaining >= iconsize || minimum > 0)
                         {
+                            minimum--;
                             remaining -= iconsize;
                             item.SetShowAsAction(ShowAsAction.Always);
                         }

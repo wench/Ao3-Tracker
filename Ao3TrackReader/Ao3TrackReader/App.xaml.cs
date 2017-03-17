@@ -25,6 +25,7 @@ using System.Text;
 
 using Xamarin.Forms;
 using Button = Ao3TrackReader.Controls.Button;
+using Ver = Ao3TrackReader.Version.Version;
 
 namespace Ao3TrackReader
 {
@@ -42,6 +43,9 @@ namespace Ao3TrackReader
         {
             get
             {
+#if true
+                return (Ver.Major, Ver.Minor, Ver.Build);
+#else
 #if WINDOWS_UWP
                 var v = Windows.ApplicationModel.Package.Current.Id.Version;
                 return (v.Major,v.Minor,v.Build);
@@ -60,6 +64,7 @@ namespace Ao3TrackReader
 #else
                 return (0,0,0);
 #endif
+#endif
             }
         }
 
@@ -67,7 +72,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                return "Copyright © 2017 Alexis Ryan";
+                return Ver.Copyright;
             }
         }
 

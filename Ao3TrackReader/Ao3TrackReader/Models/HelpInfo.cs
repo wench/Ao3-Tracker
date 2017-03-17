@@ -25,7 +25,11 @@ namespace Ao3TrackReader.Models
 
         public bool ShouldHide { get; } = false;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add { }
+            remove { } 
+        }
     }
 
     public class HelpInfoAdapter : IHelpInfo
