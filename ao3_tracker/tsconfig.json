@@ -9,7 +9,8 @@
         "strictNullChecks": true,
         "alwaysStrict": false,
         "sourceMap": false,
-        "pretty": true
+        "pretty": true,
+        "noUnusedLocals": false
     },
     "includes": ["./*.ts"]
 }
