@@ -154,8 +154,8 @@ namespace Ao3TrackReader
 
         void SetupToolbar()
         {
-            PrevPageButton = new DisableableCommand(SwipeGoBack, false);
-            NextPageButton = new DisableableCommand(SwipeGoForward, false);
+            PrevPageButton = new DisableableCommand(ToolbarGoBack, false);
+            NextPageButton = new DisableableCommand(ToolbarGoForward, false);
             JumpButton = new DisableableCommand(OnJumpClicked, false);
             IncFontSizeButton = new DisableableCommand(() => LogFontSize++);
             DecFontSizeButton = new DisableableCommand(() => LogFontSize--);
@@ -733,7 +733,7 @@ namespace Ao3TrackReader
 
                     }
                 }
-                NextPageButton.IsEnabled = SwipeCanGoForward;
+                NextPageButton.IsEnabled = ToolbarCanGoForward;
             }
         }
         private Uri prevPage;
@@ -756,8 +756,93 @@ namespace Ao3TrackReader
                     {
                     }
                 }
-                PrevPageButton.IsEnabled = SwipeCanGoBack;
+                PrevPageButton.IsEnabled = ToolbarCanGoBack;
             }
+        }
+
+
+        bool CanGoBack(NavigateBehaviour behaviour)
+        {
+            return (WebViewCanGoBack && behaviour.HasFlag(NavigateBehaviour.History)) ||
+                (prevPage != null && behaviour.HasFlag(NavigateBehaviour.Page));
+        }
+
+        void GoBack(NavigateBehaviour behaviour)
+        {
+            bool h1 = false;
+            bool p = false;
+            bool h2 = false;
+
+            if (behaviour.HasFlag(NavigateBehaviour.HistoryFirst))
+            {
+                h1 = behaviour.HasFlag(NavigateBehaviour.History); ;
+                p = behaviour.HasFlag(NavigateBehaviour.Page);
+            }
+            else
+            {
+                p = behaviour.HasFlag(NavigateBehaviour.Page);
+                h2 = behaviour.HasFlag(NavigateBehaviour.History);
+            }
+
+            if (h1 && WebViewCanGoBack) WebViewGoBack();
+            else if (p && prevPage != null) Navigate(prevPage);
+            else if (h2 && WebViewCanGoBack) WebViewGoBack();
+        }
+
+        bool CanGoForward(NavigateBehaviour behaviour)
+        {
+            return (WebViewCanGoForward && behaviour.HasFlag(NavigateBehaviour.History)) ||
+                (nextPage != null && behaviour.HasFlag(NavigateBehaviour.Page));
+        }
+
+        void GoForward(NavigateBehaviour behaviour)
+        {
+            bool h1 = false;
+            bool p = false;
+            bool h2 = false;
+
+            if (behaviour.HasFlag(NavigateBehaviour.HistoryFirst))
+            {
+                h1 = behaviour.HasFlag(NavigateBehaviour.History); ;
+                p = behaviour.HasFlag(NavigateBehaviour.Page);
+            }
+            else
+            {
+                p = behaviour.HasFlag(NavigateBehaviour.Page);
+                h2 = behaviour.HasFlag(NavigateBehaviour.History);
+            }
+
+            if (h1 && WebViewCanGoForward) WebViewGoForward();
+            else if (p && nextPage != null) Navigate(nextPage);
+            else if (h2 && WebViewCanGoForward) WebViewGoForward();
+        }
+
+        public NavigateBehaviour ToolbarBackBehaviour { get; set; } = NavigateBehaviour.History;
+        public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
+        public void ToolbarGoBack()
+        {
+            GoBack(ToolbarBackBehaviour);
+        }
+
+        public NavigateBehaviour ToolbarForwardBehaviour { get; set; } = NavigateBehaviour.HistoryThenPage;
+        public bool ToolbarCanGoForward => CanGoForward(ToolbarForwardBehaviour);
+        public void ToolbarGoForward()
+        {
+            GoForward(ToolbarForwardBehaviour);
+        }
+
+        public NavigateBehaviour SwipeBackBehaviour { get; set; } = NavigateBehaviour.History;
+        public bool SwipeCanGoBack => CanGoBack(SwipeBackBehaviour);
+        public void SwipeGoBack()
+        {
+            GoBack(SwipeBackBehaviour);
+        }
+
+        public NavigateBehaviour SwipeForwardBehaviour { get; set; } = NavigateBehaviour.PageThenHistory;
+        public bool SwipeCanGoForward => CanGoForward(SwipeForwardBehaviour);
+        public void SwipeGoForward()
+        {
+            GoForward(SwipeForwardBehaviour);
         }
 
         public void AddToReadingList(string href)
@@ -1024,8 +1109,8 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            PrevPageButton.IsEnabled = SwipeCanGoBack;
-            NextPageButton.IsEnabled = SwipeCanGoForward;
+            PrevPageButton.IsEnabled = ToolbarCanGoBack;
+            NextPageButton.IsEnabled = ToolbarCanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
@@ -1049,8 +1134,8 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            PrevPageButton.IsEnabled = SwipeCanGoBack;
-            NextPageButton.IsEnabled = SwipeCanGoForward;
+            PrevPageButton.IsEnabled = ToolbarCanGoBack;
+            NextPageButton.IsEnabled = ToolbarCanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;

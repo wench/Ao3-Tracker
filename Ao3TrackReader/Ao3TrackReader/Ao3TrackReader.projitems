@@ -61,6 +61,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Colors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Icons.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NavigateBehaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.xaml.cs">
       <DependentUpon>WebViewPage.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -155,9 +155,9 @@ namespace Ao3TrackReader
         public Uri CurrentUri
         {
             get {
-                return DoOnMainThread(()=> {
+                return DoOnMainThread(() => {
                     return webView.Source;
-                    });
+                });
             }
         }
 
@@ -174,20 +174,17 @@ namespace Ao3TrackReader
             webView.Refresh();
         }
 
-        public bool SwipeCanGoBack { get { return webView.CanGoBack || prevPage != null; } }
+        bool WebViewCanGoBack => webView.CanGoBack;
 
-        public bool SwipeCanGoForward { get { return webView.CanGoForward || nextPage != null; } }
+        bool WebViewCanGoForward => webView.CanGoForward;
 
-        public void SwipeGoBack()
+        void WebViewGoBack()
         {
-            if (webView.CanGoBack) webView.GoBack();
-            else if (prevPage != null) Navigate(prevPage);
+            webView.GoBack();
         }
-        public void SwipeGoForward()
+        void WebViewGoForward()
         {
-            if (webView.CanGoForward) webView.GoForward();
-            else if (nextPage != null) Navigate(nextPage);
-
+            webView.GoForward();
         }
 
         public double DeviceWidth
