@@ -141,21 +141,19 @@ namespace Ao3TrackReader.Droid
             int remaining = (int)App.Current.MainPage.Width;
             remaining -= 50;    // App icon
             remaining -= 50;    // Overflow button
-            int count = 0;
-            ISubMenu submenu = null;
 
-            if (Android.OS.Build.VERSION.SdkInt < BuildVersionCodes.Kitkat && remaining < 250)
-            {
-                submenu = menu.AddSubMenu("More");
-                submenu.SetIcon(Android.Resource.Drawable.IcMenuMore);
-                submenu.Item.SetShowAsAction(ShowAsAction.Always);
-            }
+            var submenu = menu.AddSubMenu("More");
+            submenu.SetIcon(Ao3TrackReader.App.Theme=="dark"?Resource.Drawable.more_dark:Resource.Drawable.more_light);
+            submenu.Item.SetShowAsAction(ShowAsAction.Always);
+            bool hasprimary = false;
+            bool hassecondary = false;
 
             for (var i = 0; i < menu.Size(); i++)
             {
                 var item = menu.GetItem(i);
                 if ((item.Order & 0xFFFF0000) == 0 && !item.HasSubMenu)
                 {
+                    bool isprimary = item.Icon != null;
                     var toolbaritem = source.Where((t) => t.Text == item.TitleFormatted.ToString()).FirstOrDefault() as Ao3TrackReader.Controls.ToolbarItem;
                     if (toolbaritem != null)
                     {
@@ -170,32 +168,30 @@ namespace Ao3TrackReader.Droid
                     
                     UpdateColorTint(item, toolbaritem);
 
-                    if (item.Icon != null)
+                    if (isprimary && remaining >= 50)
                     {
-                        int iconsize = 50;
-                        if (remaining >= iconsize)
-                        {
-                            count++;
-                            remaining -= iconsize;
-                            item.SetShowAsAction(ShowAsAction.Always);
-                        }
-                        else if (submenu != null && toolbaritem != null)
-                        {
-                            var newitem = submenu.Add(item.GroupId, item.ItemId, item.Order, item.TitleFormatted);
-                            newitem.SetIcon(item.Icon);
-                            newitem.SetEnabled(item.IsEnabled);
-                            newitem.SetOnMenuItemClickListener(new ClickListener(toolbaritem));
-                            toolbaritem.MenuItem = newitem;
-                            item.SetVisible(false);
-                        }
-                        else
-                        {
-                            item.SetShowAsAction(ShowAsAction.IfRoom);
-                            remaining = 0;
-                        }
+                        remaining -= 50;
+                        item.SetShowAsAction(ShowAsAction.Always);
+                    }
+                    else if (submenu != null && toolbaritem != null)
+                    {
+                        var newitem = submenu.Add(item.GroupId, item.ItemId, item.Order + (isprimary?0:1024), item.TitleFormatted);
+                        if (isprimary) hasprimary = true;
+                        else hassecondary = true;
+                        newitem.SetIcon(item.Icon);
+                        newitem.SetEnabled(item.IsEnabled);
+                        newitem.SetOnMenuItemClickListener(new ClickListener(toolbaritem));
+                        toolbaritem.MenuItem = newitem;
+                        item.SetVisible(false);                        
+                    }
+                    else
+                    {
+                        item.SetShowAsAction(ShowAsAction.Never);
+                        remaining = 0;
                     }
                 }
             }
+            if (hasprimary && hassecondary) submenu.Add(Menu.None, Menu.None, 1023, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
 
             return res;
         }

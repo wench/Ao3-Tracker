@@ -90,5 +90,9 @@ namespace Ao3TrackReader.Resources
         {
             get { return App.PlatformIcon("help") + ".png"; }
         }
+        public static string More
+        {
+            get { return App.PlatformIcon("More") + ".png"; }
+        }
     }
 }

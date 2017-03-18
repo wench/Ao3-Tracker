@@ -258,6 +258,18 @@
     <BundleResource Include="..\Icons\200\help_light.scale-200.png">
       <Link>Resources\help_light%402x.png</Link>
     </BundleResource>
+    <BundleResource Include="..\Icons\more_dark.png">
+      <Link>Resources\more_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\more_dark.scale-200.png">
+      <Link>Resources\more_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\more_light.png">
+      <Link>Resources\more_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\more_light.scale-200.png">
+      <Link>Resources\more_light%402x.png</Link>
+    </BundleResource>
     <BundleResource Include="..\Icons\redo_dark.png">
       <Link>Resources\redo_dark.png</Link>
     </BundleResource>
