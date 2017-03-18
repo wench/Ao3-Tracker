@@ -33,7 +33,7 @@ namespace Ao3TrackReader.Helper
         }
 
         static HelperDef s_def;
-        public HelperDef HelperDef
+        internal HelperDef HelperDef
         {
             get
             {

@@ -101,14 +101,15 @@ namespace Ao3TrackReader
             {
                 UserContentController = userContentController = new WKUserContentController()
             };
-            userContentController.AddScriptMessageHandler(new ScriptMessageHandler(this), "ao3track");
+            var helper = new Ao3TrackHelper(this); 
+            userContentController.AddScriptMessageHandler(new ScriptMessageHandler(this, helper), "ao3track");
             configuration.Preferences = preferences;
 
             webView = new WKWebView(configuration)
             {
                 NavigationDelegate = new NavigationDelegate(this)
             };
-            helper = new Ao3TrackHelper(this);
+            this.helper = helper;
 
             webView.FocuseChanged += WebView_FocusChange;
 
@@ -306,17 +307,20 @@ namespace Ao3TrackReader
         class ScriptMessageHandler : WKScriptMessageHandler
         {
             WebViewPage wvp;
-            public ScriptMessageHandler(WebViewPage wvp)
+            private Ao3TrackHelper helper;
+
+            public ScriptMessageHandler(WebViewPage wvp, Ao3TrackHelper helper)
             {
                 this.wvp = wvp;
+                this.helper = helper;
             }
 
             public class Message
-            {
-                public string type;
-                public string name;
-                public string value;
-                public string[] args;
+            {                
+                public string type { get; set; }
+                public string name { get; set; }
+                public string value { get; set; }
+                public string[] args { get; set; }
             }
 
             private object Deserialize(string value, Type type)
@@ -344,7 +348,7 @@ namespace Ao3TrackReader
                     });
                     return;
                 }
-                else if (wvp.helper.HelperDef.TryGetValue(msg.name, out var md))
+                else if (helper.HelperDef.TryGetValue(msg.name, out var md))
                 {
                     if (msg.type == "SET" && md.pi?.CanWrite == true)
                     {

@@ -13,6 +13,7 @@
     <AssemblyName>Ao3TrackReader.iOS</AssemblyName>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <HelperConfiguration>Release</HelperConfiguration>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,6 +29,7 @@
     <MtouchDebug>True</MtouchDebug>
     <IOSDebugOverWiFi>False</IOSDebugOverWiFi>
     <IOSDebuggerPort>10000</IOSDebuggerPort>
+    <HelperConfiguration>Debug</HelperConfiguration>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -66,6 +68,7 @@
     <OptimizePNGs>True</OptimizePNGs>
     <MtouchFloat32>False</MtouchFloat32>
     <DeviceSpecificBuild>False</DeviceSpecificBuild>
+    <HelperConfiguration>Debug</HelperConfiguration>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -456,6 +459,6 @@
     <Error Condition="!Exists('..\..\packages\Xamarin.Forms.2.3.4.192-pre2\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Xamarin.Forms.2.3.4.192-pre2\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)Ao3TrackReader/Ao3TrackReader.Version.Build/bin/$(ConfigurationName)/Ao3TrackReader.Version.Build.exe $(ProjectDir)Info.plist /plist/dict/key[text()='CFBundleVersion']/following-sibling::node()=String /plist/dict/key[text()='CFBundleShortVersionString']/following-sibling::node()=String</PreBuildEvent>
+    <PreBuildEvent>$(SolutionDir)Ao3TrackReader/Ao3TrackReader.Version.Build/bin/$(HelperConfiguration)/Ao3TrackReader.Version.Build.exe $(ProjectDir)Info.plist /plist/dict/key[text()='CFBundleVersion']/following-sibling::node()=String /plist/dict/key[text()='CFBundleShortVersionString']/following-sibling::node()=String</PreBuildEvent>
   </PropertyGroup>
 </Project>
