@@ -15,17 +15,51 @@ See the License for the specific language governing permissions and
 limitations under the License.   
 -->
 <local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-            x:Class="Ao3TrackReader.Controls.SettingsView">
+            x:Class="Ao3TrackReader.Controls.SettingsView" xmlns:m="clr-namespace:Ao3TrackReader.Models" xmlns:a="clr-namespace:Ao3TrackReader" >
     <local:PaneView.Resources>
         <ResourceDictionary>
             <Style TargetType="Label">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
             </Style>
+            
             <Style TargetType="local:TextView">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
             </Style>
+            
+            <Style TargetType="local:DropDown">
+                <Setter Property="WidthRequest" Value="180" />
+                <Setter Property="HorizontalOptions" Value="EndAndExpand" />
+            </Style>
+
+            <m:KeyedItemList x:TypeArguments="x:String" x:Key="Themes" x:Name="themes" />
+
+            <m:KeyedItemList x:TypeArguments="a:NavigateBehaviour" x:Key="NavigateMode" x:Name="navigateMode" >
+                <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="History"         Value="History Only"/>
+                <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="Page"            Value="Page Only"/>
+                <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="HistoryThenPage" Value="History then Page" />
+                <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="PageThenHistory" Value="Page then History "/>
+            </m:KeyedItemList>
+
+            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="BackButtonMode" x:Name="backButtonMode">
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Auto"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="Shown Always"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Never Shown"/>
+            </m:NullableKeyedItemList>
+
+            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="UnitConvMode" x:Name="unitConvMode">
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Disabled"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="US to Metric"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Metric to US"/>
+            </m:NullableKeyedItemList>
+
+            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="UnitConvModeTemp" x:Name="unitConvModeTemp">
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Disabled"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="&#xB0;F to &#xB0;C"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="&#xB0;C to &#xB0;F"/>
+            </m:NullableKeyedItemList>
         </ResourceDictionary>
     </local:PaneView.Resources>
+
     <local:PaneView.Content>
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
@@ -85,38 +119,59 @@ limitations under the License.
                         <Label Text="Toolbar Settings" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Show Back Button on Toolbar" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="backButtonModeDropDown" SelectedIndexChanged="OnBackButtonModeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="backButtonModeDropDown" ItemsSource="{StaticResource BackButtonMode}" SelectedIndexChanged="OnBackButtonModeSelected" />
+                        </StackLayout>
+                    </StackLayout>
+
+                    <StackLayout Spacing="8" x:Name="navigationForm">
+                        <Label Text="Navigation Options" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label Text="Choose the navigation options for the toolbar buttons and swipe gestures. Choose between Browser History style navigation, or Next/Previous Page navigation, or both." FontSize="{StaticResource MicroFontSize}" />
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Back Button" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="toolbarBackDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnNavOptionSelected" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Forward Button" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="toolbarForwardDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Swipe Right" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="swipeBackDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Swipe Left" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="swipeFowardDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="unitConvForm">
                         <Label Text="Unit Conversions" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." FontSize="{StaticResource MicroFontSize}" />
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Temperature" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvTempDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvTempDropDown" ItemsSource="{StaticResource UnitConvModeTemp}" SelectedIndexChanged="OnUnitConvSelected"  />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Length/Distance" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvDistDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvDistDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected"  />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Volume" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvVolumeDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvVolumeDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Convert Weight" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvWeightDropDown" SelectedIndexChanged="OnUnitConvSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="unitConvWeightDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
-                        <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." FontSize="{StaticResource MicroFontSize}" />
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="themeForm">
                         <Label Text="Theme" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label Text="You must restart the app to apply a new theme" FontSize="{StaticResource MicroFontSize}" />
                         <StackLayout Orientation="Horizontal">
                             <Label Text="Select the Application Theme" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="themeDropDown" SelectedIndexChanged="OnThemeSelected" WidthRequest="150" HorizontalOptions="EndAndExpand" />
+                            <local:DropDown x:Name="themeDropDown" SelectedIndexChanged="OnThemeSelected" ItemsSource="{StaticResource Themes}" />
                         </StackLayout>
-                        <Label Text="You must restart the app to apply a new theme" FontSize="{StaticResource MicroFontSize}" />
                     </StackLayout>
 
                     <StackLayout Spacing="8">

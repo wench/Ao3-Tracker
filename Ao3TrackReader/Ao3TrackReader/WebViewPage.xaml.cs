@@ -93,6 +93,11 @@ namespace Ao3TrackReader
             if (!App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
             else LogFontSize = 0;
 
+            App.Database.TryGetVariable("ToolbarBackBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarBackBehaviour, NavigateBehaviour.History);
+            App.Database.TryGetVariable("ToolbarForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarForwardBehaviour, NavigateBehaviour.HistoryThenPage);
+            App.Database.TryGetVariable("SwipeBackBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeBackBehaviour, NavigateBehaviour.History);
+            App.Database.TryGetVariable("SwipeForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeForwardBehaviour, NavigateBehaviour.PageThenHistory);
+
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 Navigate(uri);
@@ -817,28 +822,28 @@ namespace Ao3TrackReader
             else if (h2 && WebViewCanGoForward) WebViewGoForward();
         }
 
-        public NavigateBehaviour ToolbarBackBehaviour { get; set; } = NavigateBehaviour.History;
+        public NavigateBehaviour ToolbarBackBehaviour = NavigateBehaviour.History;
         public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
         public void ToolbarGoBack()
         {
             GoBack(ToolbarBackBehaviour);
         }
 
-        public NavigateBehaviour ToolbarForwardBehaviour { get; set; } = NavigateBehaviour.HistoryThenPage;
+        public NavigateBehaviour ToolbarForwardBehaviour = NavigateBehaviour.HistoryThenPage;
         public bool ToolbarCanGoForward => CanGoForward(ToolbarForwardBehaviour);
         public void ToolbarGoForward()
         {
             GoForward(ToolbarForwardBehaviour);
         }
 
-        public NavigateBehaviour SwipeBackBehaviour { get; set; } = NavigateBehaviour.History;
+        public NavigateBehaviour SwipeBackBehaviour = NavigateBehaviour.History;
         public bool SwipeCanGoBack => CanGoBack(SwipeBackBehaviour);
         public void SwipeGoBack()
         {
             GoBack(SwipeBackBehaviour);
         }
 
-        public NavigateBehaviour SwipeForwardBehaviour { get; set; } = NavigateBehaviour.PageThenHistory;
+        public NavigateBehaviour SwipeForwardBehaviour = NavigateBehaviour.PageThenHistory;
         public bool SwipeCanGoForward => CanGoForward(SwipeForwardBehaviour);
         public void SwipeGoForward()
         {

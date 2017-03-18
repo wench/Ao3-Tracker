@@ -31,6 +31,7 @@ using Android.Widget;
 using Android.Runtime;
 using Android.Text.Style;
 using Android.Views;
+using System.Collections.Specialized;
 
 [assembly: ExportRenderer(typeof(DropDown), typeof(Ao3TrackReader.Droid.DropDownRenderer))]
 namespace Ao3TrackReader.Droid
@@ -50,6 +51,7 @@ namespace Ao3TrackReader.Droid
             if (e.OldElement is DropDown old)
             {
                 old.SelectedIndexChanged -= Element_ItemSelected;
+                if (ncc != null) ncc.CollectionChanged -= ItemSource_CollectionChanged;
                 Control.Adapter = null;
                 itemSource = null;
             }
@@ -71,15 +73,26 @@ namespace Ao3TrackReader.Droid
             }
         }
 
+        INotifyCollectionChanged ncc;
         System.Collections.IList itemSource;
         void UpdateItemSource()
         {
+            if (ncc != null) ncc.CollectionChanged -= ItemSource_CollectionChanged;
             if (Element?.ItemsSource == null)
             {
+                ncc = null;
                 itemSource = null;
                 Control.Adapter = null;
                 return;
             }
+            ncc = Element.ItemsSource as INotifyCollectionChanged;
+            if (ncc != null) ncc.CollectionChanged += ItemSource_CollectionChanged;
+
+            FillControl();
+        }
+
+        void FillControl()
+        {
             itemSource = Element.ItemsSource as System.Collections.IList;
             if (itemSource == null)
             {
@@ -93,6 +106,11 @@ namespace Ao3TrackReader.Droid
 
             int index = itemSource.IndexOf(Element.SelectedItem);
             if (index != -1) Control.SetSelection(index);
+        }
+
+        private void ItemSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            FillControl();
         }
 
         private void Element_ItemSelected(object sender, EventArgs e)

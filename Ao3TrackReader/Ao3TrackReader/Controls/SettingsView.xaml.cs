@@ -31,11 +31,7 @@ namespace Ao3TrackReader.Controls
     {
         bool isCreateUser;
 
-        List<KeyedItem<string>> themes;
         KeyedItem<string> defaultTheme;
-        private List<KeyedItem<bool?>> backButtonMode;
-        private List<KeyedItem<bool?>> unitConvModeTemp;
-        private List<KeyedItem<bool?>> unitConvMode;
 
         public SettingsView()
         {
@@ -52,35 +48,8 @@ namespace Ao3TrackReader.Controls
 
             isCreateUser = false;
 
-            themes = new List<KeyedItem<string>> {
-                (defaultTheme = new KeyedItem<string> ("light", "Light" )),
-                new KeyedItem<string> ( "dark", "Dark" )
-            };
-            themeDropDown.ItemsSource = themes;
-
-            backButtonMode = new List<KeyedItem<bool?>> {
-                new KeyedItem<bool?>(null,"Auto"),
-                new KeyedItem<bool?>(true,"Shown Always"),
-                new KeyedItem<bool?>(false,"Never Shown")
-            };
-            backButtonModeDropDown.ItemsSource = backButtonMode;
-
-            unitConvMode = new List<KeyedItem<bool?>> {
-                new KeyedItem<bool?>(null,"Disabled"),
-                new KeyedItem<bool?>(true,"US to Metric"),
-                new KeyedItem<bool?>(false,"Metric to US")
-            };
-            unitConvDistDropDown.ItemsSource = unitConvMode;
-            unitConvVolumeDropDown.ItemsSource = unitConvMode;
-            unitConvWeightDropDown.ItemsSource = unitConvMode;
-
-            unitConvModeTemp = new List<KeyedItem<bool?>> {
-                new KeyedItem<bool?>(null,"Disabled"),
-                new KeyedItem<bool?>(true,"\x00B0F to \x00B0C"),
-                new KeyedItem<bool?>(false,"\x00B0C to \x00B0F")
-            };
-            unitConvTempDropDown.ItemsSource = unitConvModeTemp;
-
+            themes.Add(defaultTheme = new KeyedItem<string>("light", "Light"));
+            themes.Add(new KeyedItem<string>("dark", "Dark"));
         }
 
         protected override void OnIsOnScreenChanging(bool newValue)
@@ -91,7 +60,8 @@ namespace Ao3TrackReader.Controls
                 SelectCurrentTheme();
                 SelectBackButtonMode();
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
-                UpdateUnitConv();
+                UpdateUnitConvs();
+                UpdateNavOptions();
             }
         }
 
@@ -212,15 +182,7 @@ namespace Ao3TrackReader.Controls
         void SelectCurrentTheme()
         {
             string theme = Ao3TrackReader.App.Database.GetVariable("Theme");
-            KeyedItem<string> item = defaultTheme;
-            foreach (var i in themes)
-            {
-                if (i.Key == theme)
-                {
-                    item = i;
-                    break;
-                }
-            }
+            var item = themes.Find(theme) ?? defaultTheme;
             App.Database.SaveVariable("Theme", item.Key);
             themeDropDown.SelectedItem = item;
         }
@@ -250,15 +212,7 @@ namespace Ao3TrackReader.Controls
             bool? show = null;
             App.Database.TryGetVariable("ShowBackButton", bool.TryParse, out show);
 
-            KeyedItem<bool?> item = backButtonMode[0];
-            foreach (var i in backButtonMode)
-            {
-                if (i.Key == show)
-                {
-                    item = i;
-                    break;
-                }
-            }
+            var item = backButtonMode.Find(show) ?? backButtonMode[0];
             App.Database.SaveVariable("ShowBackButton", item.Key);
             backButtonModeDropDown.SelectedItem = item;
         }
@@ -317,21 +271,21 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        private void UpdateUnitConv()
+        private void UpdateUnitConvs()
         {
             bool? v;
 
             App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out v);
-            unitConvTempDropDown.SelectedItem = unitConvModeTemp.Find((i) => i.Key == v);
+            unitConvTempDropDown.SelectedItem = unitConvModeTemp.Find(v);
 
             App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out v);
-            unitConvDistDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
+            unitConvDistDropDown.SelectedItem = unitConvMode.Find(v);
 
             App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out v);
-            unitConvVolumeDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
+            unitConvVolumeDropDown.SelectedItem = unitConvMode.Find(v);
 
             App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out v);
-            unitConvWeightDropDown.SelectedItem = unitConvMode.Find((i) => i.Key == v);
+            unitConvWeightDropDown.SelectedItem = unitConvMode.Find(v);
         }
 
         void OnUnitConvSelected(object sender, EventArgs e)
@@ -349,6 +303,50 @@ namespace Ao3TrackReader.Controls
             var val = (KeyedItem<bool?>)dropdown.SelectedItem;
 
             App.Database.SaveVariable(varname, val.Key);
+        }
+
+        private ref NavigateBehaviour UnitConvForControl(DropDown control, out string name)
+        {
+            if (control == toolbarBackDropDown) {
+                name = "ToolbarBackBehaviour";
+                return ref wvp.ToolbarBackBehaviour;
+            }
+
+            if (control == toolbarForwardDropDown) {
+                name = "ToolbarForwardBehaviour";
+                return ref wvp.ToolbarForwardBehaviour;
+            }
+
+            if (control == swipeBackDropDown) {
+                name = "SwipeBackBehaviour";
+                return ref wvp.SwipeBackBehaviour;
+            }
+
+            if (control == swipeFowardDropDown) {
+                name = "SwipeForwardBehaviour";
+                return ref wvp.SwipeForwardBehaviour;
+            }
+
+            throw new ArgumentException("Invalid control name", nameof(control));
+        }
+        private void UpdateNavOptions()
+        {
+            foreach (var dropdown in navigationForm.FindChildren<DropDown>())
+            {
+                ref NavigateBehaviour value = ref UnitConvForControl(dropdown, out var dbname);
+                dropdown.SelectedItem = navigateMode.Find(value);
+            }
+        }
+
+        void OnNavOptionSelected(object sender, EventArgs e)
+        {
+            if (!IsOnScreen) return;
+
+            var dropdown = sender as DropDown;
+            ref NavigateBehaviour value = ref UnitConvForControl(dropdown, out var dbname);
+
+            value = (dropdown.SelectedItem as KeyedItem<NavigateBehaviour>).Key;
+            App.Database.SaveVariable(dbname, value);
         }
     }
 }

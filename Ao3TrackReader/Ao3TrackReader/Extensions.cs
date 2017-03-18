@@ -158,5 +158,20 @@ namespace Ao3TrackReader
         }
 #endif
 
+        public static IEnumerable<T> FindChildren<T>(this Xamarin.Forms.Element elem)
+            where T: Xamarin.Forms.Element
+        {
+            Stack<Xamarin.Forms.IElementController> elems = new Stack<Xamarin.Forms.IElementController>(10);
+            elems.Push(elem);
+            while (elems.Count != 0)
+            {
+                var e = elems.Pop();
+                foreach (var c in e.LogicalChildren)
+                {
+                    if (c is T ret) yield return ret;
+                    elems.Push(c);
+                }
+            }
+        }
     }
 }

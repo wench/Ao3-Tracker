@@ -16,11 +16,13 @@ limitations under the License.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
+using System.Linq;
 
 namespace Ao3TrackReader.Models
 {
-    public class KeyedItem<TKey,TValue>
+    public class KeyedItem<TKey, TValue>
     {
         public TKey Key { get; set; }
         public TValue Value { get; set; }
@@ -44,7 +46,7 @@ namespace Ao3TrackReader.Models
 
         public override bool Equals(object obj)
         {
-            var o = obj as KeyedItem<TKey,TValue>;
+            var o = obj as KeyedItem<TKey, TValue>;
             if (o == null) return false;
             return object.Equals(Key, o.Key) && object.Equals(Value, o.Value);
         }
@@ -56,4 +58,55 @@ namespace Ao3TrackReader.Models
         {
         }
     }
+
+    public class NullableKeyedItem<TKey> : KeyedItem<Nullable<TKey>, string>
+        where TKey: struct
+    {
+        public NullableKeyedItem() { }
+        public NullableKeyedItem(TKey key, string value) : base(key, value)
+        {
+        }
+    }
+
+    public class KeyedItemList<TKey, TValue> : ObservableCollection<KeyedItem<TKey, TValue>>
+    {
+        public KeyedItemList() : base()
+        {
+
+        }
+        public KeyedItemList(IEnumerable<KeyedItem<TKey, TValue>> collection) : base(collection)
+        {
+
+        }
+    }
+
+    public class KeyedItemList<TKey> : KeyedItemList<TKey,string>
+    {
+        public KeyedItemList() : base()
+        {
+
+        }
+        public KeyedItemList(IEnumerable<KeyedItem<TKey, string>> collection) : base(collection)
+        {
+
+        }
+    }
+
+    public class NullableKeyedItemList<TKey> : KeyedItemList<Nullable<TKey>, string>
+        where TKey: struct
+    {
+    }
+
+    public static class KeyedItemExtensions
+    {
+        public static KeyedItem<TKey> Find<TKey>(this IEnumerable<KeyedItem<TKey>> list, TKey key)
+        {
+            return list.FirstOrDefault((i) => Equals(i.Key, key));
+        }
+        public static KeyedItem<TKey, TValue> Find<TKey, TValue>(this IEnumerable<KeyedItem<TKey, TValue>> list, TKey key)
+        {
+            return list.FirstOrDefault((i) => Equals(i.Key, key));
+        }
+    }
+
 }
