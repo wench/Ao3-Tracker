@@ -24,6 +24,8 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Ao3TrackReader.Controls;
+using Xamarin.Forms.Platform.Android;
 
 namespace Ao3TrackReader.Droid
 {
@@ -80,11 +82,13 @@ namespace Ao3TrackReader.Droid
                         (byte)(color.Value.B * 255)
                     ), Android.Graphics.PorterDuff.Mode.SrcIn);
                 var tt = new Models.TextNode { Text = item.TitleFormatted.ToString() };
-                item.SetTitle(tt.ConvertToSpannable(new Models.StateNode { Foreground = color }));
+                var spannable = tt.ConvertToSpannable(new Models.StateNode { Foreground = color });
+                item.SetTitle(spannable);
             }
             else
             {
                 if (item.Icon != null) item.Icon.ClearColorFilter();
+                item.SetTitle(item.TitleFormatted.ToString());
             }
 
         }
@@ -97,6 +101,23 @@ namespace Ao3TrackReader.Droid
                 UpdateColorTint(toolbaritem.MenuItem, toolbaritem);
             }
         }
+
+        class ClickListener : Java.Lang.Object, IMenuItemOnMenuItemClickListener
+        {
+            private Xamarin.Forms.IMenuItemController xitem;
+
+            public ClickListener(Xamarin.Forms.IMenuItemController menuitem)
+            {
+                xitem = menuitem;
+            }
+
+            public bool OnMenuItemClick(IMenuItem item)
+            {
+                xitem.Activate();
+                return true;
+            }
+        }
+
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
@@ -120,30 +141,52 @@ namespace Ao3TrackReader.Droid
             int remaining = (int)App.Current.MainPage.Width;
             remaining -= 50;    // App icon
             remaining -= 50;    // Overflow button
-            int minimum = 5;
+            int count = 0;
+            ISubMenu submenu = null;
+
+            if (Android.OS.Build.VERSION.SdkInt < BuildVersionCodes.Kitkat && remaining < 250)
+            {
+                submenu = menu.AddSubMenu("More");
+                submenu.SetIcon(Android.Resource.Drawable.IcMenuMore);
+                submenu.Item.SetShowAsAction(ShowAsAction.Always);
+            }
 
             for (var i = 0; i < menu.Size(); i++)
             {
                 var item = menu.GetItem(i);
-                if ((item.Order & 0xFFFF) == 0)
+                if ((item.Order & 0xFFFF0000) == 0 && !item.HasSubMenu)
                 {
                     var toolbaritem = source.Where((t) => t.Text == item.TitleFormatted.ToString()).FirstOrDefault() as Ao3TrackReader.Controls.ToolbarItem;
                     if (toolbaritem != null)
                     {
                         toolbaritem.PropertyChanged += Toolbaritem_PropertyChanged;
                         toolbaritem.MenuItem = item;
-                    }
 
+                        if (item.Icon == null && toolbaritem.Icon != null)
+                        {
+                            item.SetIcon(new Android.Graphics.Drawables.BitmapDrawable(Resources, Resources.GetBitmap(toolbaritem.Icon)));
+                        }
+                    }
+                    
                     UpdateColorTint(item, toolbaritem);
 
                     if (item.Icon != null)
                     {
                         int iconsize = 50;
-                        if (remaining >= iconsize || minimum > 0)
+                        if (remaining >= iconsize)
                         {
-                            minimum--;
+                            count++;
                             remaining -= iconsize;
                             item.SetShowAsAction(ShowAsAction.Always);
+                        }
+                        else if (submenu != null && toolbaritem != null)
+                        {
+                            var newitem = submenu.Add(item.GroupId, item.ItemId, item.Order, item.TitleFormatted);
+                            newitem.SetIcon(item.Icon);
+                            newitem.SetEnabled(item.IsEnabled);
+                            newitem.SetOnMenuItemClickListener(new ClickListener(toolbaritem));
+                            toolbaritem.MenuItem = newitem;
+                            item.SetVisible(false);
                         }
                         else
                         {
