@@ -166,21 +166,23 @@ namespace Ao3TrackReader
 
         public delegate bool TryParseDelegate<T>(string s, out T result);
 
-        public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T result)
+        public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T result, T onFailure = default(T))
         {
             lock (locker)
             {
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
                 if (row != null)
                 {
-                    if (row.value != null) return tryparse(row.value, out result);
+                    if (row.value != null && tryparse(row.value, out result))
+                        return true;
+
                 }
-                result = default(T);
+                result = onFailure;
                 return false;
             }
         }
 
-        public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T? result)
+        public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T? result, T? onFailure = null)
             where T : struct
         {
             lock (locker)
@@ -202,7 +204,7 @@ namespace Ao3TrackReader
                         return true;
                     }
                 }
-                result = null;
+                result = onFailure;
                 return false;
             }
         }
