@@ -15,24 +15,40 @@ See the License for the specific language governing permissions and
 limitations under the License.   
 -->
 <local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-            xmlns:html="clr-namespace:Ao3TrackReader.Text" x:Class="Ao3TrackReader.Controls.ReadingListView" x:Name="root">
+                xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:html="clr-namespace:Ao3TrackReader.Text" xmlns:m="clr-namespace:Ao3TrackReader.Models" 
+                x:Class="Ao3TrackReader.Controls.ReadingListView" x:Name="root">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <c:List x:Key="ExtraHelp" x:Name="ExtraHelp" x:TypeArguments="m:HelpInfo" >
+                <m:HelpInfo Text="Tap" Group="Reading List">
+                    <m:HelpInfo.Description>
+                        <html:Span Pad="True">Tap, or left mouse click, on Reading List items, to browse to the item. If the item is a work or series it will open at the<html:Em>Read To Location.</html:Em></html:Span>
+                    </m:HelpInfo.Description>
+                </m:HelpInfo>
+                <m:HelpInfo Text="Tap and Hold" Group="Reading List">
+                    <m:HelpInfo.Description>Tap and hold, or right mouse click, on Reading List items to bring up a context menu of options for that item.</m:HelpInfo.Description>
+                </m:HelpInfo>
+            </c:List>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
     <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal" x:Name="buttonBar">
                 <local:Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton"
-                              local:HelpView.Text="Add Page To Reading List" local:HelpView.Group="Reading List" >
+                              local:HelpView.Text="Add Page To Reading List Button" local:HelpView.Group="Reading List" >
                     <local:HelpView.Description>Add the currently displayed work, search or webpage to the reading list. </local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton" 
-                              local:HelpView.Text="Refresh Reading List" local:HelpView.Group="Reading List">
+                              local:HelpView.Text="Refresh Reading List Button" local:HelpView.Group="Reading List">
                     <local:HelpView.Description>Refresh all Reading List Data from Archive of Our Own. This button is disabled while the list is being refreshed.</local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource TagIcon}" Clicked="OnShowTags" HorizontalOptions="Start" x:Name="ShowTagsButton" 
-                              local:HelpView.Text="Toggle Tags" local:HelpView.Group="Reading List">
+                              local:HelpView.Text="Toggle Tags Button" local:HelpView.Group="Reading List">
                     <local:HelpView.Description>Toggle the display of tags. Default is hidden.</local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource FilterIcon}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton" 
-                              local:HelpView.Text="Toggle Work Filter" local:HelpView.Group="Reading List">
+                              local:HelpView.Text="Toggle Work Filter Button" local:HelpView.Group="Reading List">
                     <local:HelpView.Description>Toggle the display of incomplete works and series with no unread chapters. Default is hidden.</local:HelpView.Description>
                 </local:Button>
                 <ContentView HorizontalOptions="FillAndExpand" >
@@ -59,6 +75,7 @@ limitations under the License.
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="4" />
                                 </Grid.ColumnDefinitions>
+                                
                                 <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8"
                                         local:BackgroundSwitch.Condition="{Binding Path=IsSelected}" 
                                         local:BackgroundSwitch.ColorFalse="{StaticResource BaseTransVeryLowColor}" 
@@ -104,6 +121,7 @@ limitations under the License.
                                     <local:TextView TextEx="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{StaticResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
                                     <local:TextView TextEx="{Binding Details}" FontSize="{StaticResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
                                 </Grid>
+                                
                                 <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumHighColor}"/>
                             </Grid>
                         </ViewCell>

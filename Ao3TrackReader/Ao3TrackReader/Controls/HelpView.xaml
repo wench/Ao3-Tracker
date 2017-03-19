@@ -28,23 +28,32 @@ limitations under the License.
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Grid RowSpacing="6" Margin="4,4,8,4" Padding="6,3,6,6" BackgroundColor="{StaticResource BaseTransVeryLowColor}" >
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="33" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid ColumnSpacing="6" Margin="0" Padding="0">
+                            <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="4" />
+                                </Grid.ColumnDefinitions>
+                                
+                                <Grid RowSpacing="6" Margin="4,4,4,4" Padding="6,3,6,6" BackgroundColor="{StaticResource BaseTransVeryLowColor}" >
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="33" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="20" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Image Source="{Binding Icon}" HeightRequest="20" WidthRequest="20" VerticalOptions="Start" Margin="0,3,0,0" />
-                                    <local:TextView TextEx="{Binding Text}" TextColor="{StaticResource HighlightColor}" FontSize="{StaticResource MediumSmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Column="1" VerticalTextAlignment="Start" VerticalOptions="StartAndExpand"/>
+                                    <Grid ColumnSpacing="6" Margin="0" Padding="0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="33" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="{Binding Icon}" HeightRequest="20" WidthRequest="20" VerticalOptions="Start" Margin="0,3,0,0" />
+                                        <local:TextView TextEx="{Binding Text}" TextColor="{StaticResource HighlightColor}" FontSize="{StaticResource MediumSmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Column="1" VerticalTextAlignment="Start" VerticalOptions="StartAndExpand"/>
+                                    </Grid>
+                                    <local:TextView TextEx="{Binding Description}" FontSize="{StaticResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
                                 </Grid>
-                                <local:TextView TextEx="{Binding Description}" FontSize="{StaticResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
+                                
+                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0" />
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

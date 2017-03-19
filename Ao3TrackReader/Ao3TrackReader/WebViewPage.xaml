@@ -33,7 +33,7 @@ limitations under the License.
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Jump"                Icon="{StaticResource RedoIcon}"      Command="{Binding JumpCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">Jump to the <html:Em>read to location</html:Em> of this work. This button is only enabled when viewing a work.</html:Span>
+                        <html:Span Pad="true">Jump to the <html:Em>Read To Location</html:Em> of this work. This button is only enabled when viewing a work.</html:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Reading List"        Icon="{StaticResource BookmarksIcon}" Command="{Binding ReadingListCommand,Source={x:Reference root}}" 
@@ -51,12 +51,14 @@ limitations under the License.
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Sync"                Icon="{StaticResource SyncIcon}"      Command="{Binding SyncCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">Syncronise <html:Em>read to location</html:Em> data with the Ao3Track Cloud Server. This button will be disabled while a sync is occuring, or if cloud sync is not available.</html:Span>
+                        <html:Span Pad="true">Syncronise <html:Em>Read To Location</html:Em> data with the Ao3Track Cloud Server. This button will be disabled while a sync is occuring, or if cloud sync is not available.</html:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Force set location"  Icon="{StaticResource ForceLocIcon}"  Command="{Binding ForceSetLocationCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">Force the <html:Em>read to location</html:Em> of the currently viewed work to be set to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the <html:Em>read to location</html:Em>.</html:Span>
+                        <html:Span Pad="true">
+                            Force the <html:Em>Read To Location</html:Em> of the currently viewed work to be set to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the <html:Em>Read To Location.</html:Em>
+                        </html:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Url Bar"             Icon="{StaticResource RenameIcon}"    Command="{Binding UrlBarCommand,Source={x:Reference root}}" 

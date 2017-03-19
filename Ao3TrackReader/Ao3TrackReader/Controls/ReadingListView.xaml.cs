@@ -143,7 +143,9 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        public IEnumerable<Models.IHelpInfo> HelpItems {
+
+        IEnumerable<Models.IHelpInfo> ButtonBarHelpItems
+        {
             get
             {
                 foreach (var v in buttonBar.Children)
@@ -154,6 +156,13 @@ namespace Ao3TrackReader.Controls
                             yield return new Models.HelpInfoAdapter(info);
                     }
                 }
+            }
+        }
+
+        public IEnumerable<Models.IHelpInfo> HelpItems {
+            get
+            {
+                return ExtraHelp.Concat(ButtonBarHelpItems);
             }
         }
 
