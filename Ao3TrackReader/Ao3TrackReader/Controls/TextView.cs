@@ -26,11 +26,11 @@ namespace Ao3TrackReader.Controls
     public class TextView : Xamarin.Forms.Label
     {
         public static readonly Xamarin.Forms.BindableProperty TextTreeProperty =
-          Xamarin.Forms.BindableProperty.Create("TextTree", typeof(Models.TextTree), typeof(TextView), defaultValue: null);
+          Xamarin.Forms.BindableProperty.Create("TextTree", typeof(Text.Text), typeof(TextView), defaultValue: null);
 
-        public Models.TextTree TextTree
+        public Text.Text TextTree
         {
-            get { return (Models.TextTree)GetValue(TextTreeProperty); }
+            get { return (Text.Text)GetValue(TextTreeProperty); }
             set { SetValue(TextTreeProperty, value); }
         }
 

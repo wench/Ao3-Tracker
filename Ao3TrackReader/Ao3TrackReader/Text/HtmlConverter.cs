@@ -20,7 +20,7 @@ using System.Text;
 using HtmlAgilityPack;
 using Ao3TrackReader.Models;
 
-namespace Ao3TrackReader.Data
+namespace Ao3TrackReader.Text
 {
     public static class HtmlConverter
     {
@@ -30,7 +30,7 @@ namespace Ao3TrackReader.Data
         // td, tfoot, th, thead, tr, tt, u, ul, var.
 
 
-        public static TextTree ConvertNode(HtmlNode html)
+        public static Text ConvertNode(HtmlNode html)
         {
             Span span = null;
 
@@ -67,7 +67,7 @@ namespace Ao3TrackReader.Data
                     break;
 
                 case "br":
-                    return new TextNode { Text = "\n" };
+                    return new String { Text = "\n" };
 
 
                 case "center":
@@ -140,7 +140,7 @@ namespace Ao3TrackReader.Data
                     break;
 
                 case "hr":
-                    return new TextNode { Text = "\n----\n" };
+                    return new String { Text = "\n----\n" };
 
                 case "i":
                     span = new Span();
@@ -170,7 +170,7 @@ namespace Ao3TrackReader.Data
                         int i = 1;
                         foreach (var li in html.Elements("li"))
                         {
-                            span.Nodes.Add(new TextNode { Text = i.ToString() + ": " });    // Handle list type...
+                            span.Nodes.Add(new String { Text = i.ToString() + ": " });    // Handle list type...
                             span.Nodes.Add(ConvertNode(li));
                             i++;
                         }
@@ -243,7 +243,7 @@ namespace Ao3TrackReader.Data
                         span = new Block();
                         foreach (var li in html.Elements("li"))
                         {
-                            span.Nodes.Add(new TextNode { Text = "* " });
+                            span.Nodes.Add(new String { Text = "* " });
                             span.Nodes.Add(ConvertNode(li));
                         }
                     }

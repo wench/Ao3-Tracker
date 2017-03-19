@@ -33,15 +33,15 @@ using TextView = Ao3TrackReader.Controls.TextView;
 using Android.Runtime;
 using Android.Text.Style;
 
-namespace Ao3TrackReader.Models
+namespace Ao3TrackReader.Text
 {
-    public abstract partial class TextTree
+    public abstract partial class Text
     {
         public SpannableString ConvertToSpannable(StateNode state)
         {
             var nodes = Flatten(state).TrimNewLines();
 
-            var s = new SpannableString(string.Concat(nodes as IEnumerable<TextNode>));
+            var s = new SpannableString(string.Concat(nodes as IEnumerable<Text>));
             int start = 0;
             foreach (var n in nodes)
             {

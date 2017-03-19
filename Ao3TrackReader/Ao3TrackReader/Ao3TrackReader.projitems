@@ -37,7 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TextView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3SiteDataLookup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Data\HtmlConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\HtmlConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\SyncedStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\WorkEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DisableableCommand.cs" />
@@ -53,7 +53,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\ReadingList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SortColumn.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TagCache.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Models\TextTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\Block.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\StateNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\String.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\Span.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\TextExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\Text.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\UnitConvOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />

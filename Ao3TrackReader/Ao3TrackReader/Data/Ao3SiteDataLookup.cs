@@ -1200,7 +1200,7 @@ namespace Ao3TrackReader.Data
 
                 try
                 {
-                    model.Details.Summary = HtmlConverter.ConvertNode(summarynode);
+                    model.Details.Summary = Text.HtmlConverter.ConvertNode(summarynode);
                 }
                 catch (Exception)
                 {
@@ -1389,7 +1389,7 @@ namespace Ao3TrackReader.Data
                                 {
                                     try
                                     {
-                                        model.Details.Summary = HtmlConverter.ConvertNode(blockquote);
+                                        model.Details.Summary = Text.HtmlConverter.ConvertNode(blockquote);
                                     }
                                     catch (Exception)
                                     {
@@ -1462,7 +1462,7 @@ namespace Ao3TrackReader.Data
 
             try
             {
-                model.Details.Summary = HtmlConverter.ConvertNode(userstuff);
+                model.Details.Summary = Text.HtmlConverter.ConvertNode(userstuff);
             }
             catch (Exception)
             {

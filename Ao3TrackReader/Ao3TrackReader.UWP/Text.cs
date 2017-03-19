@@ -24,9 +24,9 @@ using Windows.UI.Xaml.Media;
 using Windows.UI;
 using Windows.UI.Xaml.Documents;
 
-namespace Ao3TrackReader.Models
+namespace Ao3TrackReader.Text
 {
-    public abstract partial class TextTree
+    public abstract partial class Text
     {
         static bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
 
@@ -89,13 +89,13 @@ namespace Ao3TrackReader.Models
             return new Run();
         }
 
-        public static implicit operator Inline(TextTree tree)
+        public static implicit operator Inline(Text tree)
         {
             return tree.ConvertToInline();
         }
     }
 
-    public partial class TextNode
+    public partial class String
     {
         public override Inline ConvertToInline()
         {

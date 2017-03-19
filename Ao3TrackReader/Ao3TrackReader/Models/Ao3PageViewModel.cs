@@ -133,10 +133,10 @@ namespace Ao3TrackReader.Models
 
         public string Group { get; private set; }
         public string GroupType { get; private set; }
-        public TextTree Title { get; private set; }
+        public Text.Text Title { get; private set; }
         public DateTime? Date { get; private set; }
-        public TextTree Subtitle { get; private set; }
-        public TextTree Details { get; private set; }
+        public Text.Text Subtitle { get; private set; }
+        public Text.Text Details { get; private set; }
 
         public int? ChaptersRead { get; private set; }
         public int? Unread { get; private set; }
@@ -174,17 +174,17 @@ namespace Ao3TrackReader.Models
         }
 
 
-        public TextTree Summary { get; private set; }
+        public Text.Text Summary { get; private set; }
 
         public bool SummaryVisible { get { return Summary != null && !Summary.IsEmpty; } }
 
 
         SortedDictionary<Ao3TagType, List<string>> tags;
-        public TextTree Tags
+        public Text.Text Tags
         {
             get
             {
-                var fs = new Span();
+                var fs = new Text.Span();
 
                 if (tags != null)
                 {
@@ -192,7 +192,7 @@ namespace Ao3TrackReader.Models
                     {
                         if (t.Key == Ao3TagType.Fandoms) continue;
 
-                        var s = new Span();
+                        var s = new Text.Span();
 
                         if (t.Key == Ao3TagType.Warnings)
                         {
@@ -212,8 +212,8 @@ namespace Ao3TrackReader.Models
 
                         foreach (var tag in t.Value)
                         {
-                            s.Nodes.Add(new TextNode { Text = tag.Replace(' ', '\xA0'), Underline = true });
-                            s.Nodes.Add(new TextNode { Text = ",  " });
+                            s.Nodes.Add(new Text.String { Text = tag.Replace(' ', '\xA0'), Underline = true });
+                            s.Nodes.Add(new Text.String { Text = ",  " });
                         }
 
                         if (s.Nodes.Count != 0)
@@ -222,7 +222,7 @@ namespace Ao3TrackReader.Models
                 }
                 if (fs.Nodes.Count != 0)
                 {
-                    var last = fs.Nodes[fs.Nodes.Count - 1] as Span;
+                    var last = fs.Nodes[fs.Nodes.Count - 1] as Text.Span;
                     last.Nodes.RemoveAt(last.Nodes.Count - 1);
                 }
                 return fs;
@@ -500,39 +500,39 @@ namespace Ao3TrackReader.Models
 
         void UpdateTitle()
         {
-            var ts = new Span();
+            var ts = new Text.Span();
 
             if (baseData.Type == Ao3PageType.Search || baseData.Type == Ao3PageType.Bookmarks || baseData.Type == Ao3PageType.Tag)
             {
                 if (!string.IsNullOrWhiteSpace(baseData.PrimaryTag))
                 {
                     ts.Nodes.Add(baseData.PrimaryTag);
-                    if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(new TextNode { Text = " - ", Foreground = Colors.Base });
+                    if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(new Text.String { Text = " - ", Foreground = Colors.Base });
                 }
             }
 
-            if (baseData.Type == Ao3PageType.Series) ts.Nodes.Add(new TextNode { Text = "Series ", Foreground = Colors.Base });
-            else if (baseData.Type == Ao3PageType.Collection) ts.Nodes.Add(new TextNode { Text = "Collection ", Foreground = Colors.Base });
+            if (baseData.Type == Ao3PageType.Series) ts.Nodes.Add(new Text.String { Text = "Series ", Foreground = Colors.Base });
+            else if (baseData.Type == Ao3PageType.Collection) ts.Nodes.Add(new Text.String { Text = "Collection ", Foreground = Colors.Base });
 
             if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(baseData.Title);
 
             if (baseData.Type == Ao3PageType.Collection && Unread != null && Unread > 0)
             {
-                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + "\xA0unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
+                ts.Nodes.Add(new Text.String { Text = "  " + Unread.ToString() + "\xA0unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
             }
 
             if (baseData.Details?.Authors != null && baseData.Details.Authors.Count != 0)
             {
                 if (baseData.Type == Ao3PageType.Collection)
-                    ts.Nodes.Add(new TextNode { Text = "\nMaintainers: ", Foreground = Colors.Base });
+                    ts.Nodes.Add(new Text.String { Text = "\nMaintainers: ", Foreground = Colors.Base });
                 else
-                    ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Colors.Base });
+                    ts.Nodes.Add(new Text.String { Text = " by ", Foreground = Colors.Base });
 
                 bool first = true;
                 foreach (var user in baseData.Details.Authors)
                 {
                     if (!first)
-                        ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
+                        ts.Nodes.Add(new Text.String { Text = ", ", Foreground = Colors.Base });
                     else
                         first = false;
 
@@ -541,12 +541,12 @@ namespace Ao3TrackReader.Models
             }
             if (baseData.Details?.Recipiants != null && baseData.Details.Recipiants.Count != 0)
             {
-                ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Colors.Base });
+                ts.Nodes.Add(new Text.String { Text = " for ", Foreground = Colors.Base });
                 bool first = true;
                 foreach (var user in baseData.Details.Recipiants)
                 {
                     if (!first)
-                        ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Colors.Base });
+                        ts.Nodes.Add(new Text.String { Text = ", ", Foreground = Colors.Base });
                     else
                         first = false;
 
@@ -556,7 +556,7 @@ namespace Ao3TrackReader.Models
 
             if (baseData.Type != Ao3PageType.Collection && Unread != null && Unread > 0)
             {
-                ts.Nodes.Add(new TextNode { Text = "  " + Unread.ToString() + "\xA0unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
+                ts.Nodes.Add(new Text.String { Text = "  " + Unread.ToString() + "\xA0unread chapter" + (Unread == 1 ? "" : "s"), Foreground = Colors.Base });
             }
 
             var oldtitle = Title;
@@ -612,7 +612,7 @@ namespace Ao3TrackReader.Models
         {
             if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
             {
-                var summary = new Block();
+                var summary = new Text.Block();
                 if (baseData.Details?.Summary != null) {
                     summary.Nodes.Add(baseData.Details.Summary);
                 }
@@ -630,19 +630,19 @@ namespace Ao3TrackReader.Models
                         }
                         unread = workmodel.Details.Chapters.Available - chapters_finished;
                      }
-                    var worksummary = new Span();
+                    var worksummary = new Text.Span();
 
-                    var ts = new Span { Foreground = Resources.Colors.Highlight.Medium };
+                    var ts = new Text.Span { Foreground = Resources.Colors.Highlight.Medium };
 
-                    if (!string.IsNullOrWhiteSpace(workmodel.Title)) ts.Nodes.Add(new TextNode { Text = workmodel.Title, Foreground = Resources.Colors.Highlight.MediumHigh });
+                    if (!string.IsNullOrWhiteSpace(workmodel.Title)) ts.Nodes.Add(new Text.String { Text = workmodel.Title, Foreground = Resources.Colors.Highlight.MediumHigh });
                     if (workmodel.Details?.Authors != null && workmodel.Details.Authors.Count != 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = " by ", Foreground = Resources.Colors.Base.Medium });
+                        ts.Nodes.Add(new Text.String { Text = " by ", Foreground = Resources.Colors.Base.Medium });
                         bool first = true;
                         foreach (var user in workmodel.Details.Authors)
                         {
                             if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.Medium });
+                                ts.Nodes.Add(new Text.String { Text = ", ", Foreground = Resources.Colors.Base.Medium });
                             else
                                 first = false;
 
@@ -651,12 +651,12 @@ namespace Ao3TrackReader.Models
                     }
                     if (workmodel.Details?.Recipiants != null && workmodel.Details.Recipiants.Count != 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = " for ", Foreground = Resources.Colors.Base.Medium });
+                        ts.Nodes.Add(new Text.String { Text = " for ", Foreground = Resources.Colors.Base.Medium });
                         bool first = true;
                         foreach (var user in workmodel.Details.Recipiants)
                         {
                             if (!first)
-                                ts.Nodes.Add(new TextNode { Text = ", ", Foreground = Resources.Colors.Base.Medium });
+                                ts.Nodes.Add(new Text.String { Text = ", ", Foreground = Resources.Colors.Base.Medium });
                             else
                                 first = false;
 
@@ -665,7 +665,7 @@ namespace Ao3TrackReader.Models
                     }
                     if (unread != null && unread > 0)
                     {
-                        ts.Nodes.Add(new TextNode { Text = "  " + unread.ToString() + "\xA0unread chapter" + (unread == 1 ? "" : "s"), Foreground = Resources.Colors.Base.MediumHigh });
+                        ts.Nodes.Add(new Text.String { Text = "  " + unread.ToString() + "\xA0unread chapter" + (unread == 1 ? "" : "s"), Foreground = Resources.Colors.Base.MediumHigh });
                     }
 
                     worksummary.Nodes.Add(ts);

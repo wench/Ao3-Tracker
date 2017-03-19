@@ -16,31 +16,26 @@ limitations under the License.
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using Xamarin.Forms;
 
-namespace Ao3TrackReader
+namespace Ao3TrackReader.Text
 {
-    public class PageEx : BindableObject
+    public class StateNode : Text
     {
-        public static readonly BindableProperty TitleExProperty =
-          BindableProperty.CreateAttached("TitleEx", typeof(Text.Text), typeof(NavigationPage), null);
-
-        public static Text.Text GetTitleEx(BindableObject view)
+        public override ICollection<String> Flatten(StateNode state)
         {
-            return (Text.Text)view.GetValue(TitleExProperty);
+            return new String[] { };
         }
 
-        public static void SetTitleEx(BindableObject view, Text.Text value)
+        public override bool IsEmpty
         {
-            view.SetValue(TitleExProperty, value);
+            get { return true; }
+        }
+
+        public override string ToString()
+        {
+            return "";
         }
     }
-
-    public interface IPageEx
-    {
-        Text.Text TitleEx { get; }
-        string Title { get; set; }
-    }
-
 }

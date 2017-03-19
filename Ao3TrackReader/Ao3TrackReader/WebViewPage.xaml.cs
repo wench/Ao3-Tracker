@@ -458,7 +458,7 @@ namespace Ao3TrackReader
             }
         }
 
-        public Models.TextTree TitleEx
+        public Text.Text TitleEx
         {
             get
             {
@@ -478,19 +478,19 @@ namespace Ao3TrackReader
 
                 // Title by Author,Author - Chapter N: Title - Relationship - Fandoms
 
-                var ts = new Models.Span();
+                var ts = new Text.Span();
 
                 ts.Nodes.Add(pageTitle.Title);
 
                 if (pageTitle.Authors != null && pageTitle.Authors.Length != 0)
                 {
-                    ts.Nodes.Add(new Models.TextNode { Text = " by ", Foreground = Colors.Base });
+                    ts.Nodes.Add(new Text.String { Text = " by ", Foreground = Colors.Base });
 
                     bool first = true;
                     foreach (var user in pageTitle.Authors)
                     {
                         if (!first)
-                            ts.Nodes.Add(new Models.TextNode { Text = ", ", Foreground = Colors.Base });
+                            ts.Nodes.Add(new Text.String { Text = ", ", Foreground = Colors.Base });
                         else
                             first = false;
 
@@ -500,14 +500,14 @@ namespace Ao3TrackReader
 
                 if (!string.IsNullOrWhiteSpace(pageTitle.Chapter) || !string.IsNullOrWhiteSpace(pageTitle.Chaptername))
                 {
-                    ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
+                    ts.Nodes.Add(new Text.String { Text = " | ", Foreground = Colors.Base });
 
                     if (!string.IsNullOrWhiteSpace(pageTitle.Chapter))
                     {
                         ts.Nodes.Add(pageTitle.Chapter.Replace(' ', '\xA0'));
 
                         if (!string.IsNullOrWhiteSpace(pageTitle.Chaptername))
-                            ts.Nodes.Add(new Models.TextNode { Text = ": ", Foreground = Colors.Base });
+                            ts.Nodes.Add(new Text.String { Text = ": ", Foreground = Colors.Base });
                     }
                     if (!string.IsNullOrWhiteSpace(pageTitle.Chaptername))
                         ts.Nodes.Add(pageTitle.Chaptername.Replace(' ', '\xA0'));
@@ -515,19 +515,19 @@ namespace Ao3TrackReader
 
                 if (!string.IsNullOrWhiteSpace(pageTitle.Primarytag))
                 {
-                    ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
+                    ts.Nodes.Add(new Text.String { Text = " | ", Foreground = Colors.Base });
                     ts.Nodes.Add(pageTitle.Primarytag.Replace(' ', '\xA0'));
                 }
 
                 if (pageTitle.Fandoms != null && pageTitle.Fandoms.Length != 0)
                 {
-                    ts.Nodes.Add(new Models.TextNode { Text = " | ", Foreground = Colors.Base });
+                    ts.Nodes.Add(new Text.String { Text = " | ", Foreground = Colors.Base });
 
                     bool first = true;
                     foreach (var fandom in pageTitle.Fandoms)
                     {
                         if (!first)
-                            ts.Nodes.Add(new Models.TextNode { Text = ", ", Foreground = Colors.Base });
+                            ts.Nodes.Add(new Text.String { Text = ", ", Foreground = Colors.Base });
                         else
                             first = false;
 

@@ -45,7 +45,7 @@ namespace Ao3TrackReader
             return base.OnBackButtonPressed();
         }
 
-        public Models.TextTree TitleEx
+        public Text.Text TitleEx
         {
             get
             {

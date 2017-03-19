@@ -81,8 +81,8 @@ namespace Ao3TrackReader.Droid
                         (byte)(color.Value.G * 255),
                         (byte)(color.Value.B * 255)
                     ), Android.Graphics.PorterDuff.Mode.SrcIn);
-                var tt = new Models.TextNode { Text = item.TitleFormatted.ToString() };
-                var spannable = tt.ConvertToSpannable(new Models.StateNode { Foreground = color });
+                var tt = new Text.String { Text = item.TitleFormatted.ToString() };
+                var spannable = tt.ConvertToSpannable(new Text.StateNode { Foreground = color });
                 item.SetTitle(spannable);
             }
             else

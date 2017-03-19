@@ -113,8 +113,7 @@
     <Compile Include="MergeStyles.xaml.cs">
       <DependentUpon>MergeStyles.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TextBlockEx.cs" />
-    <Compile Include="TextTree.cs" />
+    <Compile Include="Text.cs" />
     <Compile Include="TextViewRenderer.cs" />
     <Compile Include="WebViewPage.cs" />
     <Compile Include="MainPage.xaml.cs">
