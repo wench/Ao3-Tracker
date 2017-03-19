@@ -59,7 +59,7 @@ namespace Ao3TrackReader.Models
         }
     }
 
-    public class NullableKeyedItem<TKey> : KeyedItem<Nullable<TKey>, string>
+    public class NullableKeyedItem<TKey> : KeyedItem<Nullable<TKey>>
         where TKey: struct
     {
         public NullableKeyedItem() { }
@@ -92,7 +92,7 @@ namespace Ao3TrackReader.Models
         }
     }
 
-    public class NullableKeyedItemList<TKey> : KeyedItemList<Nullable<TKey>, string>
+    public class NullableKeyedItemList<TKey> : KeyedItemList<Nullable<TKey>>
         where TKey: struct
     {
     }

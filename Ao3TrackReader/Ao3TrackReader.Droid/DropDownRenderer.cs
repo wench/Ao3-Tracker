@@ -126,7 +126,7 @@ namespace Ao3TrackReader.Droid
         private void Control_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
             if (Element != null && itemSource != null && e.Position >= 0 && e.Position < itemSource.Count && e.Position != Element.SelectedIndex)
-                Element.SelectedIndex = e.Position;
+                Element.SelectedItem = itemSource[e.Position];
         }
     }
 }

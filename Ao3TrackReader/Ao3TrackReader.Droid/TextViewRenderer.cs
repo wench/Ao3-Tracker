@@ -58,18 +58,18 @@ namespace Ao3TrackReader.Droid
                 e.PropertyName == Label.TextProperty.PropertyName ||
                 e.PropertyName == Label.FormattedTextProperty.PropertyName))
             {
-                if (view.TextTree != null)
+                if (view.TextEx != null)
                 {
                     base.OnElementPropertyChanged(sender, e);
                     UpdateControl(view);
                     return;
                 }
             }
-            else if (e.PropertyName == TextView.TextTreeProperty.PropertyName)
+            else if (e.PropertyName == TextView.TextExProperty.PropertyName)
             {
-                if (view.TextTree != null)
+                if (view.TextEx != null)
                 {
-                    var tts = view.TextTree.ToString();
+                    var tts = view.TextEx.ToString();
                     view.FormattedText = tts;
                 }
 
@@ -79,8 +79,8 @@ namespace Ao3TrackReader.Droid
         
         void UpdateControl(TextView view)
         {
-            if (view.TextTree == null) return;
-            Control.TextFormatted = view.TextTree.ConvertToSpannable(new Text.StateNode { Foreground = view.TextColor });
+            if (view.TextEx == null) return;
+            Control.TextFormatted = view.TextEx.ConvertToSpannable(new Text.StateNode { Foreground = view.TextColor });
         }
 
     }
