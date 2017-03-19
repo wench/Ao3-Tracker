@@ -133,10 +133,10 @@ namespace Ao3TrackReader.Models
 
         public string Group { get; private set; }
         public string GroupType { get; private set; }
-        public Text.Text Title { get; private set; }
+        public Text.TextEx Title { get; private set; }
         public DateTime? Date { get; private set; }
-        public Text.Text Subtitle { get; private set; }
-        public Text.Text Details { get; private set; }
+        public Text.TextEx Subtitle { get; private set; }
+        public Text.TextEx Details { get; private set; }
 
         public int? ChaptersRead { get; private set; }
         public int? Unread { get; private set; }
@@ -174,13 +174,13 @@ namespace Ao3TrackReader.Models
         }
 
 
-        public Text.Text Summary { get; private set; }
+        public Text.TextEx Summary { get; private set; }
 
         public bool SummaryVisible { get { return Summary != null && !Summary.IsEmpty; } }
 
 
         SortedDictionary<Ao3TagType, List<string>> tags;
-        public Text.Text Tags
+        public Text.TextEx Tags
         {
             get
             {

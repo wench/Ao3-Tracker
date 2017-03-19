@@ -27,7 +27,7 @@ namespace Ao3TrackReader.Controls
           BindableProperty.Create("Foreground", typeof(Color), typeof(ToolbarItem), defaultValue: Color.Default);
 
         public static readonly BindableProperty DescriptionProperty =
-          BindableProperty.Create("Description", typeof(FormattedString), typeof(ToolbarItem), defaultValue: null);
+          BindableProperty.Create("Description", typeof(Text.TextEx), typeof(ToolbarItem), defaultValue: null);
 
         public static readonly BindableProperty IsVisibleProperty =
           BindableProperty.Create("IsVisible", typeof(bool), typeof(ToolbarItem), defaultValue: true);
@@ -38,9 +38,9 @@ namespace Ao3TrackReader.Controls
             set { SetValue(ForegroundProperty, value); }
         }
 
-        public FormattedString Description
+        public Text.TextEx Description
         {
-            get { return (FormattedString)GetValue(DescriptionProperty); }
+            get { return (Text.TextEx)GetValue(DescriptionProperty); }
             set { SetValue(DescriptionProperty, value); }
         }
 
@@ -58,7 +58,7 @@ namespace Ao3TrackReader.Controls
 
         string IGroupable.Group => "Toolbar";
 
-        string IGroupable.GroupType => "";
+        string IGroupable.GroupType => null;
 
         bool IGroupable.ShouldHide => false;
     }

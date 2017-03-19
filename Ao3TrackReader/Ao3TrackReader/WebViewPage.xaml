@@ -18,7 +18,7 @@ limitations under the License.
              x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}" x:Name="root">
     <ContentPage.Content>
         <StackLayout x:Name="MainLayout" Spacing="0">
-            <local:TextView TextTree="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
+            <local:TextView TextEx="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
                             FontSize="{StaticResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
                             HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">

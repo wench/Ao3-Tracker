@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,18 +23,18 @@ using System.Text;
 namespace Ao3TrackReader.Text
 {
     [Xamarin.Forms.ContentProperty("Nodes")]
-    public partial class Span : Text
+    public partial class Span : TextEx, ICollection<TextEx>
     {
         public Span()
         {
-            Nodes = new List<Text>();
+            Nodes = new List<TextEx>();
         }
-        public Span(IEnumerable<Text> from)
+        public Span(IEnumerable<TextEx> from)
         {
-            Nodes = new List<Text>(from);
+            Nodes = new List<TextEx>(from);
         }
 
-        public IList<Text> Nodes { get; private set; }
+        public IList<TextEx> Nodes { get; private set; }
 
         public override string ToString()
         {
@@ -54,6 +55,41 @@ namespace Ao3TrackReader.Text
             return res;
         }
 
+        public void Add(TextEx item)
+        {
+            Nodes.Add(item);
+        }
+
+        public void Clear()
+        {
+            Nodes.Clear();
+        }
+
+        public bool Contains(TextEx item)
+        {
+            return Nodes.Contains(item);
+        }
+
+        public void CopyTo(TextEx[] array, int arrayIndex)
+        {
+            Nodes.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(TextEx item)
+        {
+            return Nodes.Remove(item);
+        }
+
+        public IEnumerator<TextEx> GetEnumerator()
+        {
+            return Nodes.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Nodes.GetEnumerator();
+        }
+
         public override bool IsEmpty
         {
             get
@@ -64,5 +100,9 @@ namespace Ao3TrackReader.Text
                 return true;
             }
         }
+
+        public int Count => Nodes.Count;
+
+        public bool IsReadOnly => Nodes.IsReadOnly;
     }
 }

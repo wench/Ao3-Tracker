@@ -9,14 +9,14 @@ namespace Ao3TrackReader.Models
     public interface IHelpInfo : IGroupable, INotifyPropertyChanged
     {
         string Text { get; }
-        FormattedString Description { get; }
+        Text.TextEx Description { get; }
         FileImageSource Icon { get; }
     }
 
     public class HelpInfo : IHelpInfo
     {
         public string Text { get; set; }
-        public FormattedString Description { get; set; }
+        public Text.TextEx Description { get; set; }
         public FileImageSource Icon { get; set; }
 
         public string Group { get; set; }
@@ -42,7 +42,7 @@ namespace Ao3TrackReader.Models
         }
 
         public string Text => source.Text;
-        public FormattedString Description => source.Description;
+        public Text.TextEx Description => source.Description;
         public FileImageSource Icon => source.Icon;
 
         public string Group => source.Group;

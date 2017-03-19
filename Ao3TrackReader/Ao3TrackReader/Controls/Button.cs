@@ -42,13 +42,13 @@ namespace Ao3TrackReader.Controls
 
         string IHelpInfo.Text => HelpView.GetText(this);
 
-        FormattedString IHelpInfo.Description => HelpView.GetDescription(this);
+        Text.TextEx IHelpInfo.Description => HelpView.GetDescription(this);
 
         FileImageSource IHelpInfo.Icon => Image;
 
         string IGroupable.Group => HelpView.GetGroup(this);
 
-        string IGroupable.GroupType => "";
+        string IGroupable.GroupType => null;
 
         bool IGroupable.ShouldHide => false;
     }

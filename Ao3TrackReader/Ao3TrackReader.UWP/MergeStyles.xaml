@@ -21,6 +21,26 @@ limitations under the License.
 	xmlns:uwp="using:Xamarin.Forms.Platform.UWP"
     >
 
+    <GroupStyle x:Key="ListViewGroup" HidesIfEmpty="False">
+        <GroupStyle.HeaderContainerStyle>
+            <Style TargetType="ListViewHeaderItem">
+                <Setter Property="MinHeight" Value="30" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <uwp:ListGroupHeaderPresenter />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </GroupStyle.HeaderContainerStyle>
+        <GroupStyle.HeaderTemplate>
+            <DataTemplate>
+                <uwp:CellControl IsGroupHeader="true" HorizontalContentAlignment="Stretch" />
+            </DataTemplate>
+        </GroupStyle.HeaderTemplate>
+    </GroupStyle>
+    
     <Style TargetType="uwp:PageControl">
         <Setter Property="ContentMargin" Value="0" />
         <Setter Property="Template">

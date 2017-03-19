@@ -21,7 +21,7 @@ using System.Text;
 
 namespace Ao3TrackReader.Text
 {
-    public partial class String : Text
+    public partial class String : TextEx
     {
         public String()
         {

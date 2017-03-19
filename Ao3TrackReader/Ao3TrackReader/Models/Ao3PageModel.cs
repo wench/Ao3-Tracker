@@ -82,7 +82,7 @@ namespace Ao3TrackReader.Models
         public int? Bookmarks { get; set; }
         public int? Hits { get; set; }
         public int? Works { get; set; }
-        public Text.Text Summary { get; set; }
+        public Text.TextEx Summary { get; set; }
     }
 
     public class Ao3RequredTagData

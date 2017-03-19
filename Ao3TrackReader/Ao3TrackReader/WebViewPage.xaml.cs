@@ -458,7 +458,7 @@ namespace Ao3TrackReader
             }
         }
 
-        public Text.Text TitleEx
+        public Text.TextEx TitleEx
         {
             get
             {

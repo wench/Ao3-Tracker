@@ -26,7 +26,7 @@ using Windows.UI.Xaml.Documents;
 
 namespace Ao3TrackReader.Text
 {
-    public abstract partial class Text
+    public abstract partial class TextEx
     {
         static bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
 
@@ -89,7 +89,7 @@ namespace Ao3TrackReader.Text
             return new Run();
         }
 
-        public static implicit operator Inline(Text tree)
+        public static implicit operator Inline(TextEx tree)
         {
             return tree.ConvertToInline();
         }

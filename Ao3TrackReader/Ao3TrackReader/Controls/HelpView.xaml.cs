@@ -33,7 +33,7 @@ namespace Ao3TrackReader.Controls
           Xamarin.Forms.BindableProperty.CreateAttached("Text", typeof(string), typeof(HelpView), defaultValue: null);
 
         public static readonly Xamarin.Forms.BindableProperty DescriptionProperty =
-          Xamarin.Forms.BindableProperty.CreateAttached("Description", typeof(FormattedString), typeof(HelpView), defaultValue: null);
+          Xamarin.Forms.BindableProperty.CreateAttached("Description", typeof(Text.TextEx), typeof(HelpView), defaultValue: null);
 
         public static readonly Xamarin.Forms.BindableProperty GroupProperty =
           Xamarin.Forms.BindableProperty.CreateAttached("Group", typeof(string), typeof(HelpView), defaultValue: null);
@@ -76,12 +76,12 @@ namespace Ao3TrackReader.Controls
             view.SetValue(TextProperty, value);
         }
 
-        public static FormattedString GetDescription(BindableObject view)
+        public static Text.TextEx GetDescription(BindableObject view)
         {
-            return (FormattedString)view.GetValue(DescriptionProperty);
+            return (Text.TextEx)view.GetValue(DescriptionProperty);
         }
 
-        public static void SetDescription(BindableObject view, FormattedString value)
+        public static void SetDescription(BindableObject view, Text.TextEx value)
         {
             view.SetValue(DescriptionProperty, value);
         }

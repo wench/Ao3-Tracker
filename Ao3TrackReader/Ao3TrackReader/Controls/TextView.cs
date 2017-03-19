@@ -23,15 +23,16 @@ using System.Text;
 
 namespace Ao3TrackReader.Controls
 {
+    [Xamarin.Forms.ContentProperty("TextEx")]
     public class TextView : Xamarin.Forms.Label
     {
-        public static readonly Xamarin.Forms.BindableProperty TextTreeProperty =
-          Xamarin.Forms.BindableProperty.Create("TextTree", typeof(Text.Text), typeof(TextView), defaultValue: null);
+        public static readonly Xamarin.Forms.BindableProperty TextExProperty =
+          Xamarin.Forms.BindableProperty.Create("TextEx", typeof(Text.TextEx), typeof(TextView), defaultValue: null);
 
-        public Text.Text TextTree
+        public Text.TextEx TextEx
         {
-            get { return (Text.Text)GetValue(TextTreeProperty); }
-            set { SetValue(TextTreeProperty, value); }
+            get { return (Text.TextEx)GetValue(TextExProperty); }
+            set { SetValue(TextExProperty, value); }
         }
 
         public TextView()

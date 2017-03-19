@@ -35,13 +35,13 @@ using Android.Text.Style;
 
 namespace Ao3TrackReader.Text
 {
-    public abstract partial class Text
+    public abstract partial class TextEx
     {
         public SpannableString ConvertToSpannable(StateNode state)
         {
             var nodes = Flatten(state).TrimNewLines();
 
-            var s = new SpannableString(string.Concat(nodes as IEnumerable<Text>));
+            var s = new SpannableString(string.Concat(nodes as IEnumerable<TextEx>));
             int start = 0;
             foreach (var n in nodes)
             {

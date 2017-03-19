@@ -23,6 +23,13 @@ namespace Ao3TrackReader.Text
 {
     public partial class Block : Span
     {
+        public Block() : base()
+        {
+        }
+        public Block(IEnumerable<TextEx> from) : base()
+        {
+        }
+
         public override string ToString()
         {
             bool lastisblock = Nodes.Count > 0 && Nodes[Nodes.Count - 1].GetType() == typeof(Block);

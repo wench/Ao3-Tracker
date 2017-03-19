@@ -21,7 +21,7 @@ using System.Text;
 
 namespace Ao3TrackReader.Text
 {
-    public class StateNode : Text
+    public class StateNode : TextEx
     {
         public override ICollection<String> Flatten(StateNode state)
         {

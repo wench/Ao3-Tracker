@@ -30,7 +30,7 @@ namespace Ao3TrackReader.Text
         // td, tfoot, th, thead, tr, tt, u, ul, var.
 
 
-        public static Text ConvertNode(HtmlNode html)
+        public static TextEx ConvertNode(HtmlNode html)
         {
             Span span = null;
 

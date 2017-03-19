@@ -16,7 +16,7 @@ limitations under the License.
 -->
 <local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
              x:Class="Ao3TrackReader.Controls.HelpView">
-  <local:PaneView.Content>
+    <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Help" FontSize="{StaticResource LargeFontSize}" />
@@ -24,8 +24,32 @@ limitations under the License.
             </StackLayout>
 
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" 
-                      x:Name="ListView" ItemSelected="ListView_ItemSelected" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}"
-                      ItemTemplate="{StaticResource HelpViewCellTemplate}" />
+                      x:Name="ListView" ItemSelected="ListView_ItemSelected" GroupHeaderTemplate="{StaticResource CellGroupHeaderNoTypeTemplate}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid RowSpacing="6" Margin="4,4,8,4" Padding="6,3,6,6" BackgroundColor="{StaticResource BaseTransVeryLowColor}" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="33" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid ColumnSpacing="6" Margin="0" Padding="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="33" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="{Binding Icon}" HeightRequest="20" WidthRequest="20" VerticalOptions="Start" Margin="0,3,0,0" />
+                                    <local:TextView TextEx="{Binding Text}" TextColor="{StaticResource HighlightColor}" FontSize="{StaticResource MediumSmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Column="1" VerticalTextAlignment="Start" VerticalOptions="StartAndExpand"/>
+                                </Grid>
+                                <local:TextView TextEx="{Binding Description}" FontSize="{StaticResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </StackLayout>
     </local:PaneView.Content>
 </local:PaneView>

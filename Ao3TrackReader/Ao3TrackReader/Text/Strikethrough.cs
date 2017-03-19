@@ -17,30 +17,28 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Xamarin.Forms;
 
-namespace Ao3TrackReader
+namespace Ao3TrackReader.Text
 {
-    public class PageEx : BindableObject
+    public class S : Span
     {
-        public static readonly BindableProperty TitleExProperty =
-          BindableProperty.CreateAttached("TitleEx", typeof(Text.TextEx), typeof(NavigationPage), null);
-
-        public static Text.TextEx GetTitleEx(BindableObject view)
+        public S() : base()
         {
-            return (Text.TextEx)view.GetValue(TitleExProperty);
+            Strike = true;
         }
-
-        public static void SetTitleEx(BindableObject view, Text.TextEx value)
+        public S(IEnumerable<TextEx> from) : base()
         {
-            view.SetValue(TitleExProperty, value);
+            Strike = true;
         }
     }
 
-    public interface IPageEx
+    public class Strike : S
     {
-        Text.TextEx TitleEx { get; }
-        string Title { get; set; }
+        public Strike() : base()
+        {
+        }
+        public Strike(IEnumerable<TextEx> from) : base()
+        {
+        }
     }
-
 }

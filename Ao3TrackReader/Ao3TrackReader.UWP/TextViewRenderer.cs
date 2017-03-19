@@ -63,9 +63,9 @@ namespace Ao3TrackReader.UWP
             if (view != null &&
                 e.PropertyName == Label.TextProperty.PropertyName ||
                 e.PropertyName == Label.FormattedTextProperty.PropertyName ||
-                e.PropertyName == TextView.TextTreeProperty.PropertyName)
+                e.PropertyName == TextView.TextExProperty.PropertyName)
             {
-                if (view.TextTree != null)
+                if (view.TextEx != null)
                 {
                     UpdateControl(view);
                     return;
@@ -82,10 +82,10 @@ namespace Ao3TrackReader.UWP
 
         void UpdateControl(TextView view)
         {
-            if (view.TextTree == null) return;
+            if (view.TextEx == null) return;
             Control.TextWrapping = Windows.UI.Xaml.TextWrapping.WrapWholeWords;
             Control.Inlines.Clear();
-            Control.Inlines.Add(view.TextTree.FlattenToSpan());
+            Control.Inlines.Add(view.TextEx.FlattenToSpan());
             (Element as Xamarin.Forms.IVisualElementController).InvalidateMeasure(Xamarin.Forms.Internals.InvalidationTrigger.RendererReady);
             Control.InvalidateMeasure();
             InvalidateMeasure();
