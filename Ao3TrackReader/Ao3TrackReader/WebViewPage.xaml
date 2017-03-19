@@ -15,31 +15,65 @@ See the License for the specific language governing permissions and
 limitations under the License.   
 -->
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-             xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" 
+             xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:html="clr-namespace:Ao3TrackReader.Text" 
              x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}" x:Name="root">
     <ContentPage.Resources>
         <ResourceDictionary>
             <c:List x:Key="Toolbar" x:Name="AllToolbarItems" x:TypeArguments="local:ToolbarItem" >
                 <local:ToolbarItem Text="Back"                Icon="{StaticResource BackIcon}"      Command="{Binding BackCommand,Source={x:Reference root}}"  
-                                   x:Name="BackToolBarItem"  />
+                                   x:Name="BackToolBarItem"  >
+                    <local:ToolbarItem.Description>Browse to the previous page in the browser history. If the device has a hardware back button it will behave the same way, and the toolbar button may be hidden. Back button behavior can be changed in Settings.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
                 <local:ToolbarItem Text="Forward"             Icon="{StaticResource ForwardIcon}"   Command="{Binding ForwardCommand,Source={x:Reference root}}"  
-                                   x:Name="ForwardToolBarItem"  />
-                <local:ToolbarItem Text="Refresh"             Icon="{StaticResource RefreshIcon}"   Command="{Binding RefreshCommand,Source={x:Reference root}}" />
-                <local:ToolbarItem Text="Jump"                Icon="{StaticResource RedoIcon}"      Command="{Binding JumpCommand,Source={x:Reference root}}" />
+                                   x:Name="ForwardToolBarItem" >
+                    <local:ToolbarItem.Description>Browse to the next page in the browser history, the next chapter in a work or series, or the next page of a search. Forward button behavior can be changed in Settings.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Refresh"             Icon="{StaticResource RefreshIcon}"   Command="{Binding RefreshCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>Reload the currently displayed page from the server.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Jump"                Icon="{StaticResource RedoIcon}"      Command="{Binding JumpCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>
+                        <html:Span Pad="true">Jump to the <html:Em>read to location</html:Em> of this work. This button is only enabled when viewing a work.</html:Span>
+                    </local:ToolbarItem.Description>
+                </local:ToolbarItem>
                 <local:ToolbarItem Text="Reading List"        Icon="{StaticResource BookmarksIcon}" Command="{Binding ReadingListCommand,Source={x:Reference root}}" 
-                                   x:Name="ReadingListToolBarItem" />
-                <local:ToolbarItem Text="Add to Reading List" Icon="{StaticResource AddPageIcon}"   Command="{Binding AddToReadingListCommand,Source={x:Reference root}}" />
-                <local:ToolbarItem Text="Font Increase"       Icon="{StaticResource FontUpIcon}"    Command="{Binding FontIncreaseCommand,Source={x:Reference root}}" />
-                <local:ToolbarItem Text="Font Decrease"       Icon="{StaticResource FontDownIcon}"  Command="{Binding FontDecreaseCommand,Source={x:Reference root}}" />
-                <local:ToolbarItem Text="Sync"                Icon="{StaticResource SyncIcon}"      Command="{Binding SyncCommand,Source={x:Reference root}}" />
-                <local:ToolbarItem Text="Force set location"  Icon="{StaticResource ForceLocIcon}"  Command="{Binding ForceSetLocationCommand,Source={x:Reference root}}" />
+                                   x:Name="ReadingListToolBarItem" >
+                    <local:ToolbarItem.Description>Open the Reading List pane.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Add to Reading List" Icon="{StaticResource AddPageIcon}"   Command="{Binding AddToReadingListCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>Add the currently displayed work, search or webpage to the reading list.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Font Increase"       Icon="{StaticResource FontUpIcon}"    Command="{Binding FontIncreaseCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>Increase the font size of the page text by 5%.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Font Decrease"       Icon="{StaticResource FontDownIcon}"  Command="{Binding FontDecreaseCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>Decrease the font size of the page text by 5%.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Sync"                Icon="{StaticResource SyncIcon}"      Command="{Binding SyncCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>
+                        <html:Span Pad="true">Syncronise <html:Em>read to location</html:Em> data with the Ao3Track Cloud Server. This button will be disabled while a sync is occuring, or if cloud sync is not available.</html:Span>
+                    </local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Force set location"  Icon="{StaticResource ForceLocIcon}"  Command="{Binding ForceSetLocationCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>
+                        <html:Span Pad="true">Force the <html:Em>read to location</html:Em> of the currently viewed work to be set to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the <html:Em>read to location</html:Em>.</html:Span>
+                    </local:ToolbarItem.Description>
+                </local:ToolbarItem>
                 <local:ToolbarItem Text="Url Bar"             Icon="{StaticResource RenameIcon}"    Command="{Binding UrlBarCommand,Source={x:Reference root}}" 
-                                   x:Name="UrlBarToolBarItem" />
-                <local:ToolbarItem Text="Reset Font Size"     Icon="{StaticResource FontIcon}"      Command="{Binding ResetFontSizeCommand,Source={x:Reference root}}" />
+                                   x:Name="UrlBarToolBarItem" >
+                    <local:ToolbarItem.Description>Show the URL bar. Only urls on http://archiveofourown.org/ are allowed.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Reset Font Size"     Icon="{StaticResource FontIcon}"      Command="{Binding ResetFontSizeCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>Reset the font size of the page text back to 100%.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
                 <local:ToolbarItem Text="Settings"            Icon="{StaticResource SettingsIcon}"  Command="{Binding SettingsCommand,Source={x:Reference root}}" 
-                                   x:Name="SettingsToolBarItem" Order="Secondary" />
+                                   x:Name="SettingsToolBarItem" Order="Secondary" >
+                    <local:ToolbarItem.Description>Open the Settings pane.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
                 <local:ToolbarItem Text="Help"                Icon="{StaticResource HelpIcon}"      Command="{Binding HelpCommand,Source={x:Reference root}}" 
-                                   x:Name="HelpToolBarItem" Order="Secondary" />
+                                   x:Name="HelpToolBarItem" Order="Secondary" >
+                    <local:ToolbarItem.Description>Open the Help pane (You're looking it.).</local:ToolbarItem.Description>
+                </local:ToolbarItem>
             </c:List>
         </ResourceDictionary>
     </ContentPage.Resources>

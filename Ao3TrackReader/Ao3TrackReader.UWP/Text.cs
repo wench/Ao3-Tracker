@@ -109,9 +109,12 @@ namespace Ao3TrackReader.Text
         {
             var s = new Windows.UI.Xaml.Documents.Span();
 
+            bool donefirst = false;
             foreach (var n in Nodes)
             {
+                if (Pad && donefirst) s.Inlines.Add(new Windows.UI.Xaml.Documents.Run { Text = " " });
                 s.Inlines.Add(n.ConvertToInline());
+                donefirst = true;
             }
 
             return ApplyStyles(s);

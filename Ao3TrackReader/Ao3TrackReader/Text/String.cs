@@ -26,6 +26,10 @@ namespace Ao3TrackReader.Text
         public String()
         {
         }
+        public String(string text)
+        {
+            Text = text;
+        }
         public string Text { get; set; }
 
         public override string ToString()

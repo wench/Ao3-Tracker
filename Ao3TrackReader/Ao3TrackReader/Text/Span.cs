@@ -36,10 +36,13 @@ namespace Ao3TrackReader.Text
 
         public IList<TextEx> Nodes { get; private set; }
 
+        public bool Pad { get; set; } = false;
+
         public override string ToString()
         {
-            return string.Join("", Nodes);
+            return string.Join(Pad?" ":"", Nodes);
         }
+
         public override ICollection<String> Flatten(StateNode state)
         {
             var newstate = new StateNode();
@@ -47,9 +50,12 @@ namespace Ao3TrackReader.Text
             newstate.ApplyState(state);
 
             List<String> res = new List<String>(Nodes.Count + 1);
+            bool donefirst = false;
             foreach (var node in Nodes)
             {
+                if (Pad && donefirst) res.Add(new String(" "));
                 res.AddRange(node.Flatten(newstate));
+                donefirst = true;
             }
 
             return res;

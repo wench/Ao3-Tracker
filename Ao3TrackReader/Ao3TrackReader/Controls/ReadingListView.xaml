@@ -21,7 +21,7 @@ limitations under the License.
             <StackLayout VerticalOptions="Start" Orientation="Horizontal" x:Name="buttonBar">
                 <local:Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton"
                               local:HelpView.Text="Add Page To Reading List" local:HelpView.Group="Reading List" >
-                    <local:HelpView.Description>Add the currently displayed work, search or webpage into the reading list. </local:HelpView.Description>
+                    <local:HelpView.Description>Add the currently displayed work, search or webpage to the reading list. </local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton" 
                               local:HelpView.Text="Refresh Reading List" local:HelpView.Group="Reading List">
