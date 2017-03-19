@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.   
 -->
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-             xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:html="clr-namespace:Ao3TrackReader.Text" 
+             xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:html="clr-namespace:Ao3TrackReader.Text" xmlns:m="clr-namespace:Ao3TrackReader.Models" 
              x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}" x:Name="root">
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -74,6 +74,15 @@ limitations under the License.
                                    x:Name="HelpToolBarItem" Order="Secondary" >
                     <local:ToolbarItem.Description>Open the Help pane (You're looking it.).</local:ToolbarItem.Description>
                 </local:ToolbarItem>
+            </c:List>
+
+            <c:List x:Key="ExtraHelp" x:Name="ExtraHelp" x:TypeArguments="m:HelpInfo" >
+                <m:HelpInfo Text="Swipe Right" Icon="{StaticResource ForwardIcon}" Group="Gestures">
+                    <m:HelpInfo.Description>Browse to the previous page in the browser history. Swipe right behavior can be changed in Settings.</m:HelpInfo.Description>
+                </m:HelpInfo>
+                <m:HelpInfo Text="Swipe Left" Icon="{StaticResource BackIcon}" Group="Gestures" >
+                    <m:HelpInfo.Description>Browse to the next page in the browser history, the next chapter in a work or series, or the next page of a search. Swipe left behavior can be changed in Settings.</m:HelpInfo.Description>
+                </m:HelpInfo>
             </c:List>
         </ResourceDictionary>
     </ContentPage.Resources>

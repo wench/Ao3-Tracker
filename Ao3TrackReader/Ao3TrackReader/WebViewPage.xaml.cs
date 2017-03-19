@@ -49,7 +49,7 @@ namespace Ao3TrackReader
         //public IList<ToolbarItem> Toolbar => new List<ToolbarItem>(20);
 
         public IEnumerable<Models.IHelpInfo> HelpItems {
-            get { return AllToolbarItems; }
+            get { return ((IEnumerable<Models.IHelpInfo>)AllToolbarItems).Concat(ExtraHelp); }
         }
 
         List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
