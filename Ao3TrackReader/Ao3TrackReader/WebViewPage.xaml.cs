@@ -46,19 +46,11 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
-        Dictionary<string, ToolbarItem> AllToolbarItems { get; } = new Dictionary<string, ToolbarItem>();
+        //public IList<ToolbarItem> Toolbar => new List<ToolbarItem>(20);
 
         public IEnumerable<Models.IHelpInfo> HelpItems {
-            get { return AllToolbarItems.Values; }
+            get { return AllToolbarItems; }
         }
-
-        DisableableCommand JumpButton { get; set; }
-        DisableableCommand IncFontSizeButton { get; set; }
-        DisableableCommand DecFontSizeButton { get; set; }
-        DisableableCommand NextPageButton { get; set; }
-        DisableableCommand PrevPageButton { get; set; }
-        DisableableCommand SyncButton { get; set; }
-        DisableableCommand ForceSetLocationButton { get; set; }
 
         List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
         DisableableCommand<string> ContextMenuOpenAdd;
@@ -68,11 +60,18 @@ namespace Ao3TrackReader
 
         public WebViewPage()
         {
+            InitializeToolbarCommands();          
+
             TitleEx = "Loading...";
 
-            SetupToolbar();
-
             InitializeComponent();
+
+            UpdateBackButton();
+
+            foreach (var tbi in AllToolbarItems)
+            {
+                tbi.PropertyChanged += ToolBarItem_PropertyChanged;
+            }
 
             HelpPane.Init();
             SetupContextMenu();
@@ -108,39 +107,27 @@ namespace Ao3TrackReader
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
             {
-                if (AllToolbarItems.TryGetValue("Url Bar", out var tbi))
-                {
-                    if (urlBar.IsVisible == false) tbi.Foreground = Xamarin.Forms.Color.Default;
-                    else tbi.Foreground = Colors.Highlight.High;
-                }
+                if (urlBar.IsVisible == false) UrlBarToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+                else UrlBarToolBarItem.Foreground = Colors.Highlight.High;
             }
         }
 
         private void ReadingList_IsOnScreenChanged(object sender, bool onscreen)
         {
-            if (AllToolbarItems.TryGetValue("Reading List", out var tbi))
-            {
-                if (!onscreen) tbi.Foreground = Xamarin.Forms.Color.Default;
-                else tbi.Foreground = Colors.Highlight.High;
-            }
+            if (!onscreen) ReadingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else ReadingListToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         private void SettingsPane_IsOnScreenChanged(object sender, bool onscreen)
         {
-            if (AllToolbarItems.TryGetValue("Settings", out var tbi))
-            {
-                if (!onscreen) tbi.Foreground = Xamarin.Forms.Color.Default;
-                else tbi.Foreground = Colors.Highlight.High;
-            }
+            if (!onscreen) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else SettingsToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         private void HelpPane_IsOnScreenChanged(object sender, bool onscreen)
         {
-            if (AllToolbarItems.TryGetValue("Help", out var tbi))
-            {
-                if (!onscreen) tbi.Foreground = Xamarin.Forms.Color.Default;
-                else tbi.Foreground = Colors.Highlight.High;
-            }
+            if (!onscreen) HelpToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            else HelpToolBarItem.Foreground = Colors.Highlight.High;
         }
 
         private void TogglePane(PaneView pane)
@@ -152,144 +139,57 @@ namespace Ao3TrackReader
             if (pane != null) pane.IsOnScreen = !pane.IsOnScreen;
         }
 
-        void AddToolBarItem(ToolbarItem tbi)
+        public DisableableCommand JumpCommand { get; private set; }
+        public DisableableCommand FontIncreaseCommand { get; private set; }
+        public DisableableCommand FontDecreaseCommand { get; private set; }
+        public DisableableCommand ForwardCommand { get; private set; }
+        public DisableableCommand BackCommand { get; private set; }
+        public DisableableCommand SyncCommand { get; private set; }
+        public DisableableCommand ForceSetLocationCommand { get; private set; }
+        public DisableableCommand RefreshCommand { get; private set; }
+        public DisableableCommand ReadingListCommand { get; private set; }
+        public DisableableCommand AddToReadingListCommand { get; private set; }
+        public DisableableCommand UrlBarCommand { get; private set; }
+        public DisableableCommand ResetFontSizeCommand { get; private set; }
+        public DisableableCommand SettingsCommand { get; private set; }
+        public DisableableCommand HelpCommand { get; private set; }
+
+        void InitializeToolbarCommands()
         {
-            AllToolbarItems.Add(tbi.Text, tbi);
-        }
+            BackCommand = new DisableableCommand(ToolbarGoBack, false);
+            ForwardCommand = new DisableableCommand(ToolbarGoForward, false);
+            JumpCommand = new DisableableCommand(OnJumpClicked, false);
+            FontIncreaseCommand = new DisableableCommand(() => LogFontSize++);
+            FontDecreaseCommand = new DisableableCommand(() => LogFontSize--);
+            ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
 
-        void SetupToolbar()
-        {
-            PrevPageButton = new DisableableCommand(ToolbarGoBack, false);
-            NextPageButton = new DisableableCommand(ToolbarGoForward, false);
-            JumpButton = new DisableableCommand(OnJumpClicked, false);
-            IncFontSizeButton = new DisableableCommand(() => LogFontSize++);
-            DecFontSizeButton = new DisableableCommand(() => LogFontSize--);
-            ForceSetLocationButton = new DisableableCommand(ForceSetLocation);
+            SyncCommand = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
+            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => SyncCommand.IsEnabled = false);
+            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
+            SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
 
-            SyncButton = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
-            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => SyncButton.IsEnabled = false);
-            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => SyncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
-            SyncButton.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
+            RefreshCommand = new DisableableCommand(Refresh);
+            ReadingListCommand = new DisableableCommand(() => TogglePane(ReadingList));
+            AddToReadingListCommand = new DisableableCommand(() => ReadingList.AddAsync(CurrentUri.AbsoluteUri));
 
-            AddToolBarItem(new ToolbarItem
+            UrlBarCommand = new DisableableCommand(() =>
             {
-                Text = "Back",
-                Icon = Icons.Back,
-                Command = PrevPageButton
-            });
-            UpdateBackButton();
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Forward",
-                Icon = Icons.Forward,
-                Command = NextPageButton
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Refresh",
-                Icon = Icons.Refresh,
-                Command = new Command(Refresh)
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Jump",
-                Icon = Icons.Redo,
-                Command = JumpButton
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Reading List",
-                Icon = Icons.Bookmarks,
-                Command = new Command(() => TogglePane(ReadingList))
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Add to Reading List",
-                Icon = Icons.AddPage,
-                Command = new Command(() =>
+                if (urlBar.IsVisible)
                 {
-                    ReadingList.AddAsync(CurrentUri.AbsoluteUri);
-                })
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Font Increase",
-                Icon = Icons.FontUp,
-                Command = IncFontSizeButton
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Font Decrease",
-                Icon = Icons.FontDown,
-                Command = DecFontSizeButton
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Sync",
-                Icon = Icons.Sync,
-                Command = SyncButton
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Force set location",
-                Icon = Icons.ForceLoc,
-                Command = ForceSetLocationButton
-            });
-
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Url Bar",
-                Icon = Icons.Rename,
-                Command = new Command(() =>
+                    urlBar.IsVisible = false;
+                    urlBar.Unfocus();
+                }
+                else
                 {
-                    if (urlBar.IsVisible)
-                    {
-                        urlBar.IsVisible = false;
-                        urlBar.Unfocus();
-                    }
-                    else
-                    {
-                        urlEntry.Text = CurrentUri.AbsoluteUri;
-                        urlBar.IsVisible = true;
-                        urlEntry.Focus();
-                    }
-                })
+                    urlEntry.Text = CurrentUri.AbsoluteUri;
+                    urlBar.IsVisible = true;
+                    urlEntry.Focus();
+                }
             });
 
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Reset Font Size",
-                Icon = Icons.Font,
-                Command = new Command(() => LogFontSize = 0)
-            });
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Settings",
-                Icon = Icons.Settings,
-                Order = ToolbarItemOrder.Secondary,
-                Command = new Command(() => TogglePane(SettingsPane))
-            });
-            AddToolBarItem(new ToolbarItem
-            {
-                Text = "Help",
-                Icon = Icons.Help,
-                Order = ToolbarItemOrder.Secondary,
-                Command = new Command(() => TogglePane(HelpPane))
-            });
-
-            foreach (var tbi in AllToolbarItems)
-            {
-                tbi.Value.PropertyChanged += Value_PropertyChanged;
-            }
+            ResetFontSizeCommand = new DisableableCommand(() => LogFontSize = 0);
+            SettingsCommand = new DisableableCommand(() => TogglePane(SettingsPane));
+            HelpCommand = new DisableableCommand(() => TogglePane(HelpPane));
         }
 
         public void UpdateBackButton()
@@ -307,10 +207,10 @@ namespace Ao3TrackReader
             else if (mode == InteractionMode.Tablet) def = true;
             else def = true;
 
-            AllToolbarItems["Back"].IsVisible = show ?? def;
+            BackToolBarItem.IsVisible = show ?? def;
         }
 
-        private void Value_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ToolBarItem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
             {
@@ -325,15 +225,15 @@ namespace Ao3TrackReader
             {
                 var c = i < ToolbarItems.Count ? ToolbarItems[i] : null;
 
-                if (tbi.Value.IsVisible)
+                if (tbi.IsVisible)
                 {
-                    if (tbi.Value != c)
+                    if (tbi != c)
                     {
-                        ToolbarItems.Insert(i, tbi.Value);
+                        ToolbarItems.Insert(i, tbi);
                     }
                     i++;
                 }
-                else if (tbi.Value == c)
+                else if (tbi == c)
                 {
                     ToolbarItems.RemoveAt(i);
                 }
@@ -565,8 +465,8 @@ namespace Ao3TrackReader
 
                 DoOnMainThread(() =>
                 {
-                    DecFontSizeButton.IsEnabled = log_font_size > LogFontSizeMin;
-                    IncFontSizeButton.IsEnabled = log_font_size < LogFontSizeMax;
+                    FontDecreaseCommand.IsEnabled = log_font_size > LogFontSizeMin;
+                    FontIncreaseCommand.IsEnabled = log_font_size < LogFontSizeMax;
                     helper?.OnAlterFontSize(FontSize);
                 });
             }
@@ -670,11 +570,11 @@ namespace Ao3TrackReader
         {
             set
             {
-                if (JumpButton != null) JumpButton.IsEnabled = value;
+                if (JumpCommand != null) JumpCommand.IsEnabled = value;
             }
             get
             {
-                return JumpButton?.IsEnabled ?? false;
+                return JumpCommand?.IsEnabled ?? false;
             }
         }
 
@@ -738,7 +638,7 @@ namespace Ao3TrackReader
 
                     }
                 }
-                NextPageButton.IsEnabled = ToolbarCanGoForward;
+                ForwardCommand.IsEnabled = ToolbarCanGoForward;
             }
         }
         private Uri prevPage;
@@ -761,7 +661,7 @@ namespace Ao3TrackReader
                     {
                     }
                 }
-                PrevPageButton.IsEnabled = ToolbarCanGoBack;
+                BackCommand.IsEnabled = ToolbarCanGoBack;
             }
         }
 
@@ -890,12 +790,12 @@ namespace Ao3TrackReader
                     currentLocation = value;
                     if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
                     {
-                        ForceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
+                        ForceSetLocationCommand.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                         return;
                     }
                     else if (currentLocation == null)
                     {
-                        ForceSetLocationButton.IsEnabled = false;
+                        ForceSetLocationCommand.IsEnabled = false;
                         return;
                     }
 
@@ -926,9 +826,9 @@ namespace Ao3TrackReader
                         lock (currentLocationLock)
                         {
                             if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
-                                ForceSetLocationButton.IsEnabled = currentLocation.LessThan(currentSavedLocation);
+                                ForceSetLocationCommand.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                             else
-                                ForceSetLocationButton.IsEnabled = false;
+                                ForceSetLocationCommand.IsEnabled = false;
                         }
                     });
                 }
@@ -1106,7 +1006,7 @@ namespace Ao3TrackReader
             cancelInject = new CancellationTokenSource();
             TitleEx = "Loading...";
 
-            JumpButton.IsEnabled = false;
+            JumpCommand.IsEnabled = false;
             HideContextMenu();
 
             if (urlEntry != null) urlEntry.Text = uri.AbsoluteUri;
@@ -1114,13 +1014,13 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            PrevPageButton.IsEnabled = ToolbarCanGoBack;
-            NextPageButton.IsEnabled = ToolbarCanGoForward;
+            BackCommand.IsEnabled = ToolbarCanGoBack;
+            ForwardCommand.IsEnabled = ToolbarCanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
             currentSavedLocation = null;
-            ForceSetLocationButton.IsEnabled = false;
+            ForceSetLocationCommand.IsEnabled = false;
             helper?.Reset();
             return false;
         }
@@ -1131,7 +1031,7 @@ namespace Ao3TrackReader
 
         private void OnContentLoaded()
         {
-            JumpButton.IsEnabled = false;
+            JumpCommand.IsEnabled = false;
             HideContextMenu();
 
             if (urlEntry != null) urlEntry.Text = CurrentUri.AbsoluteUri;
@@ -1139,13 +1039,13 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            PrevPageButton.IsEnabled = ToolbarCanGoBack;
-            NextPageButton.IsEnabled = ToolbarCanGoForward;
+            BackCommand.IsEnabled = ToolbarCanGoBack;
+            ForwardCommand.IsEnabled = ToolbarCanGoForward;
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
             currentSavedLocation = null;
-            ForceSetLocationButton.IsEnabled = false;
+            ForceSetLocationCommand.IsEnabled = false;
             helper?.Reset();
 
             InjectScripts(cancelInject);
