@@ -181,7 +181,7 @@ namespace Ao3TrackReader
                 }
                 else
                 {
-                    urlEntry.Text = CurrentUri.AbsoluteUri;
+                    UpdateUrlBar(CurrentUri);
                     urlBar.IsVisible = true;
                     urlEntry.Focus();
                 }
@@ -320,6 +320,17 @@ namespace Ao3TrackReader
             });
         }
 
+        private void UpdateUrlBar(Uri uri)
+        {
+            if (urlEntry != null)
+            {
+                if (uri.Fragment?.StartsWith("#ao3tjump") == true)
+                    urlEntry.Text = uri.PathAndQuery.TrimStart('/');
+                else
+                    urlEntry.Text = uri.PathAndQuery.TrimStart('/') + uri.Fragment;
+            }
+        }
+
         private void UrlCancel_Clicked(object sender, EventArgs e)
         {
             urlBar.IsVisible = false;
@@ -332,14 +343,14 @@ namespace Ao3TrackReader
             urlBar.Unfocus();
             try
             {
-                var uri = Ao3SiteDataLookup.CheckUri(new Uri(urlEntry.Text));
+                var uri = Ao3SiteDataLookup.CheckUri(new Uri(new Uri("http://archiveofourown.org/"),urlEntry.Text));
                 if (uri != null)
                 {
                     Navigate(uri);
                 }
                 else
                 {
-                    await DisplayAlert("Url error", "Can only enter urls on archiveofourown.org", "Ok");
+                    await DisplayAlert("Url error", "Can only enter valid urls on archiveofourown.org", "Ok");
                 }
             }
             catch
@@ -989,8 +1000,14 @@ namespace Ao3TrackReader
                 return true;
             }
 
+            UpdateUrlBar(uri);
+            ReadingList?.PageChange(uri);
+
             if (check.PathAndQuery == CurrentUri.PathAndQuery && check.Fragment != CurrentUri.Fragment)
             {
+                ShowPrevPageIndicator = 0;
+                ShowNextPageIndicator = 0;
+                LeftOffset = 0;
                 return false;
             }
 
@@ -1008,9 +1025,6 @@ namespace Ao3TrackReader
 
             JumpCommand.IsEnabled = false;
             HideContextMenu();
-
-            if (urlEntry != null) urlEntry.Text = uri.AbsoluteUri;
-            ReadingList?.PageChange(uri);
 
             nextPage = null;
             prevPage = null;
@@ -1034,7 +1048,7 @@ namespace Ao3TrackReader
             JumpCommand.IsEnabled = false;
             HideContextMenu();
 
-            if (urlEntry != null) urlEntry.Text = CurrentUri.AbsoluteUri;
+            UpdateUrlBar(CurrentUri);
             ReadingList?.PageChange(CurrentUri);
 
             nextPage = null;

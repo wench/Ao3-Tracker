@@ -63,7 +63,7 @@ limitations under the License.
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Url Bar"             Icon="{StaticResource RenameIcon}"    Command="{Binding UrlBarCommand,Source={x:Reference root}}" 
                                    x:Name="UrlBarToolBarItem" >
-                    <local:ToolbarItem.Description>Show the URL bar. Only urls on http://archiveofourown.org/ are allowed.</local:ToolbarItem.Description>
+                    <local:ToolbarItem.Description>Show the URL bar. Allows for direct entry of paths to browse to on archiveofourown.org.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Reset Font Size"     Icon="{StaticResource FontIcon}"      Command="{Binding ResetFontSizeCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>Reset the font size of the page text back to 100%.</local:ToolbarItem.Description>
