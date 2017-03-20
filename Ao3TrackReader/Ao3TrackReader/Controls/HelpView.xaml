@@ -19,7 +19,7 @@ limitations under the License.
     <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <Label Text="Help" FontSize="{StaticResource LargeFontSize}" />
+                <Label Text="Help" FontSize="{DynamicResource LargeFontSize}" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 
@@ -48,9 +48,9 @@ limitations under the License.
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Image Source="{Binding Icon}" HeightRequest="20" WidthRequest="20" VerticalOptions="Start" Margin="0,3,0,0" />
-                                        <local:TextView TextEx="{Binding Text}" TextColor="{StaticResource HighlightColor}" FontSize="{StaticResource MediumSmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Column="1" VerticalTextAlignment="Start" VerticalOptions="StartAndExpand"/>
+                                        <local:TextView TextEx="{Binding Text}" TextColor="{StaticResource HighlightColor}" FontSize="{DynamicResource MediumSmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Column="1" VerticalTextAlignment="Start" VerticalOptions="StartAndExpand"/>
                                     </Grid>
-                                    <local:TextView TextEx="{Binding Description}" FontSize="{StaticResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
+                                    <local:TextView TextEx="{Binding Description}" FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
                                 </Grid>
                                 
                                 <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0" />

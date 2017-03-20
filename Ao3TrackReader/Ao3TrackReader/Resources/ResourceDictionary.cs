@@ -26,6 +26,10 @@ namespace Ao3TrackReader.Resources
     {
         public ResourceDictionary()
         {
+            App.Database.GetVariableEvents("LogFontSizeUI").Updated += ResourceDictionary_Updated;
+            App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI, 0);
+            UpdateFontsize(LogFontSizeUI);
+
 #if !WINDOWS_UWP
             // Andriod and iOS uses Xamarin Forms theme           
             switch (App.Theme)  
@@ -104,6 +108,28 @@ namespace Ao3TrackReader.Resources
             }
 
 
+        }
+
+        private void ResourceDictionary_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+            if (!int.TryParse(e.NewValue, out int LogFontSizeUI)) LogFontSizeUI = 0;
+            UpdateFontsize(LogFontSizeUI);
+        }
+
+        public void UpdateFontsize(int LogFontSizeUI)
+        {
+            this["HugeFontSize"] = 24.0 * Math.Pow(1.05, LogFontSizeUI);
+            this["LargeFontSize"] = 22.0 * Math.Pow(1.05, LogFontSizeUI);
+            this["MediumFontSize"] = 18.0 * Math.Pow(1.05, LogFontSizeUI);
+            this["MediumSmallFontSize"] = 16.0 * Math.Pow(1.05, LogFontSizeUI);
+            this["SmallFontSize"] = 14.0 * Math.Pow(1.05, LogFontSizeUI);
+            this["MicroFontSize"] = 11.0 * Math.Pow(1.05, LogFontSizeUI);
+            this["TinyFontSize"] = 10.0 * Math.Pow(1.05, LogFontSizeUI);
+
+            for (int i = 1; i <= 40; i++)
+            {
+                this["Size_" + i] = i * Math.Pow(1.05, LogFontSizeUI);
+            }
         }
     }
 }

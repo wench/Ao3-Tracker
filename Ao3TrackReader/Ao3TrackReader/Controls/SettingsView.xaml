@@ -20,15 +20,22 @@ limitations under the License.
         <ResourceDictionary>
             <Style TargetType="Label">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+                <Setter Property="VerticalOptions" Value="Center" />
             </Style>
             
             <Style TargetType="local:TextView">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+                <Setter Property="VerticalOptions" Value="Center" />
             </Style>
             
             <Style TargetType="local:DropDown">
                 <Setter Property="WidthRequest" Value="180" />
                 <Setter Property="HorizontalOptions" Value="EndAndExpand" />
+                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_32}" />
+                <Setter Property="VerticalOptions" Value="Center" />
             </Style>
 
             <m:KeyedItemList x:TypeArguments="x:String" x:Key="Themes" x:Name="themes" />
@@ -37,7 +44,7 @@ limitations under the License.
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="History"         Value="History Only"/>
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="Page"            Value="Page Only"/>
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="HistoryThenPage" Value="History then Page" />
-                <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="PageThenHistory" Value="Page then History "/>
+                <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="PageThenHistory" Value="Page then History"/>
             </m:KeyedItemList>
 
             <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="BackButtonMode" x:Name="backButtonMode">
@@ -57,126 +64,139 @@ limitations under the License.
                 <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="&#xB0;F to &#xB0;C"/>
                 <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="&#xB0;C to &#xB0;F"/>
             </m:NullableKeyedItemList>
+
+            <m:KeyedItemList x:TypeArguments="x:Int32" x:Key="FontSizeUIList" x:Name="fontSizeUIList" >
+                <m:KeyedItem x:TypeArguments="x:Int32" Key="-3" Value="Tiny"/>
+                <m:KeyedItem x:TypeArguments="x:Int32" Key="0"  Value="Small"/>
+                <m:KeyedItem x:TypeArguments="x:Int32" Key="3"  Value="Medium" />
+                <m:KeyedItem x:TypeArguments="x:Int32" Key="6"  Value="Large"/>
+                <m:KeyedItem x:TypeArguments="x:Int32" Key="9"  Value="Huge"/>
+            </m:KeyedItemList>
+            
         </ResourceDictionary>
     </local:PaneView.Resources>
 
     <local:PaneView.Content>
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <Label Text="Settings" FontSize="{StaticResource LargeFontSize}" />
+                <Label Text="Settings" FontSize="{DynamicResource LargeFontSize}" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
             </StackLayout>
 
             <ScrollView Orientation="Vertical">
                 <StackLayout Spacing="12" Padding="4,0,12,0">
-                    <Label Text="Cloud Sync" FontSize="{StaticResource LargeFontSize}" />
+                    <Label Text="Cloud Sync" FontSize="{DynamicResource LargeFontSize}" />
 
-                    <Label Text="Login to your Ao3Track Sync account to syncronize work locations and reading lists across devices.&#xA;&#xA;This is not the same as your user account on Ao3. You must first create a separate Ao3Track Sync account" FontSize="{StaticResource SmallFontSize}" />
+                    <Label Text="Login to your Ao3Track Sync account to syncronize work locations and reading lists across devices.&#xA;&#xA;This is not the same as your user account on Ao3. You must first create a separate Ao3Track Sync account" FontSize="{DynamicResource SmallFontSize}" />
 
                     <StackLayout Spacing="8" x:Name="syncLoggedIn">
-                        <Label Text="Logged in as: " x:Name="syncLoggedInLabel" FontSize="{StaticResource SmallFontSize}" />
+                        <Label Text="Logged in as: " x:Name="syncLoggedInLabel" FontSize="{DynamicResource SmallFontSize}" />
                         <Button Text="Logout" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncLogout" HorizontalOptions="Start" />
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="syncForm">
                         <StackLayout Orientation="Horizontal">
                             <Button Text="Login" Clicked="OnSyncLogin" VerticalOptions="Center" x:Name="syncLoginButton"/>
-                            <Label Text=" or " FontSize="{StaticResource SmallFontSize}" VerticalOptions="Center" />
+                            <Label Text=" or " FontSize="{DynamicResource SmallFontSize}" VerticalOptions="Center" />
                             <Button Text="Create new user" Clicked="OnSyncCreate" VerticalOptions="Center" x:Name="syncCreateButton"/>
                         </StackLayout>
 
-                        <Label Text="Username" FontSize="{StaticResource MediumFontSize}" />
+                        <Label Text="Username" FontSize="{DynamicResource MediumFontSize}" />
                         <Entry Placeholder="Enter your username" HorizontalOptions="Fill" x:Name="username" />
-                        <Label Text="Text" TextColor="#990000" FontSize="{StaticResource SmallFontSize}" x:Name="usernameErrors" />
+                        <Label Text="Text" TextColor="#990000" FontSize="{DynamicResource SmallFontSize}" x:Name="usernameErrors" />
 
-                        <Label Text="Password" FontSize="{StaticResource MediumFontSize}" />
+                        <Label Text="Password" FontSize="{DynamicResource MediumFontSize}" />
                         <Entry Placeholder="Enter your password" IsPassword="True" HorizontalOptions="Fill" x:Name="password" />
-                        <Label Text="Text" TextColor="#990000" FontSize="{StaticResource SmallFontSize}" x:Name="passwordErrors" />
+                        <Label Text="Text" TextColor="#990000" FontSize="{DynamicResource SmallFontSize}" x:Name="passwordErrors" />
 
-                        <Label Text="Verify Password" FontSize="{StaticResource MediumFontSize}" x:Name="verifyLabel" />
+                        <Label Text="Verify Password" FontSize="{DynamicResource MediumFontSize}" x:Name="verifyLabel" />
                         <Entry Placeholder="Enter your password again" IsPassword="True" HorizontalOptions="Fill" x:Name="verify" />
-                        <Label Text="Text" TextColor="#990000" FontSize="{StaticResource SmallFontSize}" x:Name="verifyErrors" />
+                        <Label Text="Text" TextColor="#990000" FontSize="{DynamicResource SmallFontSize}" x:Name="verifyErrors" />
 
-                        <Label Text="Email (optional)" FontSize="{StaticResource MediumFontSize}" x:Name="emailLabel" />
+                        <Label Text="Email (optional)" FontSize="{DynamicResource MediumFontSize}" x:Name="emailLabel" />
                         <Entry Placeholder="Enter your email" Keyboard="Email" HorizontalOptions="Fill" x:Name="email" />
-                        <Label Text="Text" TextColor="#990000" FontSize="{StaticResource SmallFontSize}" x:Name="emailErrors" />
+                        <Label Text="Text" TextColor="#990000" FontSize="{DynamicResource SmallFontSize}" x:Name="emailErrors" />
 
                         <StackLayout Orientation="Horizontal">
-                            <Button Text="Submit" BorderColor="{StaticResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Button Text="Submit" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start"/>
                             <ActivityIndicator IsRunning="False" IsVisible="False"  x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="secureBrowsingForm">
-                        <Label Text="Secure Browsing" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label Text="Secure Browsing" FontSize="{DynamicResource LargeFontSize}" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Using HTTPS for secure browsing on Ao3" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="StartAndExpand" />
+                            <Label Text="Using HTTPS for secure browsing on Ao3" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="StartAndExpand" />
                             <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
                         </StackLayout>
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="backButtonForm">
-                        <Label Text="Toolbar Settings" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label Text="Toolbar Settings" FontSize="{DynamicResource LargeFontSize}" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Show Back Button on Toolbar" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Show Back Button on Toolbar" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="backButtonModeDropDown" ItemsSource="{StaticResource BackButtonMode}" SelectedIndexChanged="OnBackButtonModeSelected" />
                         </StackLayout>
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="navigationForm">
-                        <Label Text="Navigation Options" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
-                        <Label Text="Choose the navigation options for the toolbar buttons and swipe gestures. Choose between Browser History style navigation, or Next/Previous Page navigation, or both." FontSize="{StaticResource MicroFontSize}" />
+                        <Label Text="Navigation Options" FontSize="{DynamicResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label Text="Choose the navigation options for the toolbar buttons and swipe gestures. Choose between Browser History style navigation, or Next/Previous Page navigation, or both." FontSize="{DynamicResource MicroFontSize}" />
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Back Button" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Back Button" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="toolbarBackDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnNavOptionSelected" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Forward Button" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Forward Button" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="toolbarForwardDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Swipe Right" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Swipe Right" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="swipeBackDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Swipe Left" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Swipe Left" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="swipeFowardDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                     </StackLayout>
 
                     <StackLayout Spacing="8" x:Name="unitConvForm">
                         <Label Text="Unit Conversions" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
-                        <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." FontSize="{StaticResource MicroFontSize}" />
+                        <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." FontSize="{DynamicResource MicroFontSize}" />
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Convert Temperature" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Convert Temperature" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="unitConvTempDropDown" ItemsSource="{StaticResource UnitConvModeTemp}" SelectedIndexChanged="OnUnitConvSelected"  />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Convert Length/Distance" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Convert Length/Distance" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="unitConvDistDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected"  />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Convert Volume" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Convert Volume" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="unitConvVolumeDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Convert Weight" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="Convert Weight" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="unitConvWeightDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
                     </StackLayout>
 
-                    <StackLayout Spacing="8" x:Name="themeForm">
-                        <Label Text="Theme" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
-                        <Label Text="You must restart the app to apply a new theme" FontSize="{StaticResource MicroFontSize}" />
+                    <StackLayout Spacing="8" x:Name="uiForm">
+                        <Label Text="User Interface Options" FontSize="{DynamicResource LargeFontSize}" Margin="0,12,0,0"/>
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="Select the Application Theme" FontSize="{StaticResource SmallFontSize}" HorizontalOptions="Start" />
+                            <Label Text="UI Font Size" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
+                            <local:DropDown x:Name="fontSizeUIDropDown" ItemsSource="{StaticResource FontSizeUIList}" SelectedIndexChanged="OnFontSizeUISelected" />
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="Select the Application Theme" FontSize="{DynamicResource SmallFontSize}" HorizontalOptions="Start" />
                             <local:DropDown x:Name="themeDropDown" SelectedIndexChanged="OnThemeSelected" ItemsSource="{StaticResource Themes}" />
                         </StackLayout>
+                        <Label Text="You must restart the app to apply a new theme" FontSize="{DynamicResource MicroFontSize}" />
                     </StackLayout>
 
                     <StackLayout Spacing="8">
-                        <Label Text="About" FontSize="{StaticResource LargeFontSize}" Margin="0,12,0,0"/>
-                        <Label x:Name="aboutText" FontSize="{StaticResource MicroFontSize}" HorizontalOptions="Start" />
+                        <Label Text="About" FontSize="{DynamicResource LargeFontSize}" Margin="0,12,0,0"/>
+                        <Label x:Name="aboutText" FontSize="{DynamicResource MicroFontSize}" HorizontalOptions="Start" />
                     </StackLayout>
 
                 </StackLayout>

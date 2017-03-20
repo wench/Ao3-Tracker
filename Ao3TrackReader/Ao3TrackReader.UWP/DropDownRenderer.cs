@@ -52,6 +52,14 @@ namespace Ao3TrackReader.UWP
                 Control.ItemsSource = Element.ItemsSource;
                 Control.SelectedItem = Element.SelectedItem;
                 Element.SelectedIndexChanged += Element_ItemSelected;
+                Control.DataContext = Element;
+
+                var b = new Windows.UI.Xaml.Data.Binding()
+                {
+                    Mode = Windows.UI.Xaml.Data.BindingMode.OneWay,
+                    Path = new Windows.UI.Xaml.PropertyPath("FontSize"),
+                };
+                Control.SetBinding(ComboBox.FontSizeProperty, b);
             }
         }
 

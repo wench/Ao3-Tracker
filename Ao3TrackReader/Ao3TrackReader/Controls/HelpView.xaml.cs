@@ -58,7 +58,17 @@ namespace Ao3TrackReader.Controls
                     helpBacking.Add(item);
 
                 ListView.ItemsSource = helpBacking;
+                App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
             }
+        }
+
+        private void LogFontSizeUI_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+            wvp.DoOnMainThread(() =>
+            {
+                ListView.ItemsSource = null;
+                ListView.ItemsSource = helpBacking;
+            });
         }
 
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)

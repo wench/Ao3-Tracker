@@ -148,7 +148,51 @@ namespace Ao3TrackReader
 			}
 		}
 
-		public string GetVariable(string name)
+        public class VariableEventArgs : EventArgs
+        {
+            public string VarName { get; set; }
+        };
+        
+        public class VariableUpdatedEventArgs : VariableEventArgs
+        {
+            public string NewValue { get; set; }
+            public string OldValue { get; set; }
+        };
+
+
+        public interface IVariableEvents
+        {
+            event EventHandler<VariableUpdatedEventArgs> Updated;
+            event EventHandler<VariableEventArgs> Deleted;
+        }
+
+        class VariableEvents : IVariableEvents
+        {
+            public event EventHandler<VariableUpdatedEventArgs> Updated;
+            public event EventHandler<VariableEventArgs> Deleted;
+
+            public void OnUpdated(object sender, string name, string oldval, string newval)
+            {
+                if (oldval != newval)
+                    Updated?.Invoke(sender, new VariableUpdatedEventArgs { VarName = name, OldValue = oldval, NewValue = newval });
+            }
+            public void OnDeleted(object sender, string name)
+            {
+                Deleted?.Invoke(sender, new VariableEventArgs { VarName = name });
+            }
+        }
+
+        Dictionary<string, VariableEvents> variableEvents = new Dictionary<string, VariableEvents>();
+        public IVariableEvents GetVariableEvents(string name)
+        {
+            lock (locker)
+            {
+                if (!variableEvents.TryGetValue(name, out var varEvents)) variableEvents[name] = varEvents = new VariableEvents();
+                return varEvents;
+            }
+        }
+
+        public string GetVariable(string name)
 		{
 			lock (locker)
 			{
@@ -222,39 +266,19 @@ namespace Ao3TrackReader
                 {
                     database.Insert(new Variable { name = name, value = value });
                 }
+                if (variableEvents.TryGetValue(name, out var varEvents)) varEvents.OnUpdated(this, name, row?.value, value);
             }
         }
+
         public void SaveVariable<T>(string name, T value)
         {
-            lock (locker)
-            {
-                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (row != null)
-                {
-                    database.Update(new Variable { name = name, value = value.ToString() });
-                }
-                else
-                {
-                    database.Insert(new Variable { name = name, value = value.ToString() });
-                }
-            }
+            SaveVariable(name, value.ToString());
         }
+
         public void SaveVariable<T>(string name, T? value)
             where T : struct
         {
-            lock (locker)
-            {
-                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                string v = value.HasValue ? value.ToString() : null;
-                if (row != null)
-                {
-                    database.Update(new Variable { name = name, value = v });
-                }
-                else
-                {
-                    database.Insert(new Variable { name = name, value = v });
-                }
-            }
+            SaveVariable(name, value.HasValue ? value.ToString() : null);
         }
 
         public void DeleteVariable(string name)
@@ -262,6 +286,7 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 database.Delete<Variable>(name);
+                if (variableEvents.TryGetValue(name, out var varEvents)) varEvents.OnDeleted(this, name);
             }
         }
 

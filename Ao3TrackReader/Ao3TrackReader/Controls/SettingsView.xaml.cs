@@ -62,6 +62,7 @@ namespace Ao3TrackReader.Controls
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
                 UpdateUnitConvs();
                 UpdateNavOptions();
+                UpdateFontSizeUI();
             }
         }
 
@@ -347,6 +348,17 @@ namespace Ao3TrackReader.Controls
 
             value = (dropdown.SelectedItem as KeyedItem<NavigateBehaviour>).Key;
             App.Database.SaveVariable(dbname, value);
+        }
+
+        void UpdateFontSizeUI()
+        {
+            App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI, 0);
+            fontSizeUIDropDown.SelectedItem = fontSizeUIList.Find(LogFontSizeUI);
+        }
+
+        void OnFontSizeUISelected(object sender, EventArgs e)
+        {
+            App.Database.SaveVariable("LogFontSizeUI", (fontSizeUIDropDown.SelectedItem as KeyedItem<int>).Key);
         }
     }
 }

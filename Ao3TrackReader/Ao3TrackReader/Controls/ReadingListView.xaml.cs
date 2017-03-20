@@ -108,6 +108,7 @@ namespace Ao3TrackReader.Controls
             wvp.DoOnMainThread(() =>
             {
                 ListView.ItemsSource = readingListBacking;
+                App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
             });
 
             foreach (var viewmodel in vms)
@@ -128,6 +129,15 @@ namespace Ao3TrackReader.Controls
                 RefreshButton.IsEnabled = true;
                 SyncIndicator.IsRunning = false;
                 SyncIndicator.IsVisible = false;
+            });
+        }
+
+        private void LogFontSizeUI_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+            wvp.DoOnMainThread(() =>
+            {
+                ListView.ItemsSource = null;
+                ListView.ItemsSource = readingListBacking;
             });
         }
 

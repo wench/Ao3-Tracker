@@ -27,6 +27,15 @@ namespace Ao3TrackReader.Controls
 {
 	public class DropDown : Picker
     {
+        public static readonly Xamarin.Forms.BindableProperty FontSizeProperty =
+          Xamarin.Forms.BindableProperty.Create("FontSize", typeof(double), typeof(Button), defaultValue: 12.0);
+
+        public double FontSize
+        {
+            get { return (double)GetValue(FontSizeProperty); }
+            set { SetValue(FontSizeProperty, value); }
+        }
+
         public DropDown ()
 		{
 		}
