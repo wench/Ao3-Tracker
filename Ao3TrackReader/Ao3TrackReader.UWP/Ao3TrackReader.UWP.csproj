@@ -344,6 +344,54 @@
     <Content Include="..\Icons\200\forceloc_light.scale-200.png">
       <Link>Assets\forceloc_light.scale-200.png</Link>
     </Content>
+    <Content Include="..\Icons\swipeleft_dark.png">
+      <Link>Assets\swipeleft_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\swipeleft_dark.scale-200.png">
+      <Link>Assets\swipeleft_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\swipeleft_light.png">
+      <Link>Assets\swipeleft_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\swipeleft_light.scale-200.png">
+      <Link>Assets\swipeleft_light.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\swiperight_dark.png">
+      <Link>Assets\swiperight_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\swiperight_dark.scale-200.png">
+      <Link>Assets\swiperight_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\swiperight_light.png">
+      <Link>Assets\swiperight_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\swiperight_light.scale-200.png">
+      <Link>Assets\swiperight_light.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\tap_dark.png">
+      <Link>Assets\tap_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\tap_dark.scale-200.png">
+      <Link>Assets\tap_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\tap_light.png">
+      <Link>Assets\tap_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\tap_light.scale-200.png">
+      <Link>Assets\tap_light.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\taphold_dark.png">
+      <Link>Assets\taphold_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\taphold_dark.scale-200.png">
+      <Link>Assets\taphold_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\taphold_light.png">
+      <Link>Assets\taphold_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\taphold_light.scale-200.png">
+      <Link>Assets\taphold_light.scale-200.png</Link>
+    </Content>                
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\LargeTile.scale-100.png" />

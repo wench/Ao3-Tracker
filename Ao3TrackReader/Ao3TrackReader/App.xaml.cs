@@ -104,14 +104,15 @@ namespace Ao3TrackReader
             get; private set;
         }
 
-        public new NavigationPage MainPage {
-            get { return (NavigationPage) base.MainPage; }
+        public new NavigationPage MainPage
+        {
+            get { return (NavigationPage)base.MainPage; }
             set { base.MainPage = value; }
         }
 
         public new static App Current
         {
-            get { return (App) Xamarin.Forms.Application.Current; }
+            get { return (App)Xamarin.Forms.Application.Current; }
         }
 
         public static void Log(Exception e)
@@ -119,15 +120,26 @@ namespace Ao3TrackReader
             // Anything we do here must be wrapped, cause the app might be in an impossible state
             try
             {
+                if (_LogErrors)
+                {
+                }
             }
             catch
             {
             }
         }
 
+        static bool _LogErrors;
+        public static bool LogErrors
+        {
+            get { return _LogErrors; }
+            set { Database.SaveVariable("LogErrors", _LogErrors = value); }
+        }
+
         static App()
         {
             Database = new Ao3TrackDatabase();
+            Database.TryGetVariable("LogErrors", bool.TryParse, out _LogErrors, true);
             Storage = new SyncedStorage();
 
             Theme = Ao3TrackReader.App.Database.GetVariable("Theme");

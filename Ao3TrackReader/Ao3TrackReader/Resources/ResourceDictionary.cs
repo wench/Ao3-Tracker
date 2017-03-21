@@ -126,7 +126,7 @@ namespace Ao3TrackReader.Resources
             this["MicroFontSize"] = 11.0 * Math.Pow(1.05, LogFontSizeUI);
             this["TinyFontSize"] = 10.0 * Math.Pow(1.05, LogFontSizeUI);
 
-            for (int i = 1; i <= 40; i++)
+            for (int i = 1; i <= 100; i++)
             {
                 this["Size_" + i] = i * Math.Pow(1.05, LogFontSizeUI);
             }

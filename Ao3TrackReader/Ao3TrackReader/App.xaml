@@ -24,13 +24,13 @@ limitations under the License.
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
                 <Setter Property="HeightRequest" Value="{DynamicResource Size_32}" />                
             </Style>
-            <Style TargetType="Label">
-                <Setter Property="TextColor" Value="{StaticResource BaseMediumColor}" />
+            <Style TargetType="Label" ApplyToDerivedTypes="True">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
             </Style>
-            <Style TargetType="local:TextView">
-                <Setter Property="TextColor" Value="{StaticResource BaseMediumColor}" />
-                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+            <Style TargetType="Label" ApplyToDerivedTypes="True" x:Key="PaneName">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="FontSize" Value="{DynamicResource HugeFontSize}" />
             </Style>
             <Style TargetType="local:Button">
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
@@ -41,6 +41,9 @@ limitations under the License.
                 <Setter Property="HeightRequest" Value="{DynamicResource Size_40}" />
                 <Setter Property="ImageWidth" Value="20" />
                 <Setter Property="ImageHeight" Value="20" />
+            </Style>
+            <Style TargetType="local:Button" x:Key="TextButton">
+                <Setter Property="WidthRequest" Value="-1" />
             </Style>
 
             <local:EmptyStringBool x:Key="EmptyStringBoolConverter" />

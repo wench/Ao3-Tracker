@@ -26,7 +26,6 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using Ao3TrackReader.Controls;
 using Ao3TrackReader.Resources;
-using Icons = Ao3TrackReader.Resources.Icons;
 
 using Xamarin.Forms.PlatformConfiguration;
 using System.Runtime.CompilerServices;
@@ -46,10 +45,8 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
-        //public IList<ToolbarItem> Toolbar => new List<ToolbarItem>(20);
-
         public IEnumerable<Models.IHelpInfo> HelpItems {
-            get { return ((IEnumerable<Models.IHelpInfo>)AllToolbarItems).Concat(ExtraHelp); }
+            get { return ExtraHelp.Concat((IEnumerable<Models.IHelpInfo>)AllToolbarItems); }
         }
 
         List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
@@ -325,9 +322,9 @@ namespace Ao3TrackReader
             if (urlEntry != null)
             {
                 if (uri.Fragment?.StartsWith("#ao3tjump") == true)
-                    urlEntry.Text = uri.PathAndQuery.TrimStart('/');
+                    urlEntry.Text = uri.PathAndQuery;
                 else
-                    urlEntry.Text = uri.PathAndQuery.TrimStart('/') + uri.Fragment;
+                    urlEntry.Text = uri.PathAndQuery + uri.Fragment;
             }
         }
 

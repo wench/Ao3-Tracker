@@ -430,6 +430,54 @@
     <AndroidResource Include="..\Icons\200\tag_light.scale-200.png">
       <Link>Resources\drawable-hdpi\tag_light.png</Link>
     </AndroidResource>
+    <AndroidResource Include="..\Icons\swipeleft_dark.png">
+      <Link>Resources\drawable\swipeleft_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\swipeleft_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\swipeleft_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\swipeleft_light.png">
+      <Link>Resources\drawable\swipeleft_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\swipeleft_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\swipeleft_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\swiperight_dark.png">
+      <Link>Resources\drawable\swiperight_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\swiperight_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\swiperight_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\swiperight_light.png">
+      <Link>Resources\drawable\swiperight_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\swiperight_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\swiperight_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\tap_dark.png">
+      <Link>Resources\drawable\tap_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\tap_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\tap_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\tap_light.png">
+      <Link>Resources\drawable\tap_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\tap_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\tap_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\taphold_dark.png">
+      <Link>Resources\drawable\taphold_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\taphold_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\taphold_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\taphold_light.png">
+      <Link>Resources\drawable\taphold_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\taphold_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\taphold_light.png</Link>
+    </AndroidResource>                
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\callbacks.js">

@@ -20,13 +20,13 @@ limitations under the License.
     <ContentPage.Resources>
         <ResourceDictionary>
             <c:List x:Key="ExtraHelp" x:Name="ExtraHelp" x:TypeArguments="m:HelpInfo" >
-                <m:HelpInfo Text="Tap" Group="Reading List">
+                <m:HelpInfo Text="Tap" Icon="{StaticResource TapIcon}" Group="Reading List">
                     <m:HelpInfo.Description>
                         <html:Span Pad="True">Tap, or left mouse click, on Reading List items, to browse to the item. If the item is a work or series it will open at the<html:Em>Read To Location.</html:Em></html:Span>
                     </m:HelpInfo.Description>
                 </m:HelpInfo>
-                <m:HelpInfo Text="Tap and Hold" Group="Reading List">
-                    <m:HelpInfo.Description>Tap and hold, or right mouse click, on Reading List items to bring up a context menu of options for that item.</m:HelpInfo.Description>
+                <m:HelpInfo Text="Tap and Hold" Icon="{StaticResource TapHoldIcon}" Group="Reading List">
+                    <m:HelpInfo.Description>Tap and hold, or right mouse click, on Reading List items to bring up a context menu. In the context menu you can choose how to open the item, refresh the details of the item from the Ao3 site or delete the item from the reading list.</m:HelpInfo.Description>
                 </m:HelpInfo>
             </c:List>
         </ResourceDictionary>
@@ -63,12 +63,12 @@ limitations under the License.
                     <DataTemplate>
                         <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
                             <ViewCell.ContextActions>
-                                <MenuItem Text="Open at Last Location"           Command="{local:MenuOpenLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open"                            Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open Full Work at Last Location" Command="{local:MenuOpenFullWorkLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open Full Work"                  Command="{local:MenuOpenFullWorkCommand ReadingList={x:Reference root}}"  CommandParameter="{Binding .}" />
-                                <MenuItem Text="Refresh"                         Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
-                                <MenuItem Text="Delete"                          Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
+                                <MenuItem Text="Open at Read To Location" Command="{local:MenuOpenLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open"                     Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open Full Work at Read To Location" Command="{local:MenuOpenFullWorkLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open Full Work"           Command="{local:MenuOpenFullWorkCommand ReadingList={x:Reference root}}"  CommandParameter="{Binding .}" />
+                                <MenuItem Text="Refresh"                  Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
+                                <MenuItem Text="Delete"                   Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
                             </ViewCell.ContextActions>
                             <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
                                 <Grid.ColumnDefinitions>

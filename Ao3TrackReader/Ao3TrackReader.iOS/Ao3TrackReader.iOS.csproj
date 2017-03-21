@@ -354,6 +354,54 @@
     <BundleResource Include="..\Icons\200\forceloc_light.scale-200.png">
       <Link>Resources\forceloc_light%402x.png</Link>
     </BundleResource>
+    <BundleResource Include="..\Icons\swipeleft_dark.png">
+      <Link>Resources\swipeleft_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\swipeleft_dark.scale-200.png">
+      <Link>Resources\swipeleft_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\swipeleft_light.png">
+      <Link>Resources\swipeleft_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\swipeleft_light.scale-200.png">
+      <Link>Resources\swipeleft_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\swiperight_dark.png">
+      <Link>Resources\swiperight_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\swiperight_dark.scale-200.png">
+      <Link>Resources\swiperight_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\swiperight_light.png">
+      <Link>Resources\swiperight_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\swiperight_light.scale-200.png">
+      <Link>Resources\swiperight_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\tap_dark.png">
+      <Link>Resources\tap_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\tap_dark.scale-200.png">
+      <Link>Resources\tap_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\tap_light.png">
+      <Link>Resources\tap_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\tap_light.scale-200.png">
+      <Link>Resources\tap_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\taphold_dark.png">
+      <Link>Resources\taphold_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\taphold_dark.scale-200.png">
+      <Link>Resources\taphold_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\taphold_light.png">
+      <Link>Resources\taphold_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\taphold_light.scale-200.png">
+      <Link>Resources\taphold_light%402x.png</Link>
+    </BundleResource>                
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">

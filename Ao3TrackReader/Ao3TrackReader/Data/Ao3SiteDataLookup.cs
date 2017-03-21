@@ -101,7 +101,7 @@ namespace Ao3TrackReader.Data
 #if __IOS__
             use_https = true;
 #else
-            if (!App.Database.TryGetVariable("UseHttps", bool.TryParse, out use_https))
+            if (!App.Database.TryGetVariable("UseHttps", bool.TryParse, out use_https, true))
                 App.Database.SaveVariable("UseHttps", use_https.ToString());
 #endif
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;

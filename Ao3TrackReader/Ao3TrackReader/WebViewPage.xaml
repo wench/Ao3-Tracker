@@ -79,12 +79,15 @@ limitations under the License.
             </c:List>
 
             <c:List x:Key="ExtraHelp" x:Name="ExtraHelp" x:TypeArguments="m:HelpInfo" >
-                <m:HelpInfo Text="Swipe Right" Icon="{StaticResource ForwardIcon}" Group="Gestures">
+                <m:HelpInfo Text="Swipe Right" Icon="{StaticResource SwipeRightIcon}" Group="Gestures">
                     <m:HelpInfo.Description>Browse to the previous page in the browser history. Swipe right behavior can be changed in Settings.</m:HelpInfo.Description>
                 </m:HelpInfo>
-                <m:HelpInfo Text="Swipe Left" Icon="{StaticResource BackIcon}" Group="Gestures" >
+                <m:HelpInfo Text="Swipe Left" Icon="{StaticResource SwipeLeftIcon}" Group="Gestures" >
                     <m:HelpInfo.Description>Browse to the next page in the browser history, the next chapter in a work or series, or the next page of a search. Swipe left behavior can be changed in Settings.</m:HelpInfo.Description>
                 </m:HelpInfo>
+                <m:HelpInfo Text="Tap and Hold on Links" Icon="{StaticResource TapHoldIcon}" Group="Gestures">
+                    <m:HelpInfo.Description>Tap and hold, or right mouse click, on a link to bring up a context menu. In the context menu you can open the link, add it to the reading list, or copy it to the system clipboard.</m:HelpInfo.Description>
+                </m:HelpInfo>            
             </c:List>
         </ResourceDictionary>
     </ContentPage.Resources>

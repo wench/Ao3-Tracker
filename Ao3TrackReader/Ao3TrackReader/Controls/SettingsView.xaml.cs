@@ -60,10 +60,16 @@ namespace Ao3TrackReader.Controls
                 SelectCurrentTheme();
                 SelectBackButtonMode();
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
+                sendErrorsSwitch.IsToggled = App.LogErrors;
                 UpdateUnitConvs();
                 UpdateNavOptions();
                 UpdateFontSizeUI();
             }
+        }
+
+        public void OnSendErrorsSwitch(object sender, EventArgs e)
+        {
+            App.LogErrors = sendErrorsSwitch.IsToggled;
         }
 
         public void OnHttpsSwitch(object sender, EventArgs e)

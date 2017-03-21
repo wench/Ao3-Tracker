@@ -92,7 +92,23 @@ namespace Ao3TrackReader.Resources
         }
         public static string More
         {
-            get { return App.PlatformIcon("More") + ".png"; }
+            get { return App.PlatformIcon("more") + ".png"; }
+        }
+        public static string SwipeLeft
+        {
+            get { return App.PlatformIcon("swipeleft") + ".png"; }
+        }
+        public static string SwipeRight
+        {
+            get { return App.PlatformIcon("swiperight") + ".png"; }
+        }
+        public static string Tap
+        {
+            get { return App.PlatformIcon("tap") + ".png"; }
+        }
+        public static string TapHold
+        {
+            get { return App.PlatformIcon("taphold") + ".png"; }
         }
     }
 }
