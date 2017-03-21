@@ -148,13 +148,13 @@ namespace Ao3TrackReader.Controls
                                     break;
 
                                 case "verify":
-                                    if (isCreateUser) break;
+                                    if (!isCreateUser) break;
                                     verifyErrors.Text = error.Value;
                                     verifyErrors.IsVisible = true;
                                     break;
 
                                 case "email":
-                                    if (isCreateUser) break;
+                                    if (!isCreateUser) break;
                                     emailErrors.Text = error.Value;
                                     emailErrors.IsVisible = true;
                                     break;
@@ -256,7 +256,9 @@ namespace Ao3TrackReader.Controls
                 if (isCreateUser)
                 {
                     syncLoginButton.BorderColor = Colors.Base.Trans.Low;
+                    syncLoginButton.TextColor = Colors.Base.Medium;
                     syncCreateButton.BorderColor = Colors.Highlight.Trans.Medium;
+                    syncCreateButton.TextColor = Colors.Highlight;
                     verifyLabel.IsVisible = true;
                     verify.IsVisible = true;
                     emailLabel.IsVisible = true;
@@ -265,7 +267,9 @@ namespace Ao3TrackReader.Controls
                 else
                 {
                     syncLoginButton.BorderColor = Colors.Highlight.Trans.Medium;
+                    syncLoginButton.TextColor = Colors.Highlight;
                     syncCreateButton.BorderColor = Colors.Base.Trans.Low;
+                    syncCreateButton.TextColor = Colors.Base.Medium;
                     verifyLabel.IsVisible = false;
                     verify.IsVisible = false;
                     emailLabel.IsVisible = false;
