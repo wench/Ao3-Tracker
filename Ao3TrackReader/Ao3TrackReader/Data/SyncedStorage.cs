@@ -732,8 +732,32 @@ namespace Ao3TrackReader.Data
                 catch (Newtonsoft.Json.JsonException /*e*/)
                 {
                 }
-                
+
                 return res;
+            });
+        }
+
+        public Task<bool> SubmitErrorReport(string report)
+        {
+            return Task.Run(() =>
+            {
+                var json = JsonConvert.SerializeObject(report);
+                var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                var task = HttpClient.PostAsync(new Uri(url_base, "ErrorReport"), postBody);
+                try
+                {
+                    task.Wait();
+                }
+                catch (Exception)
+                {
+
+                }
+                if (task.IsFaulted) return false;
+                var response = task.Result;
+                if (!response.IsSuccessStatusCode)
+                    return false;
+                return true;
             });
         }
     }

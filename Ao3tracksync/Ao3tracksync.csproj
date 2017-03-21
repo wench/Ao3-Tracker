@@ -186,6 +186,7 @@
     <Compile Include="Auth\UserIdentity.cs" />
     <Compile Include="Auth\UserPrincipal.cs" />
     <Compile Include="Controllers\Attributes.cs" />
+    <Compile Include="Controllers\ErrorReportController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ReadingListController.cs" />
     <Compile Include="Controllers\UserController.cs" />

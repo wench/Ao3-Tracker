@@ -22,10 +22,16 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
-
 using Xamarin.Forms;
 using Button = Ao3TrackReader.Controls.Button;
 using Ver = Ao3TrackReader.Version.Version;
+using System.Threading.Tasks;
+
+#if WINDOWS_UWP
+using Windows.Storage;
+#else
+using System.IO;
+#endif
 
 namespace Ao3TrackReader
 {
@@ -115,13 +121,31 @@ namespace Ao3TrackReader
             get { return (App)Xamarin.Forms.Application.Current; }
         }
 
+        static bool _LoggedError = false;
         public static void Log(Exception e)
         {
             // Anything we do here must be wrapped, cause the app might be in an impossible state
             try
             {
-                if (_LogErrors)
+                if (_LogErrors && !_LoggedError)
                 {
+                    _LoggedError = true;
+
+                    var settings = new Newtonsoft.Json.JsonSerializerSettings()
+                    {
+                        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+                    };
+                    string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
+                    {
+                        Platform = Xamarin.Forms.Device.RuntimePlatform,
+                        Idiom = Xamarin.Forms.Device.Idiom,
+                        Version = Ao3TrackReader.Version.Version.LongString,
+                        Date = DateTime.UtcNow,
+                        Exception = e
+                    }, settings);
+
+                    TextFileSave("ErrorReport.json", report);
                 }
             }
             catch
@@ -141,6 +165,20 @@ namespace Ao3TrackReader
             Database = new Ao3TrackDatabase();
             Database.TryGetVariable("LogErrors", bool.TryParse, out _LogErrors, true);
             Storage = new SyncedStorage();
+
+            Task.Run(async () =>
+            {
+                var report = await TextFileLoadAsync("ErrorReport.json");
+                TextFileDelete("ErrorReport.json");
+
+                if (_LogErrors)
+                {
+                    if (!string.IsNullOrWhiteSpace(report))
+                    {
+                        await Storage.SubmitErrorReport(report);
+                    }
+                }
+            });
 
             Theme = Ao3TrackReader.App.Database.GetVariable("Theme");
             if (string.IsNullOrWhiteSpace(Theme)) Theme = "light";
@@ -217,6 +255,73 @@ namespace Ao3TrackReader
                 return mode == InteractionMode.Phone || mode == InteractionMode.Tablet;
             }
         }
+
+        public static T RunSynchronously<T>(System.Threading.Tasks.Task<T> task)
+        {
+            task.Wait();
+            return task.Result;
+        }
+
+        public static void RunSynchronously(System.Threading.Tasks.Task task)
+        {
+            task.Wait();
+        }
+
+#if WINDOWS_UWP
+        public static T RunSynchronously<T>(Windows.Foundation.IAsyncOperation<T> iasync)
+        {
+            var task = iasync.AsTask();
+            task.Wait();
+            return task.Result;
+        }
+
+        public static void RunSynchronously(Windows.Foundation.IAsyncAction iasync)
+        {
+            var task = iasync.AsTask();
+            task.Wait();
+        }
+
+        public static void TextFileSave(string filename, string text)
+        {
+            var localFolder = ApplicationData.Current.LocalFolder;
+            var sampleFile = RunSynchronously(localFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting));
+            RunSynchronously(FileIO.WriteTextAsync(sampleFile, text));
+        }
+        public static async Task<string> TextFileLoadAsync(string filename)
+        {
+            var storageFolder = ApplicationData.Current.LocalFolder;
+            var sampleFile = (await storageFolder.TryGetItemAsync(filename)) as StorageFile;
+            if (sampleFile == null) return null;
+            return await Windows.Storage.FileIO.ReadTextAsync(sampleFile);
+        }
+        public static void TextFileDelete(string filename)
+        {
+            var storageFolder = ApplicationData.Current.LocalFolder;
+            var sampleFile = RunSynchronously(storageFolder.TryGetItemAsync(filename)) as StorageFile;
+            if (sampleFile != null) RunSynchronously(sampleFile.DeleteAsync());
+        }
+#else
+        public static void TextFileSave(string filename, string text)
+        {
+            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            var filePath = Path.Combine(documentsPath, filename);
+            System.IO.File.WriteAllText(filePath, text);
+        }
+        public static Task<string> TextFileLoadAsync(string filename)
+        {
+            return Task.Run(()=> { 
+                var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                var filePath = Path.Combine(documentsPath, filename);
+                return System.IO.File.ReadAllText(filePath);
+            });
+        }
+        public static void TextFileDelete(string filename)
+        {
+            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            var filePath = Path.Combine(documentsPath, filename);
+            System.IO.File.Delete(filePath);
+        }
+#endif
 
         WebViewPage wvp;
 
