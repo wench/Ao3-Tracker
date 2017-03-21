@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,4 +55,9 @@
   </ItemGroup>
   <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.UWP/Package.appxmanifest /_:Package/_:Identity/@Version=LongString
+$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.iOS/Info.plist /plist/dict/key[text()='CFBundleVersion']/following-sibling::node()=String /plist/dict/key[text()='CFBundleShortVersionString']/following-sibling::node()=String
+$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Droid/Properties/AndroidManifest.xml /manifest/@android:versionName=String /manifest/@android:versionCode=Integer</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -401,7 +401,7 @@
     </BundleResource>
     <BundleResource Include="..\Icons\200\taphold_light.scale-200.png">
       <Link>Resources\taphold_light%402x.png</Link>
-    </BundleResource>                
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
@@ -519,6 +519,7 @@
     <Error Condition="!Exists('..\..\packages\Xamarin.Forms.2.3.4.192-pre2\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Xamarin.Forms.2.3.4.192-pre2\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)Ao3TrackReader/Ao3TrackReader.Version.Build/bin/$(HelperConfiguration)/Ao3TrackReader.Version.Build.exe $(ProjectDir)Info.plist /plist/dict/key[text()='CFBundleVersion']/following-sibling::node()=String /plist/dict/key[text()='CFBundleShortVersionString']/following-sibling::node()=String</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
