@@ -141,7 +141,7 @@ namespace Ao3TrackReader.Helper
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.CallVoid", _onalterfontsizeevent, fontSize).Wait(0));
+                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onalterfontsizeevent, fontSize).Wait(0));
         }
 
         [JavascriptInterface, Export("getWorkChaptersAsync")]

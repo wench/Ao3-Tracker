@@ -96,10 +96,10 @@ limitations under the License.
                                             <ColumnDefinition Width="25" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" />
-                                        <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" />
-                                        <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" />
-                                        <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" />
+                                        <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" VerticalOptions="Start" />
+                                        <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" VerticalOptions="Start" />
+                                        <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" VerticalOptions="Start" />
+                                        <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" VerticalOptions="Start" />
                                         <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0" Grid.Column="2" Grid.RowSpan="2">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
