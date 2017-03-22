@@ -22,7 +22,7 @@ limitations under the License.
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="BackgroundColor" Value="{StaticResource AltHighColor}" />
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
-                <Setter Property="HeightRequest" Value="{DynamicResource Size_32}" />                
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_32}" />
             </Style>
             <Style TargetType="Label" >
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
@@ -74,16 +74,30 @@ limitations under the License.
 
             <DataTemplate x:Key="CellGroupHeaderTemplate">
                 <ViewCell>
-                    <StackLayout Spacing="0">
-                        <local:TextView TextEx="{Binding Group}"     FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
-                        <local:TextView TextEx="{Binding GroupType}" FontSize="{DynamicResource MediumSmallFontSize}"  TextColor="{StaticResource BaseMediumColor}"  />
-                    </StackLayout>
+                    <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="4" />
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Spacing="0">
+                            <local:TextView TextEx="{Binding Group}"     FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
+                            <local:TextView TextEx="{Binding GroupType}" FontSize="{DynamicResource MediumSmallFontSize}"  TextColor="{StaticResource BaseMediumColor}"  />
+                        </StackLayout>
+                        <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
+                    </Grid>
                 </ViewCell>
             </DataTemplate>
 
             <DataTemplate x:Key="CellGroupHeaderNoTypeTemplate">
                 <ViewCell>
-                    <local:TextView TextEx="{Binding Group}" FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
+                    <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="4" />
+                        </Grid.ColumnDefinitions>
+                        <local:TextView TextEx="{Binding Group}" FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
+                        <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
+                    </Grid>
                 </ViewCell>
             </DataTemplate>
         </res:ResourceDictionary>

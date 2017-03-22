@@ -439,7 +439,7 @@ namespace Ao3TrackReader.Controls
             App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = null });
             wvp.DoOnMainThread(() =>
             {
-                var viewmodel = new Models.Ao3PageViewModel(model.Value, null)
+                var viewmodel = new Models.Ao3PageViewModel(model.Value, 0) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
                 {
                     TagsVisible = tags_visible
                 };

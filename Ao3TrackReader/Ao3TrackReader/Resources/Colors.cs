@@ -34,8 +34,10 @@ namespace Ao3TrackReader.Resources
 
     public class TransColorSet : BaseColorSet
     {
+        public Color VeryHigh { get; protected set; }
         public TransColorSet(Color col)
         {
+            VeryHigh = col.MultiplyAlpha(0.95);
             High = col.MultiplyAlpha(0.9);
             MediumHigh = col.MultiplyAlpha(0.8);
             Medium = col.MultiplyAlpha(0.6);
@@ -50,12 +52,14 @@ namespace Ao3TrackReader.Resources
 
     public class ColorSet : BaseColorSet
     {
+        public Color MediumVHigh { get; protected set; }
         public ColorSet(Color col,Color bg)
         {
             Trans = new TransColorSet(col);
             Solid = this;
 
             High = col;
+            MediumVHigh = Trans.VeryHigh.Blend(bg);
             MediumHigh = Trans.High.Blend(bg);
             Medium = Trans.MediumHigh.Blend(bg);
             MediumLow = Trans.Medium.Blend(bg);
@@ -69,8 +73,8 @@ namespace Ao3TrackReader.Resources
         {
             return set.High;
         }
-        public BaseColorSet Solid { get; protected set; }
-        public BaseColorSet Trans { get; protected set; }
+        public ColorSet Solid { get; protected set; }
+        public TransColorSet Trans { get; protected set; }
     }
 
     public static class Colors

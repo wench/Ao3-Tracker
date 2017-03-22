@@ -122,7 +122,7 @@ limitations under the License.
                                     <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
                                 </Grid>
                                 
-                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumHighColor}"/>
+                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

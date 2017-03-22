@@ -52,8 +52,8 @@ limitations under the License.
                                     </Grid>
                                     <local:TextView TextEx="{Binding Description}" FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
                                 </Grid>
-                                
-                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0" />
+
+                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

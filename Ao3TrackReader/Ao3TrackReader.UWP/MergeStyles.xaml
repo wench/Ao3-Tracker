@@ -24,6 +24,7 @@ limitations under the License.
     <GroupStyle x:Key="ListViewGroup" HidesIfEmpty="False">
         <GroupStyle.HeaderContainerStyle>
             <Style TargetType="ListViewHeaderItem">
+                <Setter Property="Margin" Value="0" />
                 <Setter Property="MinHeight" Value="30" />
                 <Setter Property="Template">
                     <Setter.Value>
