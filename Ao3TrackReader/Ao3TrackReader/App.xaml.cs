@@ -134,12 +134,14 @@ namespace Ao3TrackReader
                     var settings = new Newtonsoft.Json.JsonSerializerSettings()
                     {
                         ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-                        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+                        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+                        ObjectCreationHandling = Newtonsoft.Json.ObjectCreationHandling.Auto,
+                        TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects
                     };
                     string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
                     {
                         Platform = Xamarin.Forms.Device.RuntimePlatform,
-                        Idiom = Xamarin.Forms.Device.Idiom,
+                        Mode = GetInteractionMode().ToString(),
                         Version = Ao3TrackReader.Version.Version.LongString,
                         Date = DateTime.UtcNow,
                         Exception = e

@@ -121,7 +121,7 @@ limitations under the License.
                 </Grid.ColumnDefinitions>
 
                 <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" Grid.Column="0" />
-                <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="-1" VerticalOptions="Center" Grid.Column="1"/>
+                <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="{DynamicResource Size_52}" VerticalOptions="Center" Grid.Column="1"/>
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" Grid.Column="2"/>
             </Grid>
         </StackLayout>

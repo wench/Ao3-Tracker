@@ -18,7 +18,7 @@ limitations under the License.
             x:Class="Ao3TrackReader.Controls.SettingsView" xmlns:m="clr-namespace:Ao3TrackReader.Models" xmlns:a="clr-namespace:Ao3TrackReader" >
     <local:PaneView.Resources>
         <ResourceDictionary>
-            <Style TargetType="Label" ApplyToDerivedTypes="True">
+            <Style TargetType="Label">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="FontSize" Value="{DynamicResource MediumSmallFontSize}" />
                 <Setter Property="VerticalOptions" Value="Center" />
@@ -30,10 +30,12 @@ limitations under the License.
 
             <Style TargetType="Label" x:Key="Heading" ApplyToDerivedTypes="True">
                 <Setter Property="FontSize" Value="{DynamicResource LargeFontSize}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
             </Style>
 
             <Style TargetType="Label" x:Key="Remark" ApplyToDerivedTypes="True">
                 <Setter Property="FontSize" Value="{DynamicResource MicroFontSize}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
             </Style>
 
             <Style TargetType="local:DropDown">
@@ -62,7 +64,10 @@ limitations under the License.
             <Style TargetType="Switch" >
                 <Setter Property="Margin" Value="0,-5,0,-5" />
             </Style>
-            
+
+            <Style TargetType="local:Button" x:Key="TextButtonActive" BasedOn="{StaticResource TextButtonActive}" />
+            <Style TargetType="local:Button" x:Key="TextButtonInactive" BasedOn="{StaticResource TextButtonInactive}" />
+
             <m:KeyedItemList x:TypeArguments="x:String" x:Key="Themes" x:Name="themes" />
 
             <m:KeyedItemList x:TypeArguments="a:NavigateBehaviour" x:Key="NavigateMode" x:Name="navigateMode" >
@@ -122,9 +127,9 @@ limitations under the License.
 
                         <StackLayout x:Name="syncForm" Style="{StaticResource SettingGroup}">
                             <StackLayout Style="{StaticResource Setting}">
-                                <local:Button Text="Login" Clicked="OnSyncLogin" VerticalOptions="Center" x:Name="syncLoginButton" Style="{StaticResource TextButton}"/>
+                                <local:Button Text="Login" Clicked="OnSyncLogin" VerticalOptions="Center" x:Name="syncLoginButton" Style="{StaticResource TextButtonInactive}"/>
                                 <Label Text=" or " VerticalOptions="Center" />
-                                <local:Button Text="Create new user" Clicked="OnSyncCreate" VerticalOptions="Center" x:Name="syncCreateButton" Style="{StaticResource TextButton}"/>
+                                <local:Button Text="Create new user" Clicked="OnSyncCreate" VerticalOptions="Center" x:Name="syncCreateButton" Style="{StaticResource TextButtonInactive}"/>
                             </StackLayout>
 
                             <StackLayout Style="{StaticResource SettingVert}">

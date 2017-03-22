@@ -32,10 +32,46 @@ using Android.Runtime;
 using Android.Text.Style;
 using Android.Views;
 using System.Collections.Specialized;
+using Android.Content;
+using System.Collections;
 
 [assembly: ExportRenderer(typeof(DropDown), typeof(Ao3TrackReader.Droid.DropDownRenderer))]
 namespace Ao3TrackReader.Droid
 {
+    public class SizableArrayAdapter : ArrayAdapter
+    {
+        public SizableArrayAdapter(Context context, int resource, IList objects) : base(context, resource, objects)
+        {
+        }
+
+        List<Android.Views.View> views = new List<Android.Views.View>();
+
+        double _TextSize = 0;
+        public double TextSize {
+            get { return _TextSize; }
+            set {
+                _TextSize = value;
+                foreach (var view in views)
+                {
+                    var textView = view.FindViewById(Android.Resource.Id.Text1) as TextView;
+                    if (textView != null)
+                        textView.SetTextSize(ComplexUnitType.Sp, (float)_TextSize);
+                }
+            }
+        }
+
+        public override Android.Views.View GetView(int position, Android.Views.View convertView, ViewGroup parent)
+        {
+            var view = base.GetView(position, convertView, parent);
+            var textView = view.FindViewById(Android.Resource.Id.Text1) as TextView;
+            if (textView != null)
+                textView.SetTextSize(ComplexUnitType.Sp, (float)_TextSize);
+            if (!views.Contains(view))
+                views.Add(view);
+            return view;
+        }
+    }
+
     class DropDownRenderer : ViewRenderer<DropDown, Spinner>
     {
         protected override void OnElementChanged(ElementChangedEventArgs<DropDown> e)
@@ -71,6 +107,11 @@ namespace Ao3TrackReader.Droid
             {
                 UpdateItemSource();
             }
+            else if (e.PropertyName == DropDown.FontSizeProperty.PropertyName)
+            {
+                var adapter = Control.Adapter as SizableArrayAdapter;
+                if (adapter != null) adapter.TextSize = Element.FontSize;
+            }
         }
 
         INotifyCollectionChanged ncc;
@@ -100,7 +141,8 @@ namespace Ao3TrackReader.Droid
                 foreach (var o in Element.ItemsSource) itemSource.Add(o);
             }
 
-            var adapter = new ArrayAdapter(Context, Android.Resource.Layout.SimpleSpinnerItem, itemSource);
+            var adapter = new SizableArrayAdapter(Context, Android.Resource.Layout.SimpleSpinnerItem, itemSource);
+            adapter.TextSize = Element.FontSize;
             adapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
             Control.Adapter = adapter;
 

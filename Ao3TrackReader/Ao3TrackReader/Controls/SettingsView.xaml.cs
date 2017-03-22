@@ -255,10 +255,8 @@ namespace Ao3TrackReader.Controls
                 syncForm.IsVisible = true;
                 if (isCreateUser)
                 {
-                    syncLoginButton.BorderColor = Colors.Base.Trans.Low;
-                    syncLoginButton.TextColor = Colors.Base.Medium;
-                    syncCreateButton.BorderColor = Colors.Highlight.Trans.Medium;
-                    syncCreateButton.TextColor = Colors.Highlight;
+                    syncLoginButton.Style = Resources["TextButtonInactive"] as Style;
+                    syncCreateButton.Style = Resources["TextButtonActive"] as Style;
                     verifyLabel.IsVisible = true;
                     verify.IsVisible = true;
                     emailLabel.IsVisible = true;
@@ -266,10 +264,8 @@ namespace Ao3TrackReader.Controls
                 }
                 else
                 {
-                    syncLoginButton.BorderColor = Colors.Highlight.Trans.Medium;
-                    syncLoginButton.TextColor = Colors.Highlight;
-                    syncCreateButton.BorderColor = Colors.Base.Trans.Low;
-                    syncCreateButton.TextColor = Colors.Base.Medium;
+                    syncCreateButton.Style = Resources["TextButtonInactive"] as Style;
+                    syncLoginButton.Style = Resources["TextButtonActive"] as Style;
                     verifyLabel.IsVisible = false;
                     verify.IsVisible = false;
                     emailLabel.IsVisible = false;

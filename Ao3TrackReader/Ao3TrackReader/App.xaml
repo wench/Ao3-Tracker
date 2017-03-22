@@ -24,7 +24,11 @@ limitations under the License.
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
                 <Setter Property="HeightRequest" Value="{DynamicResource Size_32}" />                
             </Style>
-            <Style TargetType="Label" ApplyToDerivedTypes="True">
+            <Style TargetType="Label" >
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+            </Style>
+            <Style TargetType="local:TextView">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
             </Style>
@@ -33,18 +37,38 @@ limitations under the License.
                 <Setter Property="FontSize" Value="{DynamicResource HugeFontSize}" />
             </Style>
             <Style TargetType="local:Button">
-                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
-                <Setter Property="TextColor" Value="{StaticResource BaseHighColor}" />
-                <Setter Property="BackgroundColor"><Color>Transparent</Color></Setter>
+                <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
                 <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="BorderRadius" Value="2" />
+                <Setter Property="BorderColor" Value="Transparent" />
                 <Setter Property="WidthRequest" Value="{DynamicResource Size_40}" />
                 <Setter Property="HeightRequest" Value="{DynamicResource Size_40}" />
                 <Setter Property="ImageWidth" Value="20" />
                 <Setter Property="ImageHeight" Value="20" />
             </Style>
             <Style TargetType="local:Button" x:Key="TextButton">
+                <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="BorderColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="WidthRequest" Value="-1" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40}" />
             </Style>
+
+            <Style TargetType="local:Button" x:Key="TextButtonActive" BasedOn="{StaticResource TextButton}">
+                <Setter Property="TextColor" Value="{StaticResource HighlightColor}" />
+                <Setter Property="BorderColor" Value="{StaticResource HighlightColor}" />
+            </Style>
+
+            <Style TargetType="local:Button" x:Key="TextButtonInactive" BasedOn="{StaticResource TextButton}">
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumLowColor}" />
+                <Setter Property="BorderColor" Value="{StaticResource BaseMediumLowColor}" />
+            </Style>
+
+
 
             <local:EmptyStringBool x:Key="EmptyStringBoolConverter" />
 

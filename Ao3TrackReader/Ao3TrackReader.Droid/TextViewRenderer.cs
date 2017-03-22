@@ -80,7 +80,7 @@ namespace Ao3TrackReader.Droid
         void UpdateControl(TextView view)
         {
             if (view.TextEx == null) return;
-            Control.TextFormatted = view.TextEx.ConvertToSpannable(new Text.StateNode { Foreground = view.TextColor });
+            Control.TextFormatted = view.TextEx.ConvertToSpannable(new Text.StateNode { Foreground = (view.TextColor != Xamarin.Forms.Color.Default)? view.TextColor : (Xamarin.Forms.Color?)null});
         }
 
     }
