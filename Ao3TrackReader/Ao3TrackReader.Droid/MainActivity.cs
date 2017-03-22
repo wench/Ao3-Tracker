@@ -26,11 +26,12 @@ using Android.Widget;
 using Android.OS;
 using Ao3TrackReader.Controls;
 using Xamarin.Forms.Platform.Android;
+using Java.Lang;
 
 namespace Ao3TrackReader.Droid
 {
     [Activity(Label = "Ao3TrackReader", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity, Java.Lang.Thread.IUncaughtExceptionHandler
     {
         protected override void OnCreate(Bundle bundle)
         {
@@ -44,6 +45,7 @@ namespace Ao3TrackReader.Droid
                     SetTheme(Ao3TrackReader.Droid.Resource.Style.DarkTheme);
                     break;
             }
+            Java.Lang.Thread.DefaultUncaughtExceptionHandler = this;
             base.OnCreate(bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
@@ -194,6 +196,11 @@ namespace Ao3TrackReader.Droid
             if (hasprimary && hassecondary) submenu.Add(Menu.None, Menu.None, 1023, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
 
             return res;
+        }
+
+        void Thread.IUncaughtExceptionHandler.UncaughtException(Thread t, Throwable e)
+        {
+            App.Log(e);
         }
     }
 }
