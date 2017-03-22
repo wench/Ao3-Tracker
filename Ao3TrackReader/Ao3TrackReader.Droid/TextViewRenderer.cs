@@ -55,6 +55,8 @@ namespace Ao3TrackReader.Droid
 
             if (view != null && (e.PropertyName == Label.TextColorProperty.PropertyName ||
                 e.PropertyName == Label.FontProperty.PropertyName ||
+                e.PropertyName == Label.FontSizeProperty.PropertyName ||
+                e.PropertyName == Label.FontAttributesProperty.PropertyName ||
                 e.PropertyName == Label.TextProperty.PropertyName ||
                 e.PropertyName == Label.FormattedTextProperty.PropertyName))
             {
@@ -80,7 +82,12 @@ namespace Ao3TrackReader.Droid
         void UpdateControl(TextView view)
         {
             if (view.TextEx == null) return;
-            Control.TextFormatted = view.TextEx.ConvertToSpannable(new Text.StateNode { Foreground = (view.TextColor != Xamarin.Forms.Color.Default)? view.TextColor : (Xamarin.Forms.Color?)null});
+            Control.TextFormatted = view.TextEx.ConvertToSpannable(new Text.StateNode {
+                Foreground = (view.TextColor != Xamarin.Forms.Color.Default)? view.TextColor : (Xamarin.Forms.Color?)null,
+                FontSize = view.FontSize,
+                Bold = (view.FontAttributes & Xamarin.Forms.FontAttributes.Bold) != 0,
+                Italic = (view.FontAttributes & Xamarin.Forms.FontAttributes.Italic) != 0
+            }, Control.Resources.DisplayMetrics);
         }
 
     }

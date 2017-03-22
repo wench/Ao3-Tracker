@@ -145,7 +145,6 @@ namespace Ao3TrackReader
         public DisableableCommand ForceSetLocationCommand { get; private set; }
         public DisableableCommand RefreshCommand { get; private set; }
         public DisableableCommand ReadingListCommand { get; private set; }
-        public DisableableCommand AddToReadingListCommand { get; private set; }
         public DisableableCommand UrlBarCommand { get; private set; }
         public DisableableCommand ResetFontSizeCommand { get; private set; }
         public DisableableCommand SettingsCommand { get; private set; }
@@ -167,7 +166,6 @@ namespace Ao3TrackReader
 
             RefreshCommand = new DisableableCommand(Refresh);
             ReadingListCommand = new DisableableCommand(() => TogglePane(ReadingList));
-            AddToReadingListCommand = new DisableableCommand(() => ReadingList.AddAsync(CurrentUri.AbsoluteUri));
 
             UrlBarCommand = new DisableableCommand(() =>
             {
@@ -473,6 +471,7 @@ namespace Ao3TrackReader
 
                 DoOnMainThread(() =>
                 {
+                    ResetFontSizeCommand.IsEnabled = log_font_size == 0;
                     FontDecreaseCommand.IsEnabled = log_font_size > LogFontSizeMin;
                     FontIncreaseCommand.IsEnabled = log_font_size < LogFontSizeMax;
                     helper?.OnAlterFontSize(FontSize);

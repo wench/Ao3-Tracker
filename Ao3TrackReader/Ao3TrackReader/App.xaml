@@ -75,15 +75,15 @@ limitations under the License.
             <DataTemplate x:Key="CellGroupHeaderTemplate">
                 <ViewCell>
                     <StackLayout Spacing="0">
-                        <Label Text="{Binding Group}"     FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
-                        <Label Text="{Binding GroupType}" FontSize="{DynamicResource MediumSmallFontSize}"  TextColor="{StaticResource BaseMediumColor}"  />
+                        <local:TextView TextEx="{Binding Group}"     FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
+                        <local:TextView TextEx="{Binding GroupType}" FontSize="{DynamicResource MediumSmallFontSize}"  TextColor="{StaticResource BaseMediumColor}"  />
                     </StackLayout>
                 </ViewCell>
             </DataTemplate>
 
             <DataTemplate x:Key="CellGroupHeaderNoTypeTemplate">
                 <ViewCell>
-                    <Label Text="{Binding Group}" FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
+                    <local:TextView TextEx="{Binding Group}" FontSize="{DynamicResource LargeFontSize}" TextColor="{StaticResource HighlightColor}" Margin="0,4,0,0" />
                 </ViewCell>
             </DataTemplate>
         </res:ResourceDictionary>

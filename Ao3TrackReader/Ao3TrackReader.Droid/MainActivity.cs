@@ -27,6 +27,7 @@ using Android.OS;
 using Ao3TrackReader.Controls;
 using Xamarin.Forms.Platform.Android;
 using Java.Lang;
+using Android.Util;
 
 namespace Ao3TrackReader.Droid
 {
@@ -84,7 +85,8 @@ namespace Ao3TrackReader.Droid
                         (byte)(color.Value.B * 255)
                     ), Android.Graphics.PorterDuff.Mode.SrcIn);
                 var tt = new Text.String { Text = item.TitleFormatted.ToString() };
-                var spannable = tt.ConvertToSpannable(new Text.StateNode { Foreground = color });
+                var renderer = Xamarin.Forms.Platform.Android.Platform.GetRenderer(App.Current.MainPage);                
+                var spannable = tt.ConvertToSpannable(new Text.StateNode { Foreground = color }, renderer.ViewGroup.Resources.DisplayMetrics);
                 item.SetTitle(spannable);
             }
             else
@@ -193,7 +195,10 @@ namespace Ao3TrackReader.Droid
                     }
                 }
             }
-            if (hasprimary && hassecondary) submenu.Add(Menu.None, Menu.None, 1023, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
+            if (hasprimary && hassecondary)
+            {
+                submenu.Add(Menu.None, Menu.None, 1023, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
+            }
 
             return res;
         }

@@ -144,14 +144,14 @@ limitations under the License.
                                 <Label x:Name="passwordErrors" Style="{StaticResource Error}" />
                             </StackLayout>
 
-                            <StackLayout Style="{StaticResource SettingVert}">
-                                <Label Text="Verify Password" x:Name="verifyLabel" />
+                            <StackLayout Style="{StaticResource SettingVert}" x:Name="verifyField">
+                                <Label Text="Verify Password" />
                                 <Entry Placeholder="Enter your password again" IsPassword="True" HorizontalOptions="Fill" x:Name="verify" />
                                 <Label x:Name="verifyErrors" Style="{StaticResource Error}" />
                             </StackLayout>
 
-                            <StackLayout Style="{StaticResource SettingVert}">
-                                <Label Text="Email (optional)" x:Name="emailLabel" />
+                            <StackLayout Style="{StaticResource SettingVert}" x:Name="emailField">
+                                <Label Text="Email (optional)" />
                                 <Entry Placeholder="Enter your email" Keyboard="Email" HorizontalOptions="Fill" x:Name="email" />
                                 <Label x:Name="emailErrors" Style="{StaticResource Error}" />
                             </StackLayout>

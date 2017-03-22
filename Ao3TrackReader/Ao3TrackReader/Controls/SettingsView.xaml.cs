@@ -257,19 +257,15 @@ namespace Ao3TrackReader.Controls
                 {
                     syncLoginButton.Style = Resources["TextButtonInactive"] as Style;
                     syncCreateButton.Style = Resources["TextButtonActive"] as Style;
-                    verifyLabel.IsVisible = true;
-                    verify.IsVisible = true;
-                    emailLabel.IsVisible = true;
-                    email.IsVisible = true;
+                    verifyField.IsVisible = true;
+                    emailField.IsVisible = true;
                 }
                 else
                 {
                     syncCreateButton.Style = Resources["TextButtonInactive"] as Style;
                     syncLoginButton.Style = Resources["TextButtonActive"] as Style;
-                    verifyLabel.IsVisible = false;
-                    verify.IsVisible = false;
-                    emailLabel.IsVisible = false;
-                    email.IsVisible = false;
+                    verifyField.IsVisible = false;
+                    emailField.IsVisible = false;
                 }
                 usernameErrors.IsVisible = false;
                 passwordErrors.IsVisible = false;
@@ -364,6 +360,8 @@ namespace Ao3TrackReader.Controls
 
         void OnFontSizeUISelected(object sender, EventArgs e)
         {
+            if (!IsOnScreen) return;
+
             App.Database.SaveVariable("LogFontSizeUI", (fontSizeUIDropDown.SelectedItem as KeyedItem<int>).Key);
         }
     }

@@ -35,7 +35,7 @@ limitations under the License.
     <local:PaneView.Content>
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal" x:Name="buttonBar">
-                <local:Button Image="{StaticResource AddPageIcon}" Clicked="OnAddPage" HorizontalOptions="Start" x:Name="AddPageButton"
+                <local:Button Image="{StaticResource AddPageIcon}" HorizontalOptions="Start" x:Name="AddPageButton" Command="{Binding AddToReadingListCommand,Source={x:Reference root}}"
                               local:HelpView.Text="Add Page To Reading List Button" local:HelpView.Group="Reading List" >
                     <local:HelpView.Description>Add the currently displayed work, search or webpage to the reading list. </local:HelpView.Description>
                 </local:Button>

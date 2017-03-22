@@ -37,7 +37,7 @@ namespace Ao3TrackReader.Text
 {
     public abstract partial class TextEx
     {
-        public SpannableString ConvertToSpannable(StateNode state)
+        public SpannableString ConvertToSpannable(StateNode state, DisplayMetrics displayMetrics)
         {
             var nodes = Flatten(state).TrimNewLines();
 
@@ -69,7 +69,9 @@ namespace Ao3TrackReader.Text
                         ));
 
                     int fontSize = -1;
-                    if (n.FontSize != null) fontSize = (int)n.FontSize.Value;
+
+                    if (n.FontSize != null)
+                        fontSize = (int) Math.Round(TypedValue.ApplyDimension(ComplexUnitType.Sp, (float) n.FontSize.Value, displayMetrics), MidpointRounding.AwayFromZero);
 
                     s.SetSpan(new TextAppearanceSpan(null, style, fontSize, color, null), start, start + n.Text.Length, SpanTypes.InclusiveExclusive);
                 }

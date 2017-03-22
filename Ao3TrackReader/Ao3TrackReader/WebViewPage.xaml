@@ -40,14 +40,14 @@ limitations under the License.
                                    x:Name="ReadingListToolBarItem" >
                     <local:ToolbarItem.Description>Open the Reading List pane.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
-                <local:ToolbarItem Text="Add to Reading List" Icon="{StaticResource AddPageIcon}"   Command="{Binding AddToReadingListCommand,Source={x:Reference root}}" >
+                <local:ToolbarItem Text="Add to Reading List" Icon="{StaticResource AddPageIcon}"   Command="{Binding AddToReadingListCommand,Source={x:Reference ReadingListPane}}" >
                     <local:ToolbarItem.Description>Add the currently displayed work, search or webpage to the reading list.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
-                <local:ToolbarItem Text="Font Increase"       Icon="{StaticResource FontUpIcon}"    Command="{Binding FontIncreaseCommand,Source={x:Reference root}}" >
-                    <local:ToolbarItem.Description>Increase the font size of the page text by 5%.</local:ToolbarItem.Description>
-                </local:ToolbarItem>
-                <local:ToolbarItem Text="Font Decrease"       Icon="{StaticResource FontDownIcon}"  Command="{Binding FontDecreaseCommand,Source={x:Reference root}}" >
+                <local:ToolbarItem Text="Font Size Decrease"       Icon="{StaticResource FontDownIcon}"  Command="{Binding FontDecreaseCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>Decrease the font size of the page text by 5%.</local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Font Size Increase"       Icon="{StaticResource FontUpIcon}"    Command="{Binding FontIncreaseCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>Increase the font size of the page text by 5%.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Sync"                Icon="{StaticResource SyncIcon}"      Command="{Binding SyncCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
@@ -65,7 +65,8 @@ limitations under the License.
                                    x:Name="UrlBarToolBarItem" >
                     <local:ToolbarItem.Description>Show the URL bar. Allows for direct entry of paths to browse to on archiveofourown.org.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
-                <local:ToolbarItem Text="Reset Font Size"     Icon="{StaticResource FontIcon}"      Command="{Binding ResetFontSizeCommand,Source={x:Reference root}}" >
+                <local:ToolbarItem Text="Reset Font Size"     Icon="{StaticResource FontIcon}"      Command="{Binding ResetFontSizeCommand,Source={x:Reference root}}" 
+                                   Order="Secondary" >
                     <local:ToolbarItem.Description>Reset the font size of the page text back to 100%.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Settings"            Icon="{StaticResource SettingsIcon}"  Command="{Binding SettingsCommand,Source={x:Reference root}}" 

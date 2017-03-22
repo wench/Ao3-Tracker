@@ -33,6 +33,8 @@ namespace Ao3TrackReader.Controls
 
         public ReadingListView()
         {
+            AddToReadingListCommand = new DisableableCommand(() => AddAsync(wvp.CurrentUri.AbsoluteUri));
+
             InitializeComponent();
 
             readingListBacking = new GroupList<Models.Ao3PageViewModel>();
@@ -153,6 +155,8 @@ namespace Ao3TrackReader.Controls
             }
         }
 
+        public DisableableCommand AddToReadingListCommand { get; private set; }
+
 
         IEnumerable<Models.IHelpInfo> ButtonBarHelpItems
         {
@@ -243,11 +247,6 @@ namespace Ao3TrackReader.Controls
                 RemoveAsync(item.Uri.AbsoluteUri);
             }
 
-        }
-
-        private void OnAddPage(object sender, EventArgs e)
-        {
-            AddAsync(wvp.CurrentUri.AbsoluteUri);
         }
 
         private void OnRefresh(object sender, EventArgs e)
@@ -344,9 +343,19 @@ namespace Ao3TrackReader.Controls
         public void PageChange(Uri uri)
         {
             uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
-            wvp.DoOnMainThread(() => {                
-                if (uri == null) UpdateSelectedItem(null);
-                else UpdateSelectedItem(readingListBacking.FindInAll((m) => m.HasUri(uri)));
+            wvp.DoOnMainThread(() => 
+            {
+                if (uri == null)
+                {
+                    UpdateSelectedItem(null);
+                    AddToReadingListCommand.IsEnabled = false;
+                }
+                else
+                {
+                    var item = readingListBacking.FindInAll((m) => m.HasUri(uri));
+                    UpdateSelectedItem(item);
+                    AddToReadingListCommand.IsEnabled = item == null;
+                }
             });
         }
 
@@ -400,6 +409,8 @@ namespace Ao3TrackReader.Controls
             await wvp.DoOnMainThreadAsync(() =>
             {
                 if (viewmodel == selectedItem) UpdateSelectedItem(null);
+                var uri = Data.Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri);
+                if (uri == viewmodel.Uri) AddToReadingListCommand.IsEnabled = true;
                 readingListBacking.Remove(viewmodel);
                 viewmodel.Dispose();
             });
@@ -434,6 +445,10 @@ namespace Ao3TrackReader.Controls
                 };
                 viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                 readingListBacking.Add(viewmodel);
+
+                var uri = Data.Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri);
+                if (uri == viewmodel.Uri) AddToReadingListCommand.IsEnabled = false;
+
                 Task.Run(async () =>
                 {
                     await RefreshSemaphore.WaitAsync();
