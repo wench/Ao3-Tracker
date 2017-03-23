@@ -60,8 +60,7 @@ namespace Ao3TrackReader.Resources
 
                 foreach (var prop in set.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
-                    var subset = prop.GetValue(set) as BaseColorSet;
-                    if (subset != null) sets.Add(cat.Name + prop.Name, subset);
+                    if (prop.GetValue(set) is BaseColorSet subset) sets.Add(cat.Name + prop.Name, subset);
                 }
 
                 var color = (Color)set;

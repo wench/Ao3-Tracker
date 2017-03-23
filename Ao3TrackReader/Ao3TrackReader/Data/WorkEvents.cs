@@ -40,18 +40,18 @@ namespace Ao3TrackReader.Data
             return events[workid] = new WorkEvents();
         }
 
-        public event EventHandler<Work> ChapterNumChanged;
+        public event EventHandler<EventArgs<Work>> ChapterNumChanged;
 
         public void OnChapterNumChanged(object sender,Work w)
         {
-            ChapterNumChanged?.Invoke(sender, w);
+            ChapterNumChanged?.Invoke(sender, new EventArgs<Work>(w));
         }
 
-        public event EventHandler<Work> LocationChanged;
+        public event EventHandler<EventArgs<Work>> LocationChanged;
 
         public void OnLocationChanged(object sender, Work w)
         {
-            LocationChanged?.Invoke(sender, w);
+            LocationChanged?.Invoke(sender, new EventArgs<Work>(w));
         }
 
     }

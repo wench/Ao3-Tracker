@@ -52,14 +52,14 @@ namespace Ao3TrackReader.Data
         {
             public string username;
             public string credential;
-            public string toBase64()
+            public string ToBase64()
             {
                 return Convert.ToBase64String(Encoding.UTF8.GetBytes(this.username + '\n' + this.credential));
             }
         };
 
         public event EventHandler BeginSyncEvent;
-        public event EventHandler<bool> EndSyncEvent;
+        public event EventHandler<EventArgs<bool>> EndSyncEvent;
 
         public bool IsSyncing
         {
@@ -83,11 +83,13 @@ namespace Ao3TrackReader.Data
 
         public SyncedStorage()
         {
-            HttpClientHandler httpClientHandler = new HttpClientHandler();
-            httpClientHandler.AllowAutoRedirect = false;
-            httpClientHandler.UseCookies = false;
-            //httpClientHandler.MaxConnectionsPerServer = 2;
-            httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
+            HttpClientHandler httpClientHandler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = false,
+                UseCookies = false,
+                //httpClientHandler.MaxConnectionsPerServer = 2;
+                MaxRequestContentBufferSize = 1 << 20
+            };
             HttpClient = new HttpClient(httpClientHandler);
 
             storage = new Dictionary<long, Work>();
@@ -106,7 +108,7 @@ namespace Ao3TrackReader.Data
             }
             else
             {
-                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.ToBase64());
                 serversync = SyncState.Syncing;
             }
 
@@ -119,14 +121,14 @@ namespace Ao3TrackReader.Data
                     unsynced[it.workid] = storage[it.workid];
                 }
             }
-            dosync();
+            DoSync();
         }
 
-        void onSyncFromServer(bool success)
+        void OonSyncFromServer(bool success)
         {
             lock (locker)
             {
-                EndSyncEvent?.Invoke(this, success);
+                EndSyncEvent?.Invoke(this, new EventArgs<bool>(success));
                 var e = SyncFromServerEvent;
                 SyncFromServerEvent = null;
                 Task.Run(() =>
@@ -136,7 +138,7 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        public void delayedsync(int timeout)
+        public void DelayedSync(int timeout)
         {
             lock (locker)
             {
@@ -165,7 +167,7 @@ namespace Ao3TrackReader.Data
                     lock (locker)
                     {
                         cts = null;
-                        dosync(true);
+                        DoSync(true);
                     }
                 });
             }
@@ -173,13 +175,13 @@ namespace Ao3TrackReader.Data
         }
 
 
-        public void dosync(bool force = false)
+        public void DoSync(bool force = false)
         {
             lock (locker)
             {
                 if (serversync == SyncState.Disabled)
                 {
-                    onSyncFromServer(false);
+                    OonSyncFromServer(false);
                     //console.warn("dosync: FAILED. No credentials");
                     return;
                 }
@@ -195,7 +197,7 @@ namespace Ao3TrackReader.Data
                 if (!force && now < no_sync_until)
                 {
                     //console.log("dosync: have to wait %i for timeout", no_sync_until - now);
-                    delayedsync((int)(no_sync_until - now));
+                    DelayedSync((int)(no_sync_until - now));
                     return;
                 }
 
@@ -233,7 +235,7 @@ namespace Ao3TrackReader.Data
                                 serversync = SyncState.Disabled;
                             else
                                 serversync = SyncState.Ready;
-                            onSyncFromServer(false);
+                            OonSyncFromServer(false);
                             return;
                         }
                     }
@@ -242,9 +244,10 @@ namespace Ao3TrackReader.Data
                     Dictionary<long, Work> current;
                     Dictionary<long, Work> items;
                     long time, old_sync;
-                    var settings = new JsonSerializerSettings();
-                    settings.MissingMemberHandling = MissingMemberHandling.Ignore;
-
+                    var settings = new JsonSerializerSettings()
+                    {
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
                     lock (locker)
                     {
                         old_sync = last_sync;
@@ -259,7 +262,7 @@ namespace Ao3TrackReader.Data
                             {
                                 //console.error("dosync: FAILED %s", e.ToString());
                                 serversync = SyncState.Disabled;
-                                onSyncFromServer(false);
+                                OonSyncFromServer(false);
                                 return;
                             }
                         }
@@ -311,7 +314,7 @@ namespace Ao3TrackReader.Data
                         {
                             App.Database.SaveVariable("last_sync", last_sync);
                             serversync = SyncState.Ready;
-                            onSyncFromServer(true);
+                            OonSyncFromServer(true);
                             return;
                         }
                     }
@@ -354,7 +357,7 @@ namespace Ao3TrackReader.Data
                                 unsynced = current;
                             }
                             App.Database.SaveVariable("last_sync", last_sync);
-                            onSyncFromServer(false);
+                            OonSyncFromServer(false);
                             return;
                         }
                     }
@@ -373,7 +376,7 @@ namespace Ao3TrackReader.Data
                             serversync = SyncState.Disabled;
                             App.Database.SaveVariable("last_sync", 0L);
                             last_sync = 0;
-                            onSyncFromServer(false);
+                            OonSyncFromServer(false);
                             return;
                         }
                     }
@@ -385,7 +388,7 @@ namespace Ao3TrackReader.Data
                         {
                             App.Database.SaveVariable("last_sync", 0L);
                             last_sync = 0;
-                            dosync(true);
+                            DoSync(true);
                             return;
                         }
                         if (time > last_sync)
@@ -396,12 +399,12 @@ namespace Ao3TrackReader.Data
 
                         if (unsynced.Count > 0)
                         {
-                            dosync(true);
+                            DoSync(true);
                         }
                         else
                         {
                             serversync = SyncState.Ready;
-                            onSyncFromServer(true);
+                            OonSyncFromServer(true);
                         }
                     }
 
@@ -409,24 +412,24 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        public void dosync(Action<bool> callback)
+        public void DoSync(Action<bool> callback)
         {
             lock (locker)
             {
                 if (serversync == SyncState.Disabled)
                 {
                     SyncFromServerEvent += (sender, success) => callback(success);
-                    onSyncFromServer(false);
+                    OonSyncFromServer(false);
                 }
                 else
                 {
                     SyncFromServerEvent += (sender, success) => callback(success);
-                    if (serversync != SyncState.Syncing) { dosync(true); }
+                    if (serversync != SyncState.Syncing) { DoSync(true); }
                 }
             }
         }
 
-        public async Task<IDictionary<long, WorkChapter>> getWorkChaptersAsync(IEnumerable<long> works)
+        public async Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(IEnumerable<long> works)
         {
             return await Task.Run(() =>
             {
@@ -437,8 +440,7 @@ namespace Ao3TrackReader.Data
                 {
                     foreach (long w in works)
                     {
-                        Work work;
-                        if (storage.TryGetValue(w, out work))
+                        if (storage.TryGetValue(w, out Work work))
                         {
                             r[w] = new WorkChapter(work);
                         }
@@ -463,7 +465,7 @@ namespace Ao3TrackReader.Data
             });
         }
 
-        public void setWorkChapters(IDictionary<long, WorkChapter> works)
+        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
             Task.Run(() =>
             {
@@ -519,11 +521,11 @@ namespace Ao3TrackReader.Data
                         {
                             if (do_delayed)
                             {
-                                delayedsync(10 * 1000);
+                                DelayedSync(10 * 1000);
                             }
                             else
                             {
-                                dosync();
+                                DoSync();
                             }
                         }
                     }
@@ -588,13 +590,13 @@ namespace Ao3TrackReader.Data
                         Authorization authorization;
                         authorization.credential = cred;
                         authorization.username = username;
-                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
+                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.ToBase64());
                         last_sync = 0;
                         App.Database.SaveVariable("authorization.username", authorization.username);
                         App.Database.SaveVariable("authorization.credential", authorization.credential);
                         App.Database.SaveVariable("last_sync", last_sync);
                         serversync = SyncState.Syncing;
-                        dosync(true);
+                        DoSync(true);
                     }
                     errors = new Dictionary<string, string>();
                 }
@@ -678,13 +680,13 @@ namespace Ao3TrackReader.Data
                         Authorization authorization;
                         authorization.credential = cred;
                         authorization.username = username;
-                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.toBase64());
+                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.ToBase64());
                         last_sync = 0;
                         App.Database.SaveVariable("authorization.username", authorization.username);
                         App.Database.SaveVariable("authorization.credential", authorization.credential);
                         App.Database.SaveVariable("last_sync", last_sync);
                         serversync = SyncState.Syncing;
-                        dosync(true);
+                        DoSync(true);
                     }
                     errors = new Dictionary<string, string>();
                 }

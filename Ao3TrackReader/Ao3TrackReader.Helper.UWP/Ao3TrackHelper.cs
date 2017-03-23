@@ -79,6 +79,7 @@ namespace Ao3TrackReader.Helper
         }
 
         private EventRegistrationTokenTable<EventHandler<object>> _JumpToLastLocationEvent;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1009:DeclareEventHandlersCorrectly")]
         public event EventHandler<object> JumpToLastLocationEvent
         {
             add
@@ -112,6 +113,7 @@ namespace Ao3TrackReader.Helper
         }
 
         private EventRegistrationTokenTable<EventHandler<object>> _AlterFontSizeEvent;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1009:DeclareEventHandlersCorrectly")]
         public event EventHandler<object> AlterFontSizeEvent
         {
             add

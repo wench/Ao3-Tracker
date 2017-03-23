@@ -41,7 +41,7 @@ using OperationCanceledException = System.OperationCanceledException;
 
 namespace Ao3TrackReader
 {
-    public partial class WebViewPage : ContentPage, IWebViewPage, IPageEx, IWebViewPageNative
+    public sealed partial class WebViewPage : ContentPage, IWebViewPage, IPageEx, IWebViewPageNative
     {
         IAo3TrackHelper helper;
 
@@ -109,21 +109,21 @@ namespace Ao3TrackReader
             }
         }
 
-        private void ReadingList_IsOnScreenChanged(object sender, bool onscreen)
+        private void ReadingList_IsOnScreenChanged(object sender, EventArgs<bool> onscreen)
         {
-            if (!onscreen) ReadingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            if (!onscreen.Value) ReadingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
             else ReadingListToolBarItem.Foreground = Colors.Highlight.High;
         }
 
-        private void SettingsPane_IsOnScreenChanged(object sender, bool onscreen)
+        private void SettingsPane_IsOnScreenChanged(object sender, EventArgs<bool> onscreen)
         {
-            if (!onscreen) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            if (!onscreen.Value) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
             else SettingsToolBarItem.Foreground = Colors.Highlight.High;
         }
 
-        private void HelpPane_IsOnScreenChanged(object sender, bool onscreen)
+        private void HelpPane_IsOnScreenChanged(object sender, EventArgs<bool> onscreen)
         {
-            if (!onscreen) HelpToolBarItem.Foreground = Xamarin.Forms.Color.Default;
+            if (!onscreen.Value) HelpToolBarItem.Foreground = Xamarin.Forms.Color.Default;
             else HelpToolBarItem.Foreground = Colors.Highlight.High;
         }
 
@@ -159,7 +159,7 @@ namespace Ao3TrackReader
             FontDecreaseCommand = new DisableableCommand(() => LogFontSize--);
             ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
 
-            SyncCommand = new DisableableCommand(() => App.Storage.dosync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
+            SyncCommand = new DisableableCommand(() => App.Storage.DoSync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
             App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => SyncCommand.IsEnabled = false);
             App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
             SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
@@ -268,7 +268,7 @@ namespace Ao3TrackReader
             UpdateBackButton();
         }
 
-        public virtual void OnSleep()
+        public void OnSleep()
         {
             var loc = CurrentLocation;
             var uri = CurrentUri;
@@ -279,7 +279,7 @@ namespace Ao3TrackReader
             App.Database.SaveVariable("Sleep:URI", uri.AbsoluteUri);
         }
 
-        public virtual void OnResume()
+        public void OnResume()
         {
             App.Database.DeleteVariable("Sleep:URI");
         }
@@ -288,7 +288,7 @@ namespace Ao3TrackReader
         {
             Task.Run(async () =>
             {
-                var workchaps = await App.Storage.getWorkChaptersAsync(new[] { workid });
+                var workchaps = await App.Storage.GetWorkChaptersAsync(new[] { workid });
 
                 DoOnMainThread(() =>
                 {
@@ -488,7 +488,7 @@ namespace Ao3TrackReader
 
         public System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>> GetWorkChaptersAsync(long[] works)
         {
-            return App.Storage.getWorkChaptersAsync(works);
+            return App.Storage.GetWorkChaptersAsync(works);
         }
 
         public System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>> AreUrlsInReadingListAsync(string[] urls)
@@ -553,7 +553,7 @@ namespace Ao3TrackReader
 
         public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
-            App.Storage.setWorkChapters(works);
+            App.Storage.SetWorkChapters(works);
 
             lock (currentLocationLock)
             {
@@ -818,7 +818,7 @@ namespace Ao3TrackReader
                     {
                         if (currentLocation != null) workid = currentLocation.workid;
                     }
-                    var workchap = workid == 0 ? null : (await App.Storage.getWorkChaptersAsync(new[] { workid })).Select(kvp => kvp.Value).FirstOrDefault();
+                    var workchap = workid == 0 ? null : (await App.Storage.GetWorkChaptersAsync(new[] { workid })).Select(kvp => kvp.Value).FirstOrDefault();
                     if (workchap != null) workchap.workid = workid;
                     UpdateCurrentSavedLocation(workchap);
                 });
@@ -855,9 +855,9 @@ namespace Ao3TrackReader
             {
                 Task.Run(async () =>
                 {
-                    var db_workchap = (await App.Storage.getWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                    var db_workchap = (await App.Storage.GetWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
                     currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
-                    App.Storage.setWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation });
+                    App.Storage.SetWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation });
                 });
             }
         }
@@ -1125,7 +1125,9 @@ namespace Ao3TrackReader
             {
                 var r = new Models.UnitConvOptions();
 
+#pragma warning disable IDE0018 // Inline variable declaration
                 bool? v;
+#pragma warning restore IDE0018 // Inline variable declaration
                 if (App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out v)) r.tempToC = v;
                 if (App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out v)) r.distToM = v;
                 if (App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out v)) r.volumeToM = v;

@@ -20,7 +20,7 @@ using Ao3TrackReader.Helper;
 
 namespace Ao3TrackReader
 {
-    public class Work : IWorkChapterEx
+    public sealed class Work : IWorkChapterEx
     {
         public Work()
         {

@@ -92,11 +92,13 @@ namespace Ao3TrackReader.Data
 
         static Ao3SiteDataLookup()
         {
-            HttpClientHandler httpClientHandler = new HttpClientHandler();
-            httpClientHandler.AllowAutoRedirect = false;
-            httpClientHandler.UseCookies = false;
-            //httpClientHandler.MaxConnectionsPerServer = 8;
-            httpClientHandler.MaxRequestContentBufferSize = 1 << 20;
+            HttpClientHandler httpClientHandler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = false,
+                UseCookies = false,
+                //httpClientHandler.MaxConnectionsPerServer = 8;
+                MaxRequestContentBufferSize = 1 << 20
+            };
             HttpClient = new HttpClient(httpClientHandler);
 #if __IOS__
             use_https = true;
@@ -332,10 +334,11 @@ namespace Ao3TrackReader.Data
             }
             else if (response.IsSuccessStatusCode)
             {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.IgnoreWhitespace = true;
-                settings.IgnoreComments = true;
-
+                XmlReaderSettings settings = new XmlReaderSettings()
+                {
+                    IgnoreWhitespace = true,
+                    IgnoreComments = true
+                };
                 using (var xml = XmlReader.Create(await response.Content.ReadAsStreamAsync(), settings))
                 {
                     xml.MoveToContent();
@@ -458,8 +461,7 @@ namespace Ao3TrackReader.Data
         {
             if (!string.IsNullOrEmpty(category))
             {
-                Ao3TagType type;
-                if (Enum.TryParse(category, true, out type) || Enum.TryParse(category + "s", true, out type))
+                if (Enum.TryParse(category, true, out Ao3TagType type) || Enum.TryParse(category + "s", true, out type))
                     return type;
             }
 
@@ -531,8 +533,7 @@ namespace Ao3TrackReader.Data
 
                     if (value != null && !string.IsNullOrEmpty(value.Value) && !string.IsNullOrWhiteSpace(opt.InnerText))
                     {
-                        int i;
-                        if (int.TryParse(value.Value, out i))
+                        if (int.TryParse(value.Value, out int i))
                         {
                             var n = opt.InnerText.HtmlDecode().Trim();
                             App.Database.SetLanguage(n, i);
@@ -567,10 +568,12 @@ namespace Ao3TrackReader.Data
             {
                 if (uri.Scheme != Scheme || uri.Port != -1 || uri.Host == "www.archiveofourown.org")
                 {
-                    var uribuilder = new UriBuilder(uri);
-                    uribuilder.Host = "archiveofourown.org";
-                    uribuilder.Scheme = Scheme;
-                    uribuilder.Port = -1;
+                    var uribuilder = new UriBuilder(uri)
+                    {
+                        Host = "archiveofourown.org",
+                        Scheme = Scheme,
+                        Port = -1
+                    };
                     uri = uribuilder.Uri;
                 }
                 return uri;
@@ -700,8 +703,7 @@ namespace Ao3TrackReader.Data
                             var actual = ptagdetails?.actual ?? ptag;
                             var tt = GetTypeForCategory(ptagdetails?.category);
 
-                            List<string> list;
-                            if (!tags.TryGetValue(tt, out list))
+                            if (!tags.TryGetValue(tt, out List<string> list))
                             {
                                 tags[tt] = list = new List<string>();
                             }
@@ -857,8 +859,7 @@ namespace Ao3TrackReader.Data
                             if (string.IsNullOrEmpty(t.Value))
                                 continue;
 
-                            List<string> list;
-                            if (!tags.TryGetValue(t.Key, out list))
+                            if (!tags.TryGetValue(t.Key, out List<string> list))
                             {
                                 tags[t.Key] = list = new List<string>();
                             }
@@ -875,10 +876,10 @@ namespace Ao3TrackReader.Data
                         var sWORKID = match.Groups["WORKID"].Value;
                         model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
 
-                        model.Details = new Ao3WorkDetails();
-
-                        model.Details.WorkId = long.Parse(sWORKID);
-
+                        model.Details = new Ao3WorkDetails()
+                        {
+                            WorkId = long.Parse(sWORKID)
+                        };
                         var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
 
                         var worknode = await WorkWorker.LookupSummaryAsync(model.Details.WorkId);
@@ -1009,9 +1010,8 @@ namespace Ao3TrackReader.Data
                             tag = a.InnerText.HtmlDecode();
                         }
 
-                        List<string> list;
-                            if (!tags.TryGetValue(type, out list)) tags[type] = list = new List<string>();
-                            list.Add(UnescapeTag(tag));
+                        if (!tags.TryGetValue(type, out List<string> list)) tags[type] = list = new List<string>();
+                        list.Add(UnescapeTag(tag));
                     }
                 }
             }
@@ -1036,8 +1036,7 @@ namespace Ao3TrackReader.Data
                         else
                             tag = a.InnerText.HtmlDecode();
 
-                        List<string> list;
-                        if (!tags.TryGetValue(Ao3TagType.Fandoms, out list)) tags[Ao3TagType.Fandoms] = list = new List<string>();
+                        if (!tags.TryGetValue(Ao3TagType.Fandoms, out List<string> list)) tags[Ao3TagType.Fandoms] = list = new List<string>();
                         list.Add(UnescapeTag(tag));
                     }
                 }
@@ -1078,12 +1077,13 @@ namespace Ao3TrackReader.Data
 
             // Get requried tags
             HtmlNode requirednode = headernode?.ElementByClass("required-tags");
-            Dictionary<Ao3RequiredTag, HtmlNode> required = new Dictionary<Ao3RequiredTag, HtmlNode>(4);
-            required[Ao3RequiredTag.Rating] = requirednode?.DescendantsByClass("span", "rating")?.FirstOrDefault();
-            required[Ao3RequiredTag.Warnings] = requirednode?.DescendantsByClass("span", "warnings")?.FirstOrDefault();
-            required[Ao3RequiredTag.Category] = requirednode?.DescendantsByClass("span", "category")?.FirstOrDefault();
-            required[Ao3RequiredTag.Complete] = requirednode?.DescendantsByClass("span", "iswip")?.FirstOrDefault();
-
+            Dictionary<Ao3RequiredTag, HtmlNode> required = new Dictionary<Ao3RequiredTag, HtmlNode>(4)
+            {
+                [Ao3RequiredTag.Rating] = requirednode?.DescendantsByClass("span", "rating")?.FirstOrDefault(),
+                [Ao3RequiredTag.Warnings] = requirednode?.DescendantsByClass("span", "warnings")?.FirstOrDefault(),
+                [Ao3RequiredTag.Category] = requirednode?.DescendantsByClass("span", "category")?.FirstOrDefault(),
+                [Ao3RequiredTag.Complete] = requirednode?.DescendantsByClass("span", "iswip")?.FirstOrDefault()
+            };
             model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             foreach (var n in required)
             {
@@ -1134,16 +1134,17 @@ namespace Ao3TrackReader.Data
 
             var stats = worknode?.ElementByClass("dl", "stats");
 
-            DateTime datetime;
             var updatedate = headernode?.ElementByClass("p", "datetime")?.InnerText?.HtmlDecode()?.Trim();
-            if (!string.IsNullOrEmpty(updatedate) && DateTime.TryParseExact(updatedate, "d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out datetime))
+            if (!string.IsNullOrEmpty(updatedate) && DateTime.TryParseExact(updatedate, "d MMM yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime datetime))
             {
                 model.Details.LastUpdated = datetime;
             }
 
             model.Language = stats?.ElementByClass("dd", "language")?.InnerText?.HtmlDecode()?.Trim();
 
+#pragma warning disable IDE0018 // Inline variable declaration
             int intval;
+#pragma warning restore IDE0018 // Inline variable declaration
             if (stats != null && int.TryParse(stats.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""), out intval))
                 model.Details.Words = intval;
             if (stats != null && int.TryParse(stats.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode(), out intval))
@@ -1227,9 +1228,10 @@ namespace Ao3TrackReader.Data
                         Uri = new Uri(baseuri, "/works/" + sWORKID),
                         Type = Ao3PageType.Work
                     };
-                    workmodel.Details = new Ao3WorkDetails();
-                    workmodel.Details.WorkId = long.Parse(sWORKID);
-
+                    workmodel.Details = new Ao3WorkDetails()
+                    {
+                        WorkId = long.Parse(sWORKID)
+                    };
                     await FillModelFromWorkSummaryAsync(baseuri, worknode, workmodel);
 
                     return workmodel;
@@ -1274,8 +1276,7 @@ namespace Ao3TrackReader.Data
                 {
                     if (workmodel.RequiredTags.TryGetValue(kvp.Key, out var reqTag))
                     {
-                        List<string> list;
-                        if (!tags.TryGetValue(kvp.Value, out list))
+                        if (!tags.TryGetValue(kvp.Value, out List<string> list))
                         {
                             reqtags[reqTag.Label] = reqTag.Tag;
                             tags[kvp.Value] = list = new List<string>();
@@ -1308,7 +1309,9 @@ namespace Ao3TrackReader.Data
             }
 
             // Generate required tags
+#pragma warning disable IDE0018 // Inline variable declaration
             List<string> req;
+#pragma warning restore IDE0018 // Inline variable declaration
             if (tags.TryGetValue(Ao3TagType.Warnings, out req))
             {
                 if (req.Count == 1 && reqtags.TryGetValue(req[0], out string sclass))
@@ -1559,8 +1562,7 @@ namespace Ao3TrackReader.Data
                 {
                     foreach (var s in tagids)
                     {
-                        int id;
-                        if (!int.TryParse(s, out id)) continue;
+                        if (!int.TryParse(s, out int id)) continue;
 
                         tasks.Add(Task.Run(async () =>
                         {
@@ -1608,9 +1610,8 @@ namespace Ao3TrackReader.Data
 
             if (query.ContainsKey("work_search[complete]"))
             {
-                int i = 0;
                 bool b = false;
-                if (int.TryParse(query["work_search[complete]"][0], out i) || bool.TryParse(query["work_search[complete]"][0], out b))
+                if (int.TryParse(query["work_search[complete]"][0], out int i) || bool.TryParse(query["work_search[complete]"][0], out b))
                 {
                     if (i != 0 || b)
                     {
@@ -1682,7 +1683,9 @@ namespace Ao3TrackReader.Data
             }
 
             // Generate required tags
+#pragma warning disable IDE0018 // Inline variable declaration
             List<string> req;
+#pragma warning restore IDE0018 // Inline variable declaration
             if (tags.TryGetValue(Ao3TagType.Warnings, out req))
             {
                 if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
@@ -1729,14 +1732,12 @@ namespace Ao3TrackReader.Data
 
             foreach (var i in Enum.GetValues(typeof(Ao3TagType)))
             {
-                List<string> tagids;
                 var name = "work_search[" + i.ToString().ToLowerInvariant().TrimEnd('s') + "_ids][]";
-                if (query.TryGetValue(name, out tagids))
+                if (query.TryGetValue(name, out List<string> tagids))
                 {
                     foreach (var s in tagids)
                     {
-                        int id;
-                        if (!int.TryParse(s, out id)) continue;
+                        if (!int.TryParse(s, out int id)) continue;
 
                         string tag = LookupTagQuick(id);
                         if (!string.IsNullOrWhiteSpace(tag))
@@ -1758,8 +1759,7 @@ namespace Ao3TrackReader.Data
 
             if (query.ContainsKey("work_search[language_id]"))
             {
-                int id;
-                if (int.TryParse(query["work_search[language_id]"][0], out id))
+                if (int.TryParse(query["work_search[language_id]"][0], out int id))
                 {
                     model.Language = LookupLanguageQuick(id);
                 }
@@ -1776,9 +1776,8 @@ namespace Ao3TrackReader.Data
 
             if (query.ContainsKey("work_search[complete]"))
             {
-                int i = 0;
                 bool b = false;
-                if (int.TryParse(query["work_search[complete]"][0], out i) || bool.TryParse(query["work_search[complete]"][0], out b))
+                if (int.TryParse(query["work_search[complete]"][0], out int i) || bool.TryParse(query["work_search[complete]"][0], out b))
                 {
                     if (i != 0 || b)
                     {
@@ -1838,8 +1837,7 @@ namespace Ao3TrackReader.Data
 
                 if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;
 
-                List<string> list;
-                if (!tags.TryGetValue(t.Key, out list))
+                if (!tags.TryGetValue(t.Key, out List<string> list))
                 {
                     tags[t.Key] = list = new List<string>();
                 }
@@ -1848,30 +1846,26 @@ namespace Ao3TrackReader.Data
             }
 
             // Generate required tags
+#pragma warning disable IDE0018 // Inline variable declaration
             List<string> req;
+#pragma warning restore IDE0018 // Inline variable declaration
             if (tags.TryGetValue(Ao3TagType.Warnings, out req))
             {
-                int id = 0;
-                string sclass;
-                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Warnings] = new Ao3RequredTagData("warning-yes", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Category, out req))
             {
-                int id = 0;
-                string sclass;
-                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Category] = new Ao3RequredTagData("category-multi", string.Join(", ", req));
             }
             if (tags.TryGetValue(Ao3TagType.Rating, out req))
             {
-                int id = 0;
-                string sclass;
-                if (req.Count == 1 && idmap.TryGetValue(req[0], out id) && TagIdToReqClass.TryGetValue(id, out sclass))
+                if (req.Count == 1 && idmap.TryGetValue(req[0], out int id) && TagIdToReqClass.TryGetValue(id, out string sclass))
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData(sclass, req[0]);
                 else
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));

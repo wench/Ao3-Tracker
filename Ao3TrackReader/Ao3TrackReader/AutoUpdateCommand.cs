@@ -28,12 +28,12 @@ namespace Ao3TrackReader
 
         public VirtualAutoUpdateCommand(params string[] triggerProperties) : base(triggerProperties)
         {
-            execute = (p) => Execute();
-            canExecute = (p) => CanExecute();
+            base.Execute = (p) => Execute();
+            base.CanExecute = (p) => CanExecute();
         }
 
-        protected abstract bool CanExecute();
-        protected abstract void Execute();
+        new protected abstract bool CanExecute();
+        new protected abstract void Execute();
     }
 
     public class AutoUpdateCommand<T> : AutoUpdateCommand
@@ -61,21 +61,21 @@ namespace Ao3TrackReader
 
     public class AutoUpdateCommand : BindableObject, System.Windows.Input.ICommand
     {
-        protected Action<INotifyPropertyChanged> execute { get; set; }
-        protected Func<INotifyPropertyChanged, bool> canExecute { get; set; }
-        protected string[] triggerProperties { get; set; }
+        protected Action<INotifyPropertyChanged> Execute { get; set; }
+        protected Func<INotifyPropertyChanged, bool> CanExecute { get; set; }
+        protected string[] TriggerProperties { get; set; }
         protected INotifyPropertyChanged Target { get; set; }
 
         protected AutoUpdateCommand(string[] triggerProperties) 
         {
-            this.triggerProperties = triggerProperties;
+            this.TriggerProperties = triggerProperties;
         }
 
         public AutoUpdateCommand(Action<object> execute, Func<object, bool> canExecute, params string[] triggerProperties)
         {
-            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            this.canExecute = canExecute ?? throw new ArgumentNullException(nameof(canExecute));
-            this.triggerProperties = triggerProperties;
+            this.Execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            this.CanExecute = canExecute ?? throw new ArgumentNullException(nameof(canExecute));
+            this.TriggerProperties = triggerProperties;
         }
         public AutoUpdateCommand(Action execute, Func<bool> canExecute, params string[] triggerProperties)
         {
@@ -84,9 +84,9 @@ namespace Ao3TrackReader
             if (canExecute == null)
                 throw new ArgumentNullException(nameof(canExecute));
 
-            this.execute = (o) => execute();
-            this.canExecute = (o) => canExecute();
-            this.triggerProperties = triggerProperties;
+            this.Execute = (o) => execute();
+            this.CanExecute = (o) => canExecute();
+            this.TriggerProperties = triggerProperties;
         }
 
         void UpdateTarget(INotifyPropertyChanged newTarget)
@@ -102,7 +102,7 @@ namespace Ao3TrackReader
 
         private void Target_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(e.PropertyName) || Array.IndexOf(triggerProperties,e.PropertyName) != -1)
+            if (string.IsNullOrEmpty(e.PropertyName) || Array.IndexOf(TriggerProperties,e.PropertyName) != -1)
             {
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
             }
@@ -113,13 +113,13 @@ namespace Ao3TrackReader
         bool System.Windows.Input.ICommand.CanExecute(object parameter)
         {
             UpdateTarget((INotifyPropertyChanged)parameter);
-            return canExecute(Target);
+            return CanExecute(Target);
         }
 
         void System.Windows.Input.ICommand.Execute(object parameter)
         {
             UpdateTarget((INotifyPropertyChanged)parameter);
-            execute(Target);
+            Execute(Target);
         }
     }
 }

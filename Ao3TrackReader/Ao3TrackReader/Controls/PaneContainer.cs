@@ -75,7 +75,7 @@ namespace Ao3TrackReader.Controls
             c.IsOnScreenChanged += Child_IsOnScreenChanged;
         }
 
-        private void Child_IsOnScreenChanged(object sender, bool e)
+        private void Child_IsOnScreenChanged(object sender, EventArgs<bool> args)
         {
             RecalculateVisbility();
         }

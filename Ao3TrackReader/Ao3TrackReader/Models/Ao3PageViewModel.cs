@@ -35,7 +35,7 @@ namespace Ao3TrackReader.Models
     // <ICON>  
 
 
-    public class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
+    public sealed class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
     {
         public Ao3PageViewModel(Ao3PageModel baseData, int? unread)
         {
@@ -104,12 +104,12 @@ namespace Ao3TrackReader.Models
         public event PropertyChangedEventHandler PropertyChanged;
         public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected virtual void OnPropertyChanging(string propertyName)
+        void OnPropertyChanging(string propertyName)
         {
             PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangingEventArgs(propertyName));
         }
@@ -312,8 +312,10 @@ namespace Ao3TrackReader.Models
         }
 
 
-        void ChapterNumberChanged(object sender, Work workchap)
+        void ChapterNumberChanged(object sender, EventArgs<Work> args)
         {
+            var workchap = args.Value;
+
             if (baseData.Type != Ao3PageType.Work && baseData.Type != Ao3PageType.Series && baseData.Type != Ao3PageType.Collection)
                 return;
 
@@ -356,6 +358,8 @@ namespace Ao3TrackReader.Models
                 });
             });
         }
+
+        public bool HasChapters => baseData.Type == Ao3PageType.Work || baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection;
 
         Ao3PageModel baseData;
 
@@ -428,6 +432,10 @@ namespace Ao3TrackReader.Models
                         {
                             Unread = baseData.Details.Chapters.Available - ChaptersRead;
                         }
+                        else if (!HasChapters)
+                        {
+                            Unread = null;
+                        }
 
                         OnPropertyChanging("Title");
                         UpdateTitle();
@@ -465,7 +473,7 @@ namespace Ao3TrackReader.Models
             {
                 if (baseData.Type == Ao3PageType.Work)
                 {
-                    WorkChapters = await App.Storage.getWorkChaptersAsync(new[] { baseData.Details.WorkId });
+                    WorkChapters = await App.Storage.GetWorkChaptersAsync(new[] { baseData.Details.WorkId });
                     var workchap = WorkChapters.FirstOrDefault().Value;
                     long chapters_finished = workchap?.number ?? 0;
                     if (workchap?.location != null) { chapters_finished--; }
@@ -473,7 +481,7 @@ namespace Ao3TrackReader.Models
                 }
                 else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
                 {
-                    WorkChapters = await App.Storage.getWorkChaptersAsync(baseData.SeriesWorks.Select(pm => pm.Details.WorkId));
+                    WorkChapters = await App.Storage.GetWorkChaptersAsync(baseData.SeriesWorks.Select(pm => pm.Details.WorkId));
                     long chapters_finished = 0;
                     foreach (var workchap in WorkChapters.Values)
                     {
@@ -618,12 +626,11 @@ namespace Ao3TrackReader.Models
                 }
                 if (baseData.SeriesWorks != null) foreach (var workmodel in baseData.SeriesWorks)
                 {
-                    Helper.WorkChapter workchap;
                     int? unread = null;
                     if (WorkChapters != null)
                     {
                         int chapters_finished = 0;
-                        if (WorkChapters.TryGetValue(workmodel.Details.WorkId, out workchap))
+                        if (WorkChapters.TryGetValue(workmodel.Details.WorkId, out Helper.WorkChapter workchap))
                         {
                             chapters_finished = (int)workchap.number;
                             if (workchap.location != null) { chapters_finished--; }
@@ -700,7 +707,7 @@ namespace Ao3TrackReader.Models
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
