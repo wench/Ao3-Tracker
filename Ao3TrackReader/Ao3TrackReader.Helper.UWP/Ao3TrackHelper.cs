@@ -25,7 +25,9 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace Ao3TrackReader.Helper
 {
+#if WINDOWS_UWP
     [AllowForWeb]
+#endif
     public sealed class Ao3TrackHelper : IAo3TrackHelper
     {
         IWebViewPage wvp;
