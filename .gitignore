@@ -357,3 +357,6 @@ build/
 typings/
 
 nppBackup/
+
+# No generated appx files please
+*.appx

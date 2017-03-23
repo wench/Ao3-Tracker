@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3tracksync", "Ao3tracksync\Ao3tracksync.csproj", "{0BD8C8F9-C0E4-4841-8A2B-CA8BC2AA8BC6}"
 EndProject
@@ -42,6 +42,8 @@ Global
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{09ddaed0-c67d-4fb9-9b1f-1aadb8f0c064}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{3ebadc8e-8858-4033-9066-0a14d574cfb3}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{3febecc8-967d-4a3c-a25a-e653e734e779}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{7f6bc0f1-f698-464f-8d8d-ec8eff80f1f2}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
