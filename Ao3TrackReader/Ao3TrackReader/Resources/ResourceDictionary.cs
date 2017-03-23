@@ -128,7 +128,9 @@ namespace Ao3TrackReader.Resources
 
             for (int i = 1; i <= 100; i++)
             {
-                this["Size_" + i] = i * Math.Pow(1.05, LogFontSizeUI);
+                double size = i * Math.Pow(1.05, LogFontSizeUI);
+                this["Size_" + i] = size;
+                this["Size_" + i + "_Min"] = Math.Max(size, i);
             }
         }
     }

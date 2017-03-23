@@ -43,8 +43,8 @@ limitations under the License.
                 <Setter Property="BorderWidth" Value="2" />
                 <Setter Property="BorderRadius" Value="2" />
                 <Setter Property="BorderColor" Value="Transparent" />
-                <Setter Property="WidthRequest" Value="{DynamicResource Size_40}" />
-                <Setter Property="HeightRequest" Value="{DynamicResource Size_40}" />
+                <Setter Property="WidthRequest" Value="{DynamicResource Size_40_Min}" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
                 <Setter Property="ImageWidth" Value="20" />
                 <Setter Property="ImageHeight" Value="20" />
             </Style>
@@ -55,7 +55,7 @@ limitations under the License.
                 <Setter Property="BorderWidth" Value="2" />
                 <Setter Property="BorderColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="WidthRequest" Value="-1" />
-                <Setter Property="HeightRequest" Value="{DynamicResource Size_40}" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
             </Style>
 
             <Style TargetType="local:Button" x:Key="TextButtonActive" BasedOn="{StaticResource TextButton}">
