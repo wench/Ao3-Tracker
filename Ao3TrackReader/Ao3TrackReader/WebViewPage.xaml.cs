@@ -573,15 +573,17 @@ namespace Ao3TrackReader
             });
         }
 
+        bool jumpToLastLocationSetup = false;
         public bool JumpToLastLocationEnabled
         {
             set
             {
-                if (JumpCommand != null) JumpCommand.IsEnabled = value;
+                jumpToLastLocationSetup = value;
+                if (JumpCommand != null) JumpCommand.IsEnabled = jumpToLastLocationSetup && ForceSetLocationCommand.IsEnabled;
             }
             get
             {
-                return JumpCommand?.IsEnabled ?? false;
+                return jumpToLastLocationSetup;
             }
         }
 
@@ -798,11 +800,13 @@ namespace Ao3TrackReader
                     if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
                     {
                         ForceSetLocationCommand.IsEnabled = currentLocation.LessThan(currentSavedLocation);
+                        JumpCommand.IsEnabled = jumpToLastLocationSetup && ForceSetLocationCommand.IsEnabled;
                         return;
                     }
                     else if (currentLocation == null)
                     {
                         ForceSetLocationCommand.IsEnabled = false;
+                        JumpCommand.IsEnabled = jumpToLastLocationSetup && ForceSetLocationCommand.IsEnabled;
                         return;
                     }
 
@@ -836,6 +840,8 @@ namespace Ao3TrackReader
                                 ForceSetLocationCommand.IsEnabled = currentLocation.LessThan(currentSavedLocation);
                             else
                                 ForceSetLocationCommand.IsEnabled = false;
+
+                            JumpCommand.IsEnabled = jumpToLastLocationSetup && ForceSetLocationCommand.IsEnabled;
                         }
                     });
                 }
@@ -1019,7 +1025,7 @@ namespace Ao3TrackReader
             cancelInject = new CancellationTokenSource();
             TitleEx = "Loading...";
 
-            JumpCommand.IsEnabled = false;
+            JumpToLastLocationEnabled = false;
             HideContextMenu();
 
             nextPage = null;
@@ -1041,7 +1047,7 @@ namespace Ao3TrackReader
 
         private void OnContentLoaded()
         {
-            JumpCommand.IsEnabled = false;
+            JumpToLastLocationEnabled = false;
             HideContextMenu();
 
             UpdateUrlBar(CurrentUri);
