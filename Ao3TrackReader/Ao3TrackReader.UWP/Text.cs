@@ -24,14 +24,19 @@ using Windows.UI.Xaml.Media;
 using Windows.UI;
 using Windows.UI.Xaml.Documents;
 
+//#define UWP_CREATORS_UPDATE
+
 namespace Ao3TrackReader.Text
 {
     public abstract partial class TextEx
     {
+#if UWP_CREATORS_UPDATE
         static bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
+#endif
 
         protected Inline ApplyStyles(Inline i)
         {
+#if UWP_CREATORS_UPDATE
             if (isTextDecorationsAvailable)
             {
                 i.TextDecorations = TextDecorations.None;
@@ -45,6 +50,7 @@ namespace Ao3TrackReader.Text
                 }
             }
             else
+#endif
             {
                 if (Underline == true && !(i is Underline))
                 {

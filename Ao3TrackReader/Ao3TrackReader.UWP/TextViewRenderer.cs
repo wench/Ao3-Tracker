@@ -55,7 +55,7 @@ namespace Ao3TrackReader.UWP
                 UpdateControl(view);
             }
         }
-        
+
         protected override void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var view = Element as TextView;
@@ -70,6 +70,11 @@ namespace Ao3TrackReader.UWP
                     UpdateControl(view);
                     return;
                 }
+            }
+            else if (e.PropertyName == Xamarin.Forms.VisualElement.IsVisibleProperty.PropertyName)
+            {
+                var vec = Element as Xamarin.Forms.IVisualElementController;
+                vec.InvalidateMeasure(Xamarin.Forms.Internals.InvalidationTrigger.RendererReady);
             }
 
             base.OnElementPropertyChanged(sender, e);

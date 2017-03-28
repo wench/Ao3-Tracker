@@ -296,7 +296,7 @@ namespace Ao3TrackReader.Controls
                 if (tags_visible != value)
                 {
                     tags_visible = value;
-                    readingListBacking.ForEachInAll((item) => item.TagsVisible = tags_visible);
+                    readingListBacking.ForEachInAll((item) => { item.TagsVisible = tags_visible; });
                 }
             }
         }

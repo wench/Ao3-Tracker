@@ -77,6 +77,11 @@ namespace Ao3TrackReader.Droid
 
                 base.OnElementPropertyChanged(sender, e);
             }
+            else if (e.PropertyName == Xamarin.Forms.VisualElement.IsVisibleProperty.PropertyName)
+            {
+                var vec = Element as Xamarin.Forms.IVisualElementController;
+                vec.InvalidateMeasure(Xamarin.Forms.Internals.InvalidationTrigger.RendererReady);
+            }
         }
         
         void UpdateControl(TextView view)
