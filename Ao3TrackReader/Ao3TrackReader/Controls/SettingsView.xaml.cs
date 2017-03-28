@@ -41,10 +41,10 @@ namespace Ao3TrackReader.Controls
             aboutText.FormattedText = new FormattedString();
             aboutText.FormattedText.Spans.Add(new Span { Text = "Ao3Track Reader Version " + v.Major + "." + v.Minor + "." + v.Build + "\n" });
             aboutText.FormattedText.Spans.Add(new Span { Text = App.Copyright + "\n" });
-            aboutText.FormattedText.Spans.Add(new Span { Text = "Distributed under the terms of '" + App.License.Name + "':\n" });
-            aboutText.FormattedText.Spans.Add(new Span { Text = App.License.uri.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
-            aboutText.FormattedText.Spans.Add(new Span { Text = "Source Code for this build available at:\n" });
+            aboutText.FormattedText.Spans.Add(new Span { Text = "Source Code for this build available at: \n" });
             aboutText.FormattedText.Spans.Add(new Span { Text = App.Source.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
+            aboutText.FormattedText.Spans.Add(new Span { Text = "Under the terms of '" + App.License.Name + "':\n" });
+            aboutText.FormattedText.Spans.Add(new Span { Text = App.License.uri.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
 
             isCreateUser = false;
 

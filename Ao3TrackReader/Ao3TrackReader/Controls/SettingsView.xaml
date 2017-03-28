@@ -154,6 +154,7 @@ limitations under the License.
                                 <Label Text="Email (optional)" />
                                 <Entry Placeholder="Enter your email" Keyboard="Email" HorizontalOptions="Fill" x:Name="email" />
                                 <Label x:Name="emailErrors" Style="{StaticResource Error}" />
+                                <Label Text="Entry of an email address is optional. It will only be used for account recovery purposes." Style="{StaticResource Remark}" />
                             </StackLayout>
 
                             <StackLayout Style="{StaticResource Setting}">
