@@ -92,6 +92,21 @@ namespace Ao3TrackReader.Data
             };
             HttpClient = new HttpClient(httpClientHandler);
 
+            // Time synchronization. 
+            var startTime = DateTime.UtcNow.ToUnixTime();
+            HttpClient.GetAsync(new Uri(url_base, "Values/Time")).ContinueWith(async (task)=>
+            {
+                if (task.IsCanceled || task.IsFaulted) return;
+                var endTime = DateTime.UtcNow.ToUnixTime();
+
+                var response = task.Result;
+                var content = await response.Content.ReadAsStringAsync();
+
+                var serverTime = JsonConvert.DeserializeObject<long>(content);
+
+                Extensions.UnixTimeOffset = serverTime - (startTime + endTime) / 2;
+            });
+
             storage = new Dictionary<long, Work>();
             unsynced = new Dictionary<long, Work>();
 
@@ -471,7 +486,7 @@ namespace Ao3TrackReader.Data
             {
                 lock (locker)
                 {
-                    long time = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000;
+                    long time = DateTime.UtcNow.ToUnixTime();
                     Dictionary<long, Work> newitems = new Dictionary<long, Work>();
                     bool do_delayed = false;
 

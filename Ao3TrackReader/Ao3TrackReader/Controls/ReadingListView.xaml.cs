@@ -67,7 +67,7 @@ namespace Ao3TrackReader.Controls
             }
             else
             {
-                var timestamp = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000L;
+                var timestamp = DateTime.UtcNow.ToUnixTime();
                 var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
                 foreach (var model in models)
                 {
@@ -526,7 +526,7 @@ namespace Ao3TrackReader.Controls
         {
             return Task.Run(() =>
             {
-                AddAsyncImpl(href, (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10000L);
+                AddAsyncImpl(href, DateTime.UtcNow.ToUnixTime());
                 SyncToServerAsync();
             });
         }

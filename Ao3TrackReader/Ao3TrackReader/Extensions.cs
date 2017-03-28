@@ -173,5 +173,13 @@ namespace Ao3TrackReader
                 }
             }
         }
+
+        static DateTime UnixEpoc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public static long ToUnixTime(this DateTime time)
+        {
+            return (DateTime.UtcNow - UnixEpoc).Ticks / 10000L + UnixTimeOffset;
+        }
+
+        static public long UnixTimeOffset { get; set; } = 0;
     }
 }
