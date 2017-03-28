@@ -103,7 +103,7 @@ namespace Ao3tracksync.Controllers
             public long seq { get; set; }
         };
 
-        #region GET api/User/Init
+        #region GET api/Values/Init
         [AllowAnonymous, HttpGet, Route("Init")]
         public void Init()
         {
@@ -237,7 +237,7 @@ namespace Ao3tracksync.Controllers
         /// </summary>
         /// <param name="id">Workid</param>
         /// <remarks>Warning there is no way for clients to detect deletions so this wont work as expected.
-        /// The next time the clients sync the workchapter will be readded to the database.</remarks>
+        /// The next time the clients sync the workchapter will be re-added to the database.</remarks>
         public void Delete(long id)
         {
             using (var ctx = new Models.Ao3TrackEntities())
@@ -254,5 +254,15 @@ namespace Ao3tracksync.Controllers
                 }
             }
         }
+
+        static DateTime UnixEpoc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        #region GET api/Values/Time
+        [AllowAnonymous, HttpGet, Route("Time")]
+        public long Time()
+        {
+            return (DateTime.UtcNow - UnixEpoc).Ticks / 10000;
+        }
+        #endregion
     }
 }

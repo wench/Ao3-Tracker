@@ -30,5 +30,10 @@ namespace Ao3tracksync.Controllers
 
             return View();
         }
+
+        public ActionResult PrivacyPolicy()
+        {
+            return View();
+        }
     }
 }
