@@ -1,8 +1,8 @@
-#Ao3 Tracker Web Extension
+# Ao3Track Script Sources and Web Extension
 
 Requires npm, Gulp, TypeScript, typings, less to build
 
-Set up build environment
+## Set up build environment
 
 `> npm install -g gulp-cli typescript typings less`
 
@@ -10,6 +10,19 @@ Set up build environment
 
 `> typings install`
 
-Building 
+## Building 
 
+### All projects
 `> gulp`
+
+### Ao3Track Reader Scripts and CSS
+`> gulp reader`
+
+### Ao3Track Reader Scripts and CSS for UWP
+`> gulp reader.uwp`
+
+### Ao3Track Reader Scripts and CSS for Droid
+`> gulp reader.droid`
+
+### Ao3Track Reader Scripts and CSS for iOS
+`> gulp reader.ios`
