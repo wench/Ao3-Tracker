@@ -37,7 +37,7 @@ namespace Ao3TrackReader.Controls
         {
             TranslationX = old_width = 480;
             WidthRequest = old_width;
-            BackgroundColor = Ao3TrackReader.Resources.Colors.Alt.Trans.High;
+            BackgroundColor = Ao3TrackReader.Resources.Colors.Alt.Trans.VeryHigh;
             //IsVisible = false;
         }
 
