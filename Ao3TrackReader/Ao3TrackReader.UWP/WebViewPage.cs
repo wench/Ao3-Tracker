@@ -99,10 +99,13 @@ namespace Ao3TrackReader
 
         private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
         {
+            args.Handled = true;
             var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
             if (uri != null) {
-                args.Handled = true;
                 webView.Navigate(uri);
+            }
+            else {
+                OpenExternal(args.Uri);
             }
         }
 
@@ -163,10 +166,15 @@ namespace Ao3TrackReader
 
         public void Navigate(Uri uri)
         {
-            uri = Ao3SiteDataLookup.CheckUri(uri);
-            if (uri == null) return;
+            var newuri = Ao3SiteDataLookup.CheckUri(uri);
+            if (newuri == null)
+            {
+                OpenExternal(uri);
+                return;
+            }
+
             helper?.Reset();
-            webView.Navigate(uri);
+            webView.Navigate(newuri);
         }
 
         public void Refresh()
@@ -242,15 +250,19 @@ namespace Ao3TrackReader
         {
             HideContextMenu();
 
-            var res = await AreUrlsInReadingListAsync(new[] { url });
-            ContextMenuOpenAdd.IsEnabled = !res[url];
-            ContextMenuAdd.IsEnabled = !res[url];
+            var inturl = Ao3SiteDataLookup.CheckUri(new Uri(url)) != null;
+            var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
+            ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
+            ContextMenuAdd.IsEnabled = inturl && !res[url];
+            ContextMenuRemove.IsEnabled = inturl && res[url];
 
             foreach (var baseitem in contextMenu.Items)
             {
                 if (baseitem is MenuFlyoutItem item)
                 {
                     item.CommandParameter = url;
+                    if (item.Command != null)
+                        item.Visibility = item.Command.CanExecute(url) ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
 

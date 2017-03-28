@@ -49,10 +49,6 @@ namespace Ao3TrackReader
             get { return ExtraHelp.Concat((IEnumerable<Models.IHelpInfo>)AllToolbarItems); }
         }
 
-        List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
-        DisableableCommand<string> ContextMenuOpenAdd;
-        DisableableCommand<string> ContextMenuAdd;
-
         public ReadingListView ReadingList { get { return ReadingListPane; } }
 
         public WebViewPage()
@@ -85,7 +81,7 @@ namespace Ao3TrackReader
 
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
 
-            // retore font size!
+            // restore font size!
             if (!App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
             else LogFontSize = 0;
 
@@ -235,6 +231,11 @@ namespace Ao3TrackReader
             }
         }
 
+        List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
+        DisableableCommand<string> ContextMenuOpenAdd;
+        DisableableCommand<string> ContextMenuAdd;
+        DisableableCommand<string> ContextMenuRemove;
+
         void SetupContextMenu()
         {
             ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<string>>>
@@ -253,6 +254,11 @@ namespace Ao3TrackReader
                 new KeyValuePair<string, DisableableCommand<string>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<string>((url) =>
                 {
                     AddToReadingList(url);
+                })),
+
+                new KeyValuePair<string, DisableableCommand<string>>("Remove from Reading list", ContextMenuRemove = new DisableableCommand<string>((url) =>
+                {
+                    RemoveFromReadingList(url);
                 })),
 
                 new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) =>
@@ -764,6 +770,11 @@ namespace Ao3TrackReader
             ReadingList.AddAsync(href);
         }
 
+        public void RemoveFromReadingList(string href)
+        {
+            ReadingList.RemoveAsync(href);
+        }
+
         public void SetCookies(string cookies)
         {
             if (App.Database.GetVariable("siteCookies") != cookies)
@@ -994,6 +1005,7 @@ namespace Ao3TrackReader
             {
                 // Handle external uri
                 LeftOffset = 0;
+                OpenExternal(uri);
                 return true;
             }
             else if (check != uri)
@@ -1135,6 +1147,12 @@ namespace Ao3TrackReader
 
                 return r;
             }
+        }
+
+        public async void OpenExternal(Uri uri)
+        {
+            var result = await DisplayAlert("External Link", "Open external link in Web Browser?\n\n" + uri.AbsoluteUri, "Yes", "No");
+            if (result) Device.OpenUri(uri);
         }
 
     }

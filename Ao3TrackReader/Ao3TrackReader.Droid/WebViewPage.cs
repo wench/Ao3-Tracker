@@ -214,8 +214,16 @@ namespace Ao3TrackReader
 
         public void Navigate(Uri uri)
         {
-            if (OnNavigationStarting(uri) == false)
-                webView.LoadUrl(uri.AbsoluteUri);
+            var newuri = Ao3SiteDataLookup.CheckUri(uri);
+            if (newuri == null)
+            {
+                OpenExternal(uri);
+                return;
+            }
+
+            helper?.Reset();
+            if (OnNavigationStarting(newuri) == false)
+                webView.LoadUrl(newuri.AbsoluteUri);
         }
 
         public void Refresh()
@@ -285,14 +293,16 @@ namespace Ao3TrackReader
 
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / webView.Width, y * Height / webView.Height, 0, 0));
 
-            var res = await AreUrlsInReadingListAsync(new[] { url });
-            ContextMenuOpenAdd.IsEnabled = !res[url];
-            ContextMenuAdd.IsEnabled = !res[url];
+            var inturl = Ao3SiteDataLookup.CheckUri(new Uri(url)) != null;
+            var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
+            ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
+            ContextMenuAdd.IsEnabled = inturl && !res[url];
+            ContextMenuRemove.IsEnabled = inturl && res[url];
 
             for (int i = 0; i < ContextMenuItems.Count; i++)
             {
                 if (ContextMenuItems[i].Value != null)
-                    contextMenu.Menu.GetItem(i).SetEnabled(ContextMenuItems[i].Value.CanExecute(url));
+                    contextMenu.Menu.GetItem(i).SetVisible(ContextMenuItems[i].Value.CanExecute(url));
             }
 
             contextMenuUrl = url;
