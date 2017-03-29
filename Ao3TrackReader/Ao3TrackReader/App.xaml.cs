@@ -208,11 +208,10 @@ namespace Ao3TrackReader
             }
         }
 
-
-        public static InteractionMode GetInteractionMode()
-        {
 #if WINDOWS_UWP
-            if (Windows.Foundation.Metadata.ApiInformation.IsEventPresent("Windows.Phone.UI.Input.HardwareButtons", "BackPressed"))
+        static bool PhoneHasBackButton()
+        {
+            if (Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons"))
             {
                 if (typeof(Windows.Phone.UI.Input.HardwareButtons) == null)
                 {
@@ -220,17 +219,30 @@ namespace Ao3TrackReader
                     Windows.Phone.UI.Input.HardwareButtons.BackPressed += eh;
                     Windows.Phone.UI.Input.HardwareButtons.BackPressed -= eh;
                 }
-                return InteractionMode.Phone;
+                return true;
             }
-            if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.ViewManagement.UIViewSettings", "UserInteractionMode"))
-            {
-                var s = Windows.UI.ViewManagement.UIViewSettings.GetForCurrentView();
+            return false;
+        }
+#endif
 
-                if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Touch)
-                    return InteractionMode.Tablet;
-                else if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Mouse)
-                    return InteractionMode.PC;
+        public static InteractionMode GetInteractionMode()
+        {
+#if WINDOWS_UWP
+            var s = Windows.UI.ViewManagement.UIViewSettings.GetForCurrentView();
+            if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Mouse)
+                return InteractionMode.PC;
+
+            try
+            { 
+                if (Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile" && PhoneHasBackButton())
+                    return InteractionMode.Phone;
             }
+            catch {
+
+            }
+
+            if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Touch)
+                return InteractionMode.Tablet;
 #elif __ANDROID__
             // Good enough for android for now
             switch (Xamarin.Forms.Device.Idiom)
