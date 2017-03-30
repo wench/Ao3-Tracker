@@ -691,7 +691,7 @@ namespace Ao3TrackReader.Data
                         model.Type = Ao3PageType.Tag;
 
                     var tagdetails = LookupTagQuick(sTAGNAME);
-                    model.PrimaryTag = tagdetails?.actual ?? sTAGNAME;
+                    model.PrimaryTag = tagdetails?.actual ?? UnescapeTag(sTAGNAME);
                     model.PrimaryTagType = GetTypeForCategory(tagdetails?.category);
                     if (tagdetails != null)
                     {
@@ -1823,7 +1823,7 @@ namespace Ao3TrackReader.Data
             if (query.ContainsKey("tag_id"))
             {
                 var tagdetails = LookupTagQuick(query["tag_id"][0]);
-                model.PrimaryTag = tagdetails?.actual ?? query["tag_id"][0];
+                model.PrimaryTag = tagdetails?.actual ?? UnescapeTag(query["tag_id"][0]);
                 model.PrimaryTagType = GetTypeForCategory(tagdetails?.category);
             }
 
