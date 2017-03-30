@@ -23,7 +23,7 @@ namespace Ao3TrackReader.Models
 {
     public class ServerReadingList
     {
-        public long last_sync { get; set; }
+        public long last_sync { get; set; } = 0;
         public Dictionary<string, long> paths { get; set; }
     }
 

@@ -89,6 +89,44 @@ namespace Ao3TrackReader.Controls
             UpdateSyncForm();
         }
 
+
+        private void UpdateSyncForm()
+        {
+            string name = App.Storage.Username;
+            if (App.Storage.HaveCredentials && !string.IsNullOrWhiteSpace(name))
+            {
+                syncLoggedIn.IsVisible = true;
+                syncForm.IsVisible = false;
+                var text = new FormattedString();
+                text.Spans.Add(new Span { Text = "Logged in as: " });
+                text.Spans.Add(new Span { Text = name, ForegroundColor = Colors.Highlight.High });
+                syncLoggedInLabel.FormattedText = text;
+            }
+            else
+            {
+                syncLoggedIn.IsVisible = false;
+                syncForm.IsVisible = true;
+                if (isCreateUser)
+                {
+                    syncLoginButton.Style = Resources["TextButtonInactive"] as Style;
+                    syncCreateButton.Style = Resources["TextButtonActive"] as Style;
+                    verifyField.IsVisible = true;
+                    emailField.IsVisible = true;
+                }
+                else
+                {
+                    syncCreateButton.Style = Resources["TextButtonInactive"] as Style;
+                    syncLoginButton.Style = Resources["TextButtonActive"] as Style;
+                    verifyField.IsVisible = false;
+                    emailField.IsVisible = false;
+                }
+                usernameErrors.IsVisible = false;
+                passwordErrors.IsVisible = false;
+                verifyErrors.IsVisible = false;
+                emailErrors.IsVisible = false;
+            }
+        }
+
         public void OnSyncSubmit(object sender, EventArgs e)
         {
             syncSubmitButton.IsEnabled = false;
@@ -104,12 +142,14 @@ namespace Ao3TrackReader.Controls
             string s_email = email.Text;
             string s_verify = verify.Text;
 
+            string old_username = App.Storage.Username;
+            
             Task.Run(async () =>
             {
                 var errors = new Dictionary<string, string>();
 
-                if (string.IsNullOrEmpty(s_username)) errors["username"] = "You must enter a username";
-                if (string.IsNullOrEmpty(s_password)) errors["password"] = "You must enter a password";
+                if (string.IsNullOrWhiteSpace(s_username)) errors["username"] = "You must enter a username";
+                if (string.IsNullOrWhiteSpace(s_password)) errors["password"] = "You must enter a password";
 
                 if (errors.Count == 0)
                 {
@@ -164,7 +204,7 @@ namespace Ao3TrackReader.Controls
                     else
                     {
                         UpdateSyncForm();
-                        wvp.ReadingList.SyncToServerAsync();
+                        wvp.ReadingList.SyncToServerAsync(old_username != s_username);
                     }
                     syncSubmitButton.IsEnabled = true;
                     syncIndicator.IsRunning = false;
@@ -233,44 +273,6 @@ namespace Ao3TrackReader.Controls
             {
                 App.Database.SaveVariable("ShowBackButton", item.Key);
                 wvp.UpdateBackButton();
-            }
-        }
-
-
-        private void UpdateSyncForm()
-        {
-            string name = App.Storage.Username;
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                syncLoggedIn.IsVisible = true;
-                syncForm.IsVisible = false;
-                var text = new FormattedString();
-                text.Spans.Add(new Span { Text = "Logged in as: " });
-                text.Spans.Add(new Span { Text = name, ForegroundColor = Colors.Highlight.High });
-                syncLoggedInLabel.FormattedText = text;
-            }
-            else
-            {
-                syncLoggedIn.IsVisible = false;
-                syncForm.IsVisible = true;
-                if (isCreateUser)
-                {
-                    syncLoginButton.Style = Resources["TextButtonInactive"] as Style;
-                    syncCreateButton.Style = Resources["TextButtonActive"] as Style;
-                    verifyField.IsVisible = true;
-                    emailField.IsVisible = true;
-                }
-                else
-                {
-                    syncCreateButton.Style = Resources["TextButtonInactive"] as Style;
-                    syncLoginButton.Style = Resources["TextButtonActive"] as Style;
-                    verifyField.IsVisible = false;
-                    emailField.IsVisible = false;
-                }
-                usernameErrors.IsVisible = false;
-                passwordErrors.IsVisible = false;
-                verifyErrors.IsVisible = false;
-                emailErrors.IsVisible = false;
             }
         }
 

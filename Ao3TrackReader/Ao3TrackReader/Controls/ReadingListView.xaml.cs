@@ -105,7 +105,7 @@ namespace Ao3TrackReader.Controls
                     }
                 }
             }
-            SyncToServerAsync();
+            SyncToServerAsync(false);
 
             wvp.DoOnMainThread(() =>
             {
@@ -268,8 +268,9 @@ namespace Ao3TrackReader.Controls
                     }));
                 }
 
-
                 await Task.WhenAll(tasks);
+
+                SyncToServerAsync(false);
 
                 wvp.DoOnMainThread(() =>
                 {
@@ -359,17 +360,10 @@ namespace Ao3TrackReader.Controls
             });
         }
 
-        public async void SyncToServerAsync()
+        public async void SyncToServerAsync(bool newuser)
         {
             var srl = new Models.ServerReadingList();
-            try
-            {
-                srl.last_sync = Convert.ToInt64(App.Database.GetVariable("ReadingList.last_sync"));
-            }
-            catch
-            {
-                srl.last_sync = 0;
-            }
+            if (!newuser && App.Database.TryGetVariable("ReadingList.last_sync", long.TryParse, out long last)) srl.last_sync = last;
 
             srl.paths = App.Database.GetReadingListItems().ToDictionary(i => i.Uri, i => i.Timestamp);
 
@@ -420,7 +414,7 @@ namespace Ao3TrackReader.Controls
         {
             return Task.Run(async () => { 
                 await RemoveAsyncImpl(href);
-                SyncToServerAsync();
+                SyncToServerAsync(false);
             });
         }
 
@@ -527,7 +521,7 @@ namespace Ao3TrackReader.Controls
             return Task.Run(() =>
             {
                 AddAsyncImpl(href, DateTime.UtcNow.ToUnixTime());
-                SyncToServerAsync();
+                SyncToServerAsync(false);
             });
         }
 

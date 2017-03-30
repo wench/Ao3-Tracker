@@ -76,6 +76,11 @@ namespace Ao3TrackReader.Data
             get { return App.Database.GetVariable("authorization.username") ?? ""; }
         }
 
+        public bool HaveCredentials
+        {
+            get { return !string.IsNullOrWhiteSpace(App.Database.GetVariable("authorization.username")) && !string.IsNullOrWhiteSpace(App.Database.GetVariable("authorization.credential")); }
+        }
+
 
         event EventHandler<bool> SyncFromServerEvent;
 
@@ -117,7 +122,7 @@ namespace Ao3TrackReader.Data
             Authorization authorization;
             authorization.username = database.GetVariable("authorization.username") ?? "";
             authorization.credential = database.GetVariable("authorization.credential") ?? "";
-            if (String.IsNullOrEmpty(authorization.username) || String.IsNullOrEmpty(authorization.credential))
+            if (String.IsNullOrWhiteSpace(authorization.username) || String.IsNullOrWhiteSpace(authorization.credential))
             {
                 serversync = SyncState.Disabled;
             }
@@ -558,7 +563,6 @@ namespace Ao3TrackReader.Data
                 {
                     serversync = SyncState.Disabled;
                     HttpClient.DefaultRequestHeaders.Authorization = null;
-                    App.Database.SaveVariable("authorization.username", "");
                     App.Database.SaveVariable("authorization.credential", "");
                 }
 
@@ -631,7 +635,6 @@ namespace Ao3TrackReader.Data
                         serversync = SyncState.Disabled;
                         HttpClient.DefaultRequestHeaders.Authorization = null;
                         last_sync = 0;
-                        App.Database.SaveVariable("authorization.username", "");
                         App.Database.SaveVariable("authorization.credential", "");
                         App.Database.SaveVariable("last_sync", last_sync);
                     }
@@ -649,7 +652,6 @@ namespace Ao3TrackReader.Data
                 {
                     serversync = SyncState.Disabled;
                     HttpClient.DefaultRequestHeaders.Authorization = null;
-                    App.Database.SaveVariable("authorization.username", "");
                     App.Database.SaveVariable("authorization.credential", "");
                 }
 
