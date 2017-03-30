@@ -156,8 +156,8 @@ namespace Ao3TrackReader
             ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
 
             SyncCommand = new DisableableCommand(() => App.Storage.DoSync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
-            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => SyncCommand.IsEnabled = false);
-            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync);
+            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => { SyncCommand.IsEnabled = false; });
+            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => { SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync; });
             SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
 
             RefreshCommand = new DisableableCommand(Refresh);
