@@ -6,7 +6,7 @@
     <SharedGUID>b718c17d-a384-4eb9-8587-a32838095989</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Ao3TrackReader.Win8.1</Import_RootNamespace>
+    <Import_RootNamespace>Ao3TrackReader.Win81</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Ao3TrackHelper.cs" />
