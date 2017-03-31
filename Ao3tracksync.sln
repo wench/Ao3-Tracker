@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3tracksync", "Ao3tracksync\Ao3tracksync.csproj", "{0BD8C8F9-C0E4-4841-8A2B-CA8BC2AA8BC6}"
 EndProject
@@ -30,11 +30,11 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Version", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Version.Build", "Ao3TrackReader\Ao3TrackReader.Version.Build\Ao3TrackReader.Version.Build.csproj", "{02C7179C-1598-47A9-B351-D71649AB7994}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Helper.Win81", "Ao3TrackReader\Ao3TrackReader.Helper.Win81\Ao3TrackReader.Helper.Win81.csproj", "{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Win81", "Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.shproj", "{B718C17D-A384-4EB9-8587-A32838095989}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Windows81", "Ao3TrackReader\Ao3TrackReader.Windows81\Ao3TrackReader.Windows81.csproj", "{8D7BB3F9-7969-48F4-856C-F9E1B97EEC39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Win81.Desktop", "Ao3TrackReader\Ao3TrackReader.Win81.Desktop\Ao3TrackReader.Win81.Desktop.csproj", "{8D7BB3F9-7969-48F4-856C-F9E1B97EEC39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.WinPhone81", "Ao3TrackReader\Ao3TrackReader.WinPhone81\Ao3TrackReader.WinPhone81.csproj", "{C5038D7C-AA97-41E5-98C9-FDA8E173B1EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Win81.Phone", "Ao3TrackReader\Ao3TrackReader.Win81.Phone\Ao3TrackReader.Win81.Phone.csproj", "{C5038D7C-AA97-41E5-98C9-FDA8E173B1EE}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -44,13 +44,17 @@ Global
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{3febecc8-967d-4a3c-a25a-e653e734e779}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
-		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{7f6bc0f1-f698-464f-8d8d-ec8eff80f1f2}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{b08a8cc6-dfc7-45c9-bb76-7cac03075005}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{b08a8cc6-dfc7-45c9-bb76-7cac03075005}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{b08a8cc6-dfc7-45c9-bb76-7cac03075005}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.projitems*{b718c17d-a384-4eb9-8587-a32838095989}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{c5038d7c-aa97-41e5-98c9-fda8e173b1ee}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{c5038d7c-aa97-41e5-98c9-fda8e173b1ee}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.projitems*{c5038d7c-aa97-41e5-98c9-fda8e173b1ee}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{c5038d7c-aa97-41e5-98c9-fda8e173b1ee}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{d4aa9f53-dd3a-49e1-a64a-8aff1ce94299}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{d4aa9f53-dd3a-49e1-a64a-8aff1ce94299}*SharedItemsImports = 4
@@ -232,38 +236,6 @@ Global
 		{02C7179C-1598-47A9-B351-D71649AB7994}.Release|x64.Build.0 = Release|Any CPU
 		{02C7179C-1598-47A9-B351-D71649AB7994}.Release|x86.ActiveCfg = Release|Any CPU
 		{02C7179C-1598-47A9-B351-D71649AB7994}.Release|x86.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|Any CPU.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|Any CPU.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|ARM.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|ARM.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|x64.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|x64.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|x86.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Ad-Hoc|x86.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|Any CPU.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|Any CPU.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|ARM.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|ARM.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|x64.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|x64.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|x86.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.AppStore|x86.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|ARM.Build.0 = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|x64.Build.0 = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Debug|x86.Build.0 = Debug|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|ARM.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|ARM.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|x64.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|x64.Build.0 = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|x86.ActiveCfg = Release|Any CPU
-		{7F6BC0F1-F698-464F-8D8D-EC8EFF80F1F2}.Release|x86.Build.0 = Release|Any CPU
 		{8D7BB3F9-7969-48F4-856C-F9E1B97EEC39}.Ad-Hoc|Any CPU.ActiveCfg = Release|Any CPU
 		{8D7BB3F9-7969-48F4-856C-F9E1B97EEC39}.Ad-Hoc|Any CPU.Build.0 = Release|Any CPU
 		{8D7BB3F9-7969-48F4-856C-F9E1B97EEC39}.Ad-Hoc|Any CPU.Deploy.0 = Release|Any CPU
