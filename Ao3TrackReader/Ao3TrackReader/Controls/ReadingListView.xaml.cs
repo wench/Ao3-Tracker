@@ -46,7 +46,7 @@ namespace Ao3TrackReader.Controls
         protected override void OnWebViewPageSet()
         {
             base.OnWebViewPageSet();
-            Device.BeginInvokeOnMainThread(() => Task.Run(async () => { await RestoreReadingList(); }));
+            Device.BeginInvokeOnMainThread(async () => await RestoreReadingList().ConfigureAwait(false) );
         }
 
         async Task RestoreReadingList()

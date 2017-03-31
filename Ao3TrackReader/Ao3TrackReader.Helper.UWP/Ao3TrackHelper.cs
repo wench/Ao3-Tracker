@@ -177,10 +177,7 @@ namespace Ao3TrackReader.Helper
         internal static MemberDef md_SetWorkChapters = new MemberDef { args = new Dictionary<int, string> { { 0, "ToWorkChapterMapNative" } } };
         public void SetWorkChapters(IDictionary<long, WorkChapter> works)
         {
-            Task.Run(() =>
-            {
-                wvp.SetWorkChapters(works);
-            });
+            wvp.SetWorkChaptersAsync(works);
         }
 
         public void ShowContextMenu(double x, double y, string url, string innerHtml)

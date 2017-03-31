@@ -155,7 +155,7 @@ namespace Ao3TrackReader
             FontDecreaseCommand = new DisableableCommand(() => LogFontSize--);
             ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
 
-            SyncCommand = new DisableableCommand(() => App.Storage.DoSync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
+            SyncCommand = new DisableableCommand(() => App.Storage.DoSyncAsync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
             App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => { SyncCommand.IsEnabled = false; });
             App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => { SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync; });
             SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
@@ -290,23 +290,20 @@ namespace Ao3TrackReader
             App.Database.DeleteVariable("Sleep:URI");
         }
 
-        public void NavigateToLast(long workid, bool fullwork)
+        public async void NavigateToLast(long workid, bool fullwork)
         {
-            Task.Run(async () =>
-            {
-                var workchaps = await App.Storage.GetWorkChaptersAsync(new[] { workid });
+            var workchaps = await App.Storage.GetWorkChaptersAsync(new[] { workid }).ConfigureAwait(false);
 
-                DoOnMainThread(() =>
+            DoOnMainThread(() =>
+            {
+                UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
+                if (!fullwork && workchaps.TryGetValue(workid, out var wc) && wc.chapterid != 0)
                 {
-                    UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
-                    if (!fullwork && workchaps.TryGetValue(workid, out var wc) && wc.chapterid != 0)
-                    {
-                        uri.Path = uri.Path += "/chapters/" + wc.chapterid;
-                    }
-                    if (fullwork) uri.Query = "view_full_work=true";
-                    uri.Fragment = "ao3tjump";
-                    Navigate(uri.Uri);
-                });
+                    uri.Path = uri.Path += "/chapters/" + wc.chapterid;
+                }
+                if (fullwork) uri.Query = "view_full_work=true";
+                uri.Fragment = "ao3tjump";
+                Navigate(uri.Uri);
             });
         }
 
@@ -477,7 +474,7 @@ namespace Ao3TrackReader
 
                 DoOnMainThread(() =>
                 {
-                    ResetFontSizeCommand.IsEnabled = log_font_size == 0;
+                    ResetFontSizeCommand.IsEnabled = log_font_size != 0;
                     FontDecreaseCommand.IsEnabled = log_font_size > LogFontSizeMin;
                     FontIncreaseCommand.IsEnabled = log_font_size < LogFontSizeMax;
                     helper?.OnAlterFontSize(FontSize);
@@ -535,7 +532,7 @@ namespace Ao3TrackReader
 
         public async void DoOnMainThread(MainThreadAction function)
         {
-            await DoOnMainThreadAsync(() => function());
+            await DoOnMainThreadAsync(() => function()).ConfigureAwait(false);
         }
 
         public async Task DoOnMainThreadAsync(MainThreadAction function)
@@ -546,20 +543,20 @@ namespace Ao3TrackReader
             }
             else
             {
-                var task = new Task(() => { });
+                var complete = new TaskCompletionSource<object>();
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     function();
-                    task.Start();
+                    complete.SetResult(null);
                 });
-                await task;
+                await complete.Task;
             }
         }
 
 
-        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
+        public async void SetWorkChaptersAsync(IDictionary<long, WorkChapter> works)
         {
-            App.Storage.SetWorkChapters(works);
+            await App.Storage.SetWorkChaptersAsync(works);
 
             lock (currentLocationLock)
             {
@@ -573,10 +570,7 @@ namespace Ao3TrackReader
 
         public void OnJumpClicked()
         {
-            Task.Run(() =>
-            {
-                helper.OnJumpToLastLocation(true);
-            });
+            helper.OnJumpToLastLocation(true);
         }
 
         bool jumpToLastLocationSetup = false;
@@ -723,7 +717,7 @@ namespace Ao3TrackReader
 
             if (behaviour.HasFlag(NavigateBehaviour.HistoryFirst))
             {
-                h1 = behaviour.HasFlag(NavigateBehaviour.History); ;
+                h1 = behaviour.HasFlag(NavigateBehaviour.History);
                 p = behaviour.HasFlag(NavigateBehaviour.Page);
             }
             else
@@ -860,16 +854,13 @@ namespace Ao3TrackReader
         }
 
 
-        public void ForceSetLocation()
+        public async void ForceSetLocation()
         {
             if (currentLocation != null)
             {
-                Task.Run(async () =>
-                {
-                    var db_workchap = (await App.Storage.GetWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
-                    currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
-                    App.Storage.SetWorkChapters(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation });
-                });
+                var db_workchap = (await App.Storage.GetWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
+                await App.Storage.SetWorkChaptersAsync(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation }).ConfigureAwait(false);
             }
         }
 

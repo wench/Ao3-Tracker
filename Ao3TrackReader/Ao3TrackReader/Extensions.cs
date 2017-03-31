@@ -195,5 +195,18 @@ namespace Ao3TrackReader
             if (dict is IReadOnlyDictionary<K, V> rod) return rod;
             return new System.Collections.ObjectModel.ReadOnlyDictionary<K,V>(dict);
         }
+
+        public static bool TryWait(this Task task)
+        {
+            try
+            {
+                task.Wait();
+            }
+            catch
+            {
+                return false;
+            }
+            return task.IsCompleted;
+        }
     }
 }

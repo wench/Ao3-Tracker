@@ -12,5 +12,8 @@ namespace Ao3TrackReader
         {
             Value = value;
         }
+
+        public new static EventArgs<T> Empty => new EventArgs<T>(default(T));
+
     }
 }

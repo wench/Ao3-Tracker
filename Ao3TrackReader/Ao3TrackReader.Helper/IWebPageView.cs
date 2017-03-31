@@ -64,7 +64,7 @@ namespace Ao3TrackReader.Helper
         double DeviceWidth { get; }
 
         IAsyncOp_WorkChapterMap GetWorkChaptersAsync([ReadOnlyArray] long[] works);
-        void SetWorkChapters(IDictionary<long, WorkChapter> works);
+        void SetWorkChaptersAsync(IDictionary<long, WorkChapter> works);
         bool JumpToLastLocationEnabled { get; set; }
         string NextPage { get; set; }
         string PrevPage { get; set; }

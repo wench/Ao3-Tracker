@@ -29,7 +29,7 @@ namespace Ao3TrackReader.Data
 {
     public class SyncedStorage
     {
-        static object locker = new object();
+        ReaderWriterLockSlim ReadWriteLock { get; } = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         Dictionary<long, Work> storage;
         Dictionary<long, Work> unsynced;
@@ -45,7 +45,6 @@ namespace Ao3TrackReader.Data
         SyncState serversync = SyncState.Disabled;
         long last_sync = 0;
         long no_sync_until = 0;
-        CancellationTokenSource cts;
         readonly Uri url_base = new Uri("https://wenchy.net/ao3track/api/");
 
         struct Authorization
@@ -82,9 +81,7 @@ namespace Ao3TrackReader.Data
         }
 
 
-        event EventHandler<bool> SyncFromServerEvent;
-
-        HttpClient HttpClient { get; set; }
+        private HttpClient HttpClient { get; set; }
 
         public SyncedStorage()
         {
@@ -99,7 +96,7 @@ namespace Ao3TrackReader.Data
 
             // Time synchronization. 
             var startTime = DateTime.UtcNow.ToUnixTime();
-            HttpClient.GetAsync(new Uri(url_base, "Values/Time")).ContinueWith(async (task)=>
+            HttpClient.GetAsync(new Uri(url_base, "Values/Time")).ContinueWith(async (task) =>
             {
                 if (task.IsCanceled || task.IsFaulted) return;
                 var endTime = DateTime.UtcNow.ToUnixTime();
@@ -141,150 +138,138 @@ namespace Ao3TrackReader.Data
                     unsynced[it.workid] = storage[it.workid];
                 }
             }
-            DoSync();
+            DoSyncAsync();
         }
 
-        void OonSyncFromServer(bool success)
+        private CancellationTokenSource DelayedSyncCTS { get; set; } = null;
+        public Task DelayedSyncAsync(int timeout)
         {
-            lock (locker)
+            return Task.Run(() =>
             {
-                EndSyncEvent?.Invoke(this, new EventArgs<bool>(success));
-                var e = SyncFromServerEvent;
-                SyncFromServerEvent = null;
-                Task.Run(() =>
+                using (ReadWriteLock.WriteLock())
                 {
-                    e?.Invoke(this, success);
-                });
-            }
-        }
-
-        public void DelayedSync(int timeout)
-        {
-            lock (locker)
-            {
-                //console.log("delayedsync: timeout = %i", timeout);
-                var now = DateTime.UtcNow.Ticks / 10000;
-                if (cts != null)
-                {
-                    //console.log("delayedsync: existing pending sync in %i", no_sync_until - now);
-                    // If the pending sync is going to happen before timeout would elapse, just let it happen
-                    if (no_sync_until <= now + timeout) { return; }
-                    cts.Cancel();
-                    cts = null;
-                }
-                //console.log("delayedsync: setting up timeout callback");
-                no_sync_until = now + timeout;
-                serversync = SyncState.Delayed;
-                var thiscts = cts = new CancellationTokenSource();
-
-                Task.Run(() =>
-                {
-                    if (thiscts.Token.WaitHandle.WaitOne(timeout))
+                    //console.log("delayedsync: timeout = %i", timeout);
+                    var now = DateTime.UtcNow.Ticks / 10000;
+                    if (DelayedSyncCTS != null)
                     {
-                        cts = null;
-                        return;
+                        //console.log("delayedsync: existing pending sync in %i", no_sync_until - now);
+                        // If the pending sync is going to happen before timeout would elapse, just let it happen
+                        if (no_sync_until <= now + timeout) { return; }
+                        DelayedSyncCTS.Cancel();
+                        DelayedSyncCTS.Dispose();
+                        DelayedSyncCTS = null;
                     }
-                    lock (locker)
+                    //console.log("delayedsync: setting up timeout callback");
+                    no_sync_until = now + timeout;
+                    serversync = SyncState.Delayed;
+                    var cts = DelayedSyncCTS = new CancellationTokenSource();
+
+                    Task.Delay(timeout, DelayedSyncCTS.Token).ContinueWith(task =>
                     {
-                        cts = null;
-                        DoSync(true);
-                    }
-                });
-            }
-
-        }
-
-
-        public void DoSync(bool force = false)
-        {
-            lock (locker)
-            {
-                if (serversync == SyncState.Disabled)
-                {
-                    OonSyncFromServer(false);
-                    //console.warn("dosync: FAILED. No credentials");
-                    return;
-                }
-
-                // if we have on sync events, then do it now
-                if (SyncFromServerEvent != null && SyncFromServerEvent.GetInvocationList().Length > 0)
-                {
-                    force = true;
-                }
-
-                // Enforce 5 minutes gap between server sync. Don't want to hammer the server while scrolling through a fic  
-                var now = DateTime.UtcNow.Ticks / 10000;
-                if (!force && now < no_sync_until)
-                {
-                    //console.log("dosync: have to wait %i for timeout", no_sync_until - now);
-                    DelayedSync((int)(no_sync_until - now));
-                    return;
-                }
-
-                if (cts != null)
-                {
-                    cts.Cancel();
-                    cts = null;
-                }
-                no_sync_until = now + 5 * 60 * 1000;
-
-                serversync = SyncState.Syncing; // set to syncing!
-                BeginSyncEvent?.Invoke(this,EventArgs.Empty);
-
-                Task.Run(async () =>
-                {
-                    //console.log("dosync: sending GET request");
-
-                    var task = HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
-                    try
-                    {
-                        task.Wait();
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                    var response = task.IsFaulted?null:task.Result;
-
-                    if (response == null || !response.IsSuccessStatusCode)
-                    {
-                        lock (locker)
+                        using (ReadWriteLock.WriteLock())
                         {
-                            //console.error("dosync: FAILED %s", response.ReasonPhrase);
-                            if (response != null && response.StatusCode == HttpStatusCode.Forbidden)
-                                serversync = SyncState.Disabled;
-                            else
-                                serversync = SyncState.Ready;
-                            OonSyncFromServer(false);
-                            return;
+                            cts.Dispose();
+                            if (cts == DelayedSyncCTS) DelayedSyncCTS = null;
+                            if (serversync != SyncState.Syncing) DoSyncAsync(true);
                         }
-                    }
+                    }, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.RunContinuationsAsynchronously);
+                }
+            });
+        }
 
-                    var content = await response.Content.ReadAsStringAsync();
-                    Dictionary<long, Work> current;
-                    Dictionary<long, Work> items;
-                    long time, old_sync;
+        public void DoSyncAsync(bool force = false)
+        {
+            Task.Run(() =>
+            {
+                using (ReadWriteLock.UpgradeableReadLock())
+                {
                     var settings = new JsonSerializerSettings()
                     {
                         MissingMemberHandling = MissingMemberHandling.Ignore
                     };
-                    lock (locker)
+
+                    Dictionary<long, Work> items;
+                    Dictionary<long, Work> current;
+                    long time;
+                    long old_sync;
+
+                    Task<HttpResponseMessage> responseTask;
+                    HttpResponseMessage response;
+                    Task<string> contentTask;
+                    string content;
+
+                    using (ReadWriteLock.WriteLock())
                     {
+                        if (serversync == SyncState.Disabled)
+                        {
+                            EndSyncEvent?.Invoke(this, new EventArgs<bool>(false));
+                            //console.warn("dosync: FAILED. No credentials");
+                            return;
+                        }
+
+                        // if we have waiting readers do it now
+                        if (ReadWriteLock.WaitingReadCount > 0)
+                        {
+                            force = true;
+                        }
+
+                        // Enforce 5 minutes gap between server sync. Don't want to hammer the server while scrolling through a fic  
+                        var now = DateTime.UtcNow.Ticks / 10000;
+                        if (!force && now < no_sync_until)
+                        {
+                            //console.log("dosync: have to wait %i for timeout", no_sync_until - now);
+                            DelayedSyncAsync((int)(no_sync_until - now));
+                            return;
+                        }
+
+                        serversync = SyncState.Syncing; // set to syncing!
+
+                        if (DelayedSyncCTS != null)
+                        {
+                            DelayedSyncCTS.Cancel();
+                            DelayedSyncCTS.Dispose();
+                            DelayedSyncCTS = null;
+                        }
+                        no_sync_until = now + 5 * 60 * 1000;                    
+
+                        BeginSyncEvent?.Invoke(this, EventArgs.Empty);
+
+                        //console.log("dosync: sending GET request");
+
+                        responseTask = HttpClient.GetAsync(new Uri(url_base, "Values?after=" + last_sync));
+                        responseTask.TryWait();
+                        response = responseTask.IsFaulted ? null : responseTask.Result;
+
+                        if (response == null || !response.IsSuccessStatusCode)
+                        {
+                            using (ReadWriteLock.WriteLock())
+                            {
+                                //console.error("dosync: FAILED %s", response.ReasonPhrase);
+                                if (response != null && response.StatusCode == HttpStatusCode.Forbidden)
+                                    serversync = SyncState.Disabled;
+                                else
+                                    serversync = SyncState.Ready;
+                                EndSyncEvent?.Invoke(this, new EventArgs<bool>(false));
+                                return;
+                            }
+                        }
+
+                        contentTask = response.Content.ReadAsStringAsync();
+                        contentTask.Wait();
+                        content = contentTask.Result;
+
                         old_sync = last_sync;
 
                         try
                         {
                             items = JsonConvert.DeserializeObject<Dictionary<long, Work>>(content, settings);
                         }
-                        catch (Newtonsoft.Json.JsonException /*e*/)
+                        catch (Exception e)
                         {
-                            lock (locker)
-                            {
-                                //console.error("dosync: FAILED %s", e.ToString());
-                                serversync = SyncState.Disabled;
-                                OonSyncFromServer(false);
-                                return;
-                            }
+                            App.Log(e);
+                            serversync = SyncState.Disabled;
+                            EndSyncEvent?.Invoke(this, new EventArgs<bool>(false));
+                            return;
                         }
 
                         Dictionary<long, Work> newitems = new Dictionary<long, Work>();
@@ -334,7 +319,7 @@ namespace Ao3TrackReader.Data
                         {
                             App.Database.SaveVariable("last_sync", last_sync);
                             serversync = SyncState.Ready;
-                            OonSyncFromServer(true);
+                            EndSyncEvent?.Invoke(this, new EventArgs<bool>(true));
                             return;
                         }
                     }
@@ -349,20 +334,13 @@ namespace Ao3TrackReader.Data
 
                     var json = JsonConvert.SerializeObject(current);
                     var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    responseTask = HttpClient.PostAsync(new Uri(url_base, "Values"), postBody);
+                    responseTask.TryWait();
+                    response = responseTask.IsFaulted ? null : responseTask.Result;
 
-                    task = HttpClient.PostAsync(new Uri(url_base, "Values"), postBody);
-                    try
-                    {
-                        task.Wait();
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                    response = task.IsFaulted ? null : task.Result;
                     if (response == null || !response.IsSuccessStatusCode)
                     {
-                        lock (locker)
+                        using (ReadWriteLock.WriteLock())
                         {
                             //console.error("dosync: FAILED %s", response.ReasonPhrase);
                             if (response != null && response.StatusCode == HttpStatusCode.Forbidden)
@@ -377,38 +355,40 @@ namespace Ao3TrackReader.Data
                                 unsynced = current;
                             }
                             App.Database.SaveVariable("last_sync", last_sync);
-                            OonSyncFromServer(false);
+                            EndSyncEvent?.Invoke(this, new EventArgs<bool>(false));
                             return;
                         }
                     }
 
-                    content = await response.Content.ReadAsStringAsync();
+                    contentTask = response.Content.ReadAsStringAsync();
+                    contentTask.Wait();
+                    content = contentTask.Result;
 
                     try
                     {
                         items = JsonConvert.DeserializeObject<Dictionary<long, Work>>(content, settings);
                     }
-                    catch (Newtonsoft.Json.JsonException /*e*/)
+                    catch (Exception e)
                     {
-                        lock (locker)
+                        App.Log(e);
+                        using (ReadWriteLock.WriteLock())
                         {
-                            //console.error("dosync: FAILED %s", e.ToString());
                             serversync = SyncState.Disabled;
                             App.Database.SaveVariable("last_sync", 0L);
                             last_sync = 0;
-                            OonSyncFromServer(false);
+                            EndSyncEvent?.Invoke(this, new EventArgs<bool>(false));
                             return;
                         }
                     }
 
                     //console.log("dosync: SUCCESS. %i conflicted items", Object.keys(items).length);
-                    lock (locker)
+                    using (ReadWriteLock.WriteLock())
                     {
                         if (items.Count > 0)
                         {
                             App.Database.SaveVariable("last_sync", 0L);
                             last_sync = 0;
-                            DoSync(true);
+                            DoSyncAsync(true);
                             return;
                         }
                         if (time > last_sync)
@@ -419,45 +399,26 @@ namespace Ao3TrackReader.Data
 
                         if (unsynced.Count > 0)
                         {
-                            DoSync(true);
+                            DoSyncAsync(true);
                         }
                         else
                         {
                             serversync = SyncState.Ready;
-                            OonSyncFromServer(true);
+                            EndSyncEvent?.Invoke(this, new EventArgs<bool>(true));
                         }
                     }
-
-                });
-            }
+                }
+            });
         }
 
-        public void DoSync(Action<bool> callback)
+        public Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(IEnumerable<long> works)
         {
-            lock (locker)
+            return Task.Run(() =>
             {
-                if (serversync == SyncState.Disabled)
+                using (ReadWriteLock.ReadLock())
                 {
-                    SyncFromServerEvent += (sender, success) => callback(success);
-                    OonSyncFromServer(false);
-                }
-                else
-                {
-                    SyncFromServerEvent += (sender, success) => callback(success);
-                    if (serversync != SyncState.Syncing) { DoSync(true); }
-                }
-            }
-        }
+                    IDictionary<long, WorkChapter> r = new Dictionary<long, WorkChapter>();
 
-        public async Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(IEnumerable<long> works)
-        {
-            return await Task.Run(() =>
-            {
-                ManualResetEventSlim handle = null;
-                IDictionary<long, WorkChapter> r = new Dictionary<long, WorkChapter>();
-
-                EventHandler<bool> sendResponse = (sender, success) =>
-                {
                     foreach (long w in works)
                     {
                         if (storage.TryGetValue(w, out Work work))
@@ -465,31 +426,17 @@ namespace Ao3TrackReader.Data
                             r[w] = new WorkChapter(work);
                         }
                     }
-                    if (handle != null) handle.Set();
-                };
-                lock (locker)
-                {
-                    if (serversync == SyncState.Syncing)
-                    {
-                        handle = new ManualResetEventSlim();
-                        SyncFromServerEvent += sendResponse;
-                    }
-                    else
-                    {
-                        sendResponse(this, true);
-                    }
-                }
-                if (handle != null) handle.Wait();
-                return r;
 
+                    return r;
+                }
             });
         }
 
-        public void SetWorkChapters(IDictionary<long, WorkChapter> works)
+        public Task SetWorkChaptersAsync(IDictionary<long, WorkChapter> works)
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
-                lock (locker)
+                using (ReadWriteLock.WriteLock())
                 {
                     long time = DateTime.UtcNow.ToUnixTime();
                     Dictionary<long, Work> newitems = new Dictionary<long, Work>();
@@ -502,8 +449,9 @@ namespace Ao3TrackReader.Data
 
                         if (!storage.TryGetValue(work.Key, out var old) || old.LessThan(work.Value))
                         {
-                            var seq  = work.Value.seq;
-                            if (seq == null && old != null) { 
+                            var seq = work.Value.seq;
+                            if (seq == null && old != null)
+                            {
                                 seq = old.Seq;
                             }
 
@@ -541,11 +489,11 @@ namespace Ao3TrackReader.Data
                         {
                             if (do_delayed)
                             {
-                                DelayedSync(10 * 1000);
+                                DelayedSyncAsync(10 * 1000);
                             }
                             else
                             {
-                                DoSync();
+                                DoSyncAsync();
                             }
                         }
                     }
@@ -553,84 +501,11 @@ namespace Ao3TrackReader.Data
             });
         }
 
-        public Task<Dictionary<string, string>> UserCreate(string username, string password, string email)
+        public Task UserLogoutAsync()
         {
-            return Task.Run(async () =>
-            {
-                Dictionary<string, string> errors = null;
-
-                lock (locker)
+            return Task.Run(() =>
                 {
-                    serversync = SyncState.Disabled;
-                    HttpClient.DefaultRequestHeaders.Authorization = null;
-                    App.Database.SaveVariable("authorization.credential", "");
-                }
-
-                var json = JsonConvert.SerializeObject(new
-                {
-                    username = username,
-                    password = password,
-                    email = email
-                });
-
-                var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-                var task = HttpClient.PostAsync(new Uri(url_base, "User/Create"), postBody);
-                task.Wait();
-                if (task.IsFaulted) return new Dictionary<string, string>
-                {
-                    {  "exception", task.Exception.Message }
-                };
-                var response = task.Result;
-                if (!response.IsSuccessStatusCode)
-                {
-                    errors = new Dictionary<string, string> {
-                        {  "server", response.ReasonPhrase }
-                    };
-                    return errors;
-                }
-
-                var content = await response.Content.ReadAsStringAsync();
-
-                try
-                {
-                    errors = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
-                    return errors;
-                }
-                catch (Newtonsoft.Json.JsonException)
-                {
-                }
-
-                try
-                {
-                    string cred = JsonConvert.DeserializeObject<string>(content);
-                    lock (locker)
-                    {
-                        Authorization authorization;
-                        authorization.credential = cred;
-                        authorization.username = username;
-                        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Ao3track", authorization.ToBase64());
-                        last_sync = 0;
-                        App.Database.SaveVariable("authorization.username", authorization.username);
-                        App.Database.SaveVariable("authorization.credential", authorization.credential);
-                        App.Database.SaveVariable("last_sync", last_sync);
-                        serversync = SyncState.Syncing;
-                        DoSync(true);
-                    }
-                    errors = new Dictionary<string, string>();
-                }
-                catch (Newtonsoft.Json.JsonException)
-                {
-                }
-
-                return errors;
-            });
-        }
-        public async Task UserLogout()
-        {
-            await Task.Run(() =>
-                {
-                    lock (locker)
+                    using (ReadWriteLock.WriteLock())
                     {
                         serversync = SyncState.Disabled;
                         HttpClient.DefaultRequestHeaders.Authorization = null;
@@ -642,58 +517,83 @@ namespace Ao3TrackReader.Data
             );
         }
 
-        public Task<Dictionary<string, string>> UserLogin(string username, string password)
+        public Task<Dictionary<string, string>> UserLoginAsync(string username, string password)
         {
-            return Task.Run(async () =>
-            {
-                Dictionary<string, string> errors = null;
+            return UserLoginOrCreateAsync(username, password, null);
+        }
 
-                lock (locker)
+        public Task<Dictionary<string, string>> UserCreateAsync(string username, string password, string email)
+        {
+            return UserLoginOrCreateAsync(username, password, email ?? "");
+        }
+
+        private Task<Dictionary<string, string>> UserLoginOrCreateAsync(string username, string password, string email)
+        {
+            return Task.Run(() =>
+            {
+                using (ReadWriteLock.WriteLock())
                 {
                     serversync = SyncState.Disabled;
                     HttpClient.DefaultRequestHeaders.Authorization = null;
                     App.Database.SaveVariable("authorization.credential", "");
-                }
 
-                var json = JsonConvert.SerializeObject(new
-                {
-                    username = username,
-                    password = password
-                });
+                    Task<HttpResponseMessage> responseTask;
 
-                var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    if (email == null)
+                    {
 
-                var task = HttpClient.PostAsync(new Uri(url_base, "User/Login"), postBody);
-                task.Wait();
-                if (task.IsFaulted) return new Dictionary<string, string>
-                {
-                    {  "exception", task.Exception.Message }
-                };
-                var response = task.Result;
-                if (!response.IsSuccessStatusCode)
-                {
-                    errors = new Dictionary<string, string> {
+                        var json = JsonConvert.SerializeObject(new
+                        {
+                            username = username,
+                            password = password
+                        });
+
+                        var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                        responseTask = HttpClient.PostAsync(new Uri(url_base, "User/Login"), postBody);
+                    }
+                    else
+                    {
+                        var json = JsonConvert.SerializeObject(new
+                        {
+                            username = username,
+                            password = password,
+                            email = email
+                        });
+
+                        var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                        responseTask = HttpClient.PostAsync(new Uri(url_base, "User/Create"), postBody);
+                    }
+
+                    responseTask.TryWait();
+                    if (responseTask.IsFaulted)
+                    {
+                        return new Dictionary<string, string> {
+                        {  "exception", responseTask.Exception.Message }
+                    };
+                    }
+                    var response = responseTask.Result;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return new Dictionary<string, string> {
                         {  "server", response.ReasonPhrase }
                     };
-                    return errors;
-                }
+                    }
 
-                var content = await response.Content.ReadAsStringAsync();
+                    var contentTask = response.Content.ReadAsStringAsync();
+                    contentTask.Wait();
+                    var content = contentTask.Result;
 
-                try
-                {
-                    errors = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
-                    return errors;
-                }
-                catch (Newtonsoft.Json.JsonException)
-                {
-                }
-
-                try
-                {
-                    string cred = JsonConvert.DeserializeObject<string>(content);
-                    lock (locker)
+                    try
                     {
+                        if (content.StartsWith("{"))
+                        {
+                            return JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
+                        }
+
+                        string cred = JsonConvert.DeserializeObject<string>(content);
+
                         Authorization authorization;
                         authorization.credential = cred;
                         authorization.username = username;
@@ -703,15 +603,18 @@ namespace Ao3TrackReader.Data
                         App.Database.SaveVariable("authorization.credential", authorization.credential);
                         App.Database.SaveVariable("last_sync", last_sync);
                         serversync = SyncState.Syncing;
-                        DoSync(true);
+                        DoSyncAsync(true);
                     }
-                    errors = new Dictionary<string, string>();
-                }
-                catch (Newtonsoft.Json.JsonException)
-                {
-                }
+                    catch (Exception e)
+                    {
+                        App.Log(e);
+                        return new Dictionary<string, string> {
+                            {  "exception", e.Message }
+                        };
+                    }
 
-                return errors;
+                    return null;
+                }
             });
         }
 
@@ -719,40 +622,28 @@ namespace Ao3TrackReader.Data
         {
             return Task.Run(async () =>
             {
-                if (serversync == SyncState.Disabled)
-                {
-                    return null;
-                }
+                if (serversync == SyncState.Disabled) return null;
 
                 var json = JsonConvert.SerializeObject(srl);
                 var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                var task = HttpClient.PostAsync(new Uri(url_base, "ReadingList"), postBody);
-                try
-                {
-                    task.Wait();
-                }
-                catch (Exception)
-                {
+                var responseTask = HttpClient.PostAsync(new Uri(url_base, "ReadingList"), postBody);
+                responseTask.TryWait();
+                if (responseTask.IsFaulted) return null;
 
-                }
-                if (task.IsFaulted) return null;
-                var response = task.Result;
-                if (!response.IsSuccessStatusCode)
-                    return null;
+                var response = responseTask.Result;
+                if (!response.IsSuccessStatusCode) return null;
 
                 var content = await response.Content.ReadAsStringAsync();
-                Models.ServerReadingList res = null;
 
                 try
                 {
-                    res = JsonConvert.DeserializeObject<Models.ServerReadingList>(content);
+                    return JsonConvert.DeserializeObject<Models.ServerReadingList>(content);
                 }
-                catch (Newtonsoft.Json.JsonException /*e*/)
+                catch 
                 {
+                    return null;
                 }
-
-                return res;
             });
         }
 
@@ -763,20 +654,10 @@ namespace Ao3TrackReader.Data
                 var json = JsonConvert.SerializeObject(report);
                 var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-                var task = HttpClient.PostAsync(new Uri(url_base, "ErrorReport"), postBody);
-                try
-                {
-                    task.Wait();
-                }
-                catch (Exception)
-                {
-
-                }
-                if (task.IsFaulted) return false;
-                var response = task.Result;
-                if (!response.IsSuccessStatusCode)
-                    return false;
-                return true;
+                var responseTask = HttpClient.PostAsync(new Uri(url_base, "ErrorReport"), postBody);
+                responseTask.TryWait();
+                if (responseTask.IsFaulted) return false;
+                return responseTask.Result.IsSuccessStatusCode;
             });
         }
     }

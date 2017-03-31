@@ -127,7 +127,7 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        public void OnSyncSubmit(object sender, EventArgs e)
+        public async void OnSyncSubmit(object sender, EventArgs e)
         {
             syncSubmitButton.IsEnabled = false;
             syncIndicator.IsRunning = true;
@@ -143,87 +143,76 @@ namespace Ao3TrackReader.Controls
             string s_verify = verify.Text;
 
             string old_username = App.Storage.Username;
-            
-            Task.Run(async () =>
+
+            var errors = new Dictionary<string, string>();
+
+            if (string.IsNullOrWhiteSpace(s_username)) errors["username"] = "You must enter a username";
+            if (string.IsNullOrWhiteSpace(s_password)) errors["password"] = "You must enter a password";
+
+            if (errors.Count == 0)
             {
-                var errors = new Dictionary<string, string>();
-
-                if (string.IsNullOrWhiteSpace(s_username)) errors["username"] = "You must enter a username";
-                if (string.IsNullOrWhiteSpace(s_password)) errors["password"] = "You must enter a password";
-
-                if (errors.Count == 0)
+                if (isCreateUser)
                 {
-                    if (isCreateUser)
+                    if (s_password != s_verify)
                     {
-                        if (s_password != s_verify)
-                        {
-                            errors["verify"] = "Passwords do not match";
-                        }
-                        else
-                        {
-                            errors = await App.Storage.UserCreate(s_username, s_password, s_email);
-                        }
+                        errors["verify"] = "Passwords do not match";
                     }
                     else
                     {
-                        errors = await App.Storage.UserLogin(s_username, s_password);
+                        errors = await App.Storage.UserCreateAsync(s_username, s_password, s_email);
                     }
                 }
-                wvp.DoOnMainThread(() =>
+                else
                 {
-                    if (errors?.Count > 0)
+                    errors = await App.Storage.UserLoginAsync(s_username, s_password);
+                }
+            }
+
+            if (errors?.Count > 0)
+            {
+                foreach (var error in errors)
+                {
+                    switch (error.Key)
                     {
-                        foreach (var error in errors)
-                        {
-                            switch (error.Key)
-                            {
-                                case "username":
-                                    usernameErrors.Text = error.Value;
-                                    usernameErrors.IsVisible = true;
-                                    break;
+                        case "username":
+                            usernameErrors.Text = error.Value;
+                            usernameErrors.IsVisible = true;
+                            break;
 
-                                case "password":
-                                    passwordErrors.Text = error.Value;
-                                    passwordErrors.IsVisible = true;
-                                    break;
+                        case "password":
+                            passwordErrors.Text = error.Value;
+                            passwordErrors.IsVisible = true;
+                            break;
 
-                                case "verify":
-                                    if (!isCreateUser) break;
-                                    verifyErrors.Text = error.Value;
-                                    verifyErrors.IsVisible = true;
-                                    break;
+                        case "verify":
+                            if (!isCreateUser) break;
+                            verifyErrors.Text = error.Value;
+                            verifyErrors.IsVisible = true;
+                            break;
 
-                                case "email":
-                                    if (!isCreateUser) break;
-                                    emailErrors.Text = error.Value;
-                                    emailErrors.IsVisible = true;
-                                    break;
-                            }
-                        }
+                        case "email":
+                            if (!isCreateUser) break;
+                            emailErrors.Text = error.Value;
+                            emailErrors.IsVisible = true;
+                            break;
                     }
-                    else
-                    {
-                        UpdateSyncForm();
-                        wvp.ReadingList.SyncToServerAsync(old_username != s_username);
-                    }
-                    syncSubmitButton.IsEnabled = true;
-                    syncIndicator.IsRunning = false;
-                    syncIndicator.IsVisible = false;
-                });
-            });
+                }
+            }
+            else
+            {
+                UpdateSyncForm();
+                wvp.ReadingList.SyncToServerAsync(old_username != s_username);
+            }
+            syncSubmitButton.IsEnabled = true;
+            syncIndicator.IsRunning = false;
+            syncIndicator.IsVisible = false;
 
         }
 
-        public void OnSyncLogout(object sender, EventArgs e)
+        public async void OnSyncLogout(object sender, EventArgs e)
         {
-            Task.Run(async () =>
-            {
-                await App.Storage.UserLogout();
-                wvp.DoOnMainThread(() =>
-                {
-                    UpdateSyncForm();
-                });
-            });
+            await App.Storage.UserLogoutAsync();
+            UpdateSyncForm();
         }
 
         void SelectCurrentTheme()
@@ -312,22 +301,26 @@ namespace Ao3TrackReader.Controls
 
         private ref NavigateBehaviour UnitConvForControl(DropDown control, out string name)
         {
-            if (control == toolbarBackDropDown) {
+            if (control == toolbarBackDropDown)
+            {
                 name = "ToolbarBackBehaviour";
                 return ref wvp.ToolbarBackBehaviour;
             }
 
-            if (control == toolbarForwardDropDown) {
+            if (control == toolbarForwardDropDown)
+            {
                 name = "ToolbarForwardBehaviour";
                 return ref wvp.ToolbarForwardBehaviour;
             }
 
-            if (control == swipeBackDropDown) {
+            if (control == swipeBackDropDown)
+            {
                 name = "SwipeBackBehaviour";
                 return ref wvp.SwipeBackBehaviour;
             }
 
-            if (control == swipeFowardDropDown) {
+            if (control == swipeFowardDropDown)
+            {
                 name = "SwipeForwardBehaviour";
                 return ref wvp.SwipeForwardBehaviour;
             }
