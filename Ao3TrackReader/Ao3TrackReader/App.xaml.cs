@@ -27,7 +27,7 @@ using Button = Ao3TrackReader.Controls.Button;
 using Ver = Ao3TrackReader.Version.Version;
 using System.Threading.Tasks;
 
-#if WINDOWS_UWP
+#if __WINDOWS__
 using Windows.Storage;
 #else
 using System.IO;
@@ -52,7 +52,7 @@ namespace Ao3TrackReader
 #if true
                 return (Ver.Major, Ver.Minor, Ver.Build);
 #else
-#if WINDOWS_UWP
+#if __WINDOWS__
                 var v = Windows.ApplicationModel.Package.Current.Id.Version;
                 return (v.Major,v.Minor,v.Build);
 #elif __ANDROID__
@@ -72,7 +72,7 @@ namespace Ao3TrackReader
 #endif
 #endif
             }
-        }
+}
 
         public static string Copyright
         {
@@ -209,7 +209,7 @@ namespace Ao3TrackReader
         }
 
 #if WINDOWS_UWP
-        static bool PhoneHasBackButton()
+static bool PhoneHasBackButton()
         {
             if (Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons"))
             {
@@ -228,7 +228,7 @@ namespace Ao3TrackReader
         public static InteractionMode GetInteractionMode()
         {
 #if WINDOWS_UWP
-            var s = Windows.UI.ViewManagement.UIViewSettings.GetForCurrentView();
+    var s = Windows.UI.ViewManagement.UIViewSettings.GetForCurrentView();
             if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Mouse)
                 return InteractionMode.PC;
 
@@ -243,6 +243,8 @@ namespace Ao3TrackReader
 
             if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Touch)
                 return InteractionMode.Tablet;
+#elif WINDOWS_APP
+            return InteractionMode.PC;
 #elif __ANDROID__
             // Good enough for android for now
             switch (Xamarin.Forms.Device.Idiom)
@@ -258,7 +260,7 @@ namespace Ao3TrackReader
             }
 #endif
 
-            return InteractionMode.Unknown;
+    return InteractionMode.Unknown;
         }
 
         public static bool HaveOSBackButton
@@ -281,7 +283,7 @@ namespace Ao3TrackReader
             task.Wait();
         }
 
-#if WINDOWS_UWP
+#if __WINDOWS__
         public static T RunSynchronously<T>(Windows.Foundation.IAsyncOperation<T> iasync)
         {
             var task = iasync.AsTask();

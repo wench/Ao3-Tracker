@@ -104,7 +104,7 @@ namespace Ao3TrackReader
 					}
 				}
 
-				return result.Values;
+				return result.Values.ToReadOnly();
 			}
 		}
 
@@ -137,7 +137,7 @@ namespace Ao3TrackReader
 					}
 				}
 
-				return newitems.Values;
+				return newitems.Values.ToReadOnly();
 			}
 		}
 

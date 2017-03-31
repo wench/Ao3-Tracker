@@ -22,6 +22,7 @@ using HtmlAgilityPack;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Ao3TrackReader
 {
@@ -146,7 +147,7 @@ namespace Ao3TrackReader
             return doc;
         }
 
-#if WINDOWS_UWP
+#if __WINDOWS__
         public static Windows.UI.Color ToWindows(this Xamarin.Forms.Color color)
         {
             return Windows.UI.Color.FromArgb((byte)(color.A * 255), (byte)(color.R * 255), (byte)(color.G * 255), (byte)(color.B * 255));
@@ -181,5 +182,18 @@ namespace Ao3TrackReader
         }
 
         static public long UnixTimeOffset { get; set; } = 0;
+
+        public static IReadOnlyCollection<T> ToReadOnly<T>(this ICollection<T> col)
+        {
+            if (col is IReadOnlyCollection<T> roc) return roc;
+            if (col is IList<T> list) return new System.Collections.ObjectModel.ReadOnlyCollection<T>(list);
+            return new System.Collections.ObjectModel.ReadOnlyCollection<T>(col.ToList());
+        }
+
+        public static IReadOnlyDictionary<K, V> ToReadOnly<K, V>(this IDictionary<K,V> dict)
+        {
+            if (dict is IReadOnlyDictionary<K, V> rod) return rod;
+            return new System.Collections.ObjectModel.ReadOnlyDictionary<K,V>(dict);
+        }
     }
 }

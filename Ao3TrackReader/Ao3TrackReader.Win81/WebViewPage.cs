@@ -31,6 +31,7 @@ using Ao3TrackReader.Data;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.ApplicationModel.DataTransfer;
+using Newtonsoft.Json;
 
 namespace Ao3TrackReader
 {
@@ -64,10 +65,14 @@ namespace Ao3TrackReader
             webView.NavigationStarting += WebView_NavigationStarting;
             webView.DOMContentLoaded += WebView_DOMContentLoaded;
             webView.ContentLoading += WebView_ContentLoading;
-            webView.NewWindowRequested += WebView_NewWindowRequested;
             webView.GotFocus += WebView_GotFocus;
             webView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
-            helper = new Ao3TrackHelper(this);
+            var helper = new Ao3TrackHelper(this);
+            var messageHandler = new ScriptMessageHandler(this, helper);
+            webView.ScriptNotify += messageHandler.WebView_ScriptNotify;
+            this.helper = helper;
+
+            webView.SizeChanged += WebView_SizeChanged;
 
             contextMenu = new MenuFlyout();
             foreach (var kvp in ContextMenuItems)
@@ -87,21 +92,14 @@ namespace Ao3TrackReader
             return webView.ToView();
         }
 
+        private void WebView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            CallJavascriptAsync("Ao3Track.Win81.helper.setValue", "deviceWidth", DeviceWidth).Wait(0);
+        }
+
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
         {
             OnWebViewGotFocus();
-        }
-
-        private void WebView_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs args)
-        {
-            args.Handled = true;
-            var uri = Ao3SiteDataLookup.CheckUri(args.Uri);
-            if (uri != null) {
-                webView.Navigate(uri);
-            }
-            else {
-                OpenExternal(args.Uri);
-            }
         }
 
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
@@ -128,17 +126,16 @@ namespace Ao3TrackReader
 
         public void AddJavascriptObject(string name, object obj)
         {
-            webView.AddWebAllowedObject(name, obj);
         }
 
-        Task OnInjectingScripts(CancellationToken ct)
+        async Task OnInjectingScripts(CancellationToken ct)
         {
-            return Task.CompletedTask;
+            await EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";");
         }
 
         Task OnInjectedScripts(CancellationToken ct)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(new object());
         }
 
         async Task<string> ReadFile(string name, CancellationToken ct)
@@ -220,6 +217,7 @@ namespace Ao3TrackReader
 
         public void CopyToClipboard(string str, string type)
         {
+#if WINDOWS_APP
             if (type == "text")
             {
                 var dp = new DataPackage();
@@ -233,6 +231,7 @@ namespace Ao3TrackReader
                 dp.SetWebLink(new Uri(str));
                 Clipboard.SetContent(dp);
             }
+#endif
         }
 
         MenuFlyout contextMenu;
@@ -264,21 +263,77 @@ namespace Ao3TrackReader
             contextMenu.ShowAt(webView, new Windows.Foundation.Point(x, y));
         }
 
-        IAsyncOperation<IDictionary<long, WorkChapter>> IWebViewPage.GetWorkChaptersAsync(long[] works)
+        class ScriptMessageHandler
         {
-            return GetWorkChaptersAsync(works).AsAsyncOperation();
-        }
-        IAsyncOperation<IDictionary<string, bool>> IWebViewPage.AreUrlsInReadingListAsync(string[] urls)
-        {
-            return AreUrlsInReadingListAsync(urls).AsAsyncOperation();
-        }
-        IAsyncOperation<string> Helper.IWebViewPage.CallJavascriptAsync(string function, params object[] args)
-        {
-            return CallJavascriptAsync(function, args).AsAsyncOperation();
-        }
-        IAsyncOperation<string> Helper.IWebViewPage.EvaluateJavascriptAsync(string code)
-        {
-            return CallJavascriptAsync(code).AsAsyncOperation();
+            WebViewPage wvp;
+            private Ao3TrackHelper helper;
+
+            public ScriptMessageHandler(WebViewPage wvp, Ao3TrackHelper helper)
+            {
+                this.wvp = wvp;
+                this.helper = helper;
+            }
+
+            public class Message
+            {
+                public string type { get; set; }
+                public string name { get; set; }
+                public string value { get; set; }
+                public string[] args { get; set; }
+            }
+
+            private object Deserialize(string value, Type type)
+            {
+                // If destination is a string, then the value passes through unchanged. A minor optimization
+                if (type == typeof(string)) return value;
+                else return JsonConvert.DeserializeObject(value, type);
+            }
+
+            public void WebView_ScriptNotify(object sender, NotifyEventArgs ea)
+            {
+                var smsg = ea.Value;
+                var msg = JsonConvert.DeserializeObject<Message>(smsg);
+
+                if (msg.type == "INIT")
+                {
+                    wvp.DoOnMainThread(async () =>
+                    {
+                        await wvp.EvaluateJavascriptAsync(string.Format(
+                            "Ao3Track.Win81.helper.setValue({0},{1});Ao3Track.Win81.helper.setValue({2},{3});Ao3Track.Win81.helper.setValue({4},{5});Ao3Track.Win81.helper.setValue({6},{7});",
+                            JsonConvert.SerializeObject("leftOffset"), JsonConvert.SerializeObject(wvp.LeftOffset),
+                            JsonConvert.SerializeObject("swipeCanGoBack"), JsonConvert.SerializeObject(wvp.SwipeCanGoBack),
+                            JsonConvert.SerializeObject("swipeCanGoForward"), JsonConvert.SerializeObject(wvp.SwipeCanGoForward),
+                            JsonConvert.SerializeObject("deviceWidth"), JsonConvert.SerializeObject(wvp.DeviceWidth)));
+                    });
+                    return;
+                }
+                else if (helper.HelperDef.TryGetValue(msg.name, out var md))
+                {
+                    if (msg.type == "SET" && md.pi?.CanWrite == true)
+                    {
+                        md.pi.SetValue(wvp.helper, Deserialize(msg.value, md.pi.PropertyType));
+                        return;
+                    }
+                    else if (msg.type == "CALL" && md.mi != null)
+                    {
+                        var ps = md.mi.GetParameters();
+                        if (msg.args.Length == ps.Length)
+                        {
+                            var args = new object[msg.args.Length];
+                            for (int i = 0; i < msg.args.Length; i++)
+                            {
+                                args[i] = Deserialize(msg.args[i], ps[i].ParameterType);
+                            }
+
+                            md.mi.Invoke(wvp.helper, args);
+                            return;
+                        }
+                    }
+                }
+
+                throw new ArgumentException();
+            }
+
         }
 
     }

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Ao3TrackReader.iOS")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyCopyright(Ao3TrackReader.Version.Version.Copyright)]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

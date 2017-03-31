@@ -15,9 +15,20 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="FPCL.Windows8.Windows.App">
-      <m2:VisualElements DisplayName="Ao3Track Reader" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="FPCL.Windows8.Windows" ForegroundText="light" BackgroundColor="#464646">
+      <m2:VisualElements DisplayName="Ao3Track Reader" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="Ao3Track Reader for Windows 8.1" ForegroundText="light" BackgroundColor="#464646" ToastCapable="false">
         <m2:SplashScreen Image="Assets\SplashScreen.png" />
+        <m2:InitialRotationPreference>
+          <m2:Rotation Preference="portrait" />
+          <m2:Rotation Preference="landscape" />
+          <m2:Rotation Preference="portraitFlipped" />
+          <m2:Rotation Preference="landscapeFlipped" />
+        </m2:InitialRotationPreference>
+        <m2:ApplicationView MinWidth="width320" />
       </m2:VisualElements>
+      <ApplicationContentUriRules>
+        <Rule Match="https://archiveofourown.org/" Type="include" />
+        <Rule Match="https://*.archiveofourown.org/" Type="include" />
+      </ApplicationContentUriRules>
     </Application>
   </Applications>
   <Capabilities>

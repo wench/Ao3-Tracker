@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace Ao3TrackReader.Windows
+namespace Ao3TrackReader.Win81
 {
     public sealed partial class MainPage
     {

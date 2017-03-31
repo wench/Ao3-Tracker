@@ -46,14 +46,20 @@ var uwp_scripts = [
 var droid_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
-    'src/reader/webkit/*.ts',
-    'src/reader/webkit/droid/*.ts'
+    'src/reader/compat/*.ts',
+    'src/reader/droid/*.ts'
 ];
 var ios_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
-    'src/reader/webkit/*.ts',
-    'src/reader/webkit/ios/*.ts'
+    'src/reader/compat/*.ts',
+    'src/reader/ios/*.ts'
+];
+var win81_scripts = [
+    'src/*.ts',
+    'src/reader/*.ts',
+    'src/reader/compat/*.ts',
+    'src/reader/win81/*.ts'
 ];
 
 function scripts() {
@@ -88,6 +94,13 @@ var reader = {
         .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/ios/src-maps/' + file.basename + ".map").href; }}))
         .pipe(gulp.dest('build/reader/ios'));
     },
+    "reader.scripts.win81": () => {
+        return gulp.src(win81_scripts)
+        .pipe(sourcemaps.init())
+        .pipe(ts(tsOptions_ES5))
+        .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/win81/src-maps/' + file.basename + ".map").href; }}))
+        .pipe(gulp.dest('build/reader/win81'));
+    },
 
     "reader.styles.uwp": () => {
         return gulp.src('src/*.less')
@@ -110,16 +123,25 @@ var reader = {
             .pipe(sourcemaps.write('src-maps'))
             .pipe(gulp.dest('build/reader/ios'));
     },
+    "reader.styles.win81": () => {
+        return gulp.src('src/*.less')
+            .pipe(sourcemaps.init())
+            .pipe(less())
+            .pipe(sourcemaps.write('src-maps'))
+            .pipe(gulp.dest('build/reader/win81'));
+    },
 };
-exports["reader.scripts"] = reader.scripts = gulp.series(reader["reader.scripts.uwp"],reader["reader.scripts.droid"],reader["reader.scripts.ios"]);
+exports["reader.scripts"] = reader.scripts = gulp.series(reader["reader.scripts.uwp"],reader["reader.scripts.droid"],reader["reader.scripts.ios"],reader["reader.scripts.win81"]);
 exports["reader.scripts.uwp"] = reader.scripts.uwp = reader["reader.scripts.uwp"];
 exports["reader.scripts.droid"] = reader.scripts.droid = reader["reader.scripts.droid"]
 exports["reader.scripts.ios"] = reader.scripts.ios = reader["reader.scripts.ios"]
+exports["reader.scripts.win81"] = reader.scripts.win81 = reader["reader.scripts.win81"]
 
-exports["reader.styles"] = reader.styles = gulp.series(reader["reader.styles.uwp"],reader["reader.styles.droid"],reader["reader.styles.ios"]);
+exports["reader.styles"] = reader.styles = gulp.series(reader["reader.styles.uwp"],reader["reader.styles.droid"],reader["reader.styles.ios"],reader["reader.styles.win81"]);
 exports["reader.styles.uwp"] = reader.styles.uwp = reader["reader.styles.uwp"];
 exports["reader.styles.droid"] = reader.styles.droid = reader["reader.styles.droid"];
 exports["reader.styles.ios"] = reader.styles.ios = reader["reader.styles.ios"];
+exports["reader.styles.win81"] = reader.styles.win81 = reader["reader.styles.win81"];
 
 exports["reader.uwp"] = reader.uwp = gulp.series(reader.scripts.uwp, reader.styles.uwp);
 exports["reader.uwp.scripts"] = reader.uwp.scripts = reader.scripts.uwp;
@@ -132,6 +154,10 @@ exports["reader.droid.styles"] = reader.droid.styles = reader.styles.droid;
 exports["reader.ios"] = reader.ios = gulp.series(reader.scripts.ios, reader.styles.ios);
 exports["reader.ios.scripts"] = reader.ios.scripts = reader.scripts.ios;
 exports["reader.ios.styles"] = reader.ios.styles = reader.styles.ios;
+
+exports["reader.win81"] = reader.win81 = gulp.series(reader.scripts.win81, reader.styles.win81);
+exports["reader.win81.scripts"] = reader.win81.scripts = reader.scripts.win81;
+exports["reader.win81.styles"] = reader.win81.styles = reader.styles.win81;
 
 exports["reader"] = reader = Object.assign(gulp.series(reader.scripts,reader.styles),reader);
 

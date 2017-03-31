@@ -30,7 +30,7 @@ namespace Ao3TrackReader.Resources
             App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI, 0);
             UpdateFontsize(LogFontSizeUI);
 
-#if !WINDOWS_UWP
+#if !__WINDOWS__
             // Andriod and iOS uses Xamarin Forms theme           
             switch (App.Theme)  
             {

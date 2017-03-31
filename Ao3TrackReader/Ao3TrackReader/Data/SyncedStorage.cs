@@ -324,7 +324,7 @@ namespace Ao3TrackReader.Data
                                 unsynced[item.Key] = storage[item.Key];
                             }
                         }
-                        App.Database.SaveItems(newitems.Values);
+                        App.Database.SaveItems(newitems.Values.ToReadOnly());
 
                         current = unsynced;
                         unsynced = new Dictionary<long, Work>();
@@ -535,7 +535,7 @@ namespace Ao3TrackReader.Data
 
                     if (newitems.Count > 0)
                     {
-                        App.Database.SaveItems(newitems.Values);
+                        App.Database.SaveItems(newitems.Values.ToReadOnly());
 
                         if (serversync == SyncState.Ready || serversync == SyncState.Delayed)
                         {

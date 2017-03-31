@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Ao3TrackReader.UWP")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright(Ao3TrackReader.Version.Version.Copyright)]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

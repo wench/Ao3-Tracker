@@ -22,6 +22,11 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 
+#if WINDOWS_APP || WINDOWS_PHONE_APP
+using PropertyChangingEventHandler = Xamarin.Forms.PropertyChangingEventHandler;
+using PropertyChangingEventArgs = Xamarin.Forms.PropertyChangingEventArgs;
+#endif
+
 namespace Ao3TrackReader
 {
     public interface IGroupable

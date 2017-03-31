@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Navigation;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
-namespace Ao3TrackReader.Windows
+namespace Ao3TrackReader.Win81
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.

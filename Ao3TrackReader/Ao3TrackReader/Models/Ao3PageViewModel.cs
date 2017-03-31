@@ -26,6 +26,14 @@ using Ao3TrackReader.Resources;
 using Ao3TrackReader.Data;
 using System.Threading.Tasks;
 
+#if WINDOWS_APP || WINDOWS_PHONE_APP
+using PropertyChangingEventHandler = Xamarin.Forms.PropertyChangingEventHandler;
+using PropertyChangingEventArgs = Xamarin.Forms.PropertyChangingEventArgs;
+#else
+using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
+using PropertyChangingEventArgs = System.ComponentModel.PropertyChangingEventArgs;
+#endif
+
 namespace Ao3TrackReader.Models
 {
     // How this stuff is intended to be formatted
@@ -102,7 +110,7 @@ namespace Ao3TrackReader.Models
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangingEventHandler PropertyChanging;
 
         void OnPropertyChanged(string propertyName)
         {
@@ -111,7 +119,7 @@ namespace Ao3TrackReader.Models
 
         void OnPropertyChanging(string propertyName)
         {
-            PropertyChanging?.Invoke(this, new System.ComponentModel.PropertyChangingEventArgs(propertyName));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
         }
 
         bool isSelected = false;

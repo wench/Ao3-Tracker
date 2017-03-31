@@ -1,7 +1,7 @@
 ﻿<Application
-    x:Class="Ao3TrackReader.Windows.App"
+    x:Class="Ao3TrackReader.Win81.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Ao3TrackReader.Windows">
+    xmlns:local="using:Ao3TrackReader.Win81">
 
 </Application>
