@@ -17,6 +17,7 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 #if __ANDROID__
 using Android.Webkit;
@@ -169,7 +170,7 @@ namespace Ao3TrackReader.Helper
                 string name = pi.Name;
                 name = name.Substring(0, 1).ToLower() + name.Substring(1);
 
-                var setter = pi.GetSetMethod();
+                var setter = pi.SetMethod;
                 if (setter != null && setter.GetCustomAttribute<DefIgnoreAttribute>() == null && setter.IsPublic)
 #if __ANDROID__
                 if (setter != null && setter.GetCustomAttribute<DefIgnoreAttribute>() == null && setter.IsPublic && setter.GetCustomAttribute<JavascriptInterfaceAttribute>() != null)
@@ -194,7 +195,7 @@ namespace Ao3TrackReader.Helper
 #endif
                 }
 
-                var getter = pi.GetGetMethod();
+                var getter = pi.GetMethod;
                 if (getter != null && getter.GetCustomAttribute<DefIgnoreAttribute>() == null && getter.IsPublic)
 #if __ANDROID__
                 if (getter != null && getter.GetCustomAttribute<DefIgnoreAttribute>() == null && getter.IsPublic && getter.GetCustomAttribute<JavascriptInterfaceAttribute>() != null)

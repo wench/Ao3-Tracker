@@ -98,7 +98,7 @@ namespace Ao3TrackReader.Helper
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.DoOnMainThread(async () => await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onalterfontsizeevent, fontSize));
+                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onalterfontsizeevent, fontSize); });
         }
 
 
@@ -107,16 +107,13 @@ namespace Ao3TrackReader.Helper
             Task.Run(async () =>
             {
                 var workchapters = await wvp.GetWorkChaptersAsync(works);
-                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0));
+                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters); });
             });
         }
 
         public void SetWorkChapters(Dictionary<long, WorkChapter> workchapters)
         {
-            Task.Run(() =>
-            {
-                wvp.SetWorkChapters(workchapters);
-            });
+            wvp.SetWorkChaptersAsync(workchapters);
         }
 
         public void ShowContextMenu(double x, double y, string url, string innerHtml)

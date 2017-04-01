@@ -10,6 +10,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Ao3TrackHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ColorConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TextViewRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
   </ItemGroup>
 </Project>

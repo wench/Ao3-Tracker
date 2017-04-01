@@ -1,5 +1,7 @@
 ﻿{
   "dependencies": {
+    "Microsoft.CodeAnalysis.CSharp.Workspaces": "2.0.0",
+    "Microsoft.Net.Compilers": "2.0.1",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.1",
     "Newtonsoft.Json": "10.0.1"
   },

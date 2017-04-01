@@ -156,7 +156,6 @@ namespace Ao3TrackReader.Data
                         // If the pending sync is going to happen before timeout would elapse, just let it happen
                         if (no_sync_until <= now + timeout) { return; }
                         DelayedSyncCTS.Cancel();
-                        DelayedSyncCTS.Dispose();
                         DelayedSyncCTS = null;
                     }
                     //console.log("delayedsync: setting up timeout callback");
@@ -170,9 +169,10 @@ namespace Ao3TrackReader.Data
                         {
                             cts.Dispose();
                             if (cts == DelayedSyncCTS) DelayedSyncCTS = null;
-                            if (serversync != SyncState.Syncing) DoSyncAsync(true);
+
+                            if (task.IsCompleted && serversync != SyncState.Syncing) DoSyncAsync(true);
                         }
-                    }, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.RunContinuationsAsynchronously);
+                    });
                 }
             });
         }
@@ -227,7 +227,6 @@ namespace Ao3TrackReader.Data
                         if (DelayedSyncCTS != null)
                         {
                             DelayedSyncCTS.Cancel();
-                            DelayedSyncCTS.Dispose();
                             DelayedSyncCTS = null;
                         }
                         no_sync_until = now + 5 * 60 * 1000;                    

@@ -53,6 +53,8 @@ namespace Ao3TrackReader
         public bool IsMainThread => Dispatcher.HasThreadAccess; 
 
         WebView webView;
+        Xamarin.Forms.View contextMenuPlaceholder;
+
 
         public Xamarin.Forms.View CreateWebView()
         {
@@ -71,6 +73,10 @@ namespace Ao3TrackReader
             var messageHandler = new ScriptMessageHandler(this, helper);
             webView.ScriptNotify += messageHandler.WebView_ScriptNotify;
             this.helper = helper;
+
+            contextMenuPlaceholder = new Xamarin.Forms.ContentView();
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(0, 0, 0, 0));
+            Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, Xamarin.Forms.AbsoluteLayoutFlags.None);
 
             webView.SizeChanged += WebView_SizeChanged;
 
@@ -244,6 +250,8 @@ namespace Ao3TrackReader
         {
             HideContextMenu();
 
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(x * Width / webView.Width, y * Height / webView.Height, 0, 0));
+
             var inturl = Ao3SiteDataLookup.CheckUri(new Uri(url)) != null;
             var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
             ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
@@ -260,7 +268,8 @@ namespace Ao3TrackReader
                 }
             }
 
-            contextMenu.ShowAt(webView, new Windows.Foundation.Point(x, y));
+            var renderer = Xamarin.Forms.Platform.WinRT.Platform.GetRenderer(contextMenuPlaceholder);
+            contextMenu.ShowAt(renderer.ContainerElement);
         }
 
         class ScriptMessageHandler

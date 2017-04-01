@@ -244,7 +244,7 @@ static bool PhoneHasBackButton()
             if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Touch)
                 return InteractionMode.Tablet;
 #elif WINDOWS_APP
-            return InteractionMode.PC;
+                return InteractionMode.PC;
 #elif __ANDROID__
             // Good enough for android for now
             switch (Xamarin.Forms.Device.Idiom)

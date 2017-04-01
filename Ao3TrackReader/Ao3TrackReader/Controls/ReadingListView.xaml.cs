@@ -196,7 +196,13 @@ namespace Ao3TrackReader.Controls
             {
                 if (selectedItem?.IsSelected != false && ListView.SelectedItem != selectedItem)
                 {
-                    ListView.SelectedItem = selectedItem;
+                    try
+                    {
+                        ListView.SelectedItem = selectedItem;
+                    }
+                    catch
+                    {
+                    }
                 }
             });
         }
