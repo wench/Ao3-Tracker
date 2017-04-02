@@ -53,12 +53,14 @@ var ios_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
     'src/reader/compat/*.ts',
+    'src/reader/messaging/*.ts',
     'src/reader/ios/*.ts'
 ];
 var win81_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
     'src/reader/compat/*.ts',
+    'src/reader/messaging/*.ts',
     'src/reader/win81/*.ts'
 ];
 

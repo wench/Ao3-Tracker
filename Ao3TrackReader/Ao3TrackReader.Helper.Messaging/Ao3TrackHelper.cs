@@ -78,7 +78,7 @@ namespace Ao3TrackReader.Helper
             wvp.DoOnMainThread(() =>
             {
                 if (_onjumptolastlocationevent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onjumptolastlocationevent, pagejump).Wait(0);
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onjumptolastlocationevent, pagejump);
             });
         }
 
@@ -90,7 +90,7 @@ namespace Ao3TrackReader.Helper
             [Converter("Event")]
             set
             {
-                if (value != 0) wvp.DoOnMainThread(async () => await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize));
+                if (value != 0) wvp.DoOnMainThread(async () => await wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", value, wvp.FontSize));
                 _onalterfontsizeevent = value;
             }
         }
@@ -98,17 +98,14 @@ namespace Ao3TrackReader.Helper
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onalterfontsizeevent, fontSize); });
+                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); });
         }
 
 
-        public void GetWorkChaptersAsync(long[] works, [Converter("Callback")] int hCallback)
+        public async void GetWorkChaptersAsync(long[] works, [Converter("Callback")] int hCallback)
         {
-            Task.Run(async () =>
-            {
-                var workchapters = await wvp.GetWorkChaptersAsync(works);
-                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters); });
-            });
+            var workchapters = await wvp.GetWorkChaptersAsync(works);
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); });
         }
 
         public void SetWorkChapters(Dictionary<long, WorkChapter> workchapters)
@@ -133,17 +130,17 @@ namespace Ao3TrackReader.Helper
 
         public string NextPage
         {
-            set { wvp.DoOnMainThread(async () => {
+            set { wvp.DoOnMainThread(() => {
                 wvp.NextPage = value;
-                await wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoForward", wvp.SwipeCanGoForward);
+                wvp.CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "swipeCanGoForward", wvp.SwipeCanGoForward);
             }); }
 
         }
         public string PrevPage
         {
-            set { wvp.DoOnMainThread(async () => {
+            set { wvp.DoOnMainThread(() => {
                 wvp.PrevPage = value;
-                await wvp.CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "swipeCanGoBack", wvp.SwipeCanGoBack);
+                wvp.CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "swipeCanGoBack", wvp.SwipeCanGoBack);
             }); }
         }
 
@@ -192,23 +189,20 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        public void AreUrlsInReadingListAsync(string[] urls, [Converter("Callback")] int hCallback)
+        public async void AreUrlsInReadingListAsync(string[] urls, [Converter("Callback")] int hCallback)
         {
-            Task.Run(async () =>
-            {
-                var res = await wvp.AreUrlsInReadingListAsync(urls);
-                await wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res);
-            });
+            var res = await wvp.AreUrlsInReadingListAsync(urls);
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, res); });
         }
 
         public void StartWebViewDragAccelerate(double velocity)
         {
-            wvp.DoOnMainThread(() => wvp.StartWebViewDragAccelerate(velocity));
+            wvp.DoOnMainThread(() => { wvp.StartWebViewDragAccelerate(velocity); });
         }
 
         public void StopWebViewDragAccelerate()
         {
-            wvp.StopWebViewDragAccelerate();
+            wvp.DoOnMainThread(() => { wvp.StopWebViewDragAccelerate(); });
         }
 
         public double DeviceWidth
@@ -221,7 +215,7 @@ namespace Ao3TrackReader.Helper
 
         public void GetUnitConvOptions([Converter("Callback")] int hCallback)
         {
-            wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, wvp.UnitConvOptions).Wait(0));
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, wvp.UnitConvOptions); });
         }
 
     }

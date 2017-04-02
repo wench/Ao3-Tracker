@@ -26,7 +26,7 @@ namespace Ao3Track {
         let storage: { [key: number]: Callback } = {};
         let counter = 0;
 
-        export function Add(func: CallbackFuncType | null): number {
+        export function add(func: CallbackFuncType | null): number {
             if (func === null) return 0;
             storage[++counter] = {
                 func: func,
@@ -35,7 +35,7 @@ namespace Ao3Track {
             return counter;
         }
 
-        export function AddPermanent(func: CallbackFuncType | null): number {
+        export function addPermanent(func: CallbackFuncType | null): number {
             if (func === null) return 0;
             storage[++counter] = {
                 func: func,
@@ -44,7 +44,7 @@ namespace Ao3Track {
             return counter;
         }
 
-        export function Call(handle: number, arg: any): void {
+        export function call(handle: number, arg: any): void {
             if (handle in storage) {
                 let callback = storage[handle];
                 (callback.func as (arg: any) => void)(arg);
@@ -54,7 +54,7 @@ namespace Ao3Track {
             }
         }
 
-        export function CallVoid(handle: number): void {
+        export function callVoid(handle: number): void {
             if (handle in storage) {
                 let callback = storage[handle];
                 (callback.func as () => void)();
@@ -70,10 +70,10 @@ namespace Ao3Track {
         {
             export function Callback(func: Callbacks.CallbackFuncType|null) : number 
             {
-                return Callbacks.Add(func);
+                return Callbacks.add(func);
             }
             export function Event(func: Callbacks.CallbackFuncType|null) : number {
-                return Callbacks.AddPermanent(func);
+                return Callbacks.addPermanent(func);
             }
         }
     }

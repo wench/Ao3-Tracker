@@ -46,10 +46,11 @@ namespace Ao3TrackReader
                 "marshal.js",
                 "callbacks.js",
                 "platform.js",
+                "messaging.js",
                 "reader.js",
                 "tracker.js",
-                "unitconv.js",
-                "touch.js"
+                "touch.js",
+                "unitconv.js"
             };
 
         public string[] CssToInject { get; } = { "tracker.css" };
@@ -101,15 +102,17 @@ namespace Ao3TrackReader
             {
                 UserContentController = userContentController = new WKUserContentController()
             };
-            var helper = new Ao3TrackHelper(this); 
-            userContentController.AddScriptMessageHandler(new ScriptMessageHandler(this, helper), "ao3track");
+            var helper = new Ao3TrackHelper(this);
+            var messageHandler = new Ao3TrackReader.iOS.ScriptMessageHandler(this, helper);
+            userContentController.AddScriptMessageHandler((WKScriptMessageHandler) messageHandler, "ao3track");
+            this.helper = helper;
+
             configuration.Preferences = preferences;
 
             webView = new WKWebView(configuration)
             {
                 NavigationDelegate = new NavigationDelegate(this)
             };
-            this.helper = helper;
 
             webView.FocuseChanged += WebView_FocusChange;
 
@@ -121,7 +124,7 @@ namespace Ao3TrackReader
 
         private void Xview_SizeChanged(object sender, EventArgs e)
         {
-            CallJavascriptAsync("Ao3Track.iOS.helper.setValue", "deviceWidth", DeviceWidth).Wait(0);
+            CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "deviceWidth", DeviceWidth).Wait(0);
         }
 
         private void WebView_FocusChange(object sender, bool e)
@@ -302,79 +305,6 @@ namespace Ao3TrackReader
                 else
                     decisionHandler(WKNavigationActionPolicy.Allow);
             }
-        }
-
-        class ScriptMessageHandler : WKScriptMessageHandler
-        {
-            WebViewPage wvp;
-            private Ao3TrackHelper helper;
-
-            public ScriptMessageHandler(WebViewPage wvp, Ao3TrackHelper helper)
-            {
-                this.wvp = wvp;
-                this.helper = helper;
-            }
-
-            public class Message
-            {                
-                public string type { get; set; }
-                public string name { get; set; }
-                public string value { get; set; }
-                public string[] args { get; set; }
-            }
-
-            private object Deserialize(string value, Type type)
-            {
-                // If destination is a string, then the value passes through unchanged. A minor optimization
-                if (type == typeof(string)) return value;
-                else return JsonConvert.DeserializeObject(value, type);
-            }
-
-            public override void DidReceiveScriptMessage(WKUserContentController userContentController, WKScriptMessage message)
-            {
-                var smsg = message.Body.ToString();
-                var msg = JsonConvert.DeserializeObject<Message>(smsg);
-
-                if (msg.type == "INIT")
-                {
-                    wvp.DoOnMainThread(async () =>
-                    {
-                        await wvp.EvaluateJavascriptAsync(string.Format(
-                            "Ao3Track.iOS.helper.setValue({0},{1});Ao3Track.iOS.helper.setValue({2},{3});Ao3Track.iOS.helper.setValue({4},{5});Ao3Track.iOS.helper.setValue({6},{7});",
-                            JsonConvert.SerializeObject("leftOffset"), JsonConvert.SerializeObject(wvp.LeftOffset),
-                            JsonConvert.SerializeObject("swipeCanGoBack"), JsonConvert.SerializeObject(wvp.SwipeCanGoBack),
-                            JsonConvert.SerializeObject("swipeCanGoForward"), JsonConvert.SerializeObject(wvp.SwipeCanGoForward),
-                            JsonConvert.SerializeObject("deviceWidth"), JsonConvert.SerializeObject(wvp.DeviceWidth)));
-                    });
-                    return;
-                }
-                else if (helper.HelperDef.TryGetValue(msg.name, out var md))
-                {
-                    if (msg.type == "SET" && md.pi?.CanWrite == true)
-                    {
-                        md.pi.SetValue(wvp.helper, Deserialize(msg.value, md.pi.PropertyType));
-                        return;
-                    }
-                    else if (msg.type == "CALL" && md.mi != null)
-                    {
-                        var ps = md.mi.GetParameters();
-                        if (msg.args.Length == ps.Length)
-                        {
-                            var args = new object[msg.args.Length];
-                            for (int i = 0; i < msg.args.Length; i++)
-                            {
-                                args[i] = Deserialize(msg.args[i], ps[i].ParameterType);
-                            }
-
-                            md.mi.Invoke(wvp.helper, args);
-                            return;
-                        }
-                    }
-                }
-
-                throw new ArgumentException();
-            }
-
         }
 
     }

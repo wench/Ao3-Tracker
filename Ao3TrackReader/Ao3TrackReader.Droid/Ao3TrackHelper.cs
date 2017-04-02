@@ -124,7 +124,7 @@ namespace Ao3TrackReader.Helper
             wvp.DoOnMainThread(() => 
             {
                 if (_onjumptolastlocationevent != 0)
-                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onjumptolastlocationevent, pagejump).Wait(0);
+                    wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onjumptolastlocationevent, pagejump);
             });
         }
 
@@ -134,41 +134,35 @@ namespace Ao3TrackReader.Helper
             [JavascriptInterface, Export("set_onalterfontsizeevent"), Converter("Event")]
             set
             {
-                if (value != 0) wvp.DoOnMainThread(()=>wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", value, wvp.FontSize).Wait(0));
+                if (value != 0) wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", value, wvp.FontSize); });
                 _onalterfontsizeevent = value;
             }
         }
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", _onalterfontsizeevent, fontSize).Wait(0));
+                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); });
         }
 
         [JavascriptInterface, Export("getWorkChaptersAsync")]
-        public void GetWorkChaptersAsync([Converter("ToJSON")] string works_json, [Converter("Callback")] int hCallback)
+        public async void GetWorkChaptersAsync([Converter("ToJSON")] string works_json, [Converter("Callback")] int hCallback)
         {
-            Task.Run(async () =>
-            {
-                var works = JsonConvert.DeserializeObject<long[]>(works_json);
-                var workchapters = await wvp.GetWorkChaptersAsync(works);
-                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, workchapters).Wait(0));
-            });
+            var works = JsonConvert.DeserializeObject<long[]>(works_json);
+            var workchapters = await wvp.GetWorkChaptersAsync(works);
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); });
         }
 
         [JavascriptInterface, Export("setWorkChapters")]
         public void SetWorkChapters([Converter("ToJSON")] string workchapters_json)
         {
-            Task.Run(() =>
-            {
-                var workchapters = JsonConvert.DeserializeObject<Dictionary<long, WorkChapter>>(workchapters_json);
-                wvp.SetWorkChapters(workchapters);
-            });
+            var workchapters = JsonConvert.DeserializeObject<Dictionary<long, WorkChapter>>(workchapters_json);
+            wvp.SetWorkChaptersAsync(workchapters);
         }
 
         [JavascriptInterface, Export("showContextMenu")]
         public void ShowContextMenu(double x, double y, string url, string innerHtml)
         {
-            wvp.DoOnMainThread(() => wvp.ShowContextMenu(x, y, url, innerHtml));
+            wvp.DoOnMainThread(() => { wvp.ShowContextMenu(x, y, url, innerHtml); } );
         }
 
         [JavascriptInterface, Export("addToReadingList")]
@@ -197,18 +191,18 @@ namespace Ao3TrackReader.Helper
         public bool SwipeCanGoBack
         {
             [JavascriptInterface, Export("get_swipeCanGoBack")]
-            get { return (bool)wvp.DoOnMainThread(() => wvp.SwipeCanGoBack); }
+            get { return wvp.DoOnMainThread(() => wvp.SwipeCanGoBack); }
         }
         public bool SwipeCanGoForward
         {
             [JavascriptInterface, Export("get_swipeCanGoForward")]
-            get { return (bool)wvp.DoOnMainThread(() => wvp.SwipeCanGoForward); }
+            get { return wvp.DoOnMainThread(() => wvp.SwipeCanGoForward); }
         }
 
         public double LeftOffset
         {
             [JavascriptInterface, Export("get_leftOffset")]
-            get { return (double)wvp.DoOnMainThread(() => wvp.LeftOffset); }
+            get { return wvp.DoOnMainThread(() => wvp.LeftOffset); }
             [JavascriptInterface, Export("set_leftOffset")]
             set { wvp.DoOnMainThread(() => { wvp.LeftOffset = value; }); }
         }
@@ -250,21 +244,17 @@ namespace Ao3TrackReader.Helper
         }
 
         [JavascriptInterface, Export("areUrlsInReadingListAsync")]
-        public void AreUrlsInReadingListAsync([Converter("ToJSON")] string urls_json, [Converter("Callback")] int hCallback)
+        public async void AreUrlsInReadingListAsync([Converter("ToJSON")] string urls_json, [Converter("Callback")] int hCallback)
         {
-
-            Task.Run(async () =>
-            {
-                var urls = JsonConvert.DeserializeObject<string[]>(urls_json);
-                var res = await wvp.AreUrlsInReadingListAsync(urls);
-                wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, res).Wait(0));
-            });
+            var urls = JsonConvert.DeserializeObject<string[]>(urls_json);
+            var res = await wvp.AreUrlsInReadingListAsync(urls);
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, res); });
         }
 
         [JavascriptInterface, Export("startWebViewDragAccelerate")]
         public void StartWebViewDragAccelerate(double velocity)
         {
-            wvp.DoOnMainThread(() => wvp.StartWebViewDragAccelerate(velocity));
+            wvp.DoOnMainThread(() => { wvp.StartWebViewDragAccelerate(velocity); });
         }
 
         [JavascriptInterface, Export("stopWebViewDragAccelerate")]
@@ -285,7 +275,7 @@ namespace Ao3TrackReader.Helper
         [JavascriptInterface, Export("getUnitConvOptions")]
         public void GetUnitConvOptions([Converter("Callback")] int hCallback)
         {
-            wvp.DoOnMainThread(() => wvp.CallJavascriptAsync("Ao3Track.Callbacks.Call", hCallback, wvp.UnitConvOptions).Wait(0));
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, wvp.UnitConvOptions); });
         }
 
     }

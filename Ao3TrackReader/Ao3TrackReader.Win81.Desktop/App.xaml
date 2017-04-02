@@ -4,4 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Ao3TrackReader.Win81">
 
+    <Application.Resources>
+        <x:Double x:Key="AppBarThemeMinHeight">48</x:Double>
+        <Thickness x:Key="AppBarBottomBorderThemeThickness">0,0,0,0</Thickness>
+        <Thickness x:Key="AppBarBottomThemePadding">0,0,0,0</Thickness>
+        <Thickness x:Key="AppBarTopBorderThemeThickness">0,0,0,0</Thickness>
+        <Thickness x:Key="AppBarTopThemePadding">0,0,0,0</Thickness>
+
+        <SolidColorBrush x:Key="HighlightColor" Color="#FF900000" />
+    </Application.Resources>
 </Application>

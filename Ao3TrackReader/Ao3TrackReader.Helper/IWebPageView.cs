@@ -57,8 +57,10 @@ namespace Ao3TrackReader.Helper
     {
 #if WINDOWS_UWP
         [DefaultOverload]
-#endif
         object DoOnMainThread(MainThreadFunc function);
+#else
+        T DoOnMainThread<T>(Func<T> function);
+#endif
         void DoOnMainThread(MainThreadAction function);
 
         double DeviceWidth { get; }

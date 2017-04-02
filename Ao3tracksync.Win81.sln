@@ -14,18 +14,29 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Win81", "Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.shproj", "{B718C17D-A384-4EB9-8587-A32838095989}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Win81.Desktop", "Ao3TrackReader\Ao3TrackReader.Win81.Desktop\Ao3TrackReader.Win81.Desktop.csproj", "{8D7BB3F9-7969-48F4-856C-F9E1B97EEC39}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02C7179C-1598-47A9-B351-D71649AB7994} = {02C7179C-1598-47A9-B351-D71649AB7994}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.Win81.Phone", "Ao3TrackReader\Ao3TrackReader.Win81.Phone\Ao3TrackReader.Win81.Phone.csproj", "{C5038D7C-AA97-41E5-98C9-FDA8E173B1EE}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.WinRT", "Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.shproj", "{7B291718-EB18-4E7A-B547-1FE74DF1E279}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Helper.Messaging", "Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.shproj", "{29356923-19E8-4AE3-B98F-F828F5033317}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{02c7179c-1598-47a9-b351-d71649ab7994}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{09ddaed0-c67d-4fb9-9b1f-1aadb8f0c064}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.projitems*{29356923-19e8-4ae3-b98f-f828f5033317}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{3ebadc8e-8858-4033-9066-0a14d574cfb3}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{3febecc8-967d-4a3c-a25a-e653e734e779}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{7b291718-eb18-4e7a-b547-1fe74df1e279}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{8d7bb3f9-7969-48f4-856c-f9e1b97eec39}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Win81\Ao3TrackReader.Win81.projitems*{b718c17d-a384-4eb9-8587-a32838095989}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{c5038d7c-aa97-41e5-98c9-fda8e173b1ee}*SharedItemsImports = 4

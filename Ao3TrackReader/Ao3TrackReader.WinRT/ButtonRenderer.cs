@@ -20,16 +20,22 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#if WINDOWS_UWP
 using Xamarin.Forms.Platform.UWP;
+using XButtonRenderer = Xamarin.Forms.Platform.UWP.ButtonRenderer;
+#else
+using Xamarin.Forms.Platform.WinRT;
+using XButtonRenderer = Xamarin.Forms.Platform.WinRT.ButtonRenderer;
+#endif
 using XButton = Xamarin.Forms.Button;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.Resources.Core;
 
-[assembly: ExportRenderer(typeof(Ao3TrackReader.Controls.Button), typeof(Ao3TrackReader.UWP.ButtonRenderer))]
-namespace Ao3TrackReader.UWP
+[assembly: ExportRenderer(typeof(Ao3TrackReader.Controls.Button), typeof(Ao3TrackReader.ButtonRenderer))]
+namespace Ao3TrackReader
 {
-    class ButtonRenderer : Xamarin.Forms.Platform.UWP.ButtonRenderer
+    class ButtonRenderer : XButtonRenderer
     {
         protected override void OnElementChanged(ElementChangedEventArgs<XButton> e)
         {
@@ -72,7 +78,13 @@ namespace Ao3TrackReader.UWP
             ResourceContext resContext = ResourceContext.GetForCurrentView();
             var res = resMap.GetValue(bmp.UriSource.AbsolutePath.TrimStart('/'), resContext);
             int scale = 100;
-            if (!int.TryParse(res?.GetQualifierValue("scale"), out scale)) scale = 100;
+            try
+            {
+                scale = int.Parse(res?.GetQualifierValue("scale"));
+            }
+            catch
+            {
+            }
 
             var element = Element as Ao3TrackReader.Controls.Button;
 

@@ -523,13 +523,6 @@ namespace Ao3TrackReader
             }
         }
 
-        object IWebViewPage.DoOnMainThread(MainThreadFunc function)
-        {
-            var task = DoOnMainThreadAsync(() => function());
-            task.Wait();
-            return task.Result;
-        }
-
         public async void DoOnMainThread(MainThreadAction function)
         {
             await DoOnMainThreadAsync(() => function()).ConfigureAwait(false);

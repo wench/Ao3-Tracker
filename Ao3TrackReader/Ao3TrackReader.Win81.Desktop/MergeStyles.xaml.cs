@@ -13,15 +13,15 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
+// The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
+
 namespace Ao3TrackReader.Win81
 {
-    public sealed partial class MainPage
+    public sealed partial class MergeStyles : ResourceDictionary
     {
-        public MainPage()
+        public MergeStyles()
         {
             this.InitializeComponent();
-            LoadApplication((App.Current as App).XApp);
         }
-
     }
 }

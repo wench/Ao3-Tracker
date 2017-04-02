@@ -20,7 +20,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Label = Xamarin.Forms.Label;
+#if WINDOWS_UWP
 using Xamarin.Forms.Platform.UWP;
+#else
+using Xamarin.Forms.Platform.WinRT;
+#endif
 using Windows.UI.Xaml.Documents;
 using Ao3TrackReader.Controls;
 using Ao3TrackReader.Models;
@@ -29,8 +33,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI;
 using Windows.Foundation;
 
-[assembly: ExportRenderer(typeof(TextView), typeof(Ao3TrackReader.UWP.TextViewRenderer))]
-namespace Ao3TrackReader.UWP
+[assembly: ExportRenderer(typeof(TextView), typeof(Ao3TrackReader.TextViewRenderer))]
+namespace Ao3TrackReader
 {
     class TextViewRenderer : LabelRenderer
     {

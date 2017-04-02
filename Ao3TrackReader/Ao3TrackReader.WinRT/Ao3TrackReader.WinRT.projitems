@@ -3,15 +3,16 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>b718c17d-a384-4eb9-8587-a32838095989</SharedGUID>
+    <SharedGUID>7b291718-eb18-4e7a-b547-1fe74df1e279</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Ao3TrackReader.Win81</Import_RootNamespace>
+    <Import_RootNamespace>Ao3TrackReader.WinRT</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)FormsCommandBar.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ScriptMessageHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ButtonRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ColorConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TextViewRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
   </ItemGroup>
 </Project>

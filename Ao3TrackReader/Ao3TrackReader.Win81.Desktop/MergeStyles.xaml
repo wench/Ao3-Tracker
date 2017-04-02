@@ -1,0 +1,228 @@
+﻿<!--
+Copyright 2017 Alexis Ryan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.   
+-->
+<ResourceDictionary
+    x:Class="Ao3TrackReader.Win81.MergeStyles"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Ao3TrackReader.Win81"
+	xmlns:xamarin="using:Xamarin.Forms.Platform.WinRT"
+    >
+
+    <GroupStyle x:Key="ListViewGroup" HidesIfEmpty="False">
+        <GroupStyle.HeaderContainerStyle>
+            <Style TargetType="ListViewHeaderItem">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="MinHeight" Value="30" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <xamarin:ListGroupHeaderPresenter />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </GroupStyle.HeaderContainerStyle>
+        <GroupStyle.HeaderTemplate>
+            <DataTemplate>
+                <xamarin:CellControl IsGroupHeader="true" HorizontalContentAlignment="Stretch" />
+            </DataTemplate>
+        </GroupStyle.HeaderTemplate>
+    </GroupStyle>
+
+    <Style TargetType="xamarin:PageControl">
+        <Setter Property="ContentMargin" Value="0" />
+        <Setter Property="TitleBrush" Value="{ThemeResource DefaultTextForegroundThemeBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="xamarin:PageControl">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Grid.Column="0" Height="79" VerticalAlignment="Center" Background="{TemplateBinding ToolbarBackground}" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="{Binding TitleInset,RelativeSource={RelativeSource TemplatedParent}}" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <AppBarButton x:Name="backButton" Grid.Column="0" Margin="0,6,0,0" Foreground="{TemplateBinding TitleBrush}" ToolTipService.ToolTip="{TemplateBinding BackButtonTitle}" HorizontalAlignment="Right"  VerticalAlignment="Center" Visibility="Collapsed">
+                                <AppBarButton.Icon>
+                                    <SymbolIcon Symbol="Back" />
+                                </AppBarButton.Icon>
+                            </AppBarButton>
+
+                            <TextBlock Name="title" Padding="10,0,0,0" Grid.Column="1" Foreground="{TemplateBinding TitleBrush}" VerticalAlignment="Center" Style="{ThemeResource HeaderTextBlockStyle}" Text="{Binding Title}" />
+                        </Grid>
+
+                        <ContentPresenter Margin="{TemplateBinding ContentMargin}" ContentTransitions="{TemplateBinding ContentTransitions}" x:Name="presenter" Grid.Row="1" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="AppBarButton">
+        <Setter Property="Foreground" Value="{ThemeResource AppBarItemForegroundThemeBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="AppBarButton">
+                    <Grid x:Name="RootGrid" Width="68" Background="Transparent" VerticalAlignment="Stretch">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ApplicationViewStates">
+                                <!-- FullSize is used when we are in landscape or filled mode -->
+                                <VisualState x:Name="FullSize"/>
+                                <!-- Compact is used when we are in portrait or snapped mode -->
+                                <VisualState x:Name="Compact">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TextLabel" Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Width">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="68"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundEllipse" Storyboard.TargetProperty="Fill">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemPointerOverBackgroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Content" Storyboard.TargetProperty="Foreground">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemPointerOverForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OutlineEllipse" Storyboard.TargetProperty="Stroke">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundEllipse" Storyboard.TargetProperty="Fill">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Content" Storyboard.TargetProperty="Foreground">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemPressedForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OutlineEllipse" Storyboard.TargetProperty="Stroke">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemDisabledForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Content" Storyboard.TargetProperty="Foreground">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemDisabledForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TextLabel" Storyboard.TargetProperty="Foreground">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarItemDisabledForegroundThemeBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="FocusStates">
+                                <VisualState x:Name="Focused">
+                                    <Storyboard>
+                                        <DoubleAnimation
+                            Storyboard.TargetName="FocusVisualWhite"
+                            Storyboard.TargetProperty="Opacity"
+                            To="1"
+                            Duration="0"/>
+                                        <DoubleAnimation
+                            Storyboard.TargetName="FocusVisualBlack"
+                            Storyboard.TargetProperty="Opacity"
+                            To="1"
+                            Duration="0"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Unfocused" />
+                                <VisualState x:Name="PointerFocused" />
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                            <Grid Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+                                <Rectangle
+                    x:Name="BackgroundEllipse"
+                    UseLayoutRounding="False"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    MinWidth="68" 
+                    MinHeight="48"
+                    Fill="{ThemeResource AppBarItemBackgroundThemeBrush}"/>
+                                <Ellipse
+                    x:Name="OutlineEllipse"
+                    UseLayoutRounding="False"
+                    Width="40"
+                    Height="40"
+                    Visibility="Collapsed"
+                    Stroke="{ThemeResource AppBarItemForegroundThemeBrush}"
+                    StrokeThickness="2" />
+                                <ContentPresenter
+                    x:Name="Content"
+                    Content="{TemplateBinding Icon}"
+                    Foreground="{TemplateBinding Foreground}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="0,14,0,0"
+                    Width="20"
+                    Height="20"
+                    AutomationProperties.AccessibilityView="Raw"/>
+
+                                <TextBlock
+                  x:Name="TextLabel"
+                  Text="{TemplateBinding Label}"
+                  Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
+                  FontSize="12"
+                  FontFamily="{TemplateBinding FontFamily}"
+                  TextAlignment="Center"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Top"
+                  Margin="0,48,0,0"
+                  TextWrapping="Wrap"/>
+                                
+                            </Grid>
+
+                        <Rectangle
+                x:Name="FocusVisualWhite"
+                IsHitTestVisible="False"
+                Stroke="{ThemeResource FocusVisualWhiteStrokeThemeBrush}"
+                StrokeEndLineCap="Square"
+                StrokeDashArray="1,1"
+                Opacity="0"
+                StrokeDashOffset="1.5"/>
+                        <Rectangle
+                x:Name="FocusVisualBlack"
+                IsHitTestVisible="False"
+                Stroke="{ThemeResource FocusVisualBlackStrokeThemeBrush}"
+                StrokeEndLineCap="Square"
+                StrokeDashArray="1,1"
+                Opacity="0"
+                StrokeDashOffset="0.5"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

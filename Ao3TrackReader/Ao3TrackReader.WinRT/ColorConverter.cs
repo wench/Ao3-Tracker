@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media;
 
-namespace Ao3TrackReader.UWP
+namespace Ao3TrackReader
 {
     class ColorConverter : IValueConverter
     {

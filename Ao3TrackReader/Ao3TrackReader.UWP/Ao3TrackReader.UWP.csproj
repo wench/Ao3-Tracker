@@ -108,14 +108,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="ButtonRenderer.cs" />
-    <Compile Include="ColorConverter.cs" />
     <Compile Include="DropDownRenderer.cs" />
     <Compile Include="FormsCommandBar.cs" />
     <Compile Include="MergeStyles.xaml.cs">
       <DependentUpon>MergeStyles.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Text.cs" />
-    <Compile Include="TextViewRenderer.cs" />
     <Compile Include="WebViewPage.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -509,6 +506,7 @@
   </PropertyGroup>
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition="Exists('..\Ao3TrackReader\Ao3TrackReader.projitems')" />
   <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
+  <Import Project="..\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

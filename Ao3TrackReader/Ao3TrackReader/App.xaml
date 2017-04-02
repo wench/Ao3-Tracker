@@ -43,7 +43,7 @@ limitations under the License.
                 <Setter Property="BorderWidth" Value="2" />
                 <Setter Property="BorderRadius" Value="2" />
                 <Setter Property="BorderColor" Value="Transparent" />
-                <Setter Property="WidthRequest" Value="{DynamicResource Size_40_Min}" />
+                <Setter Property="WidthRequest" Value="-1" />
                 <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
                 <Setter Property="ImageWidth" Value="20" />
                 <Setter Property="ImageHeight" Value="20" />
