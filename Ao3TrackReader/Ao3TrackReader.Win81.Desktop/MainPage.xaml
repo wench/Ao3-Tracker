@@ -4,6 +4,7 @@
     xmlns:forms="using:Xamarin.Forms.Platform.WinRT"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Ao3TrackReader.Win81"
+    xmlns:wrt="using:Ao3TrackReader.WinRT"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -13,6 +14,6 @@
     </Grid>
 
     <forms:WindowsPage.BottomAppBar>
-        <local:FormsCommandBar  />
+        <wrt:FormsCommandBar  />
     </forms:WindowsPage.BottomAppBar>
 </forms:WindowsPage>

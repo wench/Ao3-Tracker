@@ -24,13 +24,27 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
 
-namespace Ao3TrackReader.UWP
+#if WINDOWS_UWP
+using BaseCommandBar = Xamarin.Forms.Platform.UWP.FormsCommandBar;
+#else
+using BaseCommandBar = Windows.UI.Xaml.Controls.CommandBar;
+#endif
+
+
+namespace Ao3TrackReader.WinRT
 {
-    public class FormsCommandBar : Xamarin.Forms.Platform.UWP.FormsCommandBar
+    public class FormsCommandBar : BaseCommandBar
     {
+        bool haveDynamicOverflow = false;
         public FormsCommandBar() : base()
         {
-            IsDynamicOverflowEnabled = true;
+#if WINDOWS_UWP
+            if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.CommandBar", "IsDynamicOverflowEnabled"))
+                IsDynamicOverflowEnabled = haveDynamicOverflow = true;
+#else
+            IsOpen = true;
+            IsSticky = true;
+#endif
             PrimaryCommands.VectorChanged += VectorChanged;
             SecondaryCommands.VectorChanged += VectorChanged;
         }
@@ -64,6 +78,7 @@ namespace Ao3TrackReader.UWP
             }
         }
 
+#if WINDOWS_UWP
         protected override Size MeasureOverride(Size availableSize)
         {
             Size res = availableSize;
@@ -77,5 +92,23 @@ namespace Ao3TrackReader.UWP
             }
             return res;
         }
+#else
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            var ret = base.ArrangeOverride(finalSize);
+
+            if (Window.Current.Content is Frame f)
+            {
+                f.Margin = new Thickness(0, 0, 0, ret.Height);
+            }
+
+            return ret;
+        }
+
+        protected override void OnClosed(object e)
+        {
+            IsOpen = true;
+        }
+#endif
     }
 }

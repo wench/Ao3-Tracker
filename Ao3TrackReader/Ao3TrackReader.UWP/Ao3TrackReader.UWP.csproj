@@ -107,9 +107,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ButtonRenderer.cs" />
     <Compile Include="DropDownRenderer.cs" />
-    <Compile Include="FormsCommandBar.cs" />
     <Compile Include="MergeStyles.xaml.cs">
       <DependentUpon>MergeStyles.xaml</DependentUpon>
     </Compile>

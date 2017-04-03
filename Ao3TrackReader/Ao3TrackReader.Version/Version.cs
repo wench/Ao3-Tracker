@@ -5,7 +5,7 @@ using System.Text;
 namespace Ao3TrackReader.Version
 {
     // Current version of Ao3TrackReader
-    static class Version
+    static partial class Version
     {
         public const int Major = 1;
         public const int Minor = 0;
