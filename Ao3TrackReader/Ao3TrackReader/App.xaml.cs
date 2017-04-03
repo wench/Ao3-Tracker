@@ -94,8 +94,14 @@ namespace Ao3TrackReader
         {
             get
             {
-                var v = Version;
-                return new Uri("https://github.com/wench/Ao3-Tracker/releases/v" + v.Major + "." + v.Minor + "." + v.Build);
+#if DEBUG
+                if (!string.IsNullOrWhiteSpace(Ver.GitRevision))
+                    return new Uri("https://github.com/wench/Ao3-Tracker/tree/" + Ver.GitRevision);
+                else
+                    return new Uri("https://github.com/wench/Ao3-Tracker");
+#else
+                return new Uri("https://github.com/wench/Ao3-Tracker/releases/v" + Ver.Major + "." + Ver.Minor + "." + Ver.Build);
+#endif
             }
         }
 
