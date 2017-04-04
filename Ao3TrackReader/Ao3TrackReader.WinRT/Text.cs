@@ -31,7 +31,7 @@ namespace Ao3TrackReader.Text
     public abstract partial class TextEx
     {
 #if UWP_CREATORS_UPDATE
-        static bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
+        protected const bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
 #endif
 
         protected Inline ApplyStyles(Inline i)
@@ -145,7 +145,13 @@ namespace Ao3TrackReader.Text
                 donefirst = true;
             }
 
+#if WINDOWS_UWP
             return ApplyStyles(s);
+#else
+            var u = new Underline();
+            u.Inlines.Add(s);
+            return ApplyStyles(u);
+#endif
         }
     }
 
