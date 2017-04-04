@@ -87,7 +87,19 @@ limitations under the License.
                 <ControlTemplate TargetType="AppBarButton">
                     <Grid x:Name="RootGrid" Width="68" Background="Transparent" VerticalAlignment="Stretch">
                         <VisualStateManager.VisualStateGroups>
-                               <VisualStateGroup x:Name="CommonStates">
+                            <VisualStateGroup x:Name="Ao3TrackAppBarButton">
+                                <!-- FullSize is used when we are in landscape or filled mode -->
+                                <VisualState x:Name="ShowLabel">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TextLabel" Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <!-- Compact is used when we are in portrait or snapped mode -->
+                                <VisualState x:Name="HideLabel" />
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="CommonStates">
                                 <VisualState x:Name="Normal"/>
                                 <VisualState x:Name="PointerOver">
                                     <Storyboard>
@@ -184,7 +196,9 @@ limitations under the License.
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Top"
                   Margin="0,48,0,0"
-                  TextWrapping="Wrap"/>
+                  TextWrapping="Wrap"
+                  Visibility="Collapsed"
+                                    />
                                 
                             </Grid>
 
