@@ -56,12 +56,7 @@ limitations under the License.
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch" >
-
-                            <Border RelativePanel.AlignLeftWithPanel="True" RelativePanel.LeftOf="TopCommandBarArea" MinWidth="1" Visibility="Collapsed">
-                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Padding="10,5,0,5" Foreground="{ThemeResource HighlightColor}" Style="{ThemeResource MainTitleTextBlockStyle}" />
-                            </Border>
-
+                        <RelativePanel x:Name="TitleBar" Background="{TemplateBinding ToolbarBackground}" HorizontalAlignment="Stretch" Visibility="Collapsed">
                             <Border x:Name="TopCommandBarArea" RelativePanel.AlignRightWithPanel="True"></Border>
                         </RelativePanel>
 
