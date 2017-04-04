@@ -32,9 +32,56 @@ using AColor = Android.Graphics.Color;
 using TextView = Ao3TrackReader.Controls.TextView;
 using Android.Runtime;
 using Android.Text.Style;
+using Android.Views;
 
 namespace Ao3TrackReader.Text
 {
+    internal class ClickableSpan : Android.Text.Style.ClickableSpan
+    {
+        A anchor;
+        public ClickableSpan(A anchor) : base()
+        {
+            this.anchor = anchor;
+        }
+
+        public override void OnClick(View widget)
+        {
+            anchor.OnClick();
+        }
+    }
+
+    internal class StringAnchor : Ao3TrackReader.Text.String
+    {
+        public A Owner { get; set; }
+        public int Length { get; set; }
+    }
+
+    public partial class A 
+    {
+        public override ICollection<String> Flatten(StateNode state)
+        {
+            var newstate = new StateNode();
+            newstate.ApplyState(this);
+            newstate.ApplyState(state);
+
+            List<String> res = new List<String>(Nodes.Count + 2);
+            var anchor = new StringAnchor { Owner = this };
+            res.Add(anchor);
+            bool donefirst = false;
+
+            foreach (var node in Nodes)
+            {
+                if (Pad && donefirst) res.Add(new String(" "));
+                res.AddRange(node.Flatten(newstate));
+                donefirst = true;
+            }
+            res.ForEach((str) => anchor.Length = anchor.Length + (str.Text?.Length ?? 0));
+
+            return res;
+        }
+    }
+
+
     public abstract partial class TextEx
     {
         public SpannableString ConvertToSpannable(StateNode state, DisplayMetrics displayMetrics)
@@ -45,7 +92,15 @@ namespace Ao3TrackReader.Text
             int start = 0;
             foreach (var n in nodes)
             {
-                if (string.IsNullOrEmpty(n.Text)) continue;
+                if (string.IsNullOrEmpty(n.Text))
+                {
+                    if (n is StringAnchor a)
+                    {
+                        s.SetSpan(new ClickableSpan(a.Owner), start, start + a.Length, SpanTypes.InclusiveExclusive);
+                        s.SetSpan(new UnderlineSpan(), start, start + a.Length, SpanTypes.InclusiveExclusive);
+                    }
+                    continue;
+                }
 
                 if (n.Bold != null || n.Italic != null || n.FontSize != null || n.Foreground != null)
                 {

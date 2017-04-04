@@ -94,7 +94,7 @@ namespace Ao3TrackReader
             if (view.TextEx == null) return;
             Control.TextWrapping = Windows.UI.Xaml.TextWrapping.WrapWholeWords;
             Control.Inlines.Clear();
-            Control.Inlines.Add(view.TextEx.FlattenToSpan());
+            Control.Inlines.Add(view.TextEx.ConvertToInline());
             (Element as Xamarin.Forms.IVisualElementController).InvalidateMeasure(Xamarin.Forms.Internals.InvalidationTrigger.RendererReady);
             Control.InvalidateMeasure();
             InvalidateMeasure();

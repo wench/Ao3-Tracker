@@ -23,7 +23,6 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Ao3TrackReader.Resources;
 using Ao3TrackReader.Models;
-using Span = Xamarin.Forms.Span;
 
 namespace Ao3TrackReader.Controls
 {
@@ -38,13 +37,22 @@ namespace Ao3TrackReader.Controls
             InitializeComponent();
 
             var v = App.Version;
-            aboutText.FormattedText = new FormattedString();
-            aboutText.FormattedText.Spans.Add(new Span { Text = "Ao3Track Reader Version " + v.Major + "." + v.Minor + "." + v.Build + "\n" });
-            aboutText.FormattedText.Spans.Add(new Span { Text = App.Copyright + "\n" });
-            aboutText.FormattedText.Spans.Add(new Span { Text = "Source Code for this build available at: \n" });
-            aboutText.FormattedText.Spans.Add(new Span { Text = App.Source.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
-            aboutText.FormattedText.Spans.Add(new Span { Text = "Under the terms of '" + App.License.Name + "':\n" });
-            aboutText.FormattedText.Spans.Add(new Span { Text = App.License.uri.AbsoluteUri + "\n", ForegroundColor = Ao3TrackReader.Resources.Colors.Highlight });
+            aboutText.TextEx = new Text.Span
+            {
+                Nodes = {
+                    new Text.String { Text = "Ao3Track Reader Version " + v.Major + "." + v.Minor + "." + v.Build },
+                    new Text.Br(),
+                    new Text.String { Text = App.Copyright },
+                    new Text.Br(),
+                    new Text.String { Text = "Source Code for this build available at: " },
+                    new Text.Br(),
+                    new Text.Link { Nodes = { App.Source.AbsoluteUri }, Foreground = Ao3TrackReader.Resources.Colors.Highlight, Href = App.Source },
+                    new Text.Br(),
+                    new Text.String { Text = "Under the terms of '" + App.License.Name + "': " },
+                    new Text.Br(),
+                    new Text.Link { Nodes = { App.License.uri.AbsoluteUri }, Foreground = Ao3TrackReader.Resources.Colors.Highlight, Href = App.License.uri },
+                }
+            };
 
             isCreateUser = false;
 

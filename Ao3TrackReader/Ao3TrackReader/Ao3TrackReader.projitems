@@ -60,6 +60,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TagCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Block.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Italic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\Link.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\P.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\StateNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Strikethrough.cs" />

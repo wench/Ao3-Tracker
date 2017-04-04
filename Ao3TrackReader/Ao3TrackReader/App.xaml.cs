@@ -72,7 +72,7 @@ namespace Ao3TrackReader
 #endif
 #endif
             }
-}
+        }
 
         public static string Copyright
         {
@@ -86,7 +86,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                return ("Apache License, Version 2.0", new Uri("http://www.apache.org/licenses/LICENSE-2.0"));
+                return ("Apache License, Version 2.0", new Uri("https://www.apache.org/licenses/LICENSE-2.0"));
             }
         }
 
@@ -120,6 +120,11 @@ namespace Ao3TrackReader
         {
             get { return (NavigationPage)base.MainPage; }
             set { base.MainPage = value; }
+        }
+
+        public WebViewPage WebViewPage
+        {
+            get { return wvp;}
         }
 
         public new static App Current

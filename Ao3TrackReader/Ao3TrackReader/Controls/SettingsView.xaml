@@ -264,7 +264,7 @@ limitations under the License.
 
                     <StackLayout Spacing="4">
                         <Label Text="About" Style="{StaticResource Heading}" />
-                        <Label x:Name="aboutText" Style="{StaticResource Remark}" HorizontalOptions="Start" />
+                        <local:TextView x:Name="aboutText" Style="{StaticResource Remark}" HorizontalOptions="Start" />
                     </StackLayout>
 
                 </StackLayout>

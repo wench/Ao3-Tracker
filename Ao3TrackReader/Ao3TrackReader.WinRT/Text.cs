@@ -127,6 +127,28 @@ namespace Ao3TrackReader.Text
         }
     }
 
+    public partial class A
+    {
+        public override Inline ConvertToInline()
+        {
+            var s = new Windows.UI.Xaml.Documents.Hyperlink();
+            s.Click += (sender, args) =>
+            {
+                OnClick();
+            };
+
+            bool donefirst = false;
+            foreach (var n in Nodes)
+            {
+                if (Pad && donefirst) s.Inlines.Add(new Windows.UI.Xaml.Documents.Run { Text = " " });
+                s.Inlines.Add(n.ConvertToInline());
+                donefirst = true;
+            }
+
+            return ApplyStyles(s);
+        }
+    }
+
     public partial class Block
     {
         public override Inline ConvertToInline()
