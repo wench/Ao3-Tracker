@@ -26,7 +26,7 @@ namespace Ao3TrackReader.Text
         public Block() : base()
         {
         }
-        public Block(IEnumerable<TextEx> from) : base()
+        public Block(IEnumerable<TextEx> from) : base(from)
         {
         }
 

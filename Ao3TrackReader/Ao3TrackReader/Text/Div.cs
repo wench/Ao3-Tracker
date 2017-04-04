@@ -25,7 +25,7 @@ namespace Ao3TrackReader.Text
         public Div() : base()
         {
         }
-        public Div(IEnumerable<TextEx> from) : base()
+        public Div(IEnumerable<TextEx> from) : base(from)
         {
         }
     }

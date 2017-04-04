@@ -26,7 +26,7 @@ namespace Ao3TrackReader.Text
         {
             Bold = true;
         }
-        public B(IEnumerable<TextEx> from) : base()
+        public B(IEnumerable<TextEx> from) : base(from)
         {
             Bold = true;
         }

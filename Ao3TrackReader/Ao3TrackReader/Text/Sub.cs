@@ -26,7 +26,7 @@ namespace Ao3TrackReader.Text
         {
             Sub = true;
         }
-        public Sub(IEnumerable<TextEx> from) : base()
+        public Sub(IEnumerable<TextEx> from) : base(from)
         {
             Sub = true;
         }

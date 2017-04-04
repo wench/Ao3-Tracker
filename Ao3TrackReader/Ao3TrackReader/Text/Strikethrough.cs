@@ -26,7 +26,7 @@ namespace Ao3TrackReader.Text
         {
             Strike = true;
         }
-        public S(IEnumerable<TextEx> from) : base()
+        public S(IEnumerable<TextEx> from) : base(from)
         {
             Strike = true;
         }
@@ -37,7 +37,7 @@ namespace Ao3TrackReader.Text
         public Strike() : base()
         {
         }
-        public Strike(IEnumerable<TextEx> from) : base()
+        public Strike(IEnumerable<TextEx> from) : base(from)
         {
         }
     }

@@ -26,7 +26,7 @@ namespace Ao3TrackReader.Text
         {
             Italic = true;
         }
-        public I(IEnumerable<TextEx> from) : base()
+        public I(IEnumerable<TextEx> from) : base(from)
         {
             Italic = true;
         }
@@ -37,7 +37,7 @@ namespace Ao3TrackReader.Text
         public Em() : base()
         {
         }
-        public Em(IEnumerable<TextEx> from) : base()
+        public Em(IEnumerable<TextEx> from) : base(from)
         {
         }
     }

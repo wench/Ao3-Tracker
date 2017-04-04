@@ -26,7 +26,7 @@ namespace Ao3TrackReader.Text
         {
             Underline = true;
         }
-        public U(IEnumerable<TextEx> from) : base()
+        public U(IEnumerable<TextEx> from) : base(from)
         {
             Underline = true;
         }
