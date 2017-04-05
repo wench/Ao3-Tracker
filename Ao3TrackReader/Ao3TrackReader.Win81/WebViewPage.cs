@@ -63,7 +63,8 @@ namespace Ao3TrackReader
 
             contextMenuPlaceholder = new Xamarin.Forms.ContentView();
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(0, 0, 0, 0));
-            Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, Xamarin.Forms.AbsoluteLayoutFlags.None);
+            Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, Xamarin.Forms.AbsoluteLayoutFlags.PositionProportional);
+            MainContent.Children.Insert(0, contextMenuPlaceholder);
 
             webView.SizeChanged += WebView_SizeChanged;
         }

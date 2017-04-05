@@ -217,9 +217,8 @@ namespace Ao3TrackReader
             HideContextMenu();
 
 #if !WINDOWS_UWP
-            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(x * Width / webView.Width, y * Height / webView.Height, 0, 0));
+            Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(x / webView.ActualWidth, y / webView.ActualHeight, 0, 0));
 #endif
-
 
             var inturl = Ao3SiteDataLookup.CheckUri(new Uri(url)) != null;
             var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
