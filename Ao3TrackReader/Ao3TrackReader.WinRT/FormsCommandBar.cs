@@ -23,6 +23,8 @@ using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 
 #if WINDOWS_UWP
 using BaseCommandBar = Xamarin.Forms.Platform.UWP.FormsCommandBar;
@@ -33,17 +35,37 @@ using BaseCommandBar = Windows.UI.Xaml.Controls.CommandBar;
 
 namespace Ao3TrackReader.WinRT
 {
+#if !WINDOWS_UWP
+
+    internal class AppBarEllipsis : AppBarButton
+    {
+        public AppBarEllipsis() : base()
+        {
+            var i = new SymbolIcon(Symbol.More);
+            Icon = new BitmapIcon
+            {
+                UriSource = new Uri("ms-appx:///" + Ao3TrackReader.Resources.Icons.More)
+            };
+        }
+
+        protected override void OnApplyTemplate()
+        {
+            var RootGrid = GetTemplateChild("RootGrid") as Grid;
+            RootGrid.Width = 48;
+        }
+    }
+#endif
+
     public class FormsCommandBar : BaseCommandBar
     {
         bool haveDynamicOverflow = false;
-        bool needOverflowmenu = false;
+
         public FormsCommandBar() : base()
         {
 #if WINDOWS_UWP
             if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.CommandBar", "IsDynamicOverflowEnabled"))
                 IsDynamicOverflowEnabled = haveDynamicOverflow = true;
 #else
-            needOverflowmenu = true;
             IsOpen = true;
             IsSticky = true;
 #endif
@@ -53,15 +75,20 @@ namespace Ao3TrackReader.WinRT
 
         bool reflowing = false;
         bool needseparator = false;
-        MenuFlyout secondaryFlyout = null;
         List<AppBarButton> primary = new List<AppBarButton>();
         List<AppBarButton> secondary = new List<AppBarButton>();
+
+#if !WINDOWS_UWP
+        MenuFlyout secondaryFlyout = null;
+#endif
 
         private void VectorChanged(Windows.Foundation.Collections.IObservableVector<ICommandBarElement> sender, Windows.Foundation.Collections.IVectorChangedEventArgs args)
         {
             if (args.CollectionChange == Windows.Foundation.Collections.CollectionChange.Reset)
             {
+#if !WINDOWS_UWP
                 secondaryFlyout = null;
+#endif
                 needseparator = false;
                 if (!reflowing)
                 {
@@ -74,20 +101,20 @@ namespace Ao3TrackReader.WinRT
                 var itembase = sender[(int)args.Index];
                 itembase.IsCompact = true;
 
-                if (sender == SecondaryCommands && needOverflowmenu)
+#if !WINDOWS_UWP
+                if (sender == SecondaryCommands)
                 {
                     if (secondaryFlyout == null)
                     {
-                        PrimaryCommands.Add(new AppBarButton
+                        var ellipsis = new AppBarEllipsis
                         {
                             Flyout = secondaryFlyout = new MenuFlyout(),
-                            Icon = new BitmapIcon
-                            {
-                                UriSource = new Uri("ms-appx:///" + Ao3TrackReader.Resources.Icons.More)
-                            }
-                        });
+                        };
+
+                        PrimaryCommands.Add(ellipsis);
                         secondaryFlyout.Opening += SecondaryFlyout_Opening;
                         secondaryFlyout.Closed += SecondaryFlyout_Closed;
+                        secondaryFlyout.Opened += SecondaryFlyout_Opened;
                     }
 
                     if (needseparator)
@@ -105,11 +132,12 @@ namespace Ao3TrackReader.WinRT
                         if (!reflowing && !primary.Contains(button))
                             secondary.Add(button);
 
-                        var menuitem = new MenuFlyoutItem
+                        var menuitem = new MenuFlyoutItemEx
                         {
                             Text = button.Label,
                             Command = button.Command,
-                            DataContext = button.DataContext
+                            DataContext = button.DataContext,
+                            Icon = button.Icon,
                         };
 
                         if (menuitem.DataContext is Ao3TrackReader.Controls.ToolbarItem)
@@ -121,7 +149,7 @@ namespace Ao3TrackReader.WinRT
                                 Path = new PropertyPath("Foreground"),
                                 Converter = new ColorConverter()
                             };
-                            menuitem.SetBinding(MenuFlyoutItem.ForegroundProperty, b);
+                            menuitem.SetBinding(MenuFlyoutItemEx.ForegroundProperty, b);
                         }
 
                         secondaryFlyout.Items.Add(menuitem);
@@ -131,6 +159,7 @@ namespace Ao3TrackReader.WinRT
 
                     return;
                 }
+#endif
 
                 if (itembase is FrameworkElement e) e.Visibility = Visibility.Visible;
 
@@ -198,26 +227,9 @@ namespace Ao3TrackReader.WinRT
             }
         }
 
-        private void SecondaryFlyout_Closed(object sender, object e)
+        private void SecondaryFlyout_Opened(object sender, object e)
         {
-            foreach (var item in PrimaryCommands)
-            {
-                if (item is AppBarButton abb)
-                {
-                    VisualStateManager.GoToState(abb, "HideLabel", true);
-                }
-            }
-        }
-
-        private void SecondaryFlyout_Opening(object sender, object e)
-        {
-            foreach (var item in PrimaryCommands)
-            {
-                if (item is AppBarButton abb)
-                {
-                    VisualStateManager.GoToState(abb, "ShowLabel", true);
-                }
-            }
+            
         }
 
 #if WINDOWS_UWP
@@ -235,6 +247,31 @@ namespace Ao3TrackReader.WinRT
             return res;
         }
 #else
+        VisualTransition LabelsHiddenToShown;
+        VisualTransition LabelsShownToHidden;
+        VisualState LabelsHidden;
+
+        protected override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            LabelsHiddenToShown = GetTemplateChild("LabelsHiddenToShown") as VisualTransition;
+            LabelsShownToHidden = GetTemplateChild("LabelsShownToHidden") as VisualTransition;
+
+            LabelsHidden = GetTemplateChild("LabelsHidden") as VisualState;
+            LabelsHidden.Storyboard.Begin();
+        }
+
+        private void SecondaryFlyout_Closed(object sender, object e)
+        {
+            LabelsShownToHidden.Storyboard.Begin();
+        }
+
+        private void SecondaryFlyout_Opening(object sender, object e)
+        {
+            LabelsHiddenToShown.Storyboard.Begin();
+        }
+
         protected override void OnClosed(object e)
         {
             IsOpen = true;
@@ -245,17 +282,10 @@ namespace Ao3TrackReader.WinRT
         {
             var ret = base.ArrangeOverride(finalSize);
 
-#if !WINDOWS_UWP
-            if (Window.Current.Content is Frame f)
-            {
-                f.Margin = new Thickness(0, 0, 0, ret.Height);
-            }
-#endif
-
             if (!haveDynamicOverflow && primary.Count != 0)
             {
                 uint limit = (uint)Math.Floor(ret.Width / 68) - 1;
-                int currentCount = PrimaryCommands.CountVisible() - (needOverflowmenu ? 1 : 0);
+                int currentCount = PrimaryCommands.CountVisible();
 
                 if (currentCount != limit && !(currentCount == primary.Count && limit > currentCount))
                 {
@@ -300,7 +330,7 @@ namespace Ao3TrackReader.WinRT
             int count = 0;
             foreach (var e in vector)
             {
-                if (e is Control ctrl && ctrl.Visibility == Visibility.Visible)
+                if (e is AppBarButton ctrl && ctrl.Visibility == Visibility.Visible && ctrl.Flyout == null)
                     count++;
             }
             return count;

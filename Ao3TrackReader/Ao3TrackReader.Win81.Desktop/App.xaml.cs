@@ -88,7 +88,7 @@ namespace Ao3TrackReader.Win81
 
                 Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(new MergeStyles());
 
-                rootFrame.Margin = new Thickness(0, 0, 0, (double)App.Current.Resources["AppBarThemeMinHeight"]);
+                rootFrame.Margin = new Thickness(0, 0, 0, 48);
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
