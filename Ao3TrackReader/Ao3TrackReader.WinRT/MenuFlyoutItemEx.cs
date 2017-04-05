@@ -8,11 +8,15 @@ namespace Ao3TrackReader.WinRT
 {
     public class MenuFlyoutItemEx : MenuFlyoutItem
     {
+        public MenuFlyoutItemEx()
+        {
+
+        }
         static DependencyProperty GetIconDependencyProperty ()
         {
 #if WINDOWS_UWP
-            if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.MenuFlyoutItem", "IconProperty"))
-                return MenuFlyoutItem.IconProperty;
+            //if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.MenuFlyoutItem", "IconProperty"))
+            //    return MenuFlyoutItem.IconProperty;
 #endif
             return DependencyProperty.Register(
                 "Icon",
@@ -25,7 +29,7 @@ namespace Ao3TrackReader.WinRT
         public static readonly DependencyProperty IconProperty = GetIconDependencyProperty();
 
 #if WINDOWS_UWP
-        new 
+        //new 
 #endif
         public IconElement Icon
         {

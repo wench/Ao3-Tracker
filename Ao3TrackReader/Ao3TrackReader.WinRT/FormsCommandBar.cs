@@ -35,6 +35,7 @@ using BaseCommandBar = Windows.UI.Xaml.Controls.CommandBar;
 
 namespace Ao3TrackReader.WinRT
 {
+
 #if !WINDOWS_UWP
 
     internal class AppBarEllipsis : AppBarButton
@@ -62,6 +63,8 @@ namespace Ao3TrackReader.WinRT
 
         public FormsCommandBar() : base()
         {
+            if (Application.Current.Resources.TryGetValue("ao3t:AppBarButtonTemplate", out var template))
+                AppBarButtonTemplate = template as ControlTemplate;
 #if WINDOWS_UWP
             if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.CommandBar", "IsDynamicOverflowEnabled"))
                 IsDynamicOverflowEnabled = haveDynamicOverflow = true;
@@ -77,6 +80,7 @@ namespace Ao3TrackReader.WinRT
         bool needseparator = false;
         List<AppBarButton> primary = new List<AppBarButton>();
         List<AppBarButton> secondary = new List<AppBarButton>();
+        private ControlTemplate AppBarButtonTemplate;
 
 #if !WINDOWS_UWP
         MenuFlyout secondaryFlyout = null;
@@ -114,7 +118,6 @@ namespace Ao3TrackReader.WinRT
                         PrimaryCommands.Add(ellipsis);
                         secondaryFlyout.Opening += SecondaryFlyout_Opening;
                         secondaryFlyout.Closed += SecondaryFlyout_Closed;
-                        secondaryFlyout.Opened += SecondaryFlyout_Opened;
                     }
 
                     if (needseparator)
@@ -136,9 +139,10 @@ namespace Ao3TrackReader.WinRT
                         {
                             Text = button.Label,
                             Command = button.Command,
-                            DataContext = button.DataContext,
-                            Icon = button.Icon,
+                            DataContext = button.DataContext                            
                         };
+                        if (button.Icon is BitmapIcon bmp) menuitem.Icon = new BitmapIcon { UriSource = bmp.UriSource };
+                        else if (button.Icon is SymbolIcon sym) menuitem.Icon = new SymbolIcon(sym.Symbol);
 
                         if (menuitem.DataContext is Ao3TrackReader.Controls.ToolbarItem)
                         {
@@ -165,6 +169,8 @@ namespace Ao3TrackReader.WinRT
 
                 var item = itembase as AppBarButton;
                 if (item == null) return;
+                if (AppBarButtonTemplate != null)
+                    item.Template = AppBarButtonTemplate;
 
                 var xitem = item.DataContext as Xamarin.Forms.ToolbarItem;
                 if (xitem == null) return;
@@ -182,13 +188,16 @@ namespace Ao3TrackReader.WinRT
                             {
                                 item.Visibility = Visibility.Collapsed;
                                 needseparator = false;
-                                SecondaryCommands.Add(new AppBarButton
+                                var newitem = new AppBarButton
                                 {
                                     Label = item.Label,
-                                    Icon = item.Icon,
                                     Command = item.Command,
                                     DataContext = item.DataContext
-                                });
+                                };
+                                if (item.Icon is BitmapIcon bmp) newitem.Icon = new BitmapIcon { UriSource = bmp.UriSource };
+                                else if (item.Icon is SymbolIcon sym) newitem.Icon = new SymbolIcon(sym.Symbol);
+                                SecondaryCommands.Add(newitem);
+
                                 needseparator = true;
 
                                 return;
@@ -204,6 +213,8 @@ namespace Ao3TrackReader.WinRT
                         SecondaryCommands.Insert((int)args.Index,new AppBarSeparator());
                     }
                     if (!reflowing) secondary.Add(item);
+
+                    var ti = GetTemplateChild("SecondaryItemsControl");
                 }
 
                 item.ClearValue(AppBarButton.IconProperty);
@@ -227,10 +238,6 @@ namespace Ao3TrackReader.WinRT
             }
         }
 
-        private void SecondaryFlyout_Opened(object sender, object e)
-        {
-            
-        }
 
 #if WINDOWS_UWP
         protected override Size MeasureOverride(Size availableSize)
@@ -291,7 +298,9 @@ namespace Ao3TrackReader.WinRT
                 {
                     reflowing = true;
 
+#if !WINDOWS_UWP
                     secondaryFlyout = null;
+#endif
                     needseparator = false;
                     PrimaryCommands.Clear();
                     SecondaryCommands.Clear();
@@ -320,7 +329,6 @@ namespace Ao3TrackReader.WinRT
 
             return ret;
         }
-
     }
 
     static class CommandBarExtensions

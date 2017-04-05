@@ -108,9 +108,6 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="DropDownRenderer.cs" />
-    <Compile Include="MergeStyles.xaml.cs">
-      <DependentUpon>MergeStyles.xaml</DependentUpon>
-    </Compile>
     <Compile Include="WebViewPage.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -475,6 +472,11 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MergeStyles-Pre15063.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
     <Page Include="MergeStyles.xaml">
       <SubType>Designer</SubType>

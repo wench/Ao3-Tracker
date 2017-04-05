@@ -85,8 +85,8 @@ namespace Ao3TrackReader.Win81
 
                 Xamarin.Forms.Forms.Init(e);
                 XApp = new Ao3TrackReader.App();
-
-                Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(new MergeStyles());
+                
+                Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
 
                 rootFrame.Margin = new Thickness(0, 0, 0, 48);
 

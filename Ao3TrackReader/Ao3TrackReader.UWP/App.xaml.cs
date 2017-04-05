@@ -75,7 +75,6 @@ namespace Ao3TrackReader.UWP
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
@@ -97,7 +96,11 @@ namespace Ao3TrackReader.UWP
                 Xamarin.Forms.Forms.Init(e);
                 XApp = new Ao3TrackReader.App();
 
-                Windows.UI.Xaml.Application.Current.Resources.MergedDictionaries.Add(new MergeStyles());
+                Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
+
+                //if (!Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.MenuFlyoutItem", "IconProperty"))
+                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles-Pre15063.xaml") });
+
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
