@@ -15,6 +15,7 @@ namespace Ao3TrackReader.Version.Build
             }
             try
             {
+                Console.WriteLine(args[0]);
                 var doc = new XmlDocument();
                 doc.Load(args[0]);
                 XmlNamespaceManager nsmanager = new XmlNamespaceManager(doc.NameTable);
@@ -54,11 +55,15 @@ namespace Ao3TrackReader.Version.Build
                             newValue = Ao3TrackReader.Version.Version.LongString;
                             break;
 
+                        case "AltString":
+                            newValue = Ao3TrackReader.Version.Version.AltString;
+                            break;
+
                         default:
                             throw new ArgumentException("Unknown type", "args[" + i + "]");
                     }                 
 
-                    Console.WriteLine("{0} = {1} => {2}", args[i].Substring(0, o).Replace("_:",""), n.InnerText, newValue);
+                    Console.WriteLine("{0}: {1} => {2}", args[i].Substring(0, o).Replace("_:",""), n.InnerText, newValue);
                     if (n.InnerText != newValue)
                     {
                         n.InnerText = newValue;

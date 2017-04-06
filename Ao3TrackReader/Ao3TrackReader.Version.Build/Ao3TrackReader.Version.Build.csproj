@@ -141,8 +141,8 @@
     <PostBuildEvent>$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.UWP/Package.appxmanifest /_:Package/_:Identity/@Version=LongString
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.iOS/Info.plist /plist/dict/key[text()='CFBundleVersion']/following-sibling::node()=String /plist/dict/key[text()='CFBundleShortVersionString']/following-sibling::node()=String
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Droid/Properties/AndroidManifest.xml /manifest/@android:versionName=String /manifest/@android:versionCode=Integer
-$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Desktop/Package.appxmanifest /_:Package/_:Identity/@Version=LongString
-$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Phone/Package.appxmanifest /_:Package/_:Identity/@Version=LongString
+$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Desktop/Package.appxmanifest /_:Package/_:Identity/@Version=AltString
+$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Phone/Package.appxmanifest /_:Package/_:Identity/@Version=AltString
 </PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

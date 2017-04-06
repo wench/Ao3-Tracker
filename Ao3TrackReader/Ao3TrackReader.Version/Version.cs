@@ -13,6 +13,7 @@ namespace Ao3TrackReader.Version
 
         public const string String = "1.0.2";
         public const string LongString = "1.0.2.0";
+        public const string AltString = "1.0.0.2";
         public const int Integer = Major * 1000000 + Minor * 1000 + Build;
 
         public const string Copyright = "Copyright © 2017 Alexis Ryan";
