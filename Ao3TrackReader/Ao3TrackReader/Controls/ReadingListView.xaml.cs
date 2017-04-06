@@ -349,7 +349,8 @@ namespace Ao3TrackReader.Controls
 
         public void PageChange(Uri uri)
         {
-            uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
+            if (uri != null) uri = Data.Ao3SiteDataLookup.ReadingListlUri(uri.AbsoluteUri);
+
             wvp.DoOnMainThread(() => 
             {
                 if (uri == null)

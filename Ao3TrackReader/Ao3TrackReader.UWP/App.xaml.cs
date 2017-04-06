@@ -38,6 +38,31 @@ namespace Ao3TrackReader.UWP
     /// </summary>
     sealed partial class App : Application
     {
+        public static ushort UniversalApi { get; }
+
+        static App()
+        {
+            ushort limit;
+#if WINDOWS_15063
+            limit = 4;
+#elif WINDOWS_14393
+            limit = 3;
+#elif WINDOWS_10586
+            limit = 2;
+#else
+            limit = 1;
+#endif
+            for (var i = limit; i >=1; i++)
+            {
+                if (Windows.Foundation.Metadata.ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", i))
+                {
+                    UniversalApi = i;
+                    break;
+                }
+            }
+
+        }
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -95,12 +120,14 @@ namespace Ao3TrackReader.UWP
 
                 Xamarin.Forms.Forms.Init(e);
                 XApp = new Ao3TrackReader.App();
-
+                
                 Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
 
-                //if (!Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.MenuFlyoutItem", "IconProperty"))
-                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles-Pre15063.xaml") });
+                if (UniversalApi <= 3)
+                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles-Api-3.xaml") });
 
+                if (UniversalApi <= 2)
+                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles-Api-2.xaml") });
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

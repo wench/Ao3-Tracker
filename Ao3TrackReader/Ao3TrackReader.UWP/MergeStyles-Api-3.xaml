@@ -125,14 +125,14 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <ControlTemplate TargetType="AppBarButton" x:Key="ao3t:AppBarButtonTemplate">
+    
+    <ControlTemplate TargetType="AppBarButton"  x:Key="ao3t:AppBarButtonTemplate">
         <Grid x:Name="Root"
-            MinWidth="{TemplateBinding MinWidth}"
-            MaxWidth="{TemplateBinding MaxWidth}"
-            Background="{TemplateBinding Background}"
-            BorderBrush="{TemplateBinding BorderBrush}"
-            BorderThickness="{TemplateBinding BorderThickness}">
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MaxWidth="{TemplateBinding MaxWidth}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
             <Grid.Resources>
                 <Style x:Name="LabelOnRightStyle" TargetType="AppBarButton">
                     <Setter Property="Width" Value="NaN" />
@@ -188,8 +188,11 @@
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowWrapper" Storyboard.TargetProperty="Visibility">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="Visible" />
                             </ObjectAnimationUsingKeyFrames>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Root" Storyboard.TargetProperty="Width">
-                                <DiscreteObjectKeyFrame KeyTime="0" Value="NaN" />
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Content" Storyboard.TargetProperty="Content">
+                                <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Null}" />
+                            </ObjectAnimationUsingKeyFrames>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowContent" Storyboard.TargetProperty="Content">
+                                <DiscreteObjectKeyFrame KeyTime="0" Value="{Binding Path=Icon,RelativeSource={RelativeSource TemplatedParent}}" />
                             </ObjectAnimationUsingKeyFrames>
                         </Storyboard>
                     </VisualState>
@@ -204,16 +207,13 @@
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Margin">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="38,0,12,0" />
                             </ObjectAnimationUsingKeyFrames>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowContent" Storyboard.TargetProperty="Visibility">
-                                <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed" />
-                            </ObjectAnimationUsingKeyFrames>
                         </Storyboard>
                     </VisualState>
                 </VisualStateGroup>
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <Storyboard>
-                            <PointerUpThemeAnimation Storyboard.TargetName="OverflowTextLabel" />
+                            <PointerUpThemeAnimation Storyboard.TargetName="OverflowWrapper" />
                         </Storyboard>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
@@ -230,14 +230,13 @@
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TextLabel" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPointerOver}" />
                             </ObjectAnimationUsingKeyFrames>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Foreground">
-                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPointerOver}" />
-                            </ObjectAnimationUsingKeyFrames>
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowContent" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPointerOver}" />
                             </ObjectAnimationUsingKeyFrames>
-                            <PointerUpThemeAnimation Storyboard.TargetName="OverflowTextLabel" />
-                            <PointerUpThemeAnimation Storyboard.TargetName="OverflowContent" />
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Foreground">
+                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPointerOver}" />
+                            </ObjectAnimationUsingKeyFrames>
+                            <PointerUpThemeAnimation Storyboard.TargetName="OverflowWrapper" />
                         </Storyboard>
                     </VisualState>
                     <VisualState x:Name="Pressed">
@@ -254,14 +253,13 @@
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TextLabel" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPressed}" />
                             </ObjectAnimationUsingKeyFrames>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Foreground">
-                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPressed}" />
-                            </ObjectAnimationUsingKeyFrames>
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowContent" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPressed}" />
                             </ObjectAnimationUsingKeyFrames>
-                            <PointerDownThemeAnimation Storyboard.TargetName="OverflowTextLabel" />
-                            <PointerDownThemeAnimation Storyboard.TargetName="OverflowContent" />
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Foreground">
+                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundPressed}" />
+                            </ObjectAnimationUsingKeyFrames>
+                            <PointerDownThemeAnimation Storyboard.TargetName="OverflowWrapper" />
                         </Storyboard>
                     </VisualState>
                     <VisualState x:Name="Disabled">
@@ -278,10 +276,10 @@
                             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TextLabel" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundDisabled}" />
                             </ObjectAnimationUsingKeyFrames>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Foreground">
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowContent" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundDisabled}" />
                             </ObjectAnimationUsingKeyFrames>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowContent" Storyboard.TargetProperty="Foreground">
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OverflowTextLabel" Storyboard.TargetProperty="Foreground">
                                 <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AppBarButtonForegroundDisabled}" />
                             </ObjectAnimationUsingKeyFrames>
                         </Storyboard>
@@ -311,29 +309,28 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <ContentPresenter x:Name="Content"
-                    Height="20"
-                    Margin="0,14,0,4"
-                    Content="{TemplateBinding Icon}"
-                    Foreground="{TemplateBinding Foreground}"
-                    HorizontalAlignment="Stretch"
-                    AutomationProperties.AccessibilityView="Raw"/>
+                                Height="20"
+                                Margin="0,14,0,4"
+                                Content="{TemplateBinding Icon}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="Stretch"
+                                AutomationProperties.AccessibilityView="Raw"/>
                 <TextBlock x:Name="TextLabel"
-                    Grid.Row="1"
-                    Text="{TemplateBinding Label}"
-                    Foreground="{TemplateBinding Foreground}"
-                    FontSize="12"
-                    FontFamily="{TemplateBinding FontFamily}"
-                    TextAlignment="Center"
-                    TextWrapping="Wrap"
-                    Margin="2,0,2,6" />
+                                Grid.Row="1"
+                                Text="{TemplateBinding Label}"
+                                Foreground="{TemplateBinding Foreground}"
+                                FontSize="12"
+                                FontFamily="{TemplateBinding FontFamily}"
+                                TextAlignment="Center"
+                                TextWrapping="Wrap"
+                                Margin="2,0,2,6" />
             </Grid>
             <Grid x:Name="OverflowWrapper" 
                     Visibility="Collapsed">
                 <ContentPresenter x:Name="OverflowContent"
                     Height="20"
                     Width="20"
-                    Margin="9,0,0,0"
-                    Content="{TemplateBinding Icon}"
+                    Margin="9,0,0,0"                  
                     Foreground="{TemplateBinding Foreground}"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
@@ -353,6 +350,5 @@
             </Grid>
         </Grid>
     </ControlTemplate>
-
 
 </ResourceDictionary>

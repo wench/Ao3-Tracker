@@ -8,9 +8,11 @@
         "**/.DS_Store": true,
         "*/node_modules/": true
     },
-    "csharp.suppressDotnetInstallWarning": false,
+    "csharp.suppressDotnetInstallWarning": true,
     "vsicons.projectDetection.disableDetect": true,
     "vsicons.presets.angular": false,
     "terminal.integrated.cwd": "ao3_tracker",
-    "typescript.check.tscVersion": false
+    "typescript.check.tscVersion": false,
+    "omnisharp.autoStart": false,
+    "csharp.suppressDotnetRestoreNotification": true
 }

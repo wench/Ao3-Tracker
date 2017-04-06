@@ -30,14 +30,10 @@ namespace Ao3TrackReader.Text
 {
     public abstract partial class TextEx
     {
-#if UWP_CREATORS_UPDATE
-        protected const bool isTextDecorationsAvailable = Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Documents.TextElement", "TextDecorations");
-#endif
-
         protected Inline ApplyStyles(Inline i)
         {
-#if UWP_CREATORS_UPDATE
-            if (isTextDecorationsAvailable)
+#if false
+            if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
             {
                 i.TextDecorations = TextDecorations.None;
                 if (Underline == true)

@@ -15,7 +15,7 @@ namespace Ao3TrackReader.WinRT
         static DependencyProperty GetIconDependencyProperty ()
         {
 #if WINDOWS_UWP
-            //if (Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.UI.Xaml.Controls.MenuFlyoutItem", "IconProperty"))
+            //if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
             //    return MenuFlyoutItem.IconProperty;
 #endif
             return DependencyProperty.Register(
