@@ -82,7 +82,7 @@ namespace Ao3TrackReader
             if (uri == null) uri = new Uri("http://archiveofourown.org/");
 
             // restore font size!
-            if (!App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
+            if (App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
             else LogFontSize = 0;
 
             App.Database.TryGetVariable("ToolbarBackBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarBackBehaviour, NavigateBehaviour.History);
