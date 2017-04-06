@@ -189,8 +189,16 @@ namespace Ao3TrackReader
             }
         }
 
+
+#if WINDOWS_PHONE_APP
+        public const bool HaveClipboard = false;
+#else
+        public const bool HaveClipboard = true;
+#endif
+
         public void CopyToClipboard(string str, string type)
         {
+#if !WINDOWS_PHONE_APP
             if (type == "text")
             {
                 var dp = new DataPackage();
@@ -204,6 +212,7 @@ namespace Ao3TrackReader
                 dp.SetWebLink(new Uri(str));
                 Clipboard.SetContent(dp);
             }
+#endif
         }
 
         MenuFlyout contextMenu;

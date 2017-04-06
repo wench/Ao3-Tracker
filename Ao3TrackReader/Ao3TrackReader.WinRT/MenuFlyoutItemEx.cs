@@ -15,8 +15,8 @@ namespace Ao3TrackReader.WinRT
         static DependencyProperty GetIconDependencyProperty ()
         {
 #if WINDOWS_UWP
-            //if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
-            //    return MenuFlyoutItem.IconProperty;
+            if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
+                return MenuFlyoutItem.IconProperty;
 #endif
             return DependencyProperty.Register(
                 "Icon",
@@ -26,10 +26,13 @@ namespace Ao3TrackReader.WinRT
             );
         }
 
+#if WINDOWS_15063
+        new
+#endif
         public static readonly DependencyProperty IconProperty = GetIconDependencyProperty();
 
-#if WINDOWS_UWP
-        //new 
+#if WINDOWS_15063
+        new 
 #endif
         public IconElement Icon
         {

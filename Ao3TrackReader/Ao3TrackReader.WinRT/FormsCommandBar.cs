@@ -36,8 +36,7 @@ using BaseCommandBar = Windows.UI.Xaml.Controls.CommandBar;
 namespace Ao3TrackReader.WinRT
 {
 
-#if !WINDOWS_UWP
-
+#if WINDOWS_APP
     internal class AppBarEllipsis : AppBarButton
     {
         public AppBarEllipsis() : base()
@@ -68,7 +67,7 @@ namespace Ao3TrackReader.WinRT
 #if WINDOWS_UWP
             if (Ao3TrackReader.UWP.App.UniversalApi >= 3)
                 IsDynamicOverflowEnabled = haveDynamicOverflow = true;
-#else
+#elif WINDOWS_APP
             IsOpen = true;
             IsSticky = true;
 #endif
@@ -82,7 +81,7 @@ namespace Ao3TrackReader.WinRT
         List<AppBarButton> secondary = new List<AppBarButton>();
         private ControlTemplate AppBarButtonTemplate;
 
-#if !WINDOWS_UWP
+#if WINDOWS_APP
         MenuFlyout secondaryFlyout = null;
 #endif
 
@@ -90,7 +89,7 @@ namespace Ao3TrackReader.WinRT
         {
             if (args.CollectionChange == Windows.Foundation.Collections.CollectionChange.Reset)
             {
-#if !WINDOWS_UWP
+#if WINDOWS_APP
                 secondaryFlyout = null;
 #endif
                 needseparator = false;
@@ -105,7 +104,7 @@ namespace Ao3TrackReader.WinRT
                 var itembase = sender[(int)args.Index];
                 itembase.IsCompact = true;
 
-#if !WINDOWS_UWP
+#if WINDOWS_APP
                 if (sender == SecondaryCommands)
                 {
                     if (secondaryFlyout == null)
@@ -139,7 +138,7 @@ namespace Ao3TrackReader.WinRT
                         {
                             Text = button.Label,
                             Command = button.Command,
-                            DataContext = button.DataContext                            
+                            DataContext = button.DataContext
                         };
                         if (button.Icon is BitmapIcon bmp) menuitem.Icon = new BitmapIcon { UriSource = bmp.UriSource };
                         else if (button.Icon is SymbolIcon sym) menuitem.Icon = new SymbolIcon(sym.Symbol);
@@ -210,7 +209,14 @@ namespace Ao3TrackReader.WinRT
                     if (needseparator)
                     {
                         needseparator = false;
-                        SecondaryCommands.Insert((int)args.Index,new AppBarSeparator());
+#if !WINDOWS_PHONE_APP
+                        SecondaryCommands.Insert((int)args.Index, new AppBarSeparator());
+#else
+                        SecondaryCommands.Insert((int)args.Index, new AppBarButton {
+                            Label = "\x23AF\x23AF\x23AF\x23AF",
+                            IsEnabled = false,
+                    });
+#endif
                     }
                     if (!reflowing) secondary.Add(item);
 
@@ -253,7 +259,7 @@ namespace Ao3TrackReader.WinRT
             }
             return res;
         }
-#else
+#elif WINDOWS_APP
         VisualTransition LabelsHiddenToShown;
         VisualTransition LabelsShownToHidden;
         VisualState LabelsHidden;
@@ -278,12 +284,11 @@ namespace Ao3TrackReader.WinRT
         {
             LabelsHiddenToShown.Storyboard.Begin();
         }
-
         protected override void OnClosed(object e)
         {
             IsOpen = true;
         }
-#endif      
+#endif
 
         protected override Size ArrangeOverride(Size finalSize)
         {
@@ -298,7 +303,7 @@ namespace Ao3TrackReader.WinRT
                 {
                     reflowing = true;
 
-#if !WINDOWS_UWP
+#if WINDOWS_APP
                     secondaryFlyout = null;
 #endif
                     needseparator = false;

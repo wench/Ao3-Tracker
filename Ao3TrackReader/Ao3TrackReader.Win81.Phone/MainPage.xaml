@@ -1,12 +1,17 @@
 ﻿<forms:WindowsPhonePage
-    x:Class="Ao3TrackReader.WinPhone.MainPage"
+    x:Class="Ao3TrackReader.Win81.MainPage"
     xmlns:forms="using:Xamarin.Forms.Platform.WinRT"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Ao3TrackReader.WinPhone"
+    xmlns:local="using:Ao3TrackReader.Win81"
+    xmlns:wrt="using:Ao3TrackReader.WinRT"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <forms:WindowsPhonePage.BottomAppBar>
+        <wrt:FormsCommandBar  />
+    </forms:WindowsPhonePage.BottomAppBar>
 
 </forms:WindowsPhonePage>

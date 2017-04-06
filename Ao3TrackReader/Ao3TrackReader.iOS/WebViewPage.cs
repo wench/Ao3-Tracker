@@ -222,6 +222,8 @@ namespace Ao3TrackReader
             }
         }
 
+        public const bool HaveClipboard = false;
+
         public void CopyToClipboard(string str, string type)
         {
 

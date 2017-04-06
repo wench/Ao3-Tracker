@@ -69,9 +69,9 @@ namespace Ao3TrackReader
             webView.SizeChanged += WebView_SizeChanged;
         }
 
-        private void WebView_SizeChanged(object sender, SizeChangedEventArgs e)
+        private async void WebView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "deviceWidth", DeviceWidth).Wait(0);
+            await CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "deviceWidth", DeviceWidth).ConfigureAwait(false);
         }
 
         public void AddJavascriptObject(string name, object obj)
@@ -80,7 +80,7 @@ namespace Ao3TrackReader
 
         async Task OnInjectingScripts(CancellationToken ct)
         {
-            await EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";");
+            await EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";").ConfigureAwait(false);
         }
 
         Task OnInjectedScripts(CancellationToken ct)

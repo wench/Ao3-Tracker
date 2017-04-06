@@ -264,7 +264,7 @@ namespace Ao3TrackReader
                 new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) =>
                 {
                     CopyToClipboard(url, "url");
-                }))
+                }) { IsEnabled = HaveClipboard })
             };
         }
 
@@ -973,7 +973,14 @@ namespace Ao3TrackReader
                 var type = args[i].GetType();
                 args[i] = Newtonsoft.Json.JsonConvert.SerializeObject(args[i]);
             }
-            return await EvaluateJavascriptAsync(function + "(" + string.Join(",", args) + ");");
+            try
+            {
+                return await EvaluateJavascriptAsync(function + "(" + string.Join(",", args) + ");");
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void OnWebViewGotFocus()

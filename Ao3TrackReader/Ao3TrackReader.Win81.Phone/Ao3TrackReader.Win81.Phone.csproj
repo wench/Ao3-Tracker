@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,7 +8,7 @@
     <ProjectGuid>{C5038D7C-AA97-41E5-98C9-FDA8E173B1EE}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Ao3TrackReader.Win81.Phone</RootNamespace>
+    <RootNamespace>Ao3TrackReader.Win81</RootNamespace>
     <AssemblyName>Ao3TrackReader.Win81.Phone</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
@@ -17,25 +18,8 @@
     <SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_PHONE_APP;__WINDOWS__</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_PHONE_APP;__WINDOWS__</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxBundlePlatforms>x86|arm</AppxBundlePlatforms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -85,6 +69,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Extensions.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -96,269 +81,137 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Icons\addpage_dark.png">
+    <Content Include="..\Icons\padded\addpage_dark.scale-200.png">
       <Link>Assets\addpage_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\addpage_dark.scale-200.png">
-      <Link>Assets\addpage_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\addpage_light.png">
+    <Content Include="..\Icons\padded\addpage_light.scale-200.png">
       <Link>Assets\addpage_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\addpage_light.scale-200.png">
-      <Link>Assets\addpage_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\back_dark.png">
+    <Content Include="..\Icons\padded\back_dark.scale-200.png">
       <Link>Assets\back_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\back_dark.scale-200.png">
-      <Link>Assets\back_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\back_light.png">
+    <Content Include="..\Icons\padded\back_light.scale-200.png">
       <Link>Assets\back_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\back_light.scale-200.png">
-      <Link>Assets\back_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\bookmarks_dark.png">
+    <Content Include="..\Icons\padded\bookmarks_dark.scale-200.png">
       <Link>Assets\bookmarks_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\bookmarks_dark.scale-200.png">
-      <Link>Assets\bookmarks_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\bookmarks_light.png">
+    <Content Include="..\Icons\padded\bookmarks_light.scale-200.png">
       <Link>Assets\bookmarks_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\bookmarks_light.scale-200.png">
-      <Link>Assets\bookmarks_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\close_dark.png">
+    <Content Include="..\Icons\padded\close_dark.scale-200.png">
       <Link>Assets\close_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\close_dark.scale-200.png">
-      <Link>Assets\close_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\close_light.png">
+    <Content Include="..\Icons\padded\close_light.scale-200.png">
       <Link>Assets\close_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\close_light.scale-200.png">
-      <Link>Assets\close_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\filter_dark.png">
+    <Content Include="..\Icons\padded\filter_dark.scale-200.png">
       <Link>Assets\filter_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\filter_dark.scale-200.png">
-      <Link>Assets\filter_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\filter_light.png">
+    <Content Include="..\Icons\padded\filter_light.scale-200.png">
       <Link>Assets\filter_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\filter_light.scale-200.png">
-      <Link>Assets\filter_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\fontdown_dark.png">
+    <Content Include="..\Icons\padded\fontdown_dark.scale-200.png">
       <Link>Assets\fontdown_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontdown_dark.scale-200.png">
-      <Link>Assets\fontdown_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\fontdown_light.png">
+    <Content Include="..\Icons\padded\fontdown_light.scale-200.png">
       <Link>Assets\fontdown_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontdown_light.scale-200.png">
-      <Link>Assets\fontdown_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\fontup_dark.png">
+    <Content Include="..\Icons\padded\fontup_dark.scale-200.png">
       <Link>Assets\fontup_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontup_dark.scale-200.png">
-      <Link>Assets\fontup_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\fontup_light.png">
+    <Content Include="..\Icons\padded\fontup_light.scale-200.png">
       <Link>Assets\fontup_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\fontup_light.scale-200.png">
-      <Link>Assets\fontup_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\font_dark.png">
+    <Content Include="..\Icons\padded\font_dark.scale-200.png">
       <Link>Assets\font_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\font_dark.scale-200.png">
-      <Link>Assets\font_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\font_light.png">
+    <Content Include="..\Icons\padded\font_light.scale-200.png">
       <Link>Assets\font_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\font_light.scale-200.png">
-      <Link>Assets\font_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\forward_dark.png">
+    <Content Include="..\Icons\padded\forward_dark.scale-200.png">
       <Link>Assets\forward_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\forward_dark.scale-200.png">
-      <Link>Assets\forward_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\forward_light.png">
+    <Content Include="..\Icons\padded\forward_light.scale-200.png">
       <Link>Assets\forward_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\forward_light.scale-200.png">
-      <Link>Assets\forward_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\help_dark.png">
+    <Content Include="..\Icons\padded\help_dark.scale-200.png">
       <Link>Assets\help_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\help_dark.scale-200.png">
-      <Link>Assets\help_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\help_light.png">
+    <Content Include="..\Icons\padded\help_light.scale-200.png">
       <Link>Assets\help_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\help_light.scale-200.png">
-      <Link>Assets\help_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\more_dark.png">
+    <Content Include="..\Icons\padded\more_dark.scale-200.png">
       <Link>Assets\more_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\more_dark.scale-200.png">
-      <Link>Assets\more_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\more_light.png">
+    <Content Include="..\Icons\padded\more_light.scale-200.png">
       <Link>Assets\more_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\more_light.scale-200.png">
-      <Link>Assets\more_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\redo_dark.png">
+    <Content Include="..\Icons\padded\redo_dark.scale-200.png">
       <Link>Assets\redo_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\redo_dark.scale-200.png">
-      <Link>Assets\redo_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\redo_light.png">
+    <Content Include="..\Icons\padded\redo_light.scale-200.png">
       <Link>Assets\redo_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\redo_light.scale-200.png">
-      <Link>Assets\redo_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\refresh_dark.png">
+    <Content Include="..\Icons\padded\refresh_dark.scale-200.png">
       <Link>Assets\refresh_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\refresh_dark.scale-200.png">
-      <Link>Assets\refresh_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\refresh_light.png">
+    <Content Include="..\Icons\padded\refresh_light.scale-200.png">
       <Link>Assets\refresh_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\refresh_light.scale-200.png">
-      <Link>Assets\refresh_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\rename_dark.png">
+    <Content Include="..\Icons\padded\rename_dark.scale-200.png">
       <Link>Assets\rename_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\rename_dark.scale-200.png">
-      <Link>Assets\rename_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\rename_light.png">
+    <Content Include="..\Icons\padded\rename_light.scale-200.png">
       <Link>Assets\rename_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\rename_light.scale-200.png">
-      <Link>Assets\rename_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\settings_dark.png">
+    <Content Include="..\Icons\padded\settings_dark.scale-200.png">
       <Link>Assets\settings_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\settings_dark.scale-200.png">
-      <Link>Assets\settings_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\settings_light.png">
+    <Content Include="..\Icons\padded\settings_light.scale-200.png">
       <Link>Assets\settings_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\settings_light.scale-200.png">
-      <Link>Assets\settings_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\sync_dark.png">
+    <Content Include="..\Icons\padded\sync_dark.scale-200.png">
       <Link>Assets\sync_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\sync_dark.scale-200.png">
-      <Link>Assets\sync_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\sync_light.png">
+    <Content Include="..\Icons\padded\sync_light.scale-200.png">
       <Link>Assets\sync_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\sync_light.scale-200.png">
-      <Link>Assets\sync_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\tag_dark.png">
+    <Content Include="..\Icons\padded\tag_dark.scale-200.png">
       <Link>Assets\tag_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\tag_dark.scale-200.png">
-      <Link>Assets\tag_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\tag_light.png">
+    <Content Include="..\Icons\padded\tag_light.scale-200.png">
       <Link>Assets\tag_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\tag_light.scale-200.png">
-      <Link>Assets\tag_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\forceloc_dark.png">
+    <Content Include="..\Icons\padded\forceloc_dark.scale-200.png">
       <Link>Assets\forceloc_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\forceloc_dark.scale-200.png">
-      <Link>Assets\forceloc_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\forceloc_light.png">
+    <Content Include="..\Icons\padded\forceloc_light.scale-200.png">
       <Link>Assets\forceloc_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\forceloc_light.scale-200.png">
-      <Link>Assets\forceloc_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\swipeleft_dark.png">
+    <Content Include="..\Icons\padded\swipeleft_dark.scale-200.png">
       <Link>Assets\swipeleft_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\swipeleft_dark.scale-200.png">
-      <Link>Assets\swipeleft_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\swipeleft_light.png">
+    <Content Include="..\Icons\padded\swipeleft_light.scale-200.png">
       <Link>Assets\swipeleft_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\swipeleft_light.scale-200.png">
-      <Link>Assets\swipeleft_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\swiperight_dark.png">
+    <Content Include="..\Icons\padded\swiperight_dark.scale-200.png">
       <Link>Assets\swiperight_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\swiperight_dark.scale-200.png">
-      <Link>Assets\swiperight_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\swiperight_light.png">
+    <Content Include="..\Icons\padded\swiperight_light.scale-200.png">
       <Link>Assets\swiperight_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\swiperight_light.scale-200.png">
-      <Link>Assets\swiperight_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\tap_dark.png">
+    <Content Include="..\Icons\padded\tap_dark.scale-200.png">
       <Link>Assets\tap_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\tap_dark.scale-200.png">
-      <Link>Assets\tap_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\tap_light.png">
+    <Content Include="..\Icons\padded\tap_light.scale-200.png">
       <Link>Assets\tap_light.png</Link>
     </Content>
-    <Content Include="..\Icons\200\tap_light.scale-200.png">
-      <Link>Assets\tap_light.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\taphold_dark.png">
+    <Content Include="..\Icons\padded\taphold_dark.scale-200.png">
       <Link>Assets\taphold_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\200\taphold_dark.scale-200.png">
-      <Link>Assets\taphold_dark.scale-200.png</Link>
-    </Content>
-    <Content Include="..\Icons\taphold_light.png">
+    <Content Include="..\Icons\padded\taphold_light.scale-200.png">
       <Link>Assets\taphold_light.png</Link>
-    </Content>
-    <Content Include="..\Icons\200\taphold_light.scale-200.png">
-      <Link>Assets\taphold_light.scale-200.png</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -374,17 +227,20 @@
     <Content Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
       <Link>Content\jquery-3.1.1.js</Link>
     </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\win81\callback.js">
-      <Link>Content\callback.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\callbacks.js">
+      <Link>Content\callbacks.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\win81\marshal.js">
       <Link>Content\marshal.js</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\messaging.js">
+      <Link>Content\messaging.js</Link>
+    </Content>
     <Content Include="..\..\ao3_tracker\build\reader\win81\platform.js">
       <Link>Content\platform.js</Link>
     </Content>
-    <Content Include="..\..\ao3_tracker\build\reader\win81\polyfill.js">
-      <Link>Content\polyfill.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\polyfills.js">
+      <Link>Content\polyfills.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\win81\reader.js">
       <Link>Content\reader.js</Link>
@@ -410,6 +266,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="MergeStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, processorArchitecture=MSIL">
@@ -417,7 +278,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.1\lib\portable-net45+win8+wpa81+wp8\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\portable-net45+win8+wpa81+wp8\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SQLite-net, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -449,28 +310,33 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.221-pre6\lib\wpa81\Xamarin.Forms.Core.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.224\lib\wpa81\Xamarin.Forms.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Forms.Platform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.221-pre6\lib\wpa81\Xamarin.Forms.Platform.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.224\lib\wpa81\Xamarin.Forms.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Forms.Platform.WinRT, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.221-pre6\lib\wpa81\Xamarin.Forms.Platform.WinRT.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.224\lib\wpa81\Xamarin.Forms.Platform.WinRT.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Forms.Platform.WinRT.Phone, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.221-pre6\lib\wpa81\Xamarin.Forms.Platform.WinRT.Phone.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.224\lib\wpa81\Xamarin.Forms.Platform.WinRT.Phone.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Forms.Xaml, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.221-pre6\lib\wpa81\Xamarin.Forms.Xaml.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Forms.2.3.4.224\lib\wpa81\Xamarin.Forms.Xaml.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="Microsoft.VCLibs, Version=12.0">
+      <Name>Microsoft Visual C++ 2013 Runtime Package for Windows Phone</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
@@ -482,16 +348,19 @@
   <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
   <Import Project="..\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems" Label="Shared" />
   <Import Project="..\Ao3TrackReader.Win81\Ao3TrackReader.Win81.projitems" Label="Shared" />
+  <Import Project="..\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems" Label="Shared" />
+  <Import Project="..\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Xamarin.Forms.2.3.4.221-pre6\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Xamarin.Forms.2.3.4.221-pre6\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Xamarin.Forms.2.3.4.224\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Xamarin.Forms.2.3.4.224\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <Import Project="..\..\packages\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.targets" Condition="Exists('..\..\packages\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v120_wp81.targets')" />
-  <Import Project="..\..\packages\Xamarin.Forms.2.3.4.221-pre6\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.3.4.221-pre6\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />
+  <Import Project="..\..\packages\Xamarin.Forms.2.3.4.224\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.3.4.224\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

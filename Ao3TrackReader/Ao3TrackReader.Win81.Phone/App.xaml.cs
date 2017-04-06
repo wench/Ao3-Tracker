@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Navigation;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
-namespace Ao3TrackReader.WinPhone
+namespace Ao3TrackReader.Win81
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -35,7 +35,28 @@ namespace Ao3TrackReader.WinPhone
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
+
+            UnhandledException += (sender, e) =>
+            {
+                Ao3TrackReader.App.Log(e.Exception);
+#if DEBUG
+                e.Handled = true;
+#endif
+            };
+
+            switch (Ao3TrackReader.App.Theme)
+            {
+                case "light":
+                    RequestedTheme = ApplicationTheme.Light;
+                    break;
+
+                case "dark":
+                    RequestedTheme = ApplicationTheme.Dark;
+                    break;
+            }
         }
+
+        public Ao3TrackReader.App XApp { get; private set; }
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -65,6 +86,9 @@ namespace Ao3TrackReader.WinPhone
                 rootFrame.CacheSize = 1;
 
                 Xamarin.Forms.Forms.Init(e);
+                XApp = new Ao3TrackReader.App();
+
+                Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

@@ -24,15 +24,13 @@ using Windows.UI.Xaml.Media;
 using Windows.UI;
 using Windows.UI.Xaml.Documents;
 
-//#define UWP_CREATORS_UPDATE
-
 namespace Ao3TrackReader.Text
 {
     public abstract partial class TextEx
     {
         protected Inline ApplyStyles(Inline i)
         {
-#if false
+#if WINDOWS_15063
             if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
             {
                 i.TextDecorations = TextDecorations.None;

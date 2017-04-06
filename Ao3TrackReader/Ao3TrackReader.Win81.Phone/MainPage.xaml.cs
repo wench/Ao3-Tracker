@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace Ao3TrackReader.WinPhone
+namespace Ao3TrackReader.Win81
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -28,7 +28,7 @@ namespace Ao3TrackReader.WinPhone
 
             this.NavigationCacheMode = NavigationCacheMode.Required;
 
-            LoadApplication(new Ao3TrackReader.App());
+            LoadApplication((App.Current as App).XApp);
         }
 
         /// <summary>

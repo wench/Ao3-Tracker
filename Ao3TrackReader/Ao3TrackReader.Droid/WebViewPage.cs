@@ -265,6 +265,8 @@ namespace Ao3TrackReader
             }
         }
 
+        public const bool HaveClipboard = true;
+
         public void CopyToClipboard(string str, string type)
         {
             var clipboard = Xamarin.Forms.Forms.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
