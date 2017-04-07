@@ -522,10 +522,6 @@
   <ItemGroup>
     <AndroidResource Include="Resources\values-v21\styles.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
-    <Analyzer Include="..\..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
-  </ItemGroup>
   <Import Project="..\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems" Label="Shared" />
   <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" />
   <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
