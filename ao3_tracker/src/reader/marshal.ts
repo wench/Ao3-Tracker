@@ -53,7 +53,8 @@ namespace Ao3Track {
             let convs = Ao3Track.Marshal.Converters as any as {[key:string]:(value:any)=>any};
 
             for (let name in helperDef) {
-                let def = helperDef[name];
+                let n = name;                
+                let def = helperDef[n];
 
                 if (typeof def.return === "string") {
                     def.return = convs[def.return as any];
@@ -69,7 +70,7 @@ namespace Ao3Track {
                 if (def.args !== undefined) {
                     let newprop: PropertyDescriptor = { enumerable: false };
                     
-                    let func = (nativeHelper[name] as Function).bind(nativeHelper) as Function;
+                    let func = (nativeHelper[n] as Function).bind(nativeHelper) as Function;
 
                     for (let i in def.args) {
                         if (typeof def.args[i] === "string")
@@ -103,14 +104,13 @@ namespace Ao3Track {
                     else {
                         newprop.value = func;
                     }
-                    Object.defineProperty(Ao3Track.Helper, name, newprop);
+                    Object.defineProperty(Ao3Track.Helper, n, newprop);
                 }
                 // It's a property
                 else if (def.getter || def.setter) {
                     let newprop: PropertyDescriptor = { enumerable: true };
 
                     if (def.getter) {
-
                         if (def.getterfunc) {
                             let func = (nativeHelper[def.getterfunc] as Function).bind(nativeHelper) as () => any;
                             if (typeof def.getter === "function") {
@@ -124,10 +124,10 @@ namespace Ao3Track {
                         else {
                             if (typeof def.getter === "function") {
                                 let getter = def.getter;
-                                newprop.get = () => getter(nativeHelper[name]);
+                                newprop.get = function() { return getter(nativeHelper[n]); };
                             }
                             else {
-                                newprop.get = () => nativeHelper[name];
+                                newprop.get = function() { return nativeHelper[n]; };
                             }
                         }
                     }
@@ -136,7 +136,7 @@ namespace Ao3Track {
                             let func = (nativeHelper[def.setterfunc] as Function).bind(nativeHelper) as (v: any) => void;
                             if (typeof def.setter === "function") {
                                 let setter = def.setter;
-                                newprop.set = (v) => func(setter(v));
+                                newprop.set = function(v) { func(setter(v)); };
                             }
                             else {
                                 newprop.set = func;
@@ -145,14 +145,14 @@ namespace Ao3Track {
                         else {
                             if (typeof def.setter === "function") {
                                 let setter = def.setter;
-                                newprop.set = (v) => nativeHelper[name] = setter(v);
+                                newprop.set = function(v) { nativeHelper[n] = setter(v); };
                             }
                             else {
-                                newprop.set = (v) => nativeHelper[name] = v;
+                                newprop.set = function(v) { nativeHelper[n] = v; };
                             }
                         }
                     }
-                    Object.defineProperty(Ao3Track.Helper, name, newprop);
+                    Object.defineProperty(Ao3Track.Helper, n, newprop);
                 }
             }
         }
