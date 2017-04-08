@@ -20,7 +20,7 @@
     <PackageCertificateKeyFile>Ao3TrackReader.UWP_StoreKey.pfx</PackageCertificateKeyFile>
     <PackageCertificateThumbprint>8BA6B34B40BCF0364DF1802B046C1FC5B5277623</PackageCertificateThumbprint>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <AppxBundle>Auto</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
   </PropertyGroup>
@@ -38,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
     <OutputPath>bin\ARM\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP;__WINDOWS__;WINDOWS_15063;CODE_ANALYSIS</DefineConstants>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP;__WINDOWS__;WINDOWS_15063</DefineConstants>
     <Optimize>true</Optimize>
     <NoWarn>;2008</NoWarn>
     <DebugType>pdbonly</DebugType>

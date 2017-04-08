@@ -14,7 +14,7 @@ namespace Ao3TrackReader.WinRT
         }
         static DependencyProperty GetIconDependencyProperty ()
         {
-#if WINDOWS_UWP
+#if WINDOWS_15063
             if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
                 return MenuFlyoutItem.IconProperty;
 #endif
