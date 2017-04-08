@@ -26,12 +26,12 @@ const url = require('url');
 
 var tsOptions = require('./tsconfig.json').compilerOptions;
 
-var tsOptions_ES5 = Object.assign({},tsOptions,{ 
-    target: "ES5" 
+var tsOptions_ES5 = Object.assign({}, tsOptions, {
+    target: "ES5"
 });
 
-var tsOptions_ES6 = Object.assign({},tsOptions,{ 
-    target: "ES6" 
+var tsOptions_ES6 = Object.assign({}, tsOptions, {
+    target: "ES6"
 });
 
 var browser_scripts = [
@@ -79,67 +79,67 @@ var reader = {
         return gulp.src(uwp_scripts)
             .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES6))
-            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/uwp/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/uwp'));
     },
     "reader.scripts.droid": () => {
         return gulp.src(droid_scripts)
-        .pipe(sourcemaps.init())
-        .pipe(ts(tsOptions_ES5))
-        .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/droid/src-maps/' + file.basename + ".map").href; }}))
-        .pipe(gulp.dest('build/reader/droid'));
+            .pipe(sourcemaps.init())
+            .pipe(ts(tsOptions_ES5))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/droid/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(gulp.dest('build/reader/droid'));
     },
     "reader.scripts.ios": () => {
         return gulp.src(ios_scripts)
-        .pipe(sourcemaps.init())
-        .pipe(ts(tsOptions_ES5))
-        .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/ios/src-maps/' + file.basename + ".map").href; }}))
-        .pipe(gulp.dest('build/reader/ios'));
+            .pipe(sourcemaps.init())
+            .pipe(ts(tsOptions_ES5))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/ios/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(gulp.dest('build/reader/ios'));
     },
     "reader.scripts.win81": () => {
         return gulp.src(win81_scripts)
-        .pipe(sourcemaps.init())
-        .pipe(ts(tsOptions_ES5))
-        .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse("file:///" + file.cwd + '/build/reader/win81/src-maps/' + file.basename + ".map").href; }}))
-        .pipe(gulp.dest('build/reader/win81'));
+            .pipe(sourcemaps.init())
+            .pipe(ts(tsOptions_ES5))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/win81/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(gulp.dest('build/reader/win81'));
     },
 
     "reader.styles.uwp": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps'))
+            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
             .pipe(gulp.dest('build/reader/uwp'));
     },
     "reader.styles.droid": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps'))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/droid/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/droid'));
     },
     "reader.styles.ios": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps'))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/iso/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/ios'));
     },
     "reader.styles.win81": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps'))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/win81/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/win81'));
     },
 };
-exports["reader.scripts"] = reader.scripts = gulp.series(reader["reader.scripts.uwp"],reader["reader.scripts.droid"],reader["reader.scripts.ios"],reader["reader.scripts.win81"]);
+exports["reader.scripts"] = reader.scripts = gulp.series(reader["reader.scripts.uwp"], reader["reader.scripts.droid"], reader["reader.scripts.ios"], reader["reader.scripts.win81"]);
 exports["reader.scripts.uwp"] = reader.scripts.uwp = reader["reader.scripts.uwp"];
 exports["reader.scripts.droid"] = reader.scripts.droid = reader["reader.scripts.droid"]
 exports["reader.scripts.ios"] = reader.scripts.ios = reader["reader.scripts.ios"]
 exports["reader.scripts.win81"] = reader.scripts.win81 = reader["reader.scripts.win81"]
 
-exports["reader.styles"] = reader.styles = gulp.series(reader["reader.styles.uwp"],reader["reader.styles.droid"],reader["reader.styles.ios"],reader["reader.styles.win81"]);
+exports["reader.styles"] = reader.styles = gulp.series(reader["reader.styles.uwp"], reader["reader.styles.droid"], reader["reader.styles.ios"], reader["reader.styles.win81"]);
 exports["reader.styles.uwp"] = reader.styles.uwp = reader["reader.styles.uwp"];
 exports["reader.styles.droid"] = reader.styles.droid = reader["reader.styles.droid"];
 exports["reader.styles.ios"] = reader.styles.ios = reader["reader.styles.ios"];
@@ -161,7 +161,7 @@ exports["reader.win81"] = reader.win81 = gulp.series(reader.scripts.win81, reade
 exports["reader.win81.scripts"] = reader.win81.scripts = reader.scripts.win81;
 exports["reader.win81.styles"] = reader.win81.styles = reader.styles.win81;
 
-exports["reader"] = reader = Object.assign(gulp.series(reader.scripts,reader.styles),reader);
+exports["reader"] = reader = Object.assign(gulp.series(reader.scripts, reader.styles), reader);
 
 function styles() {
     return gulp.src('src/*.less')
@@ -183,11 +183,11 @@ gulp.task('images', images);
 
 function pages() {
     var edge = gulp.src('src/browser/*.html')
-        .pipe(preprocess({ context:  {  BROWSER: 'Edge' } }))
+        .pipe(preprocess({ context: { BROWSER: 'Edge' } }))
         .pipe(gulp.dest('build/browser/edge'));
 
     var chrome = gulp.src('src/browser/*.html')
-        .pipe(preprocess({ context:  {  BROWSER: 'Chrome' } }))
+        .pipe(preprocess({ context: { BROWSER: 'Chrome' } }))
         .pipe(gulp.dest('build/browser/chrome'));
 
     return merge(edge, chrome);
@@ -214,11 +214,11 @@ gulp.task('libs', libs);
 
 function json() {
     var edge = gulp.src('src/browser/*.json')
-        .pipe(preprocess({ context:  {  BROWSER: 'Edge' }, extension: 'js' }))
+        .pipe(preprocess({ context: { BROWSER: 'Edge' }, extension: 'js' }))
         .pipe(gulp.dest('build/browser/edge'));
 
     var chrome = gulp.src('src/browser/*.json')
-        .pipe(preprocess({ context:  {  BROWSER: 'Chrome' }, extension: 'js' }))
+        .pipe(preprocess({ context: { BROWSER: 'Chrome' }, extension: 'js' }))
         .pipe(gulp.dest('build/browser/chrome'));
 
     return merge(edge, chrome);
@@ -228,7 +228,7 @@ gulp.task('json', json);
 var build = gulp.series(scripts, styles, images, pages, json, extras, libs, reader);
 gulp.task('default', build);
 
-gulp.task('watch', gulp.series(build, function() {
+gulp.task('watch', gulp.series(build, function () {
     gulp.watch('src/**/*.ts', [scripts, reader.scripts]);
     gulp.watch('src/**/*.less', styles);
     gulp.watch('src/browser/images/*.png', images);
