@@ -1103,11 +1103,15 @@ namespace Ao3TrackReader
             {
                 foreach (Exception e in ae.InnerExceptions)
                 {
-                    if (!(e is OperationCanceledException))
+                    if (!(e is OperationCanceledException) && !(e is ObjectDisposedException))
                     {
                         App.Log(e);
                     }
                 }
+            }
+            catch (ObjectDisposedException)
+            {
+
             }
             catch (OperationCanceledException)
             {

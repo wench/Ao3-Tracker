@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="34642MonochromeWench.Ao3TrackReader" Publisher="CN=57467E77-D7D9-466E-BDFA-FA86A2AD5DA9" Version="1.0.0.2" />
+  <Identity Name="34642MonochromeWench.Ao3TrackReader" Publisher="CN=57467E77-D7D9-466E-BDFA-FA86A2AD5DA9" Version="1.0.0.3" />
   <Properties>
     <DisplayName>Ao3Track Reader</DisplayName>
     <PublisherDisplayName>Alexis Ryan</PublisherDisplayName>
