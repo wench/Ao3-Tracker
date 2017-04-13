@@ -1019,13 +1019,13 @@ namespace Ao3TrackReader
             try
             {
                 cancelInject?.Cancel();
+                cancelInject = null;
             }
             catch (ObjectDisposedException)
             {
 
             }
-
-            cancelInject = new CancellationTokenSource();
+            
             TitleEx = "Loading...";
 
             JumpToLastLocationEnabled = false;
@@ -1067,13 +1067,26 @@ namespace Ao3TrackReader
             ForceSetLocationCommand.IsEnabled = false;
             helper?.Reset();
 
-            InjectScripts(cancelInject);
+            InjectScripts();
         }
 
-        async void InjectScripts(CancellationTokenSource cts)
+        async void InjectScripts()
         {
             try
             {
+                cancelInject?.Cancel();
+                cancelInject = null;
+            }
+            catch (ObjectDisposedException)
+            {
+
+            }
+
+            var cts = cancelInject = new CancellationTokenSource();
+
+            try
+            {
+                
                 var ct = cts.Token;
                 ct.ThrowIfCancellationRequested();
                 await OnInjectingScripts(ct);
@@ -1103,15 +1116,11 @@ namespace Ao3TrackReader
             {
                 foreach (Exception e in ae.InnerExceptions)
                 {
-                    if (!(e is OperationCanceledException) && !(e is ObjectDisposedException))
+                    if (!(e is OperationCanceledException))
                     {
                         App.Log(e);
                     }
                 }
-            }
-            catch (ObjectDisposedException)
-            {
-
             }
             catch (OperationCanceledException)
             {
