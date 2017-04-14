@@ -51,6 +51,8 @@ namespace Ao3TrackReader.Controls
 
         async Task RestoreReadingList()
         {
+            SyncIndicator.Content = new ActivityIndicator();
+
             // Restore the reading list contents!
             var items = new Dictionary<string, Models.ReadingList>();
             foreach (var i in App.Database.GetReadingListItems())
@@ -129,8 +131,7 @@ namespace Ao3TrackReader.Controls
             wvp.DoOnMainThread(() =>
             {
                 RefreshButton.IsEnabled = true;
-                SyncIndicator.IsRunning = false;
-                SyncIndicator.IsVisible = false;
+                SyncIndicator.Content = null;
             });
         }
 
@@ -259,8 +260,7 @@ namespace Ao3TrackReader.Controls
         {
             ListView.Focus();
             RefreshButton.IsEnabled = false;
-            SyncIndicator.IsRunning = true;
-            SyncIndicator.IsVisible = true;
+            SyncIndicator.Content = new ActivityIndicator();
             Task.Run(async () =>
             {
                 List<Task> tasks = new List<Task>();
@@ -281,8 +281,7 @@ namespace Ao3TrackReader.Controls
                 wvp.DoOnMainThread(() =>
                 {
                     RefreshButton.IsEnabled = true;
-                    SyncIndicator.IsRunning = false;
-                    SyncIndicator.IsVisible = false;
+                    SyncIndicator.Content = null;
                     PageChange(wvp.CurrentUri);
                 });
             });

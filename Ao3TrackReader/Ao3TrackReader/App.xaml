@@ -68,7 +68,13 @@ limitations under the License.
                 <Setter Property="BorderColor" Value="{StaticResource BaseMediumLowColor}" />
             </Style>
 
-
+            <Style TargetType="ActivityIndicator">
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_20_Min}" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+                <Setter Property="Color" Value="{StaticResource HighlightColor}" />
+                <Setter Property="IsRunning" Value="True" />
+            </Style>
 
             <local:EmptyStringBool x:Key="EmptyStringBoolConverter" />
 

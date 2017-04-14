@@ -159,7 +159,7 @@ limitations under the License.
 
                             <StackLayout Style="{StaticResource Setting}">
                                 <local:Button Text="Submit" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
-                                <ActivityIndicator IsRunning="False" IsVisible="False"  x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                                <ContentView IsVisible="False" x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                             </StackLayout>
                         </StackLayout>
 

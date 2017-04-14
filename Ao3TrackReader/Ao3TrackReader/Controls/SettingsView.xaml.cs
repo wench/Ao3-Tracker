@@ -138,7 +138,7 @@ namespace Ao3TrackReader.Controls
         public async void OnSyncSubmit(object sender, EventArgs e)
         {
             syncSubmitButton.IsEnabled = false;
-            syncIndicator.IsRunning = true;
+            syncIndicator.Content = new ActivityIndicator();
             syncIndicator.IsVisible = true;
             usernameErrors.IsVisible = false;
             passwordErrors.IsVisible = false;
@@ -212,7 +212,7 @@ namespace Ao3TrackReader.Controls
                 wvp.ReadingList.SyncToServerAsync(old_username != s_username);
             }
             syncSubmitButton.IsEnabled = true;
-            syncIndicator.IsRunning = false;
+            syncIndicator.Content = null;
             syncIndicator.IsVisible = false;
 
         }
