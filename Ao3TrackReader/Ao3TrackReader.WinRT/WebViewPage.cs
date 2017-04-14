@@ -49,7 +49,7 @@ namespace Ao3TrackReader
         public Xamarin.Forms.View CreateWebView()
         {
 #if WINDOWS_UWP
-            webView = new WebView(WebViewExecutionMode.SeparateThread)
+            webView = new WebView(WebViewExecutionMode.SameThread)
 #else
             webView = new WebView()
 #endif

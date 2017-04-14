@@ -19,8 +19,28 @@ interface Window {
 }
 
 namespace Ao3Track {
+
     export let jQuery = window.jQuery.noConflict(true);
     export let $ = jQuery;
+
+    // Don't want wrapped function please. >:(
+    export function unWrapHR<T extends Function>(f: T, bindto?: object) : T
+    {
+        let ret : T;
+        if ((f as any)["nr@original"]) ret = (f as any)["nr@original"];
+        else ret = f;
+        if (bindto) ret = ret.bind(bindto);
+        return ret;
+    }
+    
+    export let setImmediate = unWrapHR(window.setImmediate,window);
+    export let setInterval = unWrapHR(window.setInterval,window);
+    export let setTimeout = unWrapHR(window.setTimeout,window);
+    export let clearImmediate = unWrapHR(window.clearImmediate,window);
+    export let clearInterval = unWrapHR(window.clearInterval,window);
+    export let clearTimeout = unWrapHR(window.clearTimeout,window);
+    export let addEventListener = unWrapHR(EventTarget.prototype.addEventListener);
+    export let removeEventListener = unWrapHR(EventTarget.prototype.removeEventListener);
 
     export function InjectCSS (styles: string){
             let blob = new Blob([styles],{type: 'text/css', endings: "transparent"});
@@ -102,8 +122,8 @@ namespace Ao3Track {
                 return;
             }
         }
-    }
-    document.body.addEventListener("contextmenu", contextMenuHandler);
+    }  
+    addEventListener.call(document.body,"contextmenu", contextMenuHandler);
     Ao3Track.Helper.setCookies(document.cookie);
 
     // Page title handling

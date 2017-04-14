@@ -136,7 +136,11 @@ namespace Ao3Track {
         }
     };
 
+    let last_scroll_location : number|null = null;
     export function updateLocation() {
+        if (window.pageYOffset === last_scroll_location) return null;
+        last_scroll_location = window.pageYOffset;
+
         let workchapter: IWorkChapter | null = null;
 
         // Find which $userstuff is at the centre of the screen
@@ -252,15 +256,15 @@ namespace Ao3Track {
         }
 
         let last_location = updateLocation();
-        if (last_location !== null) { SetCurrentLocation(Object.assign({ workid: workid }, last_location)); }
+        if (last_location) { SetCurrentLocation(Object.assign({ workid: workid }, last_location)); }
         let last_set_location = last_location;
         if (last_set_location) {
             SetWorkChapters({ [workid]: last_set_location });
         }
 
-        $(window).scroll((eventObject) => {
+        setInterval(() => {
             let new_location = updateLocation();
-            if (new_location !== null) { SetCurrentLocation(Object.assign({ workid: workid }, new_location)); }
+            if (new_location) { SetCurrentLocation(Object.assign({ workid: workid }, new_location)); }
             if (new_location && (!last_location || new_location.number > last_location.number ||
                 (new_location.number === last_location.number && last_location.location !== null &&
                     (new_location.location === null || new_location.location > last_location.location)))) {
@@ -271,7 +275,7 @@ namespace Ao3Track {
                     SetWorkChapters({ [workid]: last_set_location = last_location });
                 }
             }
-        });
+        }, 500);
 
         setInterval(() => {
             if (last_location && (!last_set_location || last_location.number > last_set_location.number ||

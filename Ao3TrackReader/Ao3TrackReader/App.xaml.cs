@@ -206,9 +206,10 @@ namespace Ao3TrackReader
                 case Device.Android:
                     return name + dl;
 
-                case Device.Windows:
-                case Device.WinPhone:
                 case "UWP":
+                case "Windows":
+                case "WinRT":
+                case "WinPhone":
                     return "Assets/" + name + dl;
 
                 case Device.iOS:
