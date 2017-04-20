@@ -7,15 +7,41 @@ using System.Web.Http;
 using System.Web.UI;
 using System.Web;
 using System.Net.Mail;
+using Newtonsoft.Json;
 
 namespace Ao3tracksync.Controllers
 {
     [RoutePrefix("api/ErrorReport"), Authorize(Roles = "administrators"), System.Web.Mvc.OutputCache(Location = OutputCacheLocation.None)]
     public class ErrorReportController : ApiController
     {
+        public class ReportMetaData
+        {
+            public string Version { get; set; }
+            public string Platform { get; set; }
+            public string Mode { get; set; }
+        }
+
+        static List<(string Platform, Version Version)> ignoreErrors = new List<(string platform, Version version)> {
+            ("Android", new Version(1,0,2))
+        };
+
+
         [AllowAnonymous]
         public void Post([FromBody]string report)
         {
+            var meta = JsonConvert.DeserializeObject<ReportMetaData>(report, new JsonSerializerSettings
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore                
+            });
+            if (System.Version.TryParse(meta.Version, out var ver))
+            {
+                foreach (var ignore in ignoreErrors)
+                {
+                    if ((ignore.Platform == null || ignore.Platform == meta.Platform) && ver == ignore.Version)
+                        return;
+                }
+            }
+
             MailMessage message = new MailMessage(new MailAddress("ao3track@wenchy.net", "Ao3Track Debug Reports"), new MailAddress("the.wench@wenchy.net"));
 
             message.Subject = "Ao3Track Reader Error report";
