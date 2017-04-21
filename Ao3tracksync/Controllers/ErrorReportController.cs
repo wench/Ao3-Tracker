@@ -22,7 +22,9 @@ namespace Ao3tracksync.Controllers
         }
 
         static List<(string Platform, Version Version)> ignoreErrors = new List<(string platform, Version version)> {
-            ("Android", new Version(1,0,2))
+            ("Android", new Version(1,0,2,0)),
+            ("Android", new Version(1,0,1,0)),
+            ("Android", new Version(1,0,0,0)),
         };
 
 
@@ -37,14 +39,14 @@ namespace Ao3tracksync.Controllers
             {
                 foreach (var ignore in ignoreErrors)
                 {
-                    if ((ignore.Platform == null || ignore.Platform == meta.Platform) && ver == ignore.Version)
+                    if ((ignore.Platform == null || ignore.Platform == meta.Platform) && ver.Equals(ignore.Version))
                         return;
                 }
             }
 
             MailMessage message = new MailMessage(new MailAddress("ao3track@wenchy.net", "Ao3Track Debug Reports"), new MailAddress("the.wench@wenchy.net"));
 
-            message.Subject = "Ao3Track Reader Error report";
+            message.Subject = "Ao3Track Reader Error report " + meta.Platform  + " " + meta.Version;
             message.Body = "See attachment";
 
             var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(report));

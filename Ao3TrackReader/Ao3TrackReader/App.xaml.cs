@@ -147,7 +147,8 @@ namespace Ao3TrackReader
                         ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
                         NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
                         ObjectCreationHandling = Newtonsoft.Json.ObjectCreationHandling.Auto,
-                        TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects
+                        TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
+                        Formatting = Newtonsoft.Json.Formatting.Indented
                     };
                     string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
                     {
