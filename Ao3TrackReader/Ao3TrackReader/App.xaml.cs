@@ -252,6 +252,8 @@ static bool PhoneHasBackButton()
         {
 #if WINDOWS_UWP
             return null;
+#elif __WINDOWS__
+            return null;
 #elif __ANDROID__
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
                 return Android.OS.Build.SupportedAbis[0];
@@ -271,6 +273,20 @@ static bool PhoneHasBackButton()
             ulong v3 = (v & 0x00000000FFFF0000L) >> 16;
             ulong v4 = (v & 0x000000000000FFFFL);
             return $"{v1}.{v2}.{v3}.{v4}";
+#elif __WINDOWS__
+            var analyticsInfoType = Type.GetType("Windows.System.Profile.AnalyticsInfo, Windows, ContentType=WindowsRuntime");
+            var versionInfoType = Type.GetType("Windows.System.Profile.AnalyticsVersionInfo, Windows, ContentType=WindowsRuntime");
+            if (analyticsInfoType != null && versionInfoType != null)
+            {
+                var versionInfo = analyticsInfoType.GetRuntimeProperty("VersionInfo").GetValue(null);
+                ulong v = (ulong) versionInfoType.GetRuntimeProperty("DeviceFamilyVersion").GetValue(versionInfo);
+                ulong v1 = (v & 0xFFFF000000000000L) >> 48;
+                ulong v2 = (v & 0x0000FFFF00000000L) >> 32;
+                ulong v3 = (v & 0x00000000FFFF0000L) >> 16;
+                ulong v4 = (v & 0x000000000000FFFFL);
+                return $"{v1}.{v2}.{v3}.{v4}";
+            }
+            return null;
 #elif __ANDROID__
             return Android.OS.Build.VERSION.Release;
 #else
@@ -282,6 +298,9 @@ static bool PhoneHasBackButton()
         {
 #if WINDOWS_UWP
             return Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
+#elif __WINDOWS__
+            var eas = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
+            return eas.OperatingSystem;
 #elif __ANDROID__
             return Android.OS.Build.VERSION.BaseOs;
 #else
@@ -291,7 +310,7 @@ static bool PhoneHasBackButton()
 
         public static string GetHardwareName()
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || __WINDOWS__
             var eas = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
             var sku = eas.SystemSku;
             if (!string.IsNullOrWhiteSpace(sku)) return sku;

@@ -135,6 +135,9 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
   <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -144,6 +147,9 @@ $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Droid/Properties/Andro
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Desktop/Package.appxmanifest /_:Package/_:Identity/@Version=AltString
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Phone/Package.appxmanifest /_:Package/_:Identity/@Version=AltString
 </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -File $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Version/GitRevision.ps1</PreBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

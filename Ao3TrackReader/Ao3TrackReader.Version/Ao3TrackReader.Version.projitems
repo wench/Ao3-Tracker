@@ -12,4 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)GitRevision.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Version.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)GitRevision.ps1" />
+  </ItemGroup>
 </Project>
