@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Ao3TrackReader.Resources;
 using Ao3TrackReader.Models;
+using Ver = Ao3TrackReader.Version.Version;
 
 namespace Ao3TrackReader.Controls
 {
@@ -36,21 +37,20 @@ namespace Ao3TrackReader.Controls
         {
             InitializeComponent();
 
-            var v = App.Version;
             aboutText.TextEx = new Text.Span
             {
                 Nodes = {
-                    new Text.String { Text = "Ao3Track Reader Version " + v.Major + "." + v.Minor + "." + v.Build },
+                    new Text.String { Text = "Ao3Track Reader Version " + Ver.Major + "." + Ver.Minor + "." + Ver.Build },
                     new Text.Br(),
-                    new Text.String { Text = App.Copyright },
+                    new Text.String { Text = Ver.Copyright },
                     new Text.Br(),
                     new Text.String { Text = "Source Code for this build available at: " },
                     new Text.Br(),
-                    new Text.Link { Nodes = { App.Source.AbsoluteUri }, Foreground = Ao3TrackReader.Resources.Colors.Highlight, Href = App.Source },
+                    new Text.Link { Nodes = { Ver.Source.AbsoluteUri }, Foreground = Ao3TrackReader.Resources.Colors.Highlight, Href = Ver.Source },
                     new Text.Br(),
-                    new Text.String { Text = "Under the terms of '" + App.License.Name + "': " },
+                    new Text.String { Text = "Under the terms of '" + Ver.License.Name + "': " },
                     new Text.Br(),
-                    new Text.Link { Nodes = { App.License.uri.AbsoluteUri }, Foreground = Ao3TrackReader.Resources.Colors.Highlight, Href = App.License.uri },
+                    new Text.Link { Nodes = { Ver.License.uri.AbsoluteUri }, Foreground = Ao3TrackReader.Resources.Colors.Highlight, Href = Ver.License.uri },
                 }
             };
 

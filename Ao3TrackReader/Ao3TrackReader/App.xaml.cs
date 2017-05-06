@@ -24,8 +24,8 @@ using System.Reflection;
 using System.Text;
 using Xamarin.Forms;
 using Button = Ao3TrackReader.Controls.Button;
-using Ver = Ao3TrackReader.Version.Version;
 using System.Threading.Tasks;
+using Ver = Ao3TrackReader.Version.Version;
 
 #if __WINDOWS__
 using Windows.Storage;
@@ -43,69 +43,17 @@ namespace Ao3TrackReader
         PC = 2
     }
 
+    public enum Architechture
+    {
+        Any = 0,
+        x86 = 1,
+        x64 = 2,
+        ARM = 3,
+        ARM64 = 4
+    }
+
     public partial class App : Application
     {
-        public static (int Major, int Minor, int Build) Version
-        {
-            get
-            {
-#if true
-                return (Ver.Major, Ver.Minor, Ver.Build);
-#else
-#if __WINDOWS__
-                var v = Windows.ApplicationModel.Package.Current.Id.Version;
-                return (v.Major,v.Minor,v.Build);
-#elif __ANDROID__
-                //Android.Resource.Attribute.VersionCode
-                var Context = Android.App.Application.Context.ApplicationContext;
-                var pm = Context.PackageManager;
-                var pi = pm.GetPackageInfo(Context.PackageName, 0);
-                var v = pi.VersionName.ToString().Split('.');
-                return (int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
-#elif __IOS__
-                var bundle = Foundation.NSBundle.MainBundle;
-                var vi = bundle.ObjectForInfoDictionary("CFBundleVersion");
-                var v = vi.ToString().Split('.');
-                return (int.Parse(v[0]), int.Parse(v[1]), int.Parse(v[2]));
-#else
-                return (0,0,0);
-#endif
-#endif
-            }
-        }
-
-        public static string Copyright
-        {
-            get
-            {
-                return Ver.Copyright;
-            }
-        }
-
-        public static (string Name, Uri uri) License
-        {
-            get
-            {
-                return ("Apache License, Version 2.0", new Uri("https://www.apache.org/licenses/LICENSE-2.0"));
-            }
-        }
-
-        public static Uri Source
-        {
-            get
-            {
-#if DEBUG
-                if (!string.IsNullOrWhiteSpace(Ver.GitRevision))
-                    return new Uri("https://github.com/wench/Ao3-Tracker/tree/" + Ver.GitRevision);
-                else
-                    return new Uri("https://github.com/wench/Ao3-Tracker");
-#else
-                return new Uri("https://github.com/wench/Ao3-Tracker/releases/v" + Ver.Major + "." + Ver.Minor + "." + Ver.Build);
-#endif
-            }
-        }
-
-
         public static Ao3TrackDatabase Database
         {
             get; private set;
@@ -147,14 +95,22 @@ namespace Ao3TrackReader
                         ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
                         NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
                         ObjectCreationHandling = Newtonsoft.Json.ObjectCreationHandling.Auto,
-                        TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
+                        TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All,
                         Formatting = Newtonsoft.Json.Formatting.Indented
                     };
                     string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
                     {
                         Platform = Xamarin.Forms.Device.RuntimePlatform,
                         Mode = GetInteractionMode().ToString(),
-                        Version = Ao3TrackReader.Version.Version.LongString,
+                        Version = Ver.LongString,
+                        GitRev = Ver.GitRevision,
+                        GetTag = Ver.GitTag,
+                        Arch = GetArchitechture().ToString(),
+                        OSName = GetOSName(),
+                        OSVersion = GetOSVersion(),
+                        OSArch = GetOSArchitechture(),
+                        HWType = GetHardwareType(),
+                        HWName = GetHardwareName(),
                         Date = DateTime.UtcNow,
                         Exception = e
                     }, settings);
@@ -272,8 +228,90 @@ static bool PhoneHasBackButton()
                     return InteractionMode.PC;
             }
 #endif
+#pragma warning disable 162
+            return InteractionMode.Unknown;
+#pragma warning restore
+        }
 
-    return InteractionMode.Unknown;
+        public static Architechture GetArchitechture()
+        {
+#if __X86__
+            return Architechture.x86;
+#elif __X64__
+            return Architechture.x64;
+#elif __ARM__
+            return Architechture.ARM;
+#elif __ARM64__
+            return Architechture.ARM64;
+#else
+            return Architechture.Any;
+#endif
+        }
+
+        public static string GetOSArchitechture()
+        {
+#if WINDOWS_UWP
+            return null;
+#elif __ANDROID__
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
+                return Android.OS.Build.SupportedAbis[0];
+            else
+                return Android.OS.Build.CpuAbi;
+#else
+            return null;
+#endif
+        }
+
+        public static string GetOSVersion()
+        {
+#if WINDOWS_UWP
+            ulong v = ulong.Parse(Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamilyVersion);
+            ulong v1 = (v & 0xFFFF000000000000L) >> 48;
+            ulong v2 = (v & 0x0000FFFF00000000L) >> 32;
+            ulong v3 = (v & 0x00000000FFFF0000L) >> 16;
+            ulong v4 = (v & 0x000000000000FFFFL);
+            return $"{v1}.{v2}.{v3}.{v4}";
+#elif __ANDROID__
+            return Android.OS.Build.VERSION.Release;
+#else
+            return null;
+#endif
+        }
+
+        public static string GetOSName()
+        {
+#if WINDOWS_UWP
+            return Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
+#elif __ANDROID__
+            return Android.OS.Build.VERSION.BaseOs;
+#else
+            return null;
+#endif
+        }
+
+        public static string GetHardwareName()
+        {
+#if WINDOWS_UWP
+            var eas = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
+            var sku = eas.SystemSku;
+            if (!string.IsNullOrWhiteSpace(sku)) return sku;
+            return eas.SystemManufacturer + " " + eas.SystemProductName;
+#elif __ANDROID__
+            return Android.OS.Build.Brand + " " + Android.OS.Build.Device + " " + Android.OS.Build.Model;
+#else
+            return null;
+#endif
+        }
+
+        public static string GetHardwareType()
+        {
+#if WINDOWS_UWP
+            return Windows.System.Profile.AnalyticsInfo.DeviceForm;
+#elif __ANDROID__
+            return null;
+#else
+            return null;
+#endif
         }
 
         public static bool HaveOSBackButton

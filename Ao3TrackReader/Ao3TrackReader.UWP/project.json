@@ -2,14 +2,14 @@
   "dependencies": {
     "HtmlAgilityPack": "1.4.9.5",
     "Microsoft.Data.SQLite": "1.1.0",
-    "Microsoft.Net.Compilers": "2.0.1",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.2",
+    "Microsoft.Net.Compilers": "2.1.0",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
     "Microsoft.NETNative.Analyzer": "1.0.0",
     "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "10.0.2",
     "sqlite-net-pcl": "1.3.1",
-    "SQLitePCLRaw.bundle_green": "1.1.2",
-    "SQLitePCLRaw.core": "1.1.2",
+    "SQLitePCLRaw.bundle_green": "1.1.5",
+    "SQLitePCLRaw.core": "1.1.5",
     "System.Net.Http": "4.3.1",
     "System.ValueTuple": "4.3.0",
     "Xamarin.Forms": "2.3.4.231"

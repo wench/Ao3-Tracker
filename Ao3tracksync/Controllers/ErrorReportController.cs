@@ -19,6 +19,13 @@ namespace Ao3tracksync.Controllers
             public string Version { get; set; }
             public string Platform { get; set; }
             public string Mode { get; set; }
+            public string Arch { get; set; }
+            public string OSName { get; set; }
+            public string OSVersion { get; set; }
+            public string OSArch { get; set; }
+            public string HWType { get; set; }
+            public string HWName { get; set; }
+            public DateTime Date { get; set; }
         }
 
         static List<(string Platform, Version Version)> ignoreErrors = new List<(string platform, Version version)> {
@@ -33,7 +40,7 @@ namespace Ao3tracksync.Controllers
         {
             var meta = JsonConvert.DeserializeObject<ReportMetaData>(report, new JsonSerializerSettings
             {
-                MissingMemberHandling = MissingMemberHandling.Ignore                
+                MissingMemberHandling = MissingMemberHandling.Ignore
             });
             if (System.Version.TryParse(meta.Version, out var ver))
             {
@@ -46,8 +53,11 @@ namespace Ao3tracksync.Controllers
 
             MailMessage message = new MailMessage(new MailAddress("ao3track@wenchy.net", "Ao3Track Debug Reports"), new MailAddress("the.wench@wenchy.net"));
 
-            message.Subject = "Ao3Track Reader Error report " + meta.Platform  + " " + meta.Version;
-            message.Body = "See attachment";
+            message.Subject = "Ao3Track Reader Error report " + meta.Platform + " " + meta.Version;
+            message.Body = JsonConvert.SerializeObject(meta, new JsonSerializerSettings {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
+            });
 
             var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(report));
             message.Attachments.Add(new Attachment(stream, "ErrorReport.json", "application/json"));
