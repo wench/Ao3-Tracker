@@ -14,5 +14,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IWebPageView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IUnitConvOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WorkChapter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorkDetails.cs" />
   </ItemGroup>
 </Project>

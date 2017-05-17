@@ -17,35 +17,63 @@ limitations under the License.
 namespace Ao3Track {
 
     sendMessage = (request: MessageRequest) => {
-        chrome.runtime.sendMessage({type: request.type, data: request.data}, request.sendResponse);
+        chrome.runtime.sendMessage({ type: request.type, data: request.data }, request.sendResponse);
     };
 
-    GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) => {
-        sendMessage({type: "GET", data: works, sendResponse: callback});
+    GetWorkDetails = (works: number[], callback: (details: { [key: number]: IWorkDetails }) => void, flags?: WorkDetailsFlags) => {
+        if (!flags) flags = WorkDetailsFlags.All;
+        let finished: WorkDetailsFlags = 0;
+        let result: { [key: number]: IWorkDetails } = {};
+
+        if (flags & WorkDetailsFlags.SavedLoc) {
+            sendMessage({
+                type: "GET", data: works, sendResponse: (reponse: { [key: number]: IWorkChapter }) => {
+                    for (let workid in reponse) {
+                        let detail = result[workid] || {};
+                        detail.savedLoc = reponse[workid];
+                    }
+                    finished = finished | WorkDetailsFlags.SavedLoc;
+                    if (finished === flags) callback(result);
+                }
+            });
+        }
+
+        if (flags & WorkDetailsFlags.InReadingList) {
+            sendMessage({
+                type: "RL_WORKINLIST", data: works, sendResponse: (reponse: { [key: number]: boolean; }) => {
+                    for (let workid in reponse) {
+                        let detail = result[workid] || {};
+                        detail.inReadingList = reponse[workid];
+                    }
+                    finished = finished | WorkDetailsFlags.InReadingList;
+                    if (finished === flags) callback(result);
+                }
+            });
+        }
     };
 
     SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
-        sendMessage({type: "SET", data: workchapters, sendResponse: undefined});
+        sendMessage({ type: "SET", data: workchapters, sendResponse: undefined });
     };
 
     export function DoSync(callback: (result: boolean) => void) {
-        sendMessage({type: "DO_SYNC", data: undefined, sendResponse: callback});
+        sendMessage({ type: "DO_SYNC", data: undefined, sendResponse: callback });
     };
 
     export function UserLogin(credentials: IUserLoginData, callback: (errors: FormErrorList) => void) {
-        sendMessage({type: "USER_LOGIN", data: credentials, sendResponse: callback});
+        sendMessage({ type: "USER_LOGIN", data: credentials, sendResponse: callback });
     };
 
     export function UserCreate(credentials: IUserCreateData, callback: (errors: FormErrorList) => void) {
-        sendMessage({type: "USER_CREATE", data: credentials, sendResponse: callback});
+        sendMessage({ type: "USER_CREATE", data: credentials, sendResponse: callback });
     };
 
     export function UserLogout(callback: (result: boolean) => void) {
-        sendMessage({type: "USER_LOGOUT",data: undefined, sendResponse: callback});
+        sendMessage({ type: "USER_LOGOUT", data: undefined, sendResponse: callback });
     };
 
     export function UserName(callback: (username: string) => void) {
-        sendMessage({type: "USER_NAME", data: undefined, sendResponse: callback});
+        sendMessage({ type: "USER_NAME", data: undefined, sendResponse: callback });
     };
 
     SetNextPage = (uri: string) => {
@@ -94,14 +122,15 @@ namespace Ao3Track {
         curLastLoc = lastloc;
     };
 
-    SetCurrentLocation = (current : IWorkChapterEx) => {
+    SetCurrentLocation = (current: IWorkChapterEx) => {
     };
 
-    AreUrlsInReadingList = (urls: string[], callback: (result: { [key:string]:boolean})=> void)  => {
-        sendMessage({ type: "RL_ISINLIST", data: urls, sendResponse: callback });
+    AreUrlsInReadingList = (urls: string[], callback: (result: { [key: string]: boolean }) => void) => {
+        sendMessage({ type: "RL_URLSINLIST", data: urls, sendResponse: callback });
     };
 
-    GetUnitConvOptions = (callback: (result: IUnitConvOptions)=>void) => {
-        callback({tempToC: true, distToM: true, volumeToM: true, weightToM: true});
+
+    GetUnitConvOptions = (callback: (result: IUnitConvOptions) => void) => {
+        callback({ tempToC: true, distToM: true, volumeToM: true, weightToM: true });
     };
 }

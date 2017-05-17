@@ -51,8 +51,8 @@ namespace Ao3Track {
             document.getElementsByTagName('head')[0].appendChild(link);
         };
 
-    GetWorkChapters = (works: number[], callback: (workchapters: { [key:number]:IWorkChapter } ) => void) => {
-        Ao3Track.Helper.getWorkChaptersAsync(works, callback);
+    GetWorkDetails = (works: number[],  callback: (details: { [key:number]:IWorkDetails }) => void, flags?: WorkDetailsFlags) => {
+        Ao3Track.Helper.getWorkDetailsAsync(works, flags || WorkDetailsFlags.All, callback);
     };
 
     SetWorkChapters = (workchapters: { [key: number]: IWorkChapter; }) => {
@@ -78,9 +78,12 @@ namespace Ao3Track {
     EnableLastLocationJump = (workid: number, lastloc: IWorkChapter) => {
         Ao3Track.Helper.onjumptolastlocationevent = (ev) => {
             if (Boolean(ev)) {
-                GetWorkChapters([workid], (workchaps) => { 
-                    lastloc = workchaps[workid];
-                    Ao3Track.scrollToLocation(workid,lastloc,true); 
+                Ao3Track.Helper.getWorkDetailsAsync([workid], WorkDetailsFlags.SavedLoc, (details) => { 
+                    let d = details[workid] || { };
+                    if (d.savedLoc) {
+                        lastloc = d.savedLoc;
+                        Ao3Track.scrollToLocation(workid,lastloc,true); 
+                    }
                 });
             }
             else {

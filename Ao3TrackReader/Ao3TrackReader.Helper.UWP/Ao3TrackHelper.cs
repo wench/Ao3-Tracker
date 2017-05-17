@@ -144,12 +144,12 @@ namespace Ao3TrackReader.Helper
             //});
         }
 
-        internal static MemberDef md_GetWorkChaptersAsync = new MemberDef { @return = "WrapIMapNum" };
-        public IAsyncOperation<object> GetWorkChaptersAsync([ReadOnlyArray] long[] works)
+        internal static MemberDef md_GetWorkDetailsAsync = new MemberDef { @return = "WrapIMapNum" };
+        public IAsyncOperation<object> GetWorkDetailsAsync([ReadOnlyArray] long[] works, long flags)
         {
             return Task.Run(async () =>
             {
-                return (object)await wvp.GetWorkChaptersAsync(works);
+                return (object)await wvp.GetWorkDetailsAsync(works, (WorkDetailsFlags)flags);
             }).AsAsyncOperation();
         }
 

@@ -102,9 +102,9 @@ namespace Ao3TrackReader.Helper
         }
 
 
-        public async void GetWorkChaptersAsync(long[] works, [Converter("Callback")] int hCallback)
+        public async void GetWorkDetailsAsync(long[] works, int flags, [Converter("Callback")] int hCallback)
         {
-            var workchapters = await wvp.GetWorkChaptersAsync(works);
+            var workchapters = await wvp.GetWorkDetailsAsync(works, (WorkDetailsFlags)flags);
             wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); });
         }
 

@@ -135,7 +135,7 @@ namespace Ao3Track {
 
         Ao3Track.addMessageHandler((request: ReadingListMessageRequest) => {
             switch (request.type) {
-                case "RL_ISINLIST":
+                case "RL_URLSINLIST":
                     {
                         syncIfNeededAsync().then((result) => {
                             let response: { [key: string]: boolean; } = {};
@@ -146,6 +146,21 @@ namespace Ao3Track {
                                 }
                                 else {
                                     response[href] = false;
+                                }
+                            }
+                            request.sendResponse(response);
+                        });
+                    }
+                    return true;
+
+                case "RL_WORKINLIST":
+                    {
+                        syncIfNeededAsync().then((result) => {
+                            let response: { [key: number]: boolean; } = {};
+                            for (let workid of request.data) {
+                                let uri = Ao3Track.Data.readingListlUri("http://archiveofourown.org/works/" + workid);
+                                if (uri !== null && Object.keys(readingListBacking.paths).indexOf(uri.href) !== -1) {
+                                    response[workid] = true;
                                 }
                             }
                             request.sendResponse(response);

@@ -144,11 +144,11 @@ namespace Ao3TrackReader.Helper
                 wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); });
         }
 
-        [JavascriptInterface, Export("getWorkChaptersAsync")]
-        public async void GetWorkChaptersAsync([Converter("ToJSON")] string works_json, [Converter("Callback")] int hCallback)
+        [JavascriptInterface, Export("getWorkDetailsAsync")]
+        public async void GetWorkDetailsAsync([Converter("ToJSON")] string works_json, int flags, [Converter("Callback")] int hCallback)
         {
             var works = JsonConvert.DeserializeObject<long[]>(works_json);
-            var workchapters = await wvp.GetWorkChaptersAsync(works);
+            var workchapters = await wvp.GetWorkDetailsAsync(works,(WorkDetailsFlags) flags);
             wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); });
         }
 

@@ -16,6 +16,9 @@ limitations under the License.
 
 /// <reference path="../../typings/globals/chrome/index.d.ts" />
 
+declare function escape(str : string) : string;
+declare function unescape(str : string) : string;
+
 declare namespace Ao3Track {
     interface IUserCreateData {
         username: string;
@@ -69,14 +72,16 @@ declare namespace Ao3Track {
 
     interface ReadingListMessageData
     {
-        'RL_ISINLIST': string[];
+        'RL_URLSINLIST': string[];
+        'RL_WORKINLIST': number[];
     }
     interface ReadingListMessageResponse
     {
-        'RL_ISINLIST': { [key: string]: boolean; };
+        'RL_URLSINLIST': { [key: string]: boolean; };
+        'RL_WORKINLIST': { [key: number]: boolean; };        
     }
     type IReadingListMessageRequest<K extends keyof ReadingListMessageData & keyof ReadingListMessageResponse> = IMessageRequest<ReadingListMessageData,ReadingListMessageResponse,K>;        
-    type ReadingListMessageRequest = IReadingListMessageRequest<'RL_ISINLIST'>;
+    type ReadingListMessageRequest = IReadingListMessageRequest<'RL_URLSINLIST'> | IReadingListMessageRequest<'RL_WORKINLIST'>;
     
     interface MessageData extends CloudMessageData, ReadingListMessageData
     {

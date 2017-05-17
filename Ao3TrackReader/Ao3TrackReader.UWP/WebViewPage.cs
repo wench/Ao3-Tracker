@@ -88,9 +88,9 @@ namespace Ao3TrackReader
             return task.Result;
         }
 
-        IAsyncOperation<IDictionary<long, WorkChapter>> IWebViewPage.GetWorkChaptersAsync(long[] works)
+        IAsyncOperation<IDictionary<long, IWorkDetails>> IWebViewPage.GetWorkDetailsAsync(long[] works, WorkDetailsFlags flags)
         {
-            return GetWorkChaptersAsync(works).AsAsyncOperation();
+            return GetWorkDetailsAsync(works,flags).AsAsyncOperation();
         }
         IAsyncOperation<IDictionary<string, bool>> IWebViewPage.AreUrlsInReadingListAsync(string[] urls)
         {

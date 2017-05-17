@@ -22,13 +22,13 @@ using System.Runtime.InteropServices.WindowsRuntime;
 #if WINDOWS_UWP
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
-using IAsyncOp_WorkChapterMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
+using IAsyncOp_WorkWorkDetailsMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.IWorkDetails>>;
 using IAsyncOp_StringBoolMap = Windows.Foundation.IAsyncOperation<System.Collections.Generic.IDictionary<string, bool>>;
 using IAsyncOp_String = Windows.Foundation.IAsyncOperation<string>;
 #else 
 using System.Threading.Tasks;
 using IAsyncOperation = System.Threading.Tasks.Task;
-using IAsyncOp_WorkChapterMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>>;
+using IAsyncOp_WorkWorkDetailsMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.IWorkDetails>>;
 using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>>;
 using IAsyncOp_String = System.Threading.Tasks.Task<string>;
 #endif
@@ -65,7 +65,7 @@ namespace Ao3TrackReader.Helper
 
         double DeviceWidth { get; }
 
-        IAsyncOp_WorkChapterMap GetWorkChaptersAsync([ReadOnlyArray] long[] works);
+        IAsyncOp_WorkWorkDetailsMap GetWorkDetailsAsync([ReadOnlyArray] long[] works, WorkDetailsFlags flags);
         void SetWorkChaptersAsync(IDictionary<long, WorkChapter> works);
         bool JumpToLastLocationEnabled { get; set; }
         string NextPage { get; set; }

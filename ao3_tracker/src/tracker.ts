@@ -16,6 +16,12 @@ limitations under the License.
 
 namespace Ao3Track {
 
+    export enum WorkDetailsFlags {
+        SavedLoc = 1,
+        InReadingList = 2,
+        All = SavedLoc | InReadingList
+    }
+
     const $ = jQuery;
 
     // Enable swipe left to go to next page
@@ -343,33 +349,19 @@ namespace Ao3Track {
 
    if (typeof jumpnow === "object" ) { scrollToLocation(workid, jumpnow, false); }
 
-    let workchaps: { [key: number]: IWorkChapter } | null = null;
-    let readinglist: { [key: string]: boolean } | null = null;
-
-    function iterateWorks(workchaps: { [key: number]: IWorkChapter | undefined}, readinglist: { [key: string]: boolean| undefined}) {
+    Ao3Track.GetWorkDetails(works,(response)=>{
         for (let i = 0; i < $works.length && i < works.length; i++) {
-            let inreadinglist = readinglist["http://archiveofourown.org/works/"+works[i]] || false;
-            if (inreadinglist || works[i] in workchaps) {
-                let workchap = workchaps[works[i]] || { number: 1, chapterid: 0, location: 0, seq: 0};
+            if (works[i] in response) {
+                let workchap = response[works[i]].savedLoc || { number: 1, chapterid: 0, location: 0, seq: 0};
                 if (works[i] === workid) {
                     EnableLastLocationJump(workid, workchap);
                     if (jumpnow === true) { scrollToLocation(workid, workchap, false); }
                 }
 
-                ExtendWorkSummary($($works[i]), works[i], workchap, inreadinglist);
+                ExtendWorkSummary($($works[i]), works[i], workchap, response[works[i]].inReadingList || false);
             }
         }
-    }
-
-    Ao3Track.AreUrlsInReadingList(works.map((id) => "http://archiveofourown.org/works/"+id), (response) => {
-        readinglist = response;
-        if (workchaps !== null) iterateWorks(workchaps, readinglist);
-    });
-
-    Ao3Track.GetWorkChapters(works, (response) => {
-        workchaps = response;
-        if (readinglist !== null) iterateWorks(workchaps, readinglist);
-    });
+    }, WorkDetailsFlags.SavedLoc | WorkDetailsFlags.InReadingList);
 
     let $serieses = $('.series a[href^="/series/"]');
     Ao3Track.AreUrlsInReadingList($serieses.toArray().map((e) => {

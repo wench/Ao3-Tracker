@@ -489,12 +489,45 @@ namespace Ao3TrackReader
 
         static object locker = new object();
 
-        public System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.WorkChapter>> GetWorkChaptersAsync(long[] works)
+        public async Task<IDictionary<long, IWorkDetails>> GetWorkDetailsAsync(long[] works, WorkDetailsFlags flags)
         {
-            return App.Storage.GetWorkChaptersAsync(works);
+            var result = new System.Collections.Concurrent.ConcurrentDictionary<long, IWorkDetails>();
+            var tasks = new List<Task>();
+
+            if ((flags & WorkDetailsFlags.SavedLoc) != 0)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    foreach (var kvp in await App.Storage.GetWorkChaptersAsync(works))
+                    {
+                        result.AddOrUpdate(kvp.Key,
+                           (workid) => new WorkDetails { SavedLoc = kvp.Value },
+                           (workid, detail) => { detail.SavedLoc = kvp.Value; return detail; }
+                        );
+                    }
+                }));
+            }
+
+            if ((flags & WorkDetailsFlags.InReadingList) != 0)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    foreach (var kvp in await ReadingList.AreWorksInListAsync(works))
+                    {
+                        result.AddOrUpdate(kvp.Key,
+                            (workid) => new WorkDetails { InReadingList = kvp.Value },
+                            (workid, detail) => { detail.InReadingList = kvp.Value; return detail; }
+                        );
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+
+            return result;
         }
 
-        public System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>> AreUrlsInReadingListAsync(string[] urls)
+        public Task<IDictionary<string, bool>> AreUrlsInReadingListAsync(string[] urls)
         {
             return ReadingList.AreUrlsInListAsync(urls);
         }

@@ -125,8 +125,8 @@ namespace Ao3Track {
                     {
                         model.Type = Ao3PageType.Tag;
 
-                        var sTAGNAME = match[1];
-                        var sTYPE = match[2] || "";
+                        let sTAGNAME = match[1];
+                        let sTYPE = match[2] || "";
 
                         model.Title = sTYPE.trim();
                         if (model.Title.length) {
@@ -147,21 +147,21 @@ namespace Ao3Track {
                         }
 
                         /*
-                        var tagdetails = await LookupTagAsync(sTAGNAME);
+                        let tagdetails = await LookupTagAsync(sTAGNAME);
                         model.PrimaryTag = tagdetails.actual;
                         model.PrimaryTagType = GetTypeForCategory(tagdetails.category);
 
-                        var tagtasks = new List<Task<KeyValuePair<Ao3TagType, string>>>(tagdetails.parents.Count);
+                        let tagtasks = new List<Task<KeyValuePair<Ao3TagType, string>>>(tagdetails.parents.Count);
                         foreach (string ptag in tagdetails.parents)
                         {
                             tagtasks.Add(Task.Run(async () =>
                             {
-                                var ptagdetails = await LookupTagAsync(ptag);
+                                let ptagdetails = await LookupTagAsync(ptag);
                                 return new KeyValuePair<Ao3TagType, string>(GetTypeForCategory(ptagdetails.category), ptag);
                             }));
                         }
                         SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
-                        foreach (var t in await Task.WhenAll(tagtasks))
+                        foreach (let t in await Task.WhenAll(tagtasks))
                         {
                             if (string.IsNullOrEmpty(t.Value))
                                 continue;
@@ -185,14 +185,14 @@ namespace Ao3Track {
                     {
                         model.Type = Ao3PageType.Work;
 
-                        var sWORKID = match[1];
+                        let sWORKID = match[1];
                         model.Uri = uri = new URL("/works/" + sWORKID, uri.href);
 
                         model.Details = new Ao3WorkDetails();
 
                         model.Details.WorkId = parseInt(sWORKID);
 
-                        var wsuri = new URL("http://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
+                        let wsuri = new URL("http://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
 
                         new Promise<JQuery>((resolve) => {
                             let tryget = (retrying: boolean) => {
@@ -244,8 +244,8 @@ namespace Ao3Track {
 
             debugger;
             tagsnode.children("li").each((index, elem) => {
-                var tn = $(elem);
-                var a = tn.find("a.tag").first();
+                let tn = $(elem);
+                let a = tn.find("a.tag").first();
                 if (a.length === 0) {
                     return;
                 }
@@ -260,12 +260,12 @@ namespace Ao3Track {
                     }
                 }
 
-                var href = a.attr("href");
+                let href = a.attr("href");
                 if (href) {
-                    var reluri = new URL(href, baseuri.href);
-                    var m = decodeURIComponent(reluri.pathname).match(regexTag);
+                    let reluri = new URL(href, baseuri.href);
+                    let m = decodeURIComponent(reluri.pathname).match(regexTag);
                     if (m) {
-                        var tag = m[1];
+                        let tag = m[1];
 
                         let list = tags.get(type);
                         if (list === undefined) {
@@ -283,13 +283,13 @@ namespace Ao3Track {
             let fandomnode = headernode.children(".fandoms");
 
             fandomnode.children("a").each((index, elem) => {
-                var a = $(elem);
-                var href = a.attr("href");
+                let a = $(elem);
+                let href = a.attr("href");
                 if (href) {
-                    var reluri = new URL(href, baseuri.href);
-                    var m = decodeURIComponent(reluri.pathname).match(regexTag);
+                    let reluri = new URL(href, baseuri.href);
+                    let m = decodeURIComponent(reluri.pathname).match(regexTag);
                     if (m) {
-                        var tag = m[1];
+                        let tag = m[1];
                         let list = tags.get(Ao3TagType.Fandoms);
                         if (list === undefined) {
                             tags.set(Ao3TagType.Fandoms, list = []);
@@ -314,9 +314,9 @@ namespace Ao3Track {
                     links.each((index,elem)=>
                     {
                         let n = $(elem);
-                        var href = n.attr("href");
-                        var rel = n.attr("rel");
-                        var uri = new URL(href,baseuri.href);
+                        let href = n.attr("href");
+                        let rel = n.attr("rel");
+                        let uri = new URL(href,baseuri.href);
 
                         if (rel === "author")
                         {
@@ -349,13 +349,13 @@ namespace Ao3Track {
                     continue;
                 }
 
-                var classes = n[1].attr("class").split(" ");
-                var search = Ao3RequiredTag[n[0]].toLowerCase();
-                var searchns = search;
+                let classes = n[1].attr("class").split(" ");
+                let search = Ao3RequiredTag[n[0]].toLowerCase();
+                let searchns = search;
                 while (searchns.endsWith("s")) { searchns = searchns.substr(0,searchns.length-1); }
                 search = search + "-";
                 searchns = searchns + "-";
-                var tag = classes.find((val) =>
+                let tag = classes.find((val) =>
                 {
                     return val.startsWith(search) || val.startsWith(searchns);
                 });
@@ -373,7 +373,7 @@ namespace Ao3Track {
             if ((tagset = tags.get(Ao3TagType.Relationships)) && tagset.length)
             {
                 let tagname = tagset[0];
-                //var tagdetails = await LookupTagAsync(tagname);
+                //let tagdetails = await LookupTagAsync(tagname);
                 //model.PrimaryTag = tagdetails.actual;
                 model.PrimaryTag = tagname;
                 model.PrimaryTagType = Ao3TagType.Relationships;
@@ -381,7 +381,7 @@ namespace Ao3Track {
             else if ((tagset = tags.get(Ao3TagType.Fandoms)) && tagset.length)
             {
                 let tagname = tagset[0];
-                //var tagdetails = await LookupTagAsync(tagname);
+                //let tagdetails = await LookupTagAsync(tagname);
                 //model.PrimaryTag = tagdetails.actual;
                 model.PrimaryTag = tagname;
                 model.PrimaryTagType = Ao3TagType.Fandoms;
@@ -456,7 +456,7 @@ namespace Ao3Track {
 
             for (let v of uri.search.substr(1).split(/[;&]/))
             {
-                var kv = v.split('=', 2);
+                let kv = v.split('=', 2);
                 kv[0] = decodeURIComponent(kv[0]);
 
                 let array = query.get(kv[0]);
@@ -471,22 +471,22 @@ namespace Ao3Track {
 
 
             model.RequiredTags = new Map<Ao3RequiredTag, [string, string]>();
-            var tlist : [Ao3TagType, [string, number]][] = [];
+            let tlist : [Ao3TagType, [string, number]][] = [];
 
-            for (var i in Ao3TagType)
+            for (let i in Ao3TagType)
             {
                 if (typeof(i) !== "string" || !isNaN(parseInt(i))) {
                     continue;
                 }
                 
-                var name = i.toLowerCase();
+                let name = i.toLowerCase();
                 while (name.endsWith('s')) { name = name.substr(0,name.length-1); }
                 name = "work_search[" + name + "_ids][]";
                 let tagids = query.get(name);
 
                 if (tagids)
                 {
-                    for (var s of tagids)
+                    for (let s of tagids)
                     {
                         let id = parseInt(s);
 
@@ -501,9 +501,9 @@ namespace Ao3Track {
             let q;
             if (q = query.get("work_search[other_tag_names]"))
             {
-                for (var tag of q[0].split(','))
+                for (let tag of q[0].split(','))
                 {
-                    //var tagdetails = LookupTagQuick(tag);
+                    //let tagdetails = LookupTagQuick(tag);
                     //tlist.Add(new KeyValuePair<Ao3TagType, Tuple<string, int>>(GetTypeForCategory(tagdetails?.category), new Tuple<string, int>(UnescapeTag(tag), 0)));
                     tlist.push([Ao3TagType.Other as any, [tag, 0]]);
                 }
@@ -561,7 +561,7 @@ namespace Ao3Track {
 
             if (q = query.get("tag_id"))
             {
-                //var tagdetails = LookupTagQuick(query["tag_id"][0]);
+                //let tagdetails = LookupTagQuick(query["tag_id"][0]);
                 //model.PrimaryTag = tagdetails?.actual ?? query["tag_id"][0];
                 //model.PrimaryTagType = GetTypeForCategory(tagdetails?.category);
 

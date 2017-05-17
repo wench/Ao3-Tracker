@@ -27,7 +27,7 @@ declare namespace Ao3Track {
     }    
 
     export interface IAo3TrackHelperMethods {
-        getWorkChaptersAsync(works: number[], callback: (workchapters: { [key:number]:IWorkChapter }) => void) : void;
+        getWorkDetailsAsync (works: number[], flags: WorkDetailsFlags, callback: (details: { [key:number]:IWorkDetails }) => void) : void;
         setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void;
 
         showContextMenu(x: number, y: number, url: string, innerHtml: string): void;

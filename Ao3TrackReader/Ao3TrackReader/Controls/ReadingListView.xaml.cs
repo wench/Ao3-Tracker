@@ -468,7 +468,7 @@ namespace Ao3TrackReader.Controls
                 foreach (var url in urls)
                 {
                     var uri = Data.Ao3SiteDataLookup.ReadingListlUri(url);
-                    if (uri != null) urlmap.Add(new KeyValuePair<string, Uri>(url,uri));
+                    if (uri != null) urlmap.Add(new KeyValuePair<string, Uri>(url, uri));
                     result[url] = false;
                 }
 
@@ -485,6 +485,39 @@ namespace Ao3TrackReader.Controls
                         }
                     }
                     if (urlmap.Count == 0)
+                        break;
+                }
+
+                return result;
+            });
+        }
+
+        public async Task<IDictionary<long, bool>> AreWorksInListAsync(long[] workids)
+        {
+            return await Task.Run(() =>
+            {
+                var workmap = new List<KeyValuePair<long, Uri>>();
+                IDictionary<long, bool> result = new Dictionary<long, bool>();
+
+                foreach (var workid in workids)
+                {
+                    var uri = Data.Ao3SiteDataLookup.ReadingListlUri("http://archiveofourown.org/works/" + workid);
+                    if (uri != null) workmap.Add(new KeyValuePair<long, Uri>(workid, uri));
+                }
+
+                foreach (var m in readingListBacking.AllSafe)
+                {
+                    for (var i = 0; i < workmap.Count; i++)
+                    {
+                        var kvp = workmap[i];
+                        if (m.HasUri(kvp.Value))
+                        {
+                            result[kvp.Key] = true;
+                            workmap.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                    if (workmap.Count == 0)
                         break;
                 }
 
