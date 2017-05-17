@@ -324,7 +324,7 @@ namespace Ao3Track {
         if ($blurb_heading.length) {
 
             let chapter_count = parseInt(chapters_text[1]);
-            let chapter_total = chapters_text[2] !== "?" ? parseInt(chapters_text[1]):null;
+            let chapter_total = chapters_text[2] !== "?" ? parseInt(chapters_text[2]):null;
 
             if (chapter_count > chapters_finished) {
                 let unread = chapter_count - chapters_finished;
