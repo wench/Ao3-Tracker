@@ -14,49 +14,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-var gulp = require('gulp');
-var ts = require('gulp-typescript');
-var sourcemaps = require('gulp-sourcemaps');
-var cache = require('gulp-cache');
-var imagemin = require('gulp-imagemin');
-var less = require('gulp-less');
-var preprocess = require('gulp-preprocess');
-var merge = require('merge-stream');
+const gulp = require('gulp');
+const ts = require('gulp-typescript');
+const sourcemaps = require('gulp-sourcemaps');
+const cache = require('gulp-cache');
+const imagemin = require('gulp-imagemin');
+const less = require('gulp-less');
+const preprocess = require('gulp-preprocess');
+const merge = require('merge-stream');
 const url = require('url');
+const shell = require('gulp-shell')
 
-var tsOptions = require('./tsconfig.json').compilerOptions;
+const tsOptions = require('./tsconfig.json').compilerOptions;
 
-var tsOptions_ES5 = Object.assign({}, tsOptions, {
+const tsOptions_ES5 = Object.assign({}, tsOptions, {
     target: "ES5"
 });
 
-var tsOptions_ES6 = Object.assign({}, tsOptions, {
+const tsOptions_ES6 = Object.assign({}, tsOptions, {
     target: "ES6"
 });
 
-var browser_scripts = [
+const browser_scripts = [
     'src/*.ts',
     'src/browser/*.ts'
 ];
-var uwp_scripts = [
+const uwp_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
     'src/reader/uwp/*.ts'
 ];
-var droid_scripts = [
+const droid_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
     'src/reader/compat/*.ts',
     'src/reader/droid/*.ts'
 ];
-var ios_scripts = [
+const ios_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
     'src/reader/compat/*.ts',
     'src/reader/messaging/*.ts',
     'src/reader/ios/*.ts'
 ];
-var win81_scripts = [
+const win81_scripts = [
     'src/*.ts',
     'src/reader/*.ts',
     'src/reader/compat/*.ts',
@@ -238,4 +239,4 @@ gulp.task('watch', gulp.series(build, function () {
     gulp.watch('lib/**/*', libs);
 }));
 
-
+gulp.task('sourcemapserver', shell.task(['http-server build']));
