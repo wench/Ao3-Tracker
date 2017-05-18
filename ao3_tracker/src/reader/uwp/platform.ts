@@ -53,6 +53,15 @@ namespace Ao3Track {
             remove: (key: K) => void;
             size: number;
         }
+        const IMapKeys = [
+            "clear",
+            "getView",
+            "hasKey",
+            "insert",
+            "lookup",
+            "remove",
+            "size"
+        ];
 
         export interface ClassNameMap {
             "WorkChapterNative": IWorkChapter;
@@ -92,56 +101,79 @@ namespace Ao3Track {
         }
 
         export function GetIMapProxy<V, I extends string | number>(map: IMap<I, V>, conv: (key: PropertyKey) => (I | null)): any {
-            let proxy = new Proxy(map, {
+            let proxy = new Proxy({}, {
                 get: (oTarget, sKey) => {
+                    if (sKey in oTarget) return (oTarget as any)[sKey];
+                    if (IMapKeys.indexOf(sKey as string) !== -1) return (map as any)[sKey];
                     let key = conv(sKey);
                     if (key === null) return undefined;
-                    return oTarget.hasKey(key) ? oTarget.lookup(key) : undefined;
+                    return map.hasKey(key) ? map.lookup(key) : undefined;
                 },
                 set: (oTarget, sKey, vValue) => {
+                    if (IMapKeys.indexOf(sKey as string) !== -1 || sKey in oTarget) return false;
                     let key = conv(sKey);
                     if (key === null) return false;
-                    oTarget.insert(key, vValue);
+                    map.insert(key, vValue);
                     return true;
                 },
                 deleteProperty: (oTarget, sKey) => {
+                    if (IMapKeys.indexOf(sKey as string) !== -1 || sKey in oTarget) return false;
                     let key = conv(sKey);
                     if (key === null) return false;
-                    oTarget.remove(key);
+                    map.remove(key);
                     return true;
                 },
                 enumerate: (oTarget) => {
                     let keys: PropertyKey[] = [];
-                    for (let it = oTarget.first(); it.hasCurrent; it.moveNext()) {
+                    for (let it = map.first(); it.hasCurrent; it.moveNext()) {
                         keys.push(it.current.key);
                     }
                     return keys;
                 },
                 ownKeys: (oTarget) => {
-                    let keys: PropertyKey[] = [];
-                    for (let it = oTarget.first(); it.hasCurrent; it.moveNext()) {
-                        keys.push(it.current.key);
+                    let keys: PropertyKey[] = Object.keys(oTarget).slice();
+                    for (let sKey of IMapKeys) 
+                        if (keys.indexOf(sKey) === -1) keys.push(sKey);
+                    for (let it = map.first(); it.hasCurrent; it.moveNext()) {
+                        let sKey = it.current.key.toString();
+                        if (keys.indexOf(sKey) === -1) keys.push(sKey);
                     }
                     return keys;
                 },
                 has: (oTarget, sKey) => {
+                    if (IMapKeys.indexOf(sKey as string) !== -1 || sKey in oTarget) return true;
                     let key = conv(sKey);
                     if (key === null) return false;
-                    return oTarget.hasKey(key);
+                    return map.hasKey(key);
                 },
                 defineProperty: (oTarget, sKey, oDesc) => {
                     return false;
                 },
-                getOwnPropertyDescriptor: (oTarget, sKey) => {
-                    let v = this.get(oTarget, sKey);
-                    if (v === undefined) return undefined as any;
+                getOwnPropertyDescriptor: (oTarget, sKey) => {          
+                    let res = Object.getOwnPropertyDescriptor(oTarget,sKey);
+                    if (res) return res;
 
-                    let res: PropertyDescriptor = {
-                        value: v,
-                        writable: true,
-                        enumerable: true,
-                        configurable: false
-                    };
+                    if (IMapKeys.indexOf(sKey as string) !== -1) {
+                        res = {
+                            value: (map as any)[sKey],
+                            writable: false,
+                            enumerable: false,
+                            configurable: true
+                        };
+                    }
+                    else {
+                        let key = conv(sKey);
+                        if (key === null) return undefined as any;
+                        let v = map.hasKey(key) ? map.lookup(key) : undefined;
+                        if (v === undefined) return undefined as any;
+
+                        res = {
+                            value: v,
+                            writable: true,
+                            enumerable: true,
+                            configurable: true
+                        };
+                    }
                     return res;
                 }
             });
