@@ -27,12 +27,6 @@ using Button = Ao3TrackReader.Controls.Button;
 using System.Threading.Tasks;
 using Ver = Ao3TrackReader.Version.Version;
 
-#if __WINDOWS__
-using Windows.Storage;
-#else
-using System.IO;
-#endif
-
 namespace Ao3TrackReader
 {
     public enum InteractionMode
@@ -54,6 +48,8 @@ namespace Ao3TrackReader
 
     public partial class App : Application
     {
+        public new static App Current => (App)Application.Current;
+
         public static Ao3TrackDatabase Database
         {
             get; private set;
@@ -68,16 +64,6 @@ namespace Ao3TrackReader
         {
             get { return (NavigationPage)base.MainPage; }
             set { base.MainPage = value; }
-        }
-
-        public WebViewPage WebViewPage
-        {
-            get { return wvp;}
-        }
-
-        public new static App Current
-        {
-            get { return (App)Xamarin.Forms.Application.Current; }
         }
 
         static bool _LoggedError = false;
@@ -101,16 +87,16 @@ namespace Ao3TrackReader
                     string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
                     {
                         Platform = Xamarin.Forms.Device.RuntimePlatform,
-                        Mode = GetInteractionMode().ToString(),
+                        Mode = InteractionMode.ToString(),
                         Version = Ver.LongString,
                         GitRev = Ver.GitRevision,
                         GetTag = Ver.GitTag,
-                        Arch = GetArchitechture().ToString(),
-                        OSName = GetOSName(),
-                        OSVersion = GetOSVersion(),
-                        OSArch = GetOSArchitechture(),
-                        HWType = GetHardwareType(),
-                        HWName = GetHardwareName(),
+                        Arch = BuildArchitechture.ToString(),
+                        OSName = OSName,
+                        OSVersion = OSVersion,
+                        OSArch = OSArchitechture,
+                        HWType = HardwareType,
+                        HWName = HardwareName,
                         Date = DateTime.UtcNow,
                         Exception = e
                     }, settings);
@@ -155,6 +141,7 @@ namespace Ao3TrackReader
         }
 
         public static string Theme { get; private set; }
+
         public static string PlatformIcon(string name)
         {
             string dl = "_" + Theme;
@@ -177,167 +164,29 @@ namespace Ao3TrackReader
             }
         }
 
-#if WINDOWS_UWP
-static bool PhoneHasBackButton()
+        public static Architechture BuildArchitechture
         {
-            if (Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons"))
+            get
             {
-                if (typeof(Windows.Phone.UI.Input.HardwareButtons) == null)
-                {
-                    var eh = new EventHandler<Windows.Phone.UI.Input.BackPressedEventArgs>((sender, e) => { });
-                    Windows.Phone.UI.Input.HardwareButtons.BackPressed += eh;
-                    Windows.Phone.UI.Input.HardwareButtons.BackPressed -= eh;
-                }
-                return true;
-            }
-            return false;
-        }
-#endif
-
-        public static InteractionMode GetInteractionMode()
-        {
-#if WINDOWS_UWP
-    var s = Windows.UI.ViewManagement.UIViewSettings.GetForCurrentView();
-            if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Mouse)
-                return InteractionMode.PC;
-
-            try
-            { 
-                if (Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile" && PhoneHasBackButton())
-                    return InteractionMode.Phone;
-            }
-            catch {
-
-            }
-
-            if (s.UserInteractionMode == Windows.UI.ViewManagement.UserInteractionMode.Touch)
-                return InteractionMode.Tablet;
-#elif WINDOWS_APP
-                return InteractionMode.PC;
-#elif __ANDROID__
-            // Good enough for android for now
-            switch (Xamarin.Forms.Device.Idiom)
-            {
-                case TargetIdiom.Phone:
-                    return InteractionMode.Phone;
-
-                case TargetIdiom.Tablet:
-                    return InteractionMode.Tablet;
-
-                case TargetIdiom.Desktop:
-                    return InteractionMode.PC;
-            }
-#endif
-#pragma warning disable 162
-            return InteractionMode.Unknown;
-#pragma warning restore
-        }
-
-        public static Architechture GetArchitechture()
-        {
 #if __X86__
-            return Architechture.x86;
+                return Architechture.x86;
 #elif __X64__
-            return Architechture.x64;
+                return Architechture.x64;
 #elif __ARM__
-            return Architechture.ARM;
+                return Architechture.ARM;
 #elif __ARM64__
-            return Architechture.ARM64;
+                return Architechture.ARM64;
 #else
-            return Architechture.Any;
+                return Architechture.Any;
 #endif
-        }
-
-        public static string GetOSArchitechture()
-        {
-#if WINDOWS_UWP
-            return null;
-#elif __WINDOWS__
-            return null;
-#elif __ANDROID__
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
-                return Android.OS.Build.SupportedAbis[0];
-            else
-                return Android.OS.Build.CpuAbi;
-#else
-            return null;
-#endif
-        }
-
-        public static string GetOSVersion()
-        {
-#if WINDOWS_UWP
-            ulong v = ulong.Parse(Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamilyVersion);
-            ulong v1 = (v & 0xFFFF000000000000L) >> 48;
-            ulong v2 = (v & 0x0000FFFF00000000L) >> 32;
-            ulong v3 = (v & 0x00000000FFFF0000L) >> 16;
-            ulong v4 = (v & 0x000000000000FFFFL);
-            return $"{v1}.{v2}.{v3}.{v4}";
-#elif __WINDOWS__
-            var analyticsInfoType = Type.GetType("Windows.System.Profile.AnalyticsInfo, Windows, ContentType=WindowsRuntime");
-            var versionInfoType = Type.GetType("Windows.System.Profile.AnalyticsVersionInfo, Windows, ContentType=WindowsRuntime");
-            if (analyticsInfoType != null && versionInfoType != null)
-            {
-                var versionInfo = analyticsInfoType.GetRuntimeProperty("VersionInfo").GetValue(null);
-                ulong v = (ulong) versionInfoType.GetRuntimeProperty("DeviceFamilyVersion").GetValue(versionInfo);
-                ulong v1 = (v & 0xFFFF000000000000L) >> 48;
-                ulong v2 = (v & 0x0000FFFF00000000L) >> 32;
-                ulong v3 = (v & 0x00000000FFFF0000L) >> 16;
-                ulong v4 = (v & 0x000000000000FFFFL);
-                return $"{v1}.{v2}.{v3}.{v4}";
             }
-            return null;
-#elif __ANDROID__
-            return Android.OS.Build.VERSION.Release;
-#else
-            return null;
-#endif
-        }
-
-        public static string GetOSName()
-        {
-#if WINDOWS_UWP
-            return Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
-#elif __WINDOWS__
-            var eas = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
-            return eas.OperatingSystem;
-#elif __ANDROID__
-            return Android.OS.Build.VERSION.BaseOs;
-#else
-            return null;
-#endif
-        }
-
-        public static string GetHardwareName()
-        {
-#if WINDOWS_UWP || __WINDOWS__
-            var eas = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
-            var sku = eas.SystemSku;
-            if (!string.IsNullOrWhiteSpace(sku)) return sku;
-            return eas.SystemManufacturer + " " + eas.SystemProductName;
-#elif __ANDROID__
-            return Android.OS.Build.Brand + " " + Android.OS.Build.Device + " " + Android.OS.Build.Model;
-#else
-            return null;
-#endif
-        }
-
-        public static string GetHardwareType()
-        {
-#if WINDOWS_UWP
-            return Windows.System.Profile.AnalyticsInfo.DeviceForm;
-#elif __ANDROID__
-            return null;
-#else
-            return null;
-#endif
         }
 
         public static bool HaveOSBackButton
         {
             get
             {
-                var mode = GetInteractionMode();
+                var mode = InteractionMode;
                 return mode == InteractionMode.Phone || mode == InteractionMode.Tablet;
             }
         }
@@ -353,63 +202,9 @@ static bool PhoneHasBackButton()
             task.Wait();
         }
 
-#if __WINDOWS__
-        public static T RunSynchronously<T>(Windows.Foundation.IAsyncOperation<T> iasync)
-        {
-            var task = iasync.AsTask();
-            task.Wait();
-            return task.Result;
-        }
-
-        public static void RunSynchronously(Windows.Foundation.IAsyncAction iasync)
-        {
-            var task = iasync.AsTask();
-            task.Wait();
-        }
-
-        public static void TextFileSave(string filename, string text)
-        {
-            var localFolder = ApplicationData.Current.LocalFolder;
-            var sampleFile = RunSynchronously(localFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting));
-            RunSynchronously(FileIO.WriteTextAsync(sampleFile, text));
-        }
-        public static async Task<string> TextFileLoadAsync(string filename)
-        {
-            var storageFolder = ApplicationData.Current.LocalFolder;
-            var sampleFile = (await storageFolder.TryGetItemAsync(filename)) as StorageFile;
-            if (sampleFile == null) return null;
-            return await Windows.Storage.FileIO.ReadTextAsync(sampleFile);
-        }
-        public static void TextFileDelete(string filename)
-        {
-            var storageFolder = ApplicationData.Current.LocalFolder;
-            var sampleFile = RunSynchronously(storageFolder.TryGetItemAsync(filename)) as StorageFile;
-            if (sampleFile != null) RunSynchronously(sampleFile.DeleteAsync());
-        }
-#else
-        public static void TextFileSave(string filename, string text)
-        {
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            var filePath = Path.Combine(documentsPath, filename);
-            System.IO.File.WriteAllText(filePath, text);
-        }
-        public static Task<string> TextFileLoadAsync(string filename)
-        {
-            return Task.Run(()=> { 
-                var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                var filePath = Path.Combine(documentsPath, filename);
-                return System.IO.File.ReadAllText(filePath);
-            });
-        }
-        public static void TextFileDelete(string filename)
-        {
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            var filePath = Path.Combine(documentsPath, filename);
-            System.IO.File.Delete(filePath);
-        }
-#endif
 
         WebViewPage wvp;
+        public WebViewPage WebViewPage => wvp;
 
         public App()
         {

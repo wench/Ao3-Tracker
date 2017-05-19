@@ -196,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Ao3TrackHelper.cs" />
+    <Compile Include="App.cs" />
     <Compile Include="DropDownRenderer.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />

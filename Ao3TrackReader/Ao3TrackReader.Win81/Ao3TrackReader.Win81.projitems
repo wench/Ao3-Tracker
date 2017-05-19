@@ -9,6 +9,7 @@
     <Import_RootNamespace>Ao3TrackReader.Win81</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)INotifyPropertyChanging.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScriptMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />

@@ -9,6 +9,7 @@
     <Import_RootNamespace>Ao3TrackReader.WinRT</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ButtonRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ColorConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FormsCommandBar.cs" />

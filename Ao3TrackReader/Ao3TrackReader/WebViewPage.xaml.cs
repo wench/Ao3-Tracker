@@ -185,7 +185,7 @@ namespace Ao3TrackReader
 
         public void UpdateBackButton()
         {
-            var mode = App.GetInteractionMode();
+            var mode = App.InteractionMode;
 
             bool? show = null;
             if (mode == InteractionMode.Phone || mode == InteractionMode.Tablet)
