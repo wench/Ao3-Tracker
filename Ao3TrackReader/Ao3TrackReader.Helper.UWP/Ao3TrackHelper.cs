@@ -23,6 +23,8 @@ using Windows.Foundation.Metadata;
 using Windows.UI.Core;
 using Windows.ApplicationModel.DataTransfer;
 
+using Newtonsoft.Json;
+
 namespace Ao3TrackReader.Helper
 {
 #if WINDOWS_UWP
@@ -149,12 +151,13 @@ namespace Ao3TrackReader.Helper
             wvp.JavascriptError(name, message, url, lineNo, coloumNo, stack);
         }
 
-        internal static MemberDef md_GetWorkDetailsAsync = new MemberDef { @return = "WrapIMapNum" };
-        public IAsyncOperation<object> GetWorkDetailsAsync([ReadOnlyArray] long[] works, long flags)
+        internal static MemberDef md_GetWorkDetailsAsync = new MemberDef { @return = "FromJSON" };
+        public IAsyncOperation<string> GetWorkDetailsAsync([ReadOnlyArray] long[] works, long flags)
         {
             return Task.Run(async () =>
             {
-                return (object)await wvp.GetWorkDetailsAsync(works, (WorkDetailsFlags)flags);
+                var result = await wvp.GetWorkDetailsAsync(works, (WorkDetailsFlags)flags);
+                return JsonConvert.SerializeObject(result);
             }).AsAsyncOperation();
         }
 
@@ -258,12 +261,13 @@ namespace Ao3TrackReader.Helper
             set { DoOnMainThread(() => { wvp.PageTitle = value; }); }
         }
 
-        internal static MemberDef md_AreUrlsInReadingListAsync = new MemberDef { @return = "WrapIMapString" };
-        public IAsyncOperation<object> AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls)
+        internal static MemberDef md_AreUrlsInReadingListAsync = new MemberDef { @return = "FromJSON" };
+        public IAsyncOperation<string> AreUrlsInReadingListAsync([ReadOnlyArray] string[] urls)
         {
             return Task.Run(async () =>
             {
-                return (object)await wvp.AreUrlsInReadingListAsync(urls);
+                var result = await wvp.AreUrlsInReadingListAsync(urls);
+                return JsonConvert.SerializeObject(result);
             }).AsAsyncOperation();
         }
 

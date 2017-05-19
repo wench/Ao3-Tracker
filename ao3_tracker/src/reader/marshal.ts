@@ -92,9 +92,6 @@ namespace Ao3Track {
                                 prom.then((v) => {
                                     if (retconv) v = retconv(v);
                                     promcb(v);
-                                },
-                                (error) => {
-                                    //debugger;
                                 });
                                 return;
                             }

@@ -131,6 +131,13 @@ namespace Ao3TrackReader.Data
                         task.Wait();
                         if (!task.IsFaulted) return task.Result;
                     }
+                    catch (AggregateException e)
+                    {
+                        if (e.InnerException is TaskCanceledException)
+                            continue;
+
+                        App.Log(e);
+                    }
                     catch (TaskCanceledException)
                     {
                         continue;
@@ -933,17 +940,17 @@ namespace Ao3TrackReader.Data
                         model.Type = Ao3PageType.Collection;
 
                         // Only way to get data is from the page itself
-                        var response = await HttpRequestAsync(new Uri(uri,"profile"));
+                        var response = await HttpRequestAsync(new Uri(uri, "profile"));
 
                         if (response.IsSuccessStatusCode)
                         {
                             HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
 
-                            var colnode = doc.GetElementbyId("main")?.ElementByClass("div","collection");
+                            var colnode = doc.GetElementbyId("main")?.ElementByClass("div", "collection");
 
                             if (colnode != null)
                             {
-                                var title = colnode.ElementByClass("div","header")?.ElementByClass("h2", "heading");
+                                var title = colnode.ElementByClass("div", "header")?.ElementByClass("h2", "heading");
                                 model.Title = title?.InnerText?.HtmlDecode()?.Trim();
 
                                 model.Details = new Ao3WorkDetails();
@@ -1186,12 +1193,12 @@ namespace Ao3TrackReader.Data
             var chapters = stats?.ElementByClass("dd", "chapters")?.InnerText?.Trim()?.Split('/');
             if (chapters != null)
             {
-                    int? total;
-                    if (chapters[1] == "?") total = null;
-                    else total = int.Parse(chapters[1]);
+                int? total;
+                if (chapters[1] == "?") total = null;
+                else total = int.Parse(chapters[1]);
 
-                    if (int.TryParse(chapters[0],out intval))
-                        model.Details.Chapters = new Ao3ChapterDetails(intval, total);
+                if (int.TryParse(chapters[0], out intval))
+                    model.Details.Chapters = new Ao3ChapterDetails(intval, total);
             }
 
             // Horrible horrible dirty grabbing of the summary
@@ -1305,7 +1312,7 @@ namespace Ao3TrackReader.Data
 
                 if (workmodel.Details.Words != null) words += (int)workmodel.Details.Words;
 
-                if (workmodel.Details.LastUpdated != null && updated < workmodel.Details.LastUpdated) updated = (DateTime) workmodel.Details.LastUpdated;
+                if (workmodel.Details.LastUpdated != null && updated < workmodel.Details.LastUpdated) updated = (DateTime)workmodel.Details.LastUpdated;
             }
 
             // Generate required tags
@@ -1441,7 +1448,7 @@ namespace Ao3TrackReader.Data
                                         break;
 
                                     case "Bookmarks:":
-                                        if (int.TryParse(sdd.InnerText.HtmlDecode(),out intval))
+                                        if (int.TryParse(sdd.InnerText.HtmlDecode(), out intval))
                                             model.Details.Bookmarks = intval;
                                         break;
                                 }
@@ -1456,7 +1463,7 @@ namespace Ao3TrackReader.Data
 
             FillInfoFromWorkModels(model);
         }
-        
+
         private static async Task FillCollectionAsync(Uri baseuri, HtmlNode colnode, Ao3PageModel model)
         {
             var header = colnode.ElementByClass("div", "header");
@@ -1473,7 +1480,7 @@ namespace Ao3TrackReader.Data
             }
 
             var mods = new Dictionary<string, string>(1);
-            var meta = colnode.ElementByClass("div", "wrapper")?.ElementByClass("dl","meta");
+            var meta = colnode.ElementByClass("div", "wrapper")?.ElementByClass("dl", "meta");
             if (meta != null)
             {
                 foreach (var dt in meta.Elements("dt"))
@@ -1894,7 +1901,8 @@ namespace Ao3TrackReader.Data
             { 24, "category-other"},
         };
 
-        static Dictionary<string, string> SortColumnToName = new Dictionary<string, string> {
+        static Dictionary<string, string> SortColumnToName = new Dictionary<string, string>
+        {
         };
 
     }

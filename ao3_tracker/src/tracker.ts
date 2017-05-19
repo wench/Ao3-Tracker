@@ -36,7 +36,7 @@ namespace Ao3Track {
     const LOC_PARA_FRAC_MULTIPLER = 479001600;
 
     let $feedback_actions = $('#feedback > .actions');
-    let $chapter_text = $();
+    export let $chapter_text = $();
 
     let jumpnow : IWorkChapter | boolean = false;
     let jump = window.location.hash.split(":");
@@ -70,10 +70,11 @@ namespace Ao3Track {
     }); 
 
     let regex_work_url = /^(?:\/collections\/[^\/?#]+)?\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
-    let work_chapter = window.location.pathname.match(regex_work_url);
-    let workid = 0;
-    let works: number[] = [];
-    let $works = $();
+    export let work_chapter = window.location.pathname.match(regex_work_url);
+
+    export let workid = 0;
+    export let works: number[] = [];
+    export let $works = $();
 
     export function scrollToLocation(workid: number, workchap: IWorkChapter, dojump?: boolean) {
         if (!$chapter_text) { return; }
@@ -137,7 +138,7 @@ namespace Ao3Track {
         if (had_chapter) { SetCurrentLocation(Object.assign({ workid: workid }, workchap)); }
 
         // Change page!
-        if (!had_chapter && dojump) {
+        if (!had_chapter && dojump && workid) {
             window.location.replace('/works/' + workid + (workchap.chapterid ? '/chapters/' + workchap.chapterid.toString() : '') + "#ao3tjump");
         }
     };

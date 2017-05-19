@@ -30,13 +30,13 @@ namespace Ao3TrackReader.Helper
 
     public interface IWorkDetails
     {
-        IWorkChapter SavedLoc { get; set; }
-        bool? InReadingList { get; set; }
+        IWorkChapter savedLoc { get; set; }
+        bool? inReadingList { get; set; }
     }
 
     public sealed class WorkDetails : IWorkDetails
     {
-        public IWorkChapter SavedLoc { get; set; }
-        public bool? InReadingList { get; set; }
+        public IWorkChapter savedLoc { get; set; }
+        public bool? inReadingList { get; set; }
     }
 }

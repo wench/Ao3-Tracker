@@ -491,19 +491,22 @@ namespace Ao3TrackReader
 
         public async Task<IDictionary<long, IWorkDetails>> GetWorkDetailsAsync(long[] works, WorkDetailsFlags flags)
         {
-            var result = new System.Collections.Concurrent.ConcurrentDictionary<long, IWorkDetails>();
+            var result = new Dictionary<long, IWorkDetails>();
             var tasks = new List<Task>();
 
             if ((flags & WorkDetailsFlags.SavedLoc) != 0)
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    foreach (var kvp in await App.Storage.GetWorkChaptersAsync(works))
+                    var workchapters = await App.Storage.GetWorkChaptersAsync(works);
+                    lock (result)
                     {
-                        result.AddOrUpdate(kvp.Key,
-                           (workid) => new WorkDetails { SavedLoc = kvp.Value },
-                           (workid, detail) => { detail.SavedLoc = kvp.Value; return detail; }
-                        );
+                        foreach (var kvp in workchapters)
+                        {
+                            if (!result.TryGetValue(kvp.Key,out var detail))
+                                result.Add(kvp.Key, detail = new WorkDetails());
+                            detail.savedLoc = kvp.Value;
+                        }
                     }
                 }));
             }
@@ -512,12 +515,15 @@ namespace Ao3TrackReader
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    foreach (var kvp in await ReadingList.AreWorksInListAsync(works))
+                    var areinrl = await ReadingList.AreWorksInListAsync(works);
+                    lock (result)
                     {
-                        result.AddOrUpdate(kvp.Key,
-                            (workid) => new WorkDetails { InReadingList = kvp.Value },
-                            (workid, detail) => { detail.InReadingList = kvp.Value; return detail; }
-                        );
+                        foreach (var kvp in areinrl)
+                        {
+                            if (!result.TryGetValue(kvp.Key, out var detail))
+                                result.Add(kvp.Key, detail = new WorkDetails());
+                            detail.inReadingList = kvp.Value;
+                        }
                     }
                 }));
             }
