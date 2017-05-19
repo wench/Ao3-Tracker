@@ -38,6 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3SiteDataLookup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)JavascriptException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Bold.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Br.cs" />

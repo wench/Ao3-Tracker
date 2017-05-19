@@ -20,21 +20,24 @@ namespace Ao3TrackReader
 {
     public partial class App
     {
-        public static InteractionMode GetInteractionMode()
+        public static InteractionMode InteractionMode
         {
-            // Good enough for android for now
-            switch (Device.Idiom)
+            get
             {
-                case TargetIdiom.Phone:
-                    return InteractionMode.Phone;
+                // Good enough for android for now
+                switch (Device.Idiom)
+                {
+                    case TargetIdiom.Phone:
+                        return InteractionMode.Phone;
 
-                case TargetIdiom.Tablet:
-                    return InteractionMode.Tablet;
+                    case TargetIdiom.Tablet:
+                        return InteractionMode.Tablet;
 
-                case TargetIdiom.Desktop:
-                    return InteractionMode.PC;
+                    case TargetIdiom.Desktop:
+                        return InteractionMode.PC;
+                }
+                return InteractionMode.Unknown;
             }
-            return InteractionMode.Unknown;
         }
 
         public static string OSArchitechture

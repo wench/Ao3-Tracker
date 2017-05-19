@@ -144,6 +144,11 @@ namespace Ao3TrackReader.Helper
             //});
         }
 
+        public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
+        {
+            wvp.JavascriptError(name, message, url, lineNo, coloumNo, stack);
+        }
+
         internal static MemberDef md_GetWorkDetailsAsync = new MemberDef { @return = "WrapIMapNum" };
         public IAsyncOperation<object> GetWorkDetailsAsync([ReadOnlyArray] long[] works, long flags)
         {

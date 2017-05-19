@@ -53,7 +53,7 @@ namespace Ao3TrackReader
 
         public WebViewPage()
         {
-            InitializeToolbarCommands();          
+            InitializeToolbarCommands();
 
             TitleEx = "Loading...";
 
@@ -341,7 +341,7 @@ namespace Ao3TrackReader
             urlBar.Unfocus();
             try
             {
-                var uri = Ao3SiteDataLookup.CheckUri(new Uri(new Uri("http://archiveofourown.org/"),urlEntry.Text));
+                var uri = Ao3SiteDataLookup.CheckUri(new Uri(new Uri("http://archiveofourown.org/"), urlEntry.Text));
                 if (uri != null)
                 {
                     Navigate(uri);
@@ -483,7 +483,7 @@ namespace Ao3TrackReader
         }
         public int FontSize
         {
-            get { return (int) Math.Round(100.0 * Math.Pow(1.05,LogFontSize),MidpointRounding.AwayFromZero); }
+            get { return (int)Math.Round(100.0 * Math.Pow(1.05, LogFontSize), MidpointRounding.AwayFromZero); }
         }
 
 
@@ -845,7 +845,7 @@ namespace Ao3TrackReader
                 Task.Run(async () =>
                 {
                     long workid = 0;
-                    lock(currentLocationLock)
+                    lock (currentLocationLock)
                     {
                         if (currentLocation != null) workid = currentLocation.workid;
                     }
@@ -884,7 +884,7 @@ namespace Ao3TrackReader
         {
             if (currentLocation != null)
             {
-                var db_workchap = (await App.Storage.GetWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp)=>kp.Value).FirstOrDefault();
+                var db_workchap = (await App.Storage.GetWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp) => kp.Value).FirstOrDefault();
                 currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
                 await App.Storage.SetWorkChaptersAsync(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation }).ConfigureAwait(false);
             }
@@ -898,30 +898,30 @@ namespace Ao3TrackReader
                 webViewDragAccelerateStopWatch.Reset();
         }
 
-        int SwipeOffsetChanged(double offset) 
+        int SwipeOffsetChanged(double offset)
         {
             var end = DeviceWidth;
             var centre = end / 2;
-            if ((!SwipeCanGoBack && offset > 0.0) || (!SwipeCanGoForward && offset< 0.0)) {
+            if ((!SwipeCanGoBack && offset > 0.0) || (!SwipeCanGoForward && offset < 0.0)) {
                 offset = 0.0;
             }
-            else if (offset< -end) 
+            else if (offset < -end)
             {
                 offset = -end;
             }
-            else if (offset > end) 
+            else if (offset > end)
             {
                 offset = end;
             }
             LeftOffset = offset;
-            
 
-            if (SwipeCanGoForward && offset< -centre) {
+
+            if (SwipeCanGoForward && offset < -centre) {
                 ShowNextPageIndicator = 2;
                 if (offset <= -end) return -3;
                 return -2;
             }
-            else if (SwipeCanGoForward && offset< 0) {
+            else if (SwipeCanGoForward && offset < 0) {
                 ShowNextPageIndicator = 1;
             }
             else {
@@ -941,10 +941,10 @@ namespace Ao3TrackReader
                 ShowPrevPageIndicator = 0;
             }
 
-            if (offset == 0) return 0;                       
+            if (offset == 0) return 0;
             else if (offset < 0) return -1;
             else return 1;
-        }     
+        }
 
         public void StartWebViewDragAccelerate(double velocity)
         {
@@ -1058,7 +1058,7 @@ namespace Ao3TrackReader
             {
 
             }
-            
+
             TitleEx = "Loading...";
 
             JumpToLastLocationEnabled = false;
@@ -1119,7 +1119,7 @@ namespace Ao3TrackReader
 
             try
             {
-                
+
                 var ct = cts.Token;
                 ct.ThrowIfCancellationRequested();
                 await OnInjectingScripts(ct);
@@ -1190,6 +1190,17 @@ namespace Ao3TrackReader
         {
             var result = await DisplayAlert("External Link", "Open external link in Web Browser?\n\n" + uri.AbsoluteUri, "Yes", "No");
             if (result) Device.OpenUri(uri);
+        }
+
+        public void JavascriptError(string name, string message, string url, int lineNo, int coloumNo, string stack)
+        {           
+            App.Log(new JavascriptException(message, stack)
+            {
+                Name = name,
+                Url = url,
+                Line = lineNo,
+                Column = coloumNo
+            });
         }
 
     }

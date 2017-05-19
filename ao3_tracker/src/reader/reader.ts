@@ -51,6 +51,12 @@ namespace Ao3Track {
             document.getElementsByTagName('head')[0].appendChild(link);
         };
 
+    window.addEventListener("error",(event)=>{
+        let ev = event as ErrorEvent;
+        let error = ev.error as Error;
+        Ao3Track.Helper.logError(error.name, error.message, ev.filename, ev.lineno, ev.colno, error.stack || "");
+    });
+
     GetWorkDetails = (works: number[],  callback: (details: { [key:number]:IWorkDetails }) => void, flags?: WorkDetailsFlags) => {
         Ao3Track.Helper.getWorkDetailsAsync(works, flags || WorkDetailsFlags.All, callback);
     };

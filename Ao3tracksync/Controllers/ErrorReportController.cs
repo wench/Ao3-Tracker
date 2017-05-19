@@ -38,22 +38,23 @@ namespace Ao3tracksync.Controllers
         [AllowAnonymous]
         public void Post([FromBody]string report)
         {
-            var meta = JsonConvert.DeserializeObject<ReportMetaData>(report, new JsonSerializerSettings
+            report = "[\n" + report + "\n]";
+            var meta = JsonConvert.DeserializeObject<ReportMetaData[]>(report, new JsonSerializerSettings
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore
             });
-            if (System.Version.TryParse(meta.Version, out var ver))
+            if (System.Version.TryParse(meta[0].Version, out var ver))
             {
                 foreach (var ignore in ignoreErrors)
                 {
-                    if ((ignore.Platform == null || ignore.Platform == meta.Platform) && ver.Equals(ignore.Version))
+                    if ((ignore.Platform == null || ignore.Platform == meta[0].Platform) && ver.Equals(ignore.Version))
                         return;
                 }
             }
 
             MailMessage message = new MailMessage(new MailAddress("ao3track@wenchy.net", "Ao3Track Debug Reports"), new MailAddress("the.wench@wenchy.net"));
 
-            message.Subject = "Ao3Track Reader Error report " + meta.Platform + " " + meta.Version;
+            message.Subject = "Ao3Track Reader Error report " + meta[0].Platform + " " + meta[0].Version;
             message.Body = JsonConvert.SerializeObject(meta, new JsonSerializerSettings {
                 Formatting = Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore

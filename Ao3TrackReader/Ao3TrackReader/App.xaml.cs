@@ -72,10 +72,8 @@ namespace Ao3TrackReader
             // Anything we do here must be wrapped, cause the app might be in an impossible state
             try
             {
-                if (_LogErrors && !_LoggedError)
+                if (_LogErrors)
                 {
-                    _LoggedError = true;
-
                     var settings = new Newtonsoft.Json.JsonSerializerSettings()
                     {
                         ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
@@ -86,7 +84,7 @@ namespace Ao3TrackReader
                     };
                     string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
                     {
-                        Platform = Xamarin.Forms.Device.RuntimePlatform,
+                        Platform = Device.RuntimePlatform,
                         Mode = InteractionMode.ToString(),
                         Version = Ver.LongString,
                         GitRev = Ver.GitRevision,
@@ -101,7 +99,10 @@ namespace Ao3TrackReader
                         Exception = e
                     }, settings);
 
-                    TextFileSave("ErrorReport.json", report);
+                    if (_LoggedError) report = ",\n" + report;
+
+                    TextFileSave("ErrorReport.json", report, _LoggedError);
+                    _LoggedError = true;
                 }
             }
             catch

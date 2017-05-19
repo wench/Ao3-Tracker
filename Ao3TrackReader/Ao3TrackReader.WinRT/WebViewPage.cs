@@ -108,7 +108,17 @@ namespace Ao3TrackReader
 
         public async Task<string> EvaluateJavascriptAsync(string code)
         {
-            return await webView.InvokeScriptAsync("eval", new[] { code });
+            try
+            {
+                return await webView.InvokeScriptAsync("eval", new[] { code });
+            }
+            catch(Exception e)            
+            {
+                if (e.HResult != unchecked((int)0x80020101)) // happens sometimes
+                    throw;
+                else
+                    return "";
+            }
         }
 
         async Task<string> ReadFile(string name, CancellationToken ct)

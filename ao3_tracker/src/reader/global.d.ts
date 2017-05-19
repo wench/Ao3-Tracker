@@ -27,6 +27,8 @@ declare namespace Ao3Track {
     }    
 
     export interface IAo3TrackHelperMethods {
+        logError(name: string, message: string, url:string, lineNo:number, columnNo:number, stack: string): void;
+
         getWorkDetailsAsync (works: number[], flags: WorkDetailsFlags, callback: (details: { [key:number]:IWorkDetails }) => void) : void;
         setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void;
 

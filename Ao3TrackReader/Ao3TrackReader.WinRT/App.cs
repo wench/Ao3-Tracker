@@ -34,10 +34,10 @@ namespace Ao3TrackReader
             task.Wait();
         }
 
-        public static void TextFileSave(string filename, string text)
+        public static void TextFileSave(string filename, string text, bool append=false)
         {
             var localFolder = ApplicationData.Current.LocalFolder;
-            var sampleFile = RunSynchronously(localFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting));
+            var sampleFile = RunSynchronously(localFolder.CreateFileAsync(filename, append?CreationCollisionOption.OpenIfExists:CreationCollisionOption.ReplaceExisting));
             RunSynchronously(FileIO.WriteTextAsync(sampleFile, text));
         }
         public static async Task<string> TextFileLoadAsync(string filename)

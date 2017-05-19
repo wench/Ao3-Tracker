@@ -98,6 +98,9 @@ limitations under the License.
             <local:TextView TextEx="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
                             FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
                             HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
+            <local:TextView x:Name="ErrorBar"  TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False"
+                            FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" Margin="10,5,0,5" 
+                            HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
                 <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
                         AbsoluteLayout.LayoutBounds=".98, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource HugeFontSize}" />
