@@ -1209,5 +1209,65 @@ namespace Ao3TrackReader
             });
         }
 
+        CancellationTokenSource _cancelShowErrorHide;
+        public void ShowError(string message)
+        {
+            DoOnMainThread(async () =>
+            {
+                if (_cancelShowErrorHide != null) _cancelShowErrorHide.Cancel();
+                var cancel = _cancelShowErrorHide = new CancellationTokenSource();
+
+                try
+                {
+                    ErrorBar.Text = message;
+                    ErrorBar.HeightRequest = (double)App.Current.Resources["MediumSmallFontSize"] + 10.0;
+                    ErrorBar.IsVisible = true;
+
+                    var token = cancel.Token;
+                    await Task.Delay(5000, token);
+
+                    var awaiter = new TaskCompletionSource<bool>();
+
+                    ErrorBar.Animate("slideout", easing: Easing.CubicIn, length: 1000, start: 1.0, end: 0.0,
+                        callback: (f) =>
+                        {
+                            if (token.IsCancellationRequested)
+                            {
+                                awaiter.TrySetCanceled(token);
+                            }
+                            else
+                            {
+                                ErrorBar.HeightRequest = ((double)App.Current.Resources["MediumSmallFontSize"] + 10.0) * f;
+                            }
+                        },
+                        finished: (f, cancelled) =>
+                        {
+                            if (cancelled) return;
+
+                            if (token.IsCancellationRequested)
+                            {
+                                awaiter.TrySetCanceled(token);
+                            }
+                            else
+                            {
+                                ErrorBar.IsVisible = false;
+                                ErrorBar.HeightRequest = 0;
+                            }
+                        }
+                    );
+
+                    await awaiter.Task;
+                }
+                catch (TaskCanceledException)
+                {
+                    ErrorBar.AbortAnimation("slideout");
+                }
+                finally
+                {
+                    cancel.Dispose();
+                    if (cancel == _cancelShowErrorHide) _cancelShowErrorHide = null;
+                }
+            });
+        }
     }
 }

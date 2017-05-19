@@ -103,6 +103,8 @@ namespace Ao3TrackReader.Resources
             Alt = new ColorSet(a, b);
             Highlight = new ColorSet(h, a);
             Inverse = new ColorSet(i, b);
+            Red = new ColorSet(new Color(165 / 255.0, 0, 0), a);
+            Blue = new ColorSet(new Color((255 ^ 165) / 255.0, 255 / 430.0, 255 / 300.0), b);
         }
 
         public static ColorSet Base { get; private set; }
@@ -110,5 +112,9 @@ namespace Ao3TrackReader.Resources
 
         public static ColorSet Highlight { get; private set; }
         public static ColorSet Inverse { get; private set; }
+
+        public static ColorSet Red { get; private set; }
+        public static ColorSet Blue { get; private set; }
+
     }
 }

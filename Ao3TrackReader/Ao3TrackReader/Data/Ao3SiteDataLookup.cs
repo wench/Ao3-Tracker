@@ -136,6 +136,15 @@ namespace Ao3TrackReader.Data
                         if (e.InnerException is TaskCanceledException)
                             continue;
 
+                        if (e.InnerException is HttpRequestException httpexp)
+                        {
+                            if (e.InnerException is WebException webexp)
+                            {
+                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + webexp.Status);
+                                continue;
+                            }
+                        }
+
                         App.Log(e);
                     }
                     catch (TaskCanceledException)
@@ -144,6 +153,7 @@ namespace Ao3TrackReader.Data
                     }
                     catch (Exception e)
                     {
+                        App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + e.Message);
                         App.Log(e);
                         break;
                     }
