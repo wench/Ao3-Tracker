@@ -61,6 +61,7 @@ namespace Ao3TrackReader
             webView.NavigationStarting += WebView_NavigationStarting;
             webView.DOMContentLoaded += WebView_DOMContentLoaded;
             webView.ContentLoading += WebView_ContentLoading;
+            webView.NavigationCompleted += WebView_NavigationCompleted;
             webView.GotFocus += WebView_GotFocus;
             webView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
 
@@ -82,6 +83,22 @@ namespace Ao3TrackReader
             }
 
             return webView.ToView();
+        }
+
+        public void ShowErrorPage(string message, Uri uri)
+        {
+            var html = GetErrorPageHtml(message, uri);
+            webView.NavigateToString(html);
+        }
+
+        private void WebView_NavigationCompleted(WebView sender, WebViewNavigationCompletedEventArgs args)
+        {
+            // 403 and 404 allowed to show the default site pages
+            if (!args.IsSuccess && args.WebErrorStatus != Windows.Web.WebErrorStatus.NotFound && args.WebErrorStatus != Windows.Web.WebErrorStatus.Forbidden)
+            {
+                var reason = args.WebErrorStatus.ToString("d") + " " + string.Join(" ", Regex.Split(args.WebErrorStatus.ToString(), @"(?<!^)(?=[A-Z](?![A-Z]|$))"));
+                ShowErrorPage(reason, args.Uri);
+            }
         }
 
         private void WebView_GotFocus(object sender, RoutedEventArgs e)
@@ -135,7 +152,7 @@ namespace Ao3TrackReader
         {
             get {
                 return DoOnMainThread(() => {
-                    return webView.Source;
+                    return webView.Source ?? new Uri("error:///");
                 });
             }
         }

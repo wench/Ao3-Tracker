@@ -56,6 +56,10 @@ namespace Ao3TrackReader
         {
             return WebUtility.HtmlDecode(str);
         }
+        public static string HtmlEncode(this string str)
+        {
+            return WebUtility.HtmlEncode(str);
+        }
 
 
         public static string[] GetClasses(this HtmlNode node)
@@ -138,6 +142,16 @@ namespace Ao3TrackReader
                     );
         }
 
+        public static string ToHex(this Xamarin.Forms.Color color)
+        {
+            int r = Math.Min(Math.Max((int)Math.Floor(color.R * 255), 0), 255);
+            int g = Math.Min(Math.Max((int)Math.Floor(color.G * 255), 0), 255);
+            int b = Math.Min(Math.Max((int)Math.Floor(color.B * 255), 0), 255);
+            int a = Math.Min(Math.Max((int)Math.Floor(color.A * 255), 0), 255);
+
+            if (a != 255) return string.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", a, r, g, b);
+            else return string.Format("#{0:X2}{1:X2}{2:X2}", r, g, b);
+        }
 
         public static async Task<HtmlDocument> ReadAsHtmlDocumentAsync(this HttpContent httpContent)
         {

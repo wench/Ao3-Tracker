@@ -116,16 +116,16 @@ namespace Ao3TrackReader.Data
 
         static Task<HttpResponseMessage> HttpRequestAsync(Uri uri, HttpMethod method = null, string mediaType = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, string cookies = null)
         {
-            HttpRequestMessage message = new HttpRequestMessage(method ?? HttpMethod.Get, uri);
-            if (!string.IsNullOrEmpty(mediaType)) message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(mediaType));
-            if (!string.IsNullOrWhiteSpace(cookies)) message.Headers.Add("Cookie", cookies);
-
             return Task.Run(() =>
             {
                 for (int i = 0; i < 3; i++)
                 {
                     try
                     {
+                        HttpRequestMessage message = new HttpRequestMessage(method ?? HttpMethod.Get, uri);
+                        if (!string.IsNullOrEmpty(mediaType)) message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(mediaType));
+                        if (!string.IsNullOrWhiteSpace(cookies)) message.Headers.Add("Cookie", cookies);
+
                         httpSemaphore.Wait();
                         var task = HttpClient.SendAsync(message, completionOption);
                         task.Wait();
@@ -141,8 +141,17 @@ namespace Ao3TrackReader.Data
                             if (e.InnerException is WebException webexp)
                             {
                                 App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + webexp.Status);
-                                continue;
                             }
+                            else if (httpexp.InnerException is System.Runtime.InteropServices.COMException comexp && comexp.Data.Contains("RestrictedDescription") && !string.IsNullOrWhiteSpace(comexp.Data["RestrictedDescription"] as string))
+                            {
+                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + comexp.Data["RestrictedDescription"] as string);
+                            }
+                            else
+                            {
+                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3:" + httpexp.Message);
+
+                            }
+                            continue;
                         }
 
                         App.Log(e);

@@ -140,6 +140,12 @@ namespace Ao3TrackReader
             return webView.ToView();
         }
 
+        public void ShowErrorPage(string message, Uri uri)
+        {
+            var html = GetErrorPageHtml(message, uri);
+            webView.LoadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+        }
+
         private void WebView_FocusChange(object sender, Android.Views.View.FocusChangeEventArgs e)
         {
             if (e.HasFocus)
@@ -367,6 +373,20 @@ namespace Ao3TrackReader
             {
                 base.OnScaleChanged(view, oldScale, newScale);
                 await wvp.CallJavascriptAsync("Ao3Track.Touch.updateTouchState",Array.Empty<object>());
+            }
+
+            [Obsolete]
+            public override void OnReceivedError(WebView view, ClientError errorCode, string description, string failingUrl)
+            {
+                wvp.ShowErrorPage(description, new Uri(failingUrl));
+            }
+
+            public override void OnReceivedError(WebView view, IWebResourceRequest request, WebResourceError error)
+            {
+                if (request.IsForMainFrame)
+                {
+                    wvp.ShowErrorPage(error.Description.ToString(), new Uri(request.Url.ToString()));
+                }
             }
         }
 

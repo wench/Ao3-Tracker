@@ -1030,29 +1030,32 @@ namespace Ao3TrackReader
         private CancellationTokenSource cancelInject;
         private bool OnNavigationStarting(Uri uri)
         {
-            var check = Ao3SiteDataLookup.CheckUri(uri);
-            if (check == null)
+            if (uri != null)
             {
-                // Handle external uri
-                LeftOffset = 0;
-                OpenExternal(uri);
-                return true;
-            }
-            else if (check != uri)
-            {
-                Navigate(check);
-                return true;
-            }
+                var check = Ao3SiteDataLookup.CheckUri(uri);
+                if (check == null)
+                {
+                    // Handle external uri
+                    LeftOffset = 0;
+                    OpenExternal(uri);
+                    return true;
+                }
+                else if (check != uri)
+                {
+                    Navigate(check);
+                    return true;
+                }
 
-            UpdateUrlBar(uri);
-            ReadingList?.PageChange(uri);
+                UpdateUrlBar(uri);
+                ReadingList?.PageChange(uri);
 
-            if (check.PathAndQuery == CurrentUri.PathAndQuery && check.Fragment != CurrentUri.Fragment)
-            {
-                ShowPrevPageIndicator = 0;
-                ShowNextPageIndicator = 0;
-                LeftOffset = 0;
-                return false;
+                if (check.PathAndQuery == CurrentUri.PathAndQuery && check.Fragment != CurrentUri.Fragment)
+                {
+                    ShowPrevPageIndicator = 0;
+                    ShowNextPageIndicator = 0;
+                    LeftOffset = 0;
+                    return false;
+                }
             }
 
             try
@@ -1268,6 +1271,66 @@ namespace Ao3TrackReader
                     if (cancel == _cancelShowErrorHide) _cancelShowErrorHide = null;
                 }
             });
+        }
+
+        string GetErrorPageHtml(string message, Uri uri)
+        {
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            var html = doc.CreateElement("html");
+            doc.DocumentNode.AppendChild(html);
+
+            var head = doc.CreateElement("head");
+            html.AppendChild(head);
+
+            var meta = doc.CreateElement("meta");
+            meta.Attributes.Add(doc.CreateAttribute("charset", "UTF-8"));
+            head.AppendChild(meta);
+
+            var title = doc.CreateElement("title");
+            title.AppendChild(doc.CreateTextNode("Error loading page"));
+            head.AppendChild(title);
+
+            var style = doc.CreateElement("style");
+            style.AppendChild(doc.CreateTextNode($@"
+        body {{ 
+            color: { Ao3TrackReader.Resources.Colors.Base.MediumHigh.ToHex() }; 
+            background: { Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToHex() }; 
+        }}
+        h1, h2, h3, h4, h5, h6, h7, h8, a {{ 
+            color: { Ao3TrackReader.Resources.Colors.Highlight.High.ToHex() }; 
+        }}
+        details p {{ 
+            color: { Ao3TrackReader.Resources.Colors.Base.MediumLow.ToHex() }; 
+        }}
+"));
+            head.AppendChild(style);
+
+            var body = doc.CreateElement("body");
+            html.AppendChild(body);
+
+            var heading = doc.CreateElement("h1");
+            heading.AppendChild(doc.CreateTextNode("Error loading page"));
+            body.AppendChild(heading);
+
+            var details = doc.CreateElement("details");
+            var summary = doc.CreateElement("summary");
+            summary.AppendChild(doc.CreateTextNode("Unable to navigate to " + uri.AbsoluteUri.HtmlEncode()));
+            details.AppendChild(summary);
+            var para = doc.CreateElement("p");
+            para.AppendChild(doc.CreateTextNode("Reason: " + message.HtmlEncode()));
+            details.AppendChild(para);
+            body.AppendChild(details);
+
+            para = doc.CreateElement("p");
+            var link = doc.CreateElement("a");
+            link.Attributes.Add(doc.CreateAttribute("href", uri.AbsoluteUri.HtmlEncode()));
+            link.AppendChild(doc.CreateTextNode("Press to Reload page"));
+            para.AppendChild(link);
+            body.AppendChild(para);
+
+            var writer = new System.IO.StringWriter();
+            doc.Save(writer);
+            return "<!DOCTYPE html>\n" + writer.ToString();
         }
     }
 }

@@ -59,11 +59,12 @@ namespace Ao3TrackReader
 
         public static string HardwareType => null;
 
-        public static void TextFileSave(string filename, string text)
+        public static void TextFileSave(string filename, string text, bool append)
         {
             var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             var filePath = Path.Combine(documentsPath, filename);
-            File.WriteAllText(filePath, text);
+            if (!append) File.WriteAllText(filePath, text, Encoding.UTF8);
+            else File.AppendAllText(filePath, text, Encoding.UTF8);
         }
         public static Task<string> TextFileLoadAsync(string filename)
         {
