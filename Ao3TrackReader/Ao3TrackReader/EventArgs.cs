@@ -15,5 +15,14 @@ namespace Ao3TrackReader
 
         public new static EventArgs<T> Empty => new EventArgs<T>(default(T));
 
+        public static implicit operator EventArgs<T>(T value)
+        {
+            return new EventArgs<T>(value);
+        }
+
+        public static implicit operator T(EventArgs<T> e)
+        {
+            return e.Value;
+        }
     }
 }

@@ -28,12 +28,29 @@ using Ao3TrackReader.Controls;
 using Xamarin.Forms.Platform.Android;
 using Java.Lang;
 using Android.Util;
+using Android.Net;
+using Android.Content;
 
 namespace Ao3TrackReader.Droid
 {
     [Activity(Label = "Ao3Track Reader", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity, Java.Lang.Thread.IUncaughtExceptionHandler
     {
+        public class NetworkReceiver : BroadcastReceiver
+        {
+            public override void OnReceive(Context context, Intent intent)
+            {
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    var cm = (ConnectivityManager)context.GetSystemService(ConnectivityService);
+                    NetworkInfo netInfo = cm.ActiveNetworkInfo;
+                    App.Current.HaveNetwork = netInfo.IsConnectedOrConnecting;
+                });
+            }
+        }
+
+        NetworkReceiver receiver;
+
         protected override void OnCreate(Bundle bundle)
         {
             switch (Ao3TrackReader.App.Theme)
@@ -50,13 +67,27 @@ namespace Ao3TrackReader.Droid
             base.OnCreate(bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
-            var app = new Ao3TrackReader.App();
+            var cm = (ConnectivityManager) GetSystemService(ConnectivityService);
+            var netInfo = cm.ActiveNetworkInfo;
+
+            var app = new App(netInfo.IsConnectedOrConnecting);
+
+            IntentFilter filter = new IntentFilter(ConnectivityManager.ConnectivityAction);
+            receiver = new NetworkReceiver();
+            RegisterReceiver(receiver, filter);
+
             LoadApplication(app);
             app.MainPage.SizeChanged += MainPage_SizeChanged;
 
             var x = typeof(Xamarin.Forms.Themes.DarkThemeResources);
             x = typeof(Xamarin.Forms.Themes.LightThemeResources);
             x = typeof(Xamarin.Forms.Themes.Android.UnderlineEffect);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            if (receiver != null) UnregisterReceiver(receiver);
         }
 
         private void MainPage_SizeChanged(object sender, EventArgs e)

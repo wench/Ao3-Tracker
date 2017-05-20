@@ -138,7 +138,6 @@ namespace Ao3TrackReader.Data
                     unsynced[it.workid] = storage[it.workid];
                 }
             }
-            DoSyncAsync();
         }
 
         private CancellationTokenSource DelayedSyncCTS { get; set; } = null;

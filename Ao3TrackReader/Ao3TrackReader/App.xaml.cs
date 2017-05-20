@@ -202,13 +202,14 @@ namespace Ao3TrackReader
         {
             task.Wait();
         }
-
+       
 
         WebViewPage wvp;
         public WebViewPage WebViewPage => wvp;
 
-        public App()
+        public App(bool networkstate)
         {
+            HaveNetwork = networkstate;
             InitializeComponent();
 
             // The root page of your application
@@ -230,6 +231,32 @@ namespace Ao3TrackReader
         {
             // Handle when your app resumes
             wvp.OnResume();
+        }
+
+        protected override void OnPropertyChanged(string propertyName = null)
+        {
+            base.OnPropertyChanged(propertyName);
+
+            if (string.IsNullOrEmpty(propertyName) || propertyName == "HaveNetwork")
+                OnHaveNetworkChanged();                
+        }
+
+        public static readonly Xamarin.Forms.BindableProperty HaveNetworkProperty =
+          Xamarin.Forms.BindableProperty.Create("HaveNetwork", typeof(bool), typeof(App), defaultValue: false);
+
+        public bool HaveNetwork
+        {
+            get { return (bool)GetValue(HaveNetworkProperty); }
+            internal set { SetValue(HaveNetworkProperty, value); }
+        }
+
+        public event EventHandler<EventArgs<bool>> HaveNetworkChanged;     
+
+        void OnHaveNetworkChanged()
+        {
+            bool have = HaveNetwork;
+            if (have) Storage.DoSyncAsync();
+            HaveNetworkChanged?.Invoke(this, new EventArgs<bool>(have));
         }
     }
 }

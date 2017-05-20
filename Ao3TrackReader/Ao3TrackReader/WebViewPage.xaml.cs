@@ -57,6 +57,8 @@ namespace Ao3TrackReader
 
             TitleEx = "Loading...";
 
+            App.Current.HaveNetworkChanged += App_HaveNetworkChanged;
+
             InitializeComponent();
 
             UpdateBackButton();
@@ -93,7 +95,16 @@ namespace Ao3TrackReader
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 Navigate(uri);
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    App_HaveNetworkChanged(App.Current, App.Current.HaveNetwork);
+                });
             });
+        }
+
+        private void App_HaveNetworkChanged(object sender, EventArgs<bool> e)
+        {
+            if (!e) ShowError("No Internet Connection");
         }
 
         private void UrlBar_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -1227,7 +1238,7 @@ namespace Ao3TrackReader
                     ErrorBar.IsVisible = true;
 
                     var token = cancel.Token;
-                    await Task.Delay(5000, token);
+                    await Task.Delay(8000, token);
 
                     var awaiter = new TaskCompletionSource<bool>();
 
@@ -1294,7 +1305,7 @@ namespace Ao3TrackReader
             style.AppendChild(doc.CreateTextNode($@"
         body {{ 
             color: { Ao3TrackReader.Resources.Colors.Base.MediumHigh.ToHex() }; 
-            background: { Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToHex() }; 
+            background: { Ao3TrackReader.Resources.Colors.Alt.Medium.ToHex() }; 
         }}
         h1, h2, h3, h4, h5, h6, h7, h8, a {{ 
             color: { Ao3TrackReader.Resources.Colors.Highlight.High.ToHex() }; 
@@ -1324,9 +1335,18 @@ namespace Ao3TrackReader
             para = doc.CreateElement("p");
             var link = doc.CreateElement("a");
             link.Attributes.Add(doc.CreateAttribute("href", uri.AbsoluteUri.HtmlEncode()));
-            link.AppendChild(doc.CreateTextNode("Press to Reload page"));
+            link.AppendChild(doc.CreateTextNode("Reload Page"));
             para.AppendChild(link);
+
+            para.AppendChild(doc.CreateTextNode(" - "));
+
+            link = doc.CreateElement("a");
+            link.Attributes.Add(doc.CreateAttribute("href", uri.Scheme + "://archiveofourown.org/"));
+            link.AppendChild(doc.CreateTextNode("Go Home"));
+            para.AppendChild(link);
+
             body.AppendChild(para);
+
 
             var writer = new System.IO.StringWriter();
             doc.Save(writer);

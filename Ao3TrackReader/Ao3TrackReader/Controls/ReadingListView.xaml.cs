@@ -46,7 +46,7 @@ namespace Ao3TrackReader.Controls
         protected override void OnWebViewPageSet()
         {
             base.OnWebViewPageSet();
-            Device.BeginInvokeOnMainThread(async () => await RestoreReadingList().ConfigureAwait(false) );
+            Device.BeginInvokeOnMainThread(async () => await RestoreReadingList().ConfigureAwait(false));
         }
 
         async Task RestoreReadingList()
@@ -115,6 +115,14 @@ namespace Ao3TrackReader.Controls
                 App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
             });
 
+            // If we don't have network access, we wait till it's available
+            if (!App.Current.HaveNetwork)
+            {
+                tcsNetworkAvailable = new TaskCompletionSource<bool>();
+                App.Current.HaveNetworkChanged += App_HaveNetworkChanged;
+                await tcsNetworkAvailable.Task;
+            }
+
             foreach (var viewmodel in vms)
             {
                 await RefreshSemaphore.WaitAsync();
@@ -133,6 +141,16 @@ namespace Ao3TrackReader.Controls
                 RefreshButton.IsEnabled = true;
                 SyncIndicator.Content = null;
             });
+        }
+
+        TaskCompletionSource<bool> tcsNetworkAvailable;
+        private void App_HaveNetworkChanged(object sender, EventArgs<bool> e)
+        {
+            if (e)
+            {
+                App.Current.HaveNetworkChanged -= App_HaveNetworkChanged;
+                tcsNetworkAvailable.SetResult(true);
+            }
         }
 
         private void LogFontSizeUI_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)

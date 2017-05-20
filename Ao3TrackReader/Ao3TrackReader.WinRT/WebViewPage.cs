@@ -93,8 +93,7 @@ namespace Ao3TrackReader
 
         private void WebView_NavigationCompleted(WebView sender, WebViewNavigationCompletedEventArgs args)
         {
-            // 403 and 404 allowed to show the default site pages
-            if (!args.IsSuccess && args.WebErrorStatus != Windows.Web.WebErrorStatus.NotFound && args.WebErrorStatus != Windows.Web.WebErrorStatus.Forbidden)
+            if (!args.IsSuccess)
             {
                 var reason = args.WebErrorStatus.ToString("d") + " " + string.Join(" ", Regex.Split(args.WebErrorStatus.ToString(), @"(?<!^)(?=[A-Z](?![A-Z]|$))"));
                 ShowErrorPage(reason, args.Uri);

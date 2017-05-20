@@ -23,6 +23,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -119,8 +120,13 @@ namespace Ao3TrackReader.UWP
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
                 Xamarin.Forms.Forms.Init(e);
-                XApp = new Ao3TrackReader.App();
-                
+
+                ConnectionProfile connections = NetworkInformation.GetInternetConnectionProfile();
+
+                XApp = new Ao3TrackReader.App(connections != null && connections.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
+
+                NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
+
                 Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
 
                 if (UniversalApi <= 3)
@@ -149,12 +155,21 @@ namespace Ao3TrackReader.UWP
             Window.Current.Activate();
         }
 
+        private void NetworkInformation_NetworkStatusChanged(object sender)
+        {
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                ConnectionProfile connections = NetworkInformation.GetInternetConnectionProfile();
+                XApp.HaveNetwork = connections != null && connections.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess;
+            });
+        }
+
         /// <summary>
         /// Invoked when Navigation to a certain page fails
         /// </summary>
         /// <param name="sender">The Frame which failed navigation</param>
         /// <param name="e">Details about the navigation failure</param>
-        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+            void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
