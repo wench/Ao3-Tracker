@@ -70,6 +70,9 @@ namespace Ao3Track {
     }); 
 
     let regex_work_url = /^(?:\/collections\/[^\/?#]+)?\/works\/(\d+)(?:\/chapters\/(\d+))?$/;
+    let regex_tag_url = new RegExp("^/tags/([^/?#]+)(?:/(works|bookmarks)?)?$");           // 1 => TAGNAME, 2 => TYPE
+    let regex_user_url = new RegExp("^/users/([^/?#]+)(?:/.*)?$");                         // 1 => USERID
+    let regex_series_url = new RegExp("^/series/(\\d+)$");                                 // 1 => SERIESID
     export let work_chapter = window.location.pathname.match(regex_work_url);
 
     export let workid = 0;
@@ -303,7 +306,76 @@ namespace Ao3Track {
             let $work = $(elem);
             let attr = $work.attr('id').match(regex_work);
             if (attr !== null) {
-                works.push(parseInt(attr[1]));
+                let workid = parseInt(attr[1]);
+                works.push(workid);
+
+                // Gather authors
+                let authors : string[] = [];
+                $work.find(".heading a[rel=author]").each((index,elem)=>{
+                    let a = elem as HTMLAnchorElement;
+
+                    let match = a.pathname.match(regex_user_url);
+                    if (match && match.length > 1) {
+                        let  author = decodeURIComponent(match[1]);
+                        if (authors.indexOf(match[1]) === -1) authors.push(author);
+                    }
+                });
+
+                // Gather all the tags
+                let tags : string[] = [];
+                $work.find("a[class=tag]").each((index,elem)=>{
+                    let a = elem as HTMLAnchorElement;
+
+                    let match = a.pathname.match(regex_tag_url);
+                    if (match && match.length > 1) {
+                        let tag = decodeURIComponent(match[1]);
+                        if (tags.indexOf(tag) === -1) tags.push(tag);
+                    }
+                });     
+                
+                // Gather all the serieses
+                let serieses : number[] = [];
+                $work.find(".series a").each((index,elem)=>{
+                    let a = elem as HTMLAnchorElement;
+
+                    let match = a.pathname.match(regex_series_url);
+                    
+                    if (match && match.length > 1) {
+                        let id = parseInt(decodeURIComponent(match[1]));
+                        if (serieses.indexOf(id) === -1) serieses.push(id);
+                    }
+                });    
+
+                ShouldFilterWork(workid, authors, tags, serieses, (filter) => {
+                    if (filter) {
+                        let message = document.createElement("div");
+                        message.setAttribute("class","ao3t-filtered-message");
+
+                        let hideshow = document.createElement("a");
+                        hideshow.innerText = "Show work";
+                        hideshow.setAttribute("class","ao3-filtered-hideshow");
+                        hideshow.onclick = (event) => {
+                            event.preventDefault();
+
+                            if (hideshow.innerText === "Show work") {
+                                hideshow.innerText = "Hide work";
+                                $work.removeClass("ao3t-filtered-hide");
+                            }
+                            else {
+                                hideshow.innerText = "Show work";
+                                $work.addClass("ao3t-filtered-hide");
+                            }
+                        };
+
+                        message.appendChild(hideshow);
+
+                        message.appendChild(document.createTextNode("Work filtered due to filter:"));
+                        message.appendChild(document.createElement("br"));
+                        message.appendChild(document.createTextNode(filter));
+
+                        $work.addClass("ao3t-filtered ao3t-filtered-hide").prepend(message);
+                    }
+                });
             }
         });
     }

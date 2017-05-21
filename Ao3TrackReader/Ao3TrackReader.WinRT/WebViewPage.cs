@@ -247,7 +247,7 @@ namespace Ao3TrackReader
             contextMenu.Hide();
         }
 
-        public async void ShowContextMenu(double x, double y, string url, string innerHtml)
+        public async void ShowContextMenu(double x, double y, string url, string innerText)
         {
             HideContextMenu();
 
@@ -260,6 +260,12 @@ namespace Ao3TrackReader
             ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
             ContextMenuAdd.IsEnabled = inturl && !res[url];
             ContextMenuRemove.IsEnabled = inturl && res[url];
+
+            ContextMenuFilterDetails = await Data.ListFilters.Instance.GetFilterFromUrlAsync(url, innerText);
+            bool isFilter = ContextMenuFilterDetails != null ? await Data.ListFilters.Instance.GetIsFilterAsync(ContextMenuFilterDetails) : false;
+
+            ContextMenuAddFilter.IsEnabled = ContextMenuFilterDetails != null ? !isFilter : false;
+            ContextMenuRemoveFilter.IsEnabled = ContextMenuFilterDetails != null ? isFilter : false;
 
             foreach (var baseitem in contextMenu.Items)
             {

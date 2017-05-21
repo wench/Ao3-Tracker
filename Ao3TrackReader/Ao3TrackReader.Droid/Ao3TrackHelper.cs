@@ -165,10 +165,20 @@ namespace Ao3TrackReader.Helper
             wvp.SetWorkChaptersAsync(workchapters);
         }
 
-        [JavascriptInterface, Export("showContextMenu")]
-        public void ShowContextMenu(double x, double y, string url, string innerHtml)
+        [JavascriptInterface, Export("shouldFilterWork")]
+        public async void ShouldFilterWork(long workId, [Converter("ToJSON")] string workauthors_json, [Converter("ToJSON")] string worktags_json, [Converter("ToJSON")] string workserieses_json, [Converter("Callback")] int hCallback)
         {
-            wvp.DoOnMainThread(() => { wvp.ShowContextMenu(x, y, url, innerHtml); } );
+            string[] workauthors = JsonConvert.DeserializeObject<string[]>(workauthors_json);
+            string[] worktags = JsonConvert.DeserializeObject<string[]>(worktags_json);
+            long[] workserieses = JsonConvert.DeserializeObject <long[]>(workserieses_json);
+            var result = await wvp.ShouldFilterWorkAsync(workId, workauthors, worktags, workserieses);
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, result); });
+        }
+
+        [JavascriptInterface, Export("showContextMenu")]
+        public void ShowContextMenu(double x, double y, string url, string innerText)
+        {
+            wvp.DoOnMainThread(() => { wvp.ShowContextMenu(x, y, url, innerText); } );
         }
 
         [JavascriptInterface, Export("addToReadingList")]

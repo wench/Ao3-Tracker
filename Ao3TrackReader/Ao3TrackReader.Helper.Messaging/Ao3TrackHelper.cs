@@ -117,9 +117,15 @@ namespace Ao3TrackReader.Helper
             wvp.SetWorkChaptersAsync(workchapters);
         }
 
-        public void ShowContextMenu(double x, double y, string url, string innerHtml)
+        public async void ShouldFilterWork(long workId, string[] workauthors, string[] worktags, long[] workserieses, [Converter("Callback")] int hCallback)
         {
-            wvp.ShowContextMenu(x, y, url, innerHtml);
+            var result = await wvp.ShouldFilterWorkAsync(workId, workauthors, worktags, workserieses);
+            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, result); });
+        }
+
+        public void ShowContextMenu(double x, double y, string url, string innerText    )
+        {
+            wvp.ShowContextMenu(x, y, url, innerText);
         }
 
         public void AddToReadingList(string href)

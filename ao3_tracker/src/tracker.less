@@ -32,6 +32,29 @@ span {
     }
 }
 
+.blurb {
+    &.ao3t-filtered {
+        &.ao3t-filtered-hide > * { 
+            display: none;
+        }
+
+        > div.ao3t-filtered-message {
+            .ao3-filtered-hideshow {
+                margin-left: 10px;
+                float: right;
+            }
+
+            display: block !important;            
+            margin-bottom: 5px;
+            font-size: .7em;
+        }
+
+        &.ao3t-filtered-hide > div.ao3t-filtered-message {
+            margin-bottom: 0;
+        }
+    }
+}
+
 #ao3t-options {
     form {
         border: 1px solid black;

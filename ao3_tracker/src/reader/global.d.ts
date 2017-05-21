@@ -31,8 +31,9 @@ declare namespace Ao3Track {
 
         getWorkDetailsAsync (works: number[], flags: WorkDetailsFlags, callback: (details: { [key:number]:IWorkDetails }) => void) : void;
         setWorkChapters(workchapters: { [key: number]: IWorkChapter; }): void;
+        shouldFilterWork(workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string|null)=>void) : void;
 
-        showContextMenu(x: number, y: number, url: string, innerHtml: string): void;
+        showContextMenu(x: number, y: number, url: string, innerText: string): void;
         
         setCookies(cookies: string): void;
 

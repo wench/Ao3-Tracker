@@ -58,4 +58,5 @@ declare namespace Ao3Track {
     export let SetCurrentLocation : (current : IWorkChapterEx) => void;    
     export let GetUnitConvOptions : (callback: (result :IUnitConvOptions)=>void) => void;
     export let AreUrlsInReadingList : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;
+    export let ShouldFilterWork : (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string|null)=>void) => void;
 }

@@ -80,11 +80,12 @@ namespace Ao3TrackReader.Data
         static string[] usescTagStrings = { "/", "&", ".", "?", "#" };
         static Regex regexEscTag = new Regex(@"([/&.?#])");
         static Regex regexUnescTag = new Regex(@"(\*[sadqh])\*");
-        static Regex regexTag = new Regex(@"^/tags/(?<TAGNAME>[^/?#]+)(/(?<TYPE>(works|bookmarks)?))?$", RegexOptions.ExplicitCapture);
-        static Regex regexWork = new Regex(@"^/works/(?<WORKID>\d+)(/chapters/(?<CHAPTERID>\d+))?$", RegexOptions.ExplicitCapture);
-        static Regex regexWorkComment = new Regex(@"^/works/(?<WORKID>\d+)/comments/(?<COMMENTID>\d+)$", RegexOptions.ExplicitCapture);
-        static Regex regexSeries = new Regex(@"^/series/(?<WORKID>\d+)$", RegexOptions.ExplicitCapture);
-        static Regex regexCollection = new Regex(@"^/collections/(?<COLID>[^/?#]+)(/.*)?$", RegexOptions.ExplicitCapture);
+        static public Regex regexTag = new Regex(@"^/tags/(?<TAGNAME>[^/?#]+)(/(?<TYPE>(works|bookmarks)?))?$", RegexOptions.ExplicitCapture);
+        static public Regex regexWork = new Regex(@"^/works/(?<WORKID>\d+)(/chapters/(?<CHAPTERID>\d+))?$", RegexOptions.ExplicitCapture);
+        static public Regex regexWorkComment = new Regex(@"^/works/(?<WORKID>\d+)/comments/(?<COMMENTID>\d+)$", RegexOptions.ExplicitCapture);
+        static public Regex regexSeries = new Regex(@"^/series/(?<SERIESID>\d+)$", RegexOptions.ExplicitCapture);
+        static public Regex regexCollection = new Regex(@"^/collections/(?<COLID>[^/?#]+)(/.*)?$", RegexOptions.ExplicitCapture);
+        static public Regex regexAuthor = new Regex(@"^/users/(?<USERNAME>[^/?#]+)(/.*)?$", RegexOptions.ExplicitCapture);
         static Regex regexRSSTagTitle = new Regex(@"AO3 works tagged '(?<TAGNAME>.*)'$", RegexOptions.ExplicitCapture);
         static Regex regexTagCategory = new Regex(@"This tag belongs to the (?<CATEGORY>\w*) Category\.", RegexOptions.ExplicitCapture);
         static Regex regexPageQuery = new Regex(@"(?<PAGE>&?page=\d+&?)");

@@ -222,5 +222,18 @@ namespace Ao3TrackReader
             }
             return task.IsCompleted;
         }
+
+        public static T WaitGetResult<T>(this Task<T> task)
+        {
+            try
+            {
+                task.Wait();
+            }
+            catch
+            {
+                return default(T);
+            }
+            return task.Result;
+        }
     }
 }

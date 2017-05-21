@@ -5,6 +5,15 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="Ao3TrackModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="ListFilters">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="userid" Type="bigint" Nullable="false" />
+          <Property Name="data" Type="varchar(max)" Nullable="false" />
+          <Property Name="timestamp" Type="bigint" Nullable="false" />
+        </EntityType>
         <EntityType Name="ReadingList">
           <Key>
             <PropertyRef Name="id" />
@@ -37,6 +46,20 @@
           <Property Name="timestamp" Type="bigint" Nullable="false" />
           <Property Name="seq" Type="bigint" Nullable="false" />
         </EntityType>
+        <Association Name="FK_ListFilters_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ListFilters" Type="Self.ListFilters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="ListFilters">
+              <PropertyRef Name="userid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_ReadingList_Users">
           <End Role="Users" Type="Self.Users" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -66,9 +89,14 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="Ao3TrackModelStoreContainer">
+          <EntitySet Name="ListFilters" EntityType="Self.ListFilters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ReadingList" EntityType="Self.ReadingList" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Works" EntityType="Self.Works" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_ListFilters_Users" Association="Self.FK_ListFilters_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="ListFilters" EntitySet="ListFilters" />
+          </AssociationSet>
           <AssociationSet Name="FK_ReadingList_Users" Association="Self.FK_ReadingList_Users">
             <End Role="Users" EntitySet="Users" />
             <End Role="ReadingList" EntitySet="ReadingList" />
@@ -131,6 +159,11 @@
             <End Role="User" EntitySet="Users" />
             <End Role="ReadingList" EntitySet="ReadingLists" />
           </AssociationSet>
+          <EntitySet Name="ListFilters" EntityType="Ao3TrackModel.ListFilter" />
+          <AssociationSet Name="FK_ListFilters_Users" Association="Ao3TrackModel.FK_ListFilters_Users">
+            <End Role="User" EntitySet="Users" />
+            <End Role="ListFilter" EntitySet="ListFilters" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="ReadingList">
           <Key>
@@ -151,6 +184,29 @@
               <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="ReadingList">
+              <PropertyRef Name="userid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="ListFilter">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="userid" Type="Int64" Nullable="false" />
+          <Property Name="data" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="timestamp" Type="Int64" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_ListFilters_Users">
+          <End Type="Ao3TrackModel.User" Role="User" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="Ao3TrackModel.ListFilter" Role="ListFilter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="ListFilter">
               <PropertyRef Name="userid" />
             </Dependent>
           </ReferentialConstraint>
@@ -195,7 +251,17 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-        </EntityContainerMapping>
+          <EntitySetMapping Name="ListFilters">
+            <EntityTypeMapping TypeName="Ao3TrackModel.ListFilter">
+              <MappingFragment StoreEntitySet="ListFilters">
+                <ScalarProperty Name="timestamp" ColumnName="timestamp" />
+                <ScalarProperty Name="data" ColumnName="data" />
+                <ScalarProperty Name="userid" ColumnName="userid" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>
@@ -210,7 +276,7 @@
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
         <DesignerProperty Name="EnablePluralization" Value="true" />
-        <DesignerProperty Name="IncludeForeignKeysInModel" Value="False" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
       </DesignerInfoPropertySet>

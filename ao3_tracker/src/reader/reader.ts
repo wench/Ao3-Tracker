@@ -65,6 +65,10 @@ namespace Ao3Track {
         Ao3Track.Helper.setWorkChapters(workchapters);
     };
 
+    ShouldFilterWork = (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string|null)=>void) => {
+        Ao3Track.Helper.shouldFilterWork(workid, authors || [], tags || [], series || [], callback);
+    };
+
     SetNextPage = (uri: string) => {
         Ao3Track.Helper.nextPage = uri;
     };
@@ -127,7 +131,7 @@ namespace Ao3Track {
                 ev.stopPropagation();
 
                 let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
-                Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, a.href, a.innerHTML);
+                Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, a.href, a.innerText);
                 return;
             }
         }

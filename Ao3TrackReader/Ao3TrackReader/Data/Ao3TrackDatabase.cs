@@ -65,6 +65,7 @@ namespace Ao3TrackReader
             database.CreateTable<LanguageCache>();
             database.CreateTable<ReadingList>();
             database.CreateTable<SortColumn>();
+            database.CreateTable<ListFilter>();
 
             database.Query<Work>("UPDATE Work SET seq=0 WHERE seq IS NULL");
         }
@@ -406,7 +407,7 @@ namespace Ao3TrackReader
             }
 
         }
-
+        #region ReadingList
         public IEnumerable<ReadingList> GetReadingListItems()
         {
             lock (locker)
@@ -465,5 +466,68 @@ namespace Ao3TrackReader
                 }
             }
         }
+        #endregion
+
+        #region ListFilters
+        public IEnumerable<ListFilter> GetListFilters()
+        {
+            lock (locker)
+            {
+                return (from i in database.Table<ListFilter>() select i);
+            }
+        }
+
+        public ListFilter GetListFilter(string data)
+        {
+            lock (locker)
+            {
+                return database.Table<ListFilter>().FirstOrDefault(x => x.data== data);
+            }
+        }
+
+        public void SaveListFilters(params ListFilter[] items)
+        {
+            SaveListFilters(items as IReadOnlyCollection<ListFilter>);
+
+        }
+
+        public void SaveListFilters(IReadOnlyCollection<ListFilter> items)
+        {
+            lock (locker)
+            {
+                foreach (var item in items)
+                {
+
+                    var row = database.Table<ListFilter>().FirstOrDefault(x => x.data == item.data);
+                    if (row != null)
+                    {
+                        if (item.timestamp == 0) item.timestamp = row.timestamp;
+                        database.Update(item);
+                    }
+                    else
+                    {
+                        database.Insert(item);
+                    }
+                }
+            }
+        }
+
+        public void DeleteListFilters(params string[] items)
+        {
+            DeleteListFilters(items as IReadOnlyCollection<string>);
+        }
+
+        public void DeleteListFilters(IReadOnlyCollection<string> items)
+        {
+            lock (locker)
+            {
+                foreach (var item in items)
+                {
+                    database.Delete<ListFilter>(item);
+                }
+            }
+        }
+
+        #endregion
     }
 }

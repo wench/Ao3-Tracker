@@ -68,6 +68,13 @@ limitations under the License.
             <Style TargetType="local:Button" x:Key="TextButtonActive" BasedOn="{StaticResource TextButtonActive}" />
             <Style TargetType="local:Button" x:Key="TextButtonInactive" BasedOn="{StaticResource TextButtonInactive}" />
 
+            <Style TargetType="Editor">
+                <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_100}" />
+                <Setter Property="TextColor" Value="Default" />
+                <Setter Property="BackgroundColor" Value="Default" />
+            </Style>
+            
             <m:KeyedItemList x:TypeArguments="x:String" x:Key="Themes" x:Name="themes" />
 
             <m:KeyedItemList x:TypeArguments="a:NavigateBehaviour" x:Key="NavigateMode" x:Name="navigateMode" >
@@ -242,6 +249,40 @@ limitations under the License.
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Convert Weight" HorizontalOptions="Start" />
                             <local:DropDown x:Name="unitConvWeightDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                        </StackLayout>
+                    </StackLayout>
+
+                    <StackLayout x:Name="listFiltersForm" Style="{StaticResource SettingGroup}">
+                        <Label Text="Work Listing Filters" Style="{StaticResource Heading}" />
+                        <Label Text="Works matching any of the filters below will be excluded from showing up on listing pages. Only one filter allowed per line." Style="{StaticResource Remark}" />
+                        <Label Text="Filters can also be added via the context menu shown when right clicking or tapping and holding on links." Style="{StaticResource Remark}" />
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <Label Text="Tags"  HorizontalOptions="Start" />
+                            <Editor x:Name="listFilterTags" />
+                            <Label Text="Tags will match against all tags with same meaning." Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <Label Text="Authors" HorizontalOptions="Start" />
+                            <Editor x:Name="listFilterAuthors" />
+                            <Label Text="Enter Author usernames, not psueds." Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <Label Text="Works" HorizontalOptions="Start" />
+                            <Editor x:Name="listFilterWorks" />
+                            <Label Text="Enter WorkId optionally followed by a space the work title." Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <Label Text="Serieses" HorizontalOptions="Start" />
+                            <Editor x:Name="listFilterSerieses" />
+                            <Label Text="Enter SeriesId optionally followed by a space the series name." Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource Setting}">
+                            <local:Button Text="Save Filters" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
                         </StackLayout>
                     </StackLayout>
 

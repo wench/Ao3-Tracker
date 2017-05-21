@@ -161,6 +161,14 @@ namespace Ao3TrackReader.Helper
             }).AsAsyncOperation();
         }
 
+        public IAsyncOperation<string> ShouldFilterWork(long workId, [ReadOnlyArray] string[] workauthors, [ReadOnlyArray] string[] worktags, [ReadOnlyArray] long[] workserieses)
+        {
+            return Task.Run(async () =>
+            {
+                return await wvp.ShouldFilterWorkAsync(workId, workauthors, worktags, workserieses);
+            }).AsAsyncOperation();
+        }
+
         internal static MemberDef md_CreateObject = null;
         public object CreateObject(string classname)
         {
@@ -188,9 +196,9 @@ namespace Ao3TrackReader.Helper
             wvp.SetWorkChaptersAsync(works);
         }
 
-        public void ShowContextMenu(double x, double y, string url, string innerHtml)
+        public void ShowContextMenu(double x, double y, string url, string innerText)
         {
-            wvp.DoOnMainThread(() => wvp.ShowContextMenu(x, y, url, innerHtml));
+            wvp.DoOnMainThread(() => wvp.ShowContextMenu(x, y, url, innerText));
         }
 
         public void AddToReadingList(string href)

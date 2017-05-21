@@ -37,8 +37,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TextView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3SiteDataLookup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\ListFilters.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JavascriptException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\ListFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Bold.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Br.cs" />

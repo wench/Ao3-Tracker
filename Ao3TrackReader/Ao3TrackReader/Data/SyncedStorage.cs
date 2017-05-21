@@ -638,7 +638,36 @@ namespace Ao3TrackReader.Data
                 {
                     return JsonConvert.DeserializeObject<Models.ServerReadingList>(content);
                 }
-                catch 
+                catch
+                {
+                    return null;
+                }
+            });
+        }
+
+        public Task<Models.ServerListFilters> SyncListFiltersAsync(Models.ServerListFilters slf)
+        {
+            return Task.Run(async () =>
+            {
+                if (serversync == SyncState.Disabled) return null;
+
+                var json = JsonConvert.SerializeObject(slf);
+                var postBody = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                var responseTask = HttpClient.PostAsync(new Uri(url_base, "ListFilters"), postBody);
+                responseTask.TryWait();
+                if (responseTask.IsFaulted) return null;
+
+                var response = responseTask.Result;
+                if (!response.IsSuccessStatusCode) return null;
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    return JsonConvert.DeserializeObject<Models.ServerListFilters>(content);
+                }
+                catch
                 {
                     return null;
                 }

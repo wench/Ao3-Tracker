@@ -74,6 +74,8 @@ namespace Ao3TrackReader
 
             WebViewHolder.Content = CreateWebView();
 
+            ListFilters.Create();
+
             string url = App.Database.GetVariable("Sleep:URI");
             App.Database.DeleteVariable("Sleep:URI");
 
@@ -246,6 +248,9 @@ namespace Ao3TrackReader
         DisableableCommand<string> ContextMenuOpenAdd;
         DisableableCommand<string> ContextMenuAdd;
         DisableableCommand<string> ContextMenuRemove;
+        DisableableCommand<string> ContextMenuAddFilter;
+        DisableableCommand<string> ContextMenuRemoveFilter;
+        string ContextMenuFilterDetails;
 
         void SetupContextMenu()
         {
@@ -270,6 +275,16 @@ namespace Ao3TrackReader
                 new KeyValuePair<string, DisableableCommand<string>>("Remove from Reading list", ContextMenuRemove = new DisableableCommand<string>((url) =>
                 {
                     RemoveFromReadingList(url);
+                })),
+
+                new KeyValuePair<string, DisableableCommand<string>>("Add as Listing Filter", ContextMenuAddFilter = new DisableableCommand<string>((url) =>
+                {
+                    Data.ListFilters.Instance.AddFilterAsync(ContextMenuFilterDetails);
+                })),
+
+                new KeyValuePair<string, DisableableCommand<string>>("Remove as Listing Filter", ContextMenuRemoveFilter = new DisableableCommand<string>((url) =>
+                {
+                    Data.ListFilters.Instance.RemoveFilterAsync(ContextMenuFilterDetails);
                 })),
 
                 new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) =>
@@ -1351,6 +1366,11 @@ namespace Ao3TrackReader
             var writer = new System.IO.StringWriter();
             doc.Save(writer);
             return "<!DOCTYPE html>\n" + writer.ToString();
+        }
+
+        Task<string> ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses)
+        {
+            return Task.Run(() => Data.ListFilters.Instance.ShouldFilterWork(workId, workauthors, worktags, workserieses));
         }
     }
 }

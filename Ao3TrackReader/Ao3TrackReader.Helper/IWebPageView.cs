@@ -84,7 +84,7 @@ namespace Ao3TrackReader.Helper
         int FontSize { get; }
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
-        void ShowContextMenu(double x, double y, string url, string innerHtml);
+        void ShowContextMenu(double x, double y, string url, string innerText);
         void AddToReadingList(string href);
         void SetCookies(string cookies);
 
@@ -97,5 +97,7 @@ namespace Ao3TrackReader.Helper
         IAsyncOp_String EvaluateJavascriptAsync(string code);
 
         IUnitConvOptions UnitConvOptions { get; }
+
+        IAsyncOp_String ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses);
     }
 }

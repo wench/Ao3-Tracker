@@ -72,6 +72,7 @@ namespace Ao3TrackReader.Controls
                 UpdateUnitConvs();
                 UpdateNavOptions();
                 UpdateFontSizeUI();
+                UpdateListFilters();
             }
         }
 
@@ -210,6 +211,7 @@ namespace Ao3TrackReader.Controls
             {
                 UpdateSyncForm();
                 wvp.ReadingList.SyncToServerAsync(old_username != s_username);
+                Data.ListFilters.Instance.SyncWithServerAsync(old_username != s_username);
             }
             syncSubmitButton.IsEnabled = true;
             syncIndicator.Content = null;
@@ -366,6 +368,20 @@ namespace Ao3TrackReader.Controls
             if (!IsOnScreen) return;
 
             App.Database.SaveVariable("LogFontSizeUI", (fontSizeUIDropDown.SelectedItem as KeyedItem<int>).Key);
+        }
+
+        void UpdateListFilters()
+        {
+            Data.ListFilters.Instance.GetFilterStrings(out var tags, out var authors, out var works, out var serieses);
+            listFilterTags.Text = tags;
+            listFilterAuthors.Text = authors;
+            listFilterWorks.Text = works;
+            listFilterSerieses.Text = serieses;
+        }
+
+        void OnSaveFilters(object sender, EventArgs e)
+        {
+            Data.ListFilters.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
         }
     }
 }

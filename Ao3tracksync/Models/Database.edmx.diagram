@@ -5,11 +5,13 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="1a523eb784c24dcdbcef95a0920225d5" Name="Diagram1">
-        <EntityTypeShape EntityType="Ao3TrackModel.User" Width="1.5" PointX="0.75" PointY="0.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="Ao3TrackModel.Work" Width="1.5" PointX="3" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Ao3TrackModel.User" Width="1.5" PointX="0.625" PointY="3.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="Ao3TrackModel.Work" Width="1.5" PointX="2.875" PointY="0.875" IsExpanded="true" />
         <AssociationConnector Association="Ao3TrackModel.FK_Works_Users" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="Ao3TrackModel.ReadingList" Width="1.5" PointX="3" PointY="4" />
+        <EntityTypeShape EntityType="Ao3TrackModel.ReadingList" Width="1.5" PointX="2.875" PointY="3.625" />
         <AssociationConnector Association="Ao3TrackModel.FK_ReadingList_Users" />
+        <EntityTypeShape EntityType="Ao3TrackModel.ListFilter" Width="1.5" PointX="2.875" PointY="5.875" />
+        <AssociationConnector Association="Ao3TrackModel.FK_ListFilters_Users" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -104,6 +104,9 @@ namespace Ao3TrackReader
         {
             return CallJavascriptAsync(code).AsAsyncOperation();
         }
-
+        IAsyncOperation<string> Helper.IWebViewPage.ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses)
+        {
+            return ShouldFilterWorkAsync(workId, workauthors, worktags, workserieses).AsAsyncOperation();
+        }
     }
 }

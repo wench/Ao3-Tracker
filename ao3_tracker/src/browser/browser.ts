@@ -56,6 +56,10 @@ namespace Ao3Track {
         sendMessage({ type: "SET", data: workchapters, sendResponse: undefined });
     };
 
+    ShouldFilterWork = (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string|null)=>void) => {
+        callback(null);
+    }
+
     export function DoSync(callback: (result: boolean) => void) {
         sendMessage({ type: "DO_SYNC", data: undefined, sendResponse: callback });
     };

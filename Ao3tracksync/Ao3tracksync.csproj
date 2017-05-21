@@ -251,6 +251,7 @@
     <Compile Include="Controllers\Attributes.cs" />
     <Compile Include="Controllers\ErrorReportController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ListFiltersController.cs" />
     <Compile Include="Controllers\ReadingListController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
@@ -274,6 +275,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Database.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ListFilter.cs">
+      <DependentUpon>Database.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ReadingList.cs">
       <DependentUpon>Database.tt</DependentUpon>
