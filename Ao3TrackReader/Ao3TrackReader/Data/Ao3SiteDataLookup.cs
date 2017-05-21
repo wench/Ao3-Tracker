@@ -116,7 +116,7 @@ namespace Ao3TrackReader.Data
 
         static Task<HttpResponseMessage> HttpRequestAsync(Uri uri, HttpMethod method = null, string mediaType = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, string cookies = null)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -126,51 +126,43 @@ namespace Ao3TrackReader.Data
                         if (!string.IsNullOrEmpty(mediaType)) message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(mediaType));
                         if (!string.IsNullOrWhiteSpace(cookies)) message.Headers.Add("Cookie", cookies);
 
-                        httpSemaphore.Wait();
+                        await httpSemaphore.WaitAsync();
                         var task = HttpClient.SendAsync(message, completionOption);
-                        task.Wait();
-                        if (!task.IsFaulted) return task.Result;
+                        return await task;
                     }
-                    catch (AggregateException e)
+                    catch (HttpRequestException e)
                     {
-                        if (e.InnerException is TaskCanceledException)
-                            continue;
-
-                        if (e.InnerException is HttpRequestException httpexp)
+                        if (i == 2)
                         {
                             if (e.InnerException is WebException webexp)
                             {
                                 App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + webexp.Status);
                             }
-                            else if (httpexp.InnerException is System.Runtime.InteropServices.COMException comexp && comexp.Data.Contains("RestrictedDescription") && !string.IsNullOrWhiteSpace(comexp.Data["RestrictedDescription"] as string))
+                            else if (e.InnerException is System.Runtime.InteropServices.COMException comexp && comexp.Data.Contains("RestrictedDescription") && !string.IsNullOrWhiteSpace(comexp.Data["RestrictedDescription"] as string))
                             {
                                 App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + comexp.Data["RestrictedDescription"] as string);
                             }
                             else
                             {
-                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3:" + httpexp.Message);
-
+                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3:" + e.Message);
                             }
-                            continue;
                         }
-
-                        App.Log(e);
                     }
                     catch (TaskCanceledException)
                     {
-                        continue;
                     }
                     catch (Exception e)
                     {
-                        App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + e.Message);
-                        App.Log(e);
-                        break;
+                        if (i == 2)
+                        {
+                            App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + e.Message);
+                            App.Log(e);
+                        }
                     }
                     finally
                     {
                         httpSemaphore.Release();
                     }
-                    break;
                 }
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             });
