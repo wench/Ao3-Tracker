@@ -261,7 +261,7 @@ namespace Ao3TrackReader
             ContextMenuAdd.IsEnabled = inturl && !res[url];
             ContextMenuRemove.IsEnabled = inturl && res[url];
 
-            ContextMenuFilterDetails = await Data.ListFilters.Instance.GetFilterFromUrlAsync(url, innerText);
+            ContextMenuFilterDetails = Data.ListFilters.Instance.GetFilterFromUrl(url, innerText);
             bool isFilter = ContextMenuFilterDetails != null ? await Data.ListFilters.Instance.GetIsFilterAsync(ContextMenuFilterDetails) : false;
 
             ContextMenuAddFilter.IsEnabled = ContextMenuFilterDetails != null ? !isFilter : false;

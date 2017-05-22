@@ -310,7 +310,7 @@ namespace Ao3TrackReader.Data
             });
         }
 
-        static string UnescapeTag(string tag)
+        static public string UnescapeTag(string tag)
         {
             if (tag == null) return null;
             return regexUnescTag.Replace(tag, (match) =>
@@ -385,10 +385,10 @@ namespace Ao3TrackReader.Data
             return tag;
         }
 
-        static public TagCache LookupTagQuick(string intag)
+        static public TagCache LookupTagQuick(string intag, bool ignoreexpires=false)
         {
             intag = UnescapeTag(intag);
-            var tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
+            var tag = App.Database.GetTag(intag,ignoreexpires) ?? new TagCache { name = intag };
             if (!string.IsNullOrEmpty(tag.actual))
             {
                 return tag;
@@ -396,82 +396,183 @@ namespace Ao3TrackReader.Data
             return null;
         }
 
+        static SemaphoreSlim taglock = new SemaphoreSlim(1);
+        static Dictionary<string, SemaphoreSlim> taglocks = new Dictionary<string, SemaphoreSlim>();
+        static Stack<SemaphoreSlim> oldtaglocks = new Stack<SemaphoreSlim>();
+        static SemaphoreSlim GetTagLockSem()
+        {
+            if (oldtaglocks.Count != 0) return oldtaglocks.Pop();
+            else return new SemaphoreSlim(1);
+        }
+        static void DisposeTagLockSem(SemaphoreSlim sem)
+        {
+            oldtaglocks.Push(sem);
+        }
+
         static public async Task<TagCache> LookupTagAsync(string intag)
         {
+            if (string.IsNullOrWhiteSpace(intag)) return new TagCache { name = intag, actual = intag };
+
             intag = UnescapeTag(intag);
             var tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
-            if (!string.IsNullOrEmpty(tag.actual))
+            if (!string.IsNullOrEmpty(tag?.actual))
             {
                 return tag;
             }
-            tag.actual = intag;
-            intag = EscapeTag(intag);
 
-            var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + intag);
+            // Get a lock for this tag
+            await taglock.WaitAsync();
+            if (!taglocks.TryGetValue(intag, out var thistaglock)) taglocks[intag] = thistaglock = GetTagLockSem();
+            taglock.Release();
 
-            var response = await HttpRequestAsync(uri);
+            await thistaglock.WaitAsync();
 
-            if (response.IsSuccessStatusCode)
+            try
             {
-                HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
-                var main = doc.GetElementbyId("main");
-
-                HtmlNode tagnode = main?.ElementByClass("div", "tag");
-                if (tagnode != null)
+                tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
+                if (!string.IsNullOrEmpty(tag?.actual))
                 {
-                    // Merger?
-                    HtmlNode mergernode = tagnode.ElementByClass("div", "merger");
-                    if (mergernode != null)
-                    {
-                        foreach (var e in mergernode.DescendantsByClass("a", "tag"))
-                        {
-                            var href = e.Attributes["href"];
-                            if (href != null && !string.IsNullOrEmpty(href.Value))
-                            {
-                                var newuri = new Uri(uri, href.Value.HtmlDecode());
-                                var m = regexTag.Match(newuri.LocalPath);
-                                if (m.Success) tag.actual = UnescapeTag(m.Groups["TAGNAME"].Value);
-                                break;
-                            }
-                        }
-                    }
-
-                    // Parents
-                    HtmlNode parenttagsnode = tagnode.ElementByClass("div", "parent")?.Element("ul");
-                    if (parenttagsnode != null)
-                    {
-                        foreach (var e in parenttagsnode.DescendantsByClass("a", "tag"))
-                        {
-                            var href = e.Attributes["href"];
-                            if (href != null && !string.IsNullOrEmpty(href.Value))
-                            {
-                                var newuri = new Uri(uri, href.Value.HtmlDecode());
-                                var m = regexTag.Match(newuri.LocalPath);
-                                if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
-                                    tag.parents.Add(UnescapeTag(m.Groups["TAGNAME"].Value));
-                            }
-                        }
-
-                    }
-
-                    // Category
-                    foreach (var p in tagnode.Elements("p"))
-                    {
-                        if (p.InnerText != null)
-                        {
-                            var m = regexTagCategory.Match(p.InnerText.HtmlDecode());
-                            if (m.Success)
-                            {
-                                tag.category = m.Groups["CATEGORY"].Value;
-                                break;
-                            }
-                        }
-                    }
+                    return tag;
                 }
 
-            }
+                tag.actual = intag;
+                intag = EscapeTag(intag);
 
-            App.Database.SetTagDetails(tag);
+                var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + intag);
+
+                var response = await HttpRequestAsync(uri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
+                    var main = doc.GetElementbyId("main");
+
+                    HtmlNode tagnode = main?.ElementByClass("div", "tag");
+                    if (tagnode != null)
+                    {
+                        // Merger?
+                        HtmlNode mergernode = tagnode.ElementByClass("div", "merger");
+                        if (mergernode != null)
+                        {
+                            foreach (var e in mergernode.DescendantsByClass("a", "tag"))
+                            {
+                                var href = e.Attributes["href"];
+                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                {
+                                    var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                    var m = regexTag.Match(newuri.LocalPath);
+                                    if (m.Success)
+                                    {
+                                        tag.actual = UnescapeTag(m.Groups["TAGNAME"].Value);
+                                        await LookupTagAsync(tag.actual).ConfigureAwait(false);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Parents
+                        HtmlNode parenttagsnode = tagnode.ElementByClass("div", "parent")?.Element("ul");
+                        if (parenttagsnode != null)
+                        {
+                            foreach (var e in parenttagsnode.DescendantsByClass("a", "tag"))
+                            {
+                                var href = e.Attributes["href"];
+                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                {
+                                    var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                    var m = regexTag.Match(newuri.LocalPath);
+                                    if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
+                                        tag.parents.Add(UnescapeTag(m.Groups["TAGNAME"].Value));
+                                }
+                            }
+
+                        }
+
+                        // Category
+                        foreach (var p in tagnode.Elements("p"))
+                        {
+                            if (p.InnerText != null)
+                            {
+                                var m = regexTagCategory.Match(p.InnerText.HtmlDecode());
+                                if (m.Success)
+                                {
+                                    tag.category = m.Groups["CATEGORY"].Value;
+                                    break;
+                                }
+                            }
+                        }
+
+                        App.Database.SetTagDetails(tag);
+
+                        // synonyms
+                        HtmlNode synonymstagsnode = tagnode.ElementByClass("div", "synonym")?.Element("ul");
+                        if (synonymstagsnode != null)
+                        {
+                            foreach (var e in synonymstagsnode.DescendantsByClass("a", "tag"))
+                            {
+                                var href = e.Attributes["href"];
+                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                {
+                                    var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                    var m = regexTag.Match(newuri.LocalPath);
+                                    if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
+                                    {
+                                        var ssyntag = UnescapeTag(m.Groups["TAGNAME"].Value);
+                                        if (string.IsNullOrEmpty(App.Database.GetTag(ssyntag)?.actual))
+                                        {
+                                            // Get a lock for this tag
+                                            await taglock.WaitAsync();
+                                            if (!taglocks.TryGetValue(ssyntag, out var syntaglock)) taglocks[ssyntag] = syntaglock = GetTagLockSem();
+                                            taglock.Release();
+
+                                            // If the lock is already held then another thread is already working on this
+                                            if (await syntaglock.WaitAsync(0))
+                                            {
+                                                try
+                                                {
+                                                    var syntag = App.Database.GetTag(ssyntag) ?? new TagCache { name = ssyntag };
+                                                    if (string.IsNullOrEmpty(syntag?.actual))
+                                                    {
+                                                        syntag.actual = tag.actual;
+                                                        syntag.parents = tag.parents;
+                                                        syntag.category = tag.category;
+                                                        App.Database.SetTagDetails(syntag);
+                                                    }
+                                                }
+                                                finally
+                                                {
+                                                    syntaglock.Release();
+                                                    await taglock.WaitAsync();
+                                                    if (syntaglock.CurrentCount == 1)
+                                                    {
+                                                        DisposeTagLockSem(syntaglock);
+                                                        taglocks.Remove(ssyntag);
+                                                    }
+                                                    taglock.Release();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+            finally
+            {
+                // Release lock and delete if no thread waiting
+                thistaglock.Release();
+                await taglock.WaitAsync();
+                if (thistaglock.CurrentCount == 1)
+                {
+                    DisposeTagLockSem(thistaglock);
+                    taglocks.Remove(intag);
+                }
+                taglock.Release();
+            }
 
             return tag;
         }
@@ -1596,6 +1697,7 @@ namespace Ao3TrackReader.Data
             {
                 foreach (var tag in query["work_search[other_tag_names]"][0].Split(','))
                 {
+                    if (!string.IsNullOrWhiteSpace(tag))
                     tasks.Add(Task.Run(async () =>
                     {
                         var tagdetails = await LookupTagAsync(tag);

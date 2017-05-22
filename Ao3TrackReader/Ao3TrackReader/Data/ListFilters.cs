@@ -69,7 +69,7 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        async public Task<string> GetFilterFromUrlAsync(string url, string extra)
+        public string GetFilterFromUrl(string url, string extra)
         {
             var uri = new Uri(url);
             Match match = null;
@@ -98,9 +98,9 @@ namespace Ao3TrackReader.Data
             {
                 var sTAGNAME = match.Groups["TAGNAME"].Value;
 
-                var tag = await Ao3SiteDataLookup.LookupTagAsync(sTAGNAME);
+                var tag = Ao3SiteDataLookup.UnescapeTag(sTAGNAME);
                 
-                return $"{ListFilterType.Tag} {tag.actual}".TrimEnd();
+                return $"{ListFilterType.Tag} {tag}".TrimEnd();
             }
 
             return null;
@@ -338,8 +338,8 @@ namespace Ao3TrackReader.Data
                     {
                         if (!string.IsNullOrWhiteSpace(split[1]))
                         {
-                            var tag = Ao3SiteDataLookup.LookupTagAsync(split[1]).WaitGetResult();
-                            if (tags.Contains(tag.actual))
+                            var tag = Ao3SiteDataLookup.LookupTagQuick(split[1], true);
+                            if (tags.Contains(tag?.actual))
                                 return $"{ListFilterType.Tag} {tag.actual}";
                         }
                         return null;
@@ -528,17 +528,6 @@ namespace Ao3TrackReader.Data
 
         public string ShouldFilterWork(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses)
         {
-            var actualtags = new List<string>();
-            Parallel.ForEach(worktags, (tagstr) =>
-            {
-                var tag = Ao3SiteDataLookup.LookupTagAsync(tagstr).WaitGetResult();
-                lock (actualtags)
-                {
-                    if (!actualtags.Contains(tag.actual))
-                        actualtags.Add(tag.actual);
-                }
-            });
-
             using (rwlock.ReadLock())
             {
                 if (works.TryGetValue(workId, out var workname))
@@ -552,14 +541,14 @@ namespace Ao3TrackReader.Data
                         return $"{ListFilterType.Author} {author}";
                     }
                 }
-                foreach (var tag in actualtags)
+                foreach (var tagstr in worktags)
                 {
-                    if (tags.Contains(tag))
+                    var tag = Ao3SiteDataLookup.LookupTagQuick(tagstr, true);
+                    if (tags.Contains(tag?.actual))
                     {
-                        return $"{ListFilterType.Tag} {tag}";
+                        return $"{ListFilterType.Tag} {tag.actual}";
                     }
                 }
-
                 foreach (var series in workserieses)
                 {
                     if (serieses.TryGetValue(series, out var seriesname))

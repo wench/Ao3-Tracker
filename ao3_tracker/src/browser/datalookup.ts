@@ -221,7 +221,7 @@ namespace Ao3Track {
                                         }
                                     }
                                 });
-                            }
+                            };
                             tryget(false);
                         }).then((worknode) => {
                             if (worknode.length !== 0) { FillModelFromWorkSummary(wsuri, worknode, model); }

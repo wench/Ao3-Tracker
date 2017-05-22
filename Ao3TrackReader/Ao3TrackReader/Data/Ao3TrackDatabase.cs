@@ -59,15 +59,26 @@ namespace Ao3TrackReader
 		{
 			database = new SQLiteConnection (DatabasePath);
             // create the tables
+            database.CreateTable<Variable>();
+
             database.CreateTable<Work>();
-			database.CreateTable<Variable>();
             database.CreateTable<TagCache>();
             database.CreateTable<LanguageCache>();
             database.CreateTable<ReadingList>();
             database.CreateTable<SortColumn>();
             database.CreateTable<ListFilter>();
 
-            database.Query<Work>("UPDATE Work SET seq=0 WHERE seq IS NULL");
+            // Do any database upgrades if necessaey
+            TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
+
+            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5))
+            {
+                database.Query<Work>("UPDATE Work SET seq=0 WHERE seq IS NULL");
+                database.Query<TagCache>("UPDATE TagCache SET expires=0"); // Invalidate the entire cache
+            }
+
+            SaveVariable("DatabaseVersion", Version.Version.Integer);
+
         }
 
 		public IEnumerable<Work> GetItems ()
@@ -301,23 +312,36 @@ namespace Ao3TrackReader
 			}
 		}
 
-		public TagCache GetTag(string name)
+        public TagCache GetTag(string name, bool ignoreexpires = false)
 		{
 			lock (locker)
 			{
-				var now = DateTime.UtcNow;
-				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
-				return row;
-			}
+                if (!ignoreexpires)
+                {
+                    var now = DateTime.UtcNow;
+                    return database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
+                }
+                else
+                {
+                    return database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                }
+            }
 
 		}
 
-		public void SetTagId(string name, int id)
+        Random random = new Random();
+
+        TimeSpan RandomExpires(int days, int variation)
+        {
+            return TimeSpan.FromDays(days + random.NextDouble()*variation);
+        }
+
+        public void SetTagId(string name, int id)
 		{
 			lock (locker)
 			{
 				var now = DateTime.UtcNow;
-				var expires = now + new TimeSpan(7, 0, 0, 0);
+				var expires = now + RandomExpires(21,14);
 				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
 				if (row != null)
 				{
@@ -339,7 +363,7 @@ namespace Ao3TrackReader
 			lock (locker)
 			{
 				var now = DateTime.UtcNow;
-				tag.expires = now + new TimeSpan(7, 0, 0, 0);
+				tag.expires = now + RandomExpires(21, 14);
 				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
 				if (row != null)
 				{

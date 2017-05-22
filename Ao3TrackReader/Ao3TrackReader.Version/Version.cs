@@ -32,5 +32,10 @@ namespace Ao3TrackReader.Version
                     return new Uri("https://github.com/wench/Ao3-Tracker");
             }
         }
+
+        public static int AsInteger(int major, int minor, int build)
+        {
+            return major * 1000000 + minor * 1000 + build;
+        }
     }
 }
