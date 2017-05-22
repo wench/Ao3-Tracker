@@ -385,10 +385,10 @@ namespace Ao3TrackReader.Data
             return tag;
         }
 
-        static public TagCache LookupTagQuick(string intag, bool ignoreexpires=false)
+        static public TagCache LookupTagQuick(string intag, bool ignoreexpires = false)
         {
             intag = UnescapeTag(intag);
-            var tag = App.Database.GetTag(intag,ignoreexpires) ?? new TagCache { name = intag };
+            var tag = App.Database.GetTag(intag, ignoreexpires) ?? new TagCache { name = intag };
             if (!string.IsNullOrEmpty(tag.actual))
             {
                 return tag;
@@ -396,7 +396,7 @@ namespace Ao3TrackReader.Data
             return null;
         }
 
-        static SemaphoreSlim taglock = new SemaphoreSlim(1);
+        static SemaphoreSlim taglockslock = new SemaphoreSlim(1);
         static Dictionary<string, SemaphoreSlim> taglocks = new Dictionary<string, SemaphoreSlim>();
         static Stack<SemaphoreSlim> oldtaglocks = new Stack<SemaphoreSlim>();
         static SemaphoreSlim GetTagLockSem()
@@ -421,12 +421,13 @@ namespace Ao3TrackReader.Data
             }
 
             // Get a lock for this tag
-            await taglock.WaitAsync();
-            if (!taglocks.TryGetValue(intag, out var thistaglock)) taglocks[intag] = thistaglock = GetTagLockSem();
-            taglock.Release();
+            SemaphoreSlim taglock;
+            using (await taglockslock.LockAsync())
+            {
+                if (!taglocks.TryGetValue(intag, out taglock)) taglocks[intag] = taglock = GetTagLockSem();
+            }
 
-            await thistaglock.WaitAsync();
-
+            await taglock.LockAsync();
             try
             {
                 tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
@@ -503,31 +504,33 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        App.Database.SetTagDetails(tag);
-
-                        // synonyms
-                        HtmlNode synonymstagsnode = tagnode.ElementByClass("div", "synonym")?.Element("ul");
-                        if (synonymstagsnode != null)
+                        using (App.Database.BeginTransaction()) // All txn commands must be on same thread or deadlock!
                         {
-                            foreach (var e in synonymstagsnode.DescendantsByClass("a", "tag"))
-                            {
-                                var href = e.Attributes["href"];
-                                if (href != null && !string.IsNullOrEmpty(href.Value))
-                                {
-                                    var newuri = new Uri(uri, href.Value.HtmlDecode());
-                                    var m = regexTag.Match(newuri.LocalPath);
-                                    if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
-                                    {
-                                        var ssyntag = UnescapeTag(m.Groups["TAGNAME"].Value);
-                                        if (string.IsNullOrEmpty(App.Database.GetTag(ssyntag)?.actual))
-                                        {
-                                            // Get a lock for this tag
-                                            await taglock.WaitAsync();
-                                            if (!taglocks.TryGetValue(ssyntag, out var syntaglock)) taglocks[ssyntag] = syntaglock = GetTagLockSem();
-                                            taglock.Release();
+                            App.Database.SetTagDetails(tag);
 
-                                            // If the lock is already held then another thread is already working on this
-                                            if (await syntaglock.WaitAsync(0))
+                            // synonyms
+                            HtmlNode synonymstagsnode = tagnode.ElementByClass("div", "synonym")?.Element("ul");
+                            if (synonymstagsnode != null)
+                            {
+                                foreach (var e in synonymstagsnode.DescendantsByClass("a", "tag"))
+                                {
+                                    var href = e.Attributes["href"];
+                                    if (href != null && !string.IsNullOrEmpty(href.Value))
+                                    {
+                                        var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                        var m = regexTag.Match(newuri.LocalPath);
+                                        if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
+                                        {
+                                            var ssyntag = UnescapeTag(m.Groups["TAGNAME"].Value);
+
+                                            SemaphoreSlim syntaglock;
+                                            using (taglockslock.Lock())
+                                            {
+                                                if (!taglocks.TryGetValue(ssyntag, out syntaglock)) taglocks[ssyntag] = syntaglock = GetTagLockSem();
+                                            }
+
+                                            // If the lock is already held then another thread is already working on this, we wont even attempt to do anything to it
+                                            if (syntaglock.Wait(0))
                                             {
                                                 try
                                                 {
@@ -543,13 +546,16 @@ namespace Ao3TrackReader.Data
                                                 finally
                                                 {
                                                     syntaglock.Release();
-                                                    await taglock.WaitAsync();
-                                                    if (syntaglock.CurrentCount == 1)
-                                                    {
-                                                        DisposeTagLockSem(syntaglock);
-                                                        taglocks.Remove(ssyntag);
-                                                    }
-                                                    taglock.Release();
+                                                }
+                                            }
+
+                                            // Release lock and delete if no thread waiting
+                                            using (taglockslock.Lock())
+                                            {
+                                                if (syntaglock.CurrentCount == 1)
+                                                {
+                                                    DisposeTagLockSem(syntaglock);
+                                                    taglocks.Remove(ssyntag);
                                                 }
                                             }
                                         }
@@ -563,15 +569,17 @@ namespace Ao3TrackReader.Data
             }
             finally
             {
-                // Release lock and delete if no thread waiting
-                thistaglock.Release();
-                await taglock.WaitAsync();
-                if (thistaglock.CurrentCount == 1)
-                {
-                    DisposeTagLockSem(thistaglock);
-                    taglocks.Remove(intag);
-                }
                 taglock.Release();
+
+                // Release lock and delete if no thread waiting
+                using (await taglockslock.LockAsync())
+                {
+                    if (taglock.CurrentCount == 1)
+                    {
+                        DisposeTagLockSem(taglock);
+                        taglocks.Remove(intag);
+                    }
+                }
             }
 
             return tag;
@@ -745,349 +753,337 @@ namespace Ao3TrackReader.Data
 
             foreach (string url in urls)
             {
-                var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) =>
-                {
-                    if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
-                    else return "";
-                }).TrimEnd('?'));
-
-                if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
-                {
-                    uribuilder.Host = "archiveofourown.org";
-                    uribuilder.Scheme = "http";
-                    uribuilder.Port = -1;
-                }
-                else
-                {
-                    dict[url] = null;
-                    continue;
-                }
-
-                uribuilder.Fragment = null;
-
-                Uri uri = uribuilder.Uri;
-
-                Ao3PageModel model = new Ao3PageModel
-                {
-                    Uri = uri
-                };
-
-                Match match = null;
-
-                if (uri.LocalPath == "/works") // Work search and Advanced search
-                {
-                    model.Type = Ao3PageType.Search;
-                    model.Title = "Search";
-
-                    FillModelFromSearchQueryQuick(uri, model);
-                }
-                if (uri.LocalPath == "/works/search") // Work search and Advanced search
-                {
-                    model.Type = Ao3PageType.Search;
-                    model.Title = "Advanced Search";
-
-                    FillModelFromSearchQueryQuick(uri, model);
-
-                }
-                else if ((match = regexTag.Match(uri.LocalPath)).Success)    // View tag
-                {
-                    model.Type = Ao3PageType.Tag;
-
-                    var sTAGNAME = match.Groups["TAGNAME"].Value;
-                    var sTYPE = match.Groups["TYPE"].Value;
-
-                    model.Title = (sTYPE ?? "").Trim();
-                    model.Title = model.Title[0].ToString().ToUpper() + model.Title.Substring(1);
-
-                    if (sTYPE == "works")
-                    {
-                        model.Type = Ao3PageType.Search;
-                        if (uri.Query.Contains("work_search"))
-                            model.Title = "Search";
-                    }
-                    else if (sTYPE == "bookmarks")
-                        model.Type = Ao3PageType.Bookmarks;
-                    else
-                        model.Type = Ao3PageType.Tag;
-
-                    var tagdetails = LookupTagQuick(sTAGNAME);
-                    model.PrimaryTag = tagdetails?.actual ?? UnescapeTag(sTAGNAME);
-                    model.PrimaryTagType = GetTypeForCategory(tagdetails?.category);
-                    if (tagdetails != null)
-                    {
-                        SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
-                        foreach (string ptag in tagdetails.parents)
-                        {
-                            var ptagdetails = LookupTagQuick(ptag);
-
-                            var actual = ptagdetails?.actual ?? ptag;
-                            var tt = GetTypeForCategory(ptagdetails?.category);
-
-                            if (!tags.TryGetValue(tt, out List<string> list))
-                            {
-                                tags[tt] = list = new List<string>();
-                            }
-                            list.Add(actual);
-                        }
-                    }
-
-                    FillModelFromSearchQueryQuick(uri, model);
-                }
-                else if ((match = regexWork.Match(uri.LocalPath)).Success)   // View Work
-                {
-                    model.Type = Ao3PageType.Work;
-                    model.PrimaryTag = "<Work>";
-                    model.PrimaryTagType = Ao3TagType.Other;
-
-                    var sWORKID = match.Groups["WORKID"].Value;
-                    model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
-                    model.Title = "Work " + sWORKID;
-
-                    model.Details = new Ao3WorkDetails();
-
-                    try
-                    {
-                        model.Details.WorkId = long.Parse(sWORKID);
-                    }
-                    catch
-                    {
-
-                    }
-
-                }
-                else if ((match = regexSeries.Match(uri.LocalPath)).Success)
-                {
-                    model.Type = Ao3PageType.Series;
-                    model.PrimaryTag = "<Series>";
-                    model.PrimaryTagType = Ao3TagType.Other;
-
-                }
-                else if ((match = regexCollection.Match(uri.LocalPath)).Success)
-                {
-                    var sCOLID = match.Groups["COLID"].Value;
-                    model.Uri = uri = new Uri(uri, "/collections/" + sCOLID);
-                    model.Type = Ao3PageType.Collection;
-                    model.Title = sCOLID;
-                    model.PrimaryTag = "<Collection>";
-                    model.PrimaryTagType = Ao3TagType.Other;
-                }
-                else
-                {
-                    model.Type = Ao3PageType.Unknown;
-                    if (uri.LocalPath == "/") model.Title = "Archive of Our Own Home Page";
-                    //model.Title = uri.ToString();
-                }
-
-                dict[url] = model;
+                dict[url] = LookupQuick(url);
             }
-
             return dict;
         }
 
-        public static async Task<IDictionary<string, Ao3PageModel>> LookupAsync(ICollection<string> urls)
+        public static Ao3PageModel LookupQuick(string url)
         {
-            var tasks = new List<Task<KeyValuePair<string, Ao3PageModel>>>(urls.Count);
-
-            foreach (string url in urls)
+            var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) =>
             {
-                tasks.Add(Task.Run(async () =>
+                if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
+                else return "";
+            }).TrimEnd('?'));
+
+            if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
+            {
+                uribuilder.Host = "archiveofourown.org";
+                uribuilder.Scheme = "http";
+                uribuilder.Port = -1;
+            }
+            else
+            {
+                return null;
+            }
+
+            uribuilder.Fragment = null;
+
+            Uri uri = uribuilder.Uri;
+
+            Ao3PageModel model = new Ao3PageModel
+            {
+                Uri = uri
+            };
+
+            Match match = null;
+
+            if (uri.LocalPath == "/works") // Work search and Advanced search
+            {
+                model.Type = Ao3PageType.Search;
+                model.Title = "Search";
+
+                FillModelFromSearchQueryQuick(uri, model);
+            }
+            if (uri.LocalPath == "/works/search") // Work search and Advanced search
+            {
+                model.Type = Ao3PageType.Search;
+                model.Title = "Advanced Search";
+
+                FillModelFromSearchQueryQuick(uri, model);
+
+            }
+            else if ((match = regexTag.Match(uri.LocalPath)).Success)    // View tag
+            {
+                model.Type = Ao3PageType.Tag;
+
+                var sTAGNAME = match.Groups["TAGNAME"].Value;
+                var sTYPE = match.Groups["TYPE"].Value;
+
+                model.Title = (sTYPE ?? "").Trim();
+                model.Title = model.Title[0].ToString().ToUpper() + model.Title.Substring(1);
+
+                if (sTYPE == "works")
                 {
-                    var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) =>
-                    {
-                        if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
-                        else return "";
-                    }).TrimEnd('?'));
-
-                    if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
-                    {
-                        uribuilder.Host = "archiveofourown.org";
-                        uribuilder.Scheme = "http";
-                        uribuilder.Port = -1;
-                    }
-                    else
-                    {
-                        return new KeyValuePair<string, Ao3PageModel>(url, null);
-                    }
-
-                    uribuilder.Fragment = null;
-
-                    Uri uri = uribuilder.Uri;
-
-                    Ao3PageModel model = new Ao3PageModel
-                    {
-                        Uri = uri
-                    };
-
-                    Match match = null;
-
-                    if (uri.LocalPath == "/works") // Work search and Advanced search
-                    {
-                        model.Type = Ao3PageType.Search;
+                    model.Type = Ao3PageType.Search;
+                    if (uri.Query.Contains("work_search"))
                         model.Title = "Search";
+                }
+                else if (sTYPE == "bookmarks")
+                    model.Type = Ao3PageType.Bookmarks;
+                else
+                    model.Type = Ao3PageType.Tag;
 
-                        await FillModelFromSearchQueryAsync(uri, model);
-                    }
-                    else if (uri.LocalPath == "/works/search") // Work search and Advanced search
+                var tagdetails = LookupTagQuick(sTAGNAME);
+                model.PrimaryTag = tagdetails?.actual ?? UnescapeTag(sTAGNAME);
+                model.PrimaryTagType = GetTypeForCategory(tagdetails?.category);
+                if (tagdetails != null)
+                {
+                    SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
+                    foreach (string ptag in tagdetails.parents)
                     {
-                        model.Type = Ao3PageType.Search;
-                        model.Title = "Advanced Search";
+                        var ptagdetails = LookupTagQuick(ptag);
 
-                        await FillModelFromSearchQueryAsync(uri, model);
+                        var actual = ptagdetails?.actual ?? ptag;
+                        var tt = GetTypeForCategory(ptagdetails?.category);
 
+                        if (!tags.TryGetValue(tt, out List<string> list))
+                        {
+                            tags[tt] = list = new List<string>();
+                        }
+                        list.Add(actual);
                     }
-                    else if ((match = regexTag.Match(uri.LocalPath)).Success)    // View tag
-                    {
-                        model.Type = Ao3PageType.Tag;
+                }
 
-                        var sTAGNAME = match.Groups["TAGNAME"].Value;
-                        var sTYPE = match.Groups["TYPE"].Value;
-
-                        model.Title = (sTYPE ?? "").Trim();
-                        model.Title = model.Title[0].ToString().ToUpper() + model.Title.Substring(1);
-
-                        if (sTYPE == "works")
-                        {
-                            model.Type = Ao3PageType.Search;
-                            if (uri.Query.Contains("work_search"))
-                                model.Title = "Search";
-                        }
-                        else if (sTYPE == "bookmarks")
-                        {
-                            model.Type = Ao3PageType.Bookmarks;
-                        }
-                        else
-                        {
-                            model.Type = Ao3PageType.Tag;
-                        }
-
-                        var tagdetails = await LookupTagAsync(sTAGNAME);
-                        model.PrimaryTag = tagdetails.actual;
-                        model.PrimaryTagType = GetTypeForCategory(tagdetails.category);
-
-                        var tagtasks = new List<Task<KeyValuePair<Ao3TagType, string>>>(tagdetails.parents.Count);
-                        foreach (string ptag in tagdetails.parents)
-                        {
-                            tagtasks.Add(Task.Run(async () =>
-                            {
-                                var ptagdetails = await LookupTagAsync(ptag);
-                                return new KeyValuePair<Ao3TagType, string>(GetTypeForCategory(ptagdetails.category), ptag);
-                            }));
-                        }
-                        SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
-                        foreach (var t in await Task.WhenAll(tagtasks))
-                        {
-                            if (string.IsNullOrEmpty(t.Value))
-                                continue;
-
-                            if (!tags.TryGetValue(t.Key, out List<string> list))
-                            {
-                                tags[t.Key] = list = new List<string>();
-                            }
-                            list.Add(t.Value);
-                        }
-
-                        await FillModelFromSearchQueryAsync(uri, model);
-
-                    }
-                    else if ((match = regexWork.Match(uri.LocalPath)).Success)   // View Work
-                    {
-                        model.Type = Ao3PageType.Work;
-
-                        var sWORKID = match.Groups["WORKID"].Value;
-                        model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
-
-                        model.Details = new Ao3WorkDetails()
-                        {
-                            WorkId = long.Parse(sWORKID)
-                        };
-                        var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
-
-                        var worknode = await WorkWorker.LookupSummaryAsync(model.Details.WorkId);
-
-                        if (worknode == null)
-                        {
-                            // No worknode, try with cookies
-                            string cookies = App.Database.GetVariable("siteCookies");
-                            if (!string.IsNullOrWhiteSpace(cookies))
-                            {
-                                var response = await HttpRequestAsync(wsuri, cookies: cookies);
-
-                                if (response.IsSuccessStatusCode)
-                                {
-                                    var doc = await response.Content.ReadAsHtmlDocumentAsync();
-                                    worknode = doc.GetElementbyId("work_" + sWORKID);
-                                }
-                            }
-                        }
-
-                        if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
-                    }
-                    else if ((match = regexSeries.Match(uri.LocalPath)).Success)
-                    {
-                        model.Type = Ao3PageType.Series;
-
-                        // Only way to get data is from the page itself
-                        var response = await HttpRequestAsync(uri);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
-
-                            var main = doc.GetElementbyId("main");
-
-                            if (main != null)
-                            {
-                                var title = main.ElementByClass("h2", "heading");
-                                model.Title = title?.InnerText?.HtmlDecode()?.Trim();
-
-                                model.Details = new Ao3WorkDetails();
-                                await FillSeriesAsync(uri, main, model);
-                            }
-                        }
-                    }
-                    else if ((match = regexCollection.Match(uri.LocalPath)).Success)
-                    {
-                        var sCOLID = match.Groups["COLID"].Value;
-                        model.Uri = new Uri(uri, "/collections/" + sCOLID);
-                        uri = new Uri(uri, "/collections/" + sCOLID + "/");
-                        model.Type = Ao3PageType.Collection;
-
-                        // Only way to get data is from the page itself
-                        var response = await HttpRequestAsync(new Uri(uri, "profile"));
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
-
-                            var colnode = doc.GetElementbyId("main")?.ElementByClass("div", "collection");
-
-                            if (colnode != null)
-                            {
-                                var title = colnode.ElementByClass("div", "header")?.ElementByClass("h2", "heading");
-                                model.Title = title?.InnerText?.HtmlDecode()?.Trim();
-
-                                model.Details = new Ao3WorkDetails();
-                                await FillCollectionAsync(uri, colnode, model);
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        model.Type = Ao3PageType.Unknown;
-                        if (uri.LocalPath == "/") model.Title = "Archive of Our Own Home Page";
-                        //model.Title = uri.ToString();
-                    }
-                    return new KeyValuePair<string, Ao3PageModel>(url, model);
-                }));
+                FillModelFromSearchQueryQuick(uri, model);
             }
-
-            var dict = new Dictionary<string, Ao3PageModel>(urls.Count);
-            foreach (var kp in await Task.WhenAll(tasks))
+            else if ((match = regexWork.Match(uri.LocalPath)).Success)   // View Work
             {
-                dict[kp.Key] = kp.Value;
+                model.Type = Ao3PageType.Work;
+                model.PrimaryTag = "<Work>";
+                model.PrimaryTagType = Ao3TagType.Other;
+
+                var sWORKID = match.Groups["WORKID"].Value;
+                model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
+                model.Title = "Work " + sWORKID;
+
+                model.Details = new Ao3WorkDetails();
+
+                try
+                {
+                    model.Details.WorkId = long.Parse(sWORKID);
+                }
+                catch
+                {
+
+                }
+
             }
-            return dict;
+            else if ((match = regexSeries.Match(uri.LocalPath)).Success)
+            {
+                model.Type = Ao3PageType.Series;
+                model.PrimaryTag = "<Series>";
+                model.PrimaryTagType = Ao3TagType.Other;
+
+            }
+            else if ((match = regexCollection.Match(uri.LocalPath)).Success)
+            {
+                var sCOLID = match.Groups["COLID"].Value;
+                model.Uri = uri = new Uri(uri, "/collections/" + sCOLID);
+                model.Type = Ao3PageType.Collection;
+                model.Title = sCOLID;
+                model.PrimaryTag = "<Collection>";
+                model.PrimaryTagType = Ao3TagType.Other;
+            }
+            else
+            {
+                model.Type = Ao3PageType.Unknown;
+                if (uri.LocalPath == "/") model.Title = "Archive of Our Own Home Page";
+                //model.Title = uri.ToString();
+            }
+
+            return model;
+        }
+
+        public static async Task<Ao3PageModel> LookupAsync(string url)
+        {
+            var uribuilder = new UriBuilder(regexPageQuery.Replace(url, (m) =>
+            {
+                if (m.Value.StartsWith("&") && m.Value.EndsWith("&")) return "&";
+                else return "";
+            }).TrimEnd('?'));
+
+            if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
+            {
+                uribuilder.Host = "archiveofourown.org";
+                uribuilder.Scheme = "http";
+                uribuilder.Port = -1;
+            }
+            else
+            {
+                return null;
+            }
+
+            uribuilder.Fragment = null;
+
+            Uri uri = uribuilder.Uri;
+
+            Ao3PageModel model = new Ao3PageModel
+            {
+                Uri = uri
+            };
+
+            Match match = null;
+
+            if (uri.LocalPath == "/works") // Work search and Advanced search
+            {
+                model.Type = Ao3PageType.Search;
+                model.Title = "Search";
+
+                await FillModelFromSearchQueryAsync(uri, model);
+            }
+            else if (uri.LocalPath == "/works/search") // Work search and Advanced search
+            {
+                model.Type = Ao3PageType.Search;
+                model.Title = "Advanced Search";
+
+                await FillModelFromSearchQueryAsync(uri, model);
+
+            }
+            else if ((match = regexTag.Match(uri.LocalPath)).Success)    // View tag
+            {
+                model.Type = Ao3PageType.Tag;
+
+                var sTAGNAME = match.Groups["TAGNAME"].Value;
+                var sTYPE = match.Groups["TYPE"].Value;
+
+                model.Title = (sTYPE ?? "").Trim();
+                model.Title = model.Title[0].ToString().ToUpper() + model.Title.Substring(1);
+
+                if (sTYPE == "works")
+                {
+                    model.Type = Ao3PageType.Search;
+                    if (uri.Query.Contains("work_search"))
+                        model.Title = "Search";
+                }
+                else if (sTYPE == "bookmarks")
+                {
+                    model.Type = Ao3PageType.Bookmarks;
+                }
+                else
+                {
+                    model.Type = Ao3PageType.Tag;
+                }
+
+                var tagdetails = await LookupTagAsync(sTAGNAME);
+                model.PrimaryTag = tagdetails.actual;
+                model.PrimaryTagType = GetTypeForCategory(tagdetails.category);
+
+                var tagtasks = new List<Task<KeyValuePair<Ao3TagType, string>>>(tagdetails.parents.Count);
+                foreach (string ptag in tagdetails.parents)
+                {
+                    tagtasks.Add(Task.Run(async () =>
+                    {
+                        var ptagdetails = await LookupTagAsync(ptag);
+                        return new KeyValuePair<Ao3TagType, string>(GetTypeForCategory(ptagdetails.category), ptag);
+                    }));
+                }
+                SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
+                foreach (var t in await Task.WhenAll(tagtasks))
+                {
+                    if (string.IsNullOrEmpty(t.Value))
+                        continue;
+
+                    if (!tags.TryGetValue(t.Key, out List<string> list))
+                    {
+                        tags[t.Key] = list = new List<string>();
+                    }
+                    list.Add(t.Value);
+                }
+
+                await FillModelFromSearchQueryAsync(uri, model);
+
+            }
+            else if ((match = regexWork.Match(uri.LocalPath)).Success)   // View Work
+            {
+                model.Type = Ao3PageType.Work;
+
+                var sWORKID = match.Groups["WORKID"].Value;
+                model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
+
+                model.Details = new Ao3WorkDetails()
+                {
+                    WorkId = long.Parse(sWORKID)
+                };
+                var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
+
+                var worknode = await WorkWorker.LookupSummaryAsync(model.Details.WorkId);
+
+                if (worknode == null)
+                {
+                    // No worknode, try with cookies
+                    string cookies = App.Database.GetVariable("siteCookies");
+                    if (!string.IsNullOrWhiteSpace(cookies))
+                    {
+                        var response = await HttpRequestAsync(wsuri, cookies: cookies);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var doc = await response.Content.ReadAsHtmlDocumentAsync();
+                            worknode = doc.GetElementbyId("work_" + sWORKID);
+                        }
+                    }
+                }
+
+                if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
+            }
+            else if ((match = regexSeries.Match(uri.LocalPath)).Success)
+            {
+                model.Type = Ao3PageType.Series;
+
+                // Only way to get data is from the page itself
+                var response = await HttpRequestAsync(uri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
+
+                    var main = doc.GetElementbyId("main");
+
+                    if (main != null)
+                    {
+                        var title = main.ElementByClass("h2", "heading");
+                        model.Title = title?.InnerText?.HtmlDecode()?.Trim();
+
+                        model.Details = new Ao3WorkDetails();
+                        await FillSeriesAsync(uri, main, model);
+                    }
+                }
+            }
+            else if ((match = regexCollection.Match(uri.LocalPath)).Success)
+            {
+                var sCOLID = match.Groups["COLID"].Value;
+                model.Uri = new Uri(uri, "/collections/" + sCOLID);
+                uri = new Uri(uri, "/collections/" + sCOLID + "/");
+                model.Type = Ao3PageType.Collection;
+
+                // Only way to get data is from the page itself
+                var response = await HttpRequestAsync(new Uri(uri, "profile"));
+
+                if (response.IsSuccessStatusCode)
+                {
+                    HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
+
+                    var colnode = doc.GetElementbyId("main")?.ElementByClass("div", "collection");
+
+                    if (colnode != null)
+                    {
+                        var title = colnode.ElementByClass("div", "header")?.ElementByClass("h2", "heading");
+                        model.Title = title?.InnerText?.HtmlDecode()?.Trim();
+
+                        model.Details = new Ao3WorkDetails();
+                        await FillCollectionAsync(uri, colnode, model);
+                    }
+                }
+
+            }
+            else
+            {
+                model.Type = Ao3PageType.Unknown;
+                if (uri.LocalPath == "/") model.Title = "Archive of Our Own Home Page";
+                //model.Title = uri.ToString();
+            }
+            return model;
         }
 
         private static async Task FillModelFromWorkSummaryAsync(Uri baseuri, HtmlNode worknode, Ao3PageModel model)
@@ -1698,11 +1694,11 @@ namespace Ao3TrackReader.Data
                 foreach (var tag in query["work_search[other_tag_names]"][0].Split(','))
                 {
                     if (!string.IsNullOrWhiteSpace(tag))
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        var tagdetails = await LookupTagAsync(tag);
-                        return new KeyValuePair<Ao3TagType, Tuple<string, int>>(GetTypeForCategory(tagdetails.category), new Tuple<string, int>(UnescapeTag(tag), 0));
-                    }));
+                        tasks.Add(Task.Run(async () =>
+                        {
+                            var tagdetails = await LookupTagAsync(tag);
+                            return new KeyValuePair<Ao3TagType, Tuple<string, int>>(GetTypeForCategory(tagdetails.category), new Tuple<string, int>(UnescapeTag(tag), 0));
+                        }));
                 }
 
             }

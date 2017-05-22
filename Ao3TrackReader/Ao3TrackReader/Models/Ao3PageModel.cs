@@ -139,5 +139,7 @@ namespace Ao3TrackReader.Models
         public string SortDirection { get; set; }
 
         public IReadOnlyCollection<Ao3PageModel> SeriesWorks { get; set; }
+
+        public bool HasChapters => Type == Ao3PageType.Series || Type == Ao3PageType.Work || Type == Ao3PageType.Collection;
     }
 }

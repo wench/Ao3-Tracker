@@ -41,7 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JavascriptException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ListFilter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyncronizationExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Bold.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Br.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Div.cs" />

@@ -20,12 +20,14 @@ using System.IO;
 using System.Linq;
 using SQLite;
 using Ao3TrackReader.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Ao3TrackReader
 {
 	public class Ao3TrackDatabase
 	{
-		static object locker = new object ();   
+		static object locker = new object();   
 
 		SQLiteConnection database;
 		string DatabasePath {
@@ -57,7 +59,12 @@ namespace Ao3TrackReader
 		/// </param>
 		public Ao3TrackDatabase()
 		{
-			database = new SQLiteConnection (DatabasePath);
+            SQLitePCL.Batteries_V2.Init();
+            SQLitePCL.raw.FreezeProvider();
+            SQLitePCL.raw.sqlite3_shutdown();
+            int result = SQLitePCL.raw.sqlite3_config(SQLitePCL.raw.SQLITE_CONFIG_SERIALIZED);
+            database = new SQLiteConnection(DatabasePath);
+
             // create the tables
             database.CreateTable<Variable>();
 
@@ -90,8 +97,8 @@ namespace Ao3TrackReader
 
 		public Work GetItem(long id)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				return database.Table<Work>().FirstOrDefault(x => x.workid == id);
 			}
 		}
@@ -103,8 +110,8 @@ namespace Ao3TrackReader
 
 		public IReadOnlyCollection<Work> GetItems(IReadOnlyCollection<long> items)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				Dictionary<long, Work> result = new Dictionary<long, Work>();
 
 				foreach (var item in items)
@@ -128,8 +135,8 @@ namespace Ao3TrackReader
 
 		public IReadOnlyCollection<Work> SaveItems(IReadOnlyCollection<Work> items)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				Dictionary<long,Work> newitems = new Dictionary<long, Work>();
 
 				foreach (var item in items) {
@@ -155,7 +162,8 @@ namespace Ao3TrackReader
 
 		public int DeleteItem(int id)
 		{
-			lock (locker) {
+            lock (locker)
+            {
 				return database.Delete<Work>(id);
 			}
 		}
@@ -206,8 +214,8 @@ namespace Ao3TrackReader
 
         public string GetVariable(string name)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
 				if (row != null)
 				{
@@ -304,8 +312,8 @@ namespace Ao3TrackReader
 
         public string GetTag(int id)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				var now = DateTime.UtcNow;
 				var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
 				return row?.name;
@@ -313,9 +321,9 @@ namespace Ao3TrackReader
 		}
 
         public TagCache GetTag(string name, bool ignoreexpires = false)
-		{
-			lock (locker)
-			{
+        {
+            lock (locker)
+            {
                 if (!ignoreexpires)
                 {
                     var now = DateTime.UtcNow;
@@ -327,7 +335,7 @@ namespace Ao3TrackReader
                 }
             }
 
-		}
+        }
 
         Random random = new Random();
 
@@ -338,8 +346,8 @@ namespace Ao3TrackReader
 
         public void SetTagId(string name, int id)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				var now = DateTime.UtcNow;
 				var expires = now + RandomExpires(21,14);
 				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
@@ -360,8 +368,8 @@ namespace Ao3TrackReader
 
 		public void SetTagDetails(TagCache tag)
 		{
-			lock (locker)
-			{
+            lock (locker)
+            {
 				var now = DateTime.UtcNow;
 				tag.expires = now + RandomExpires(21, 14);
 				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
@@ -451,7 +459,6 @@ namespace Ao3TrackReader
         public void SaveReadingListItems(params ReadingList[] items)
         {
             SaveReadingListItems(items as IReadOnlyCollection<ReadingList>);
-
         }
 
         public void SaveReadingListItems(IReadOnlyCollection<ReadingList> items)
@@ -476,8 +483,7 @@ namespace Ao3TrackReader
         }
         public void DeleteReadingListItems(params string[] items)
         {
-            DeleteReadingListItems(items as IReadOnlyCollection<string>);
-
+            DeleteReadingListItems(items as IReadOnlyCollection<string>);        
         }
 
         public void DeleteReadingListItems(IReadOnlyCollection<string> items)
@@ -512,7 +518,6 @@ namespace Ao3TrackReader
         public void SaveListFilters(params ListFilter[] items)
         {
             SaveListFilters(items as IReadOnlyCollection<ListFilter>);
-
         }
 
         public void SaveListFilters(IReadOnlyCollection<ListFilter> items)
@@ -552,6 +557,37 @@ namespace Ao3TrackReader
             }
         }
 
+        #endregion
+
+        #region Transactions
+        public struct AutoCommitTransaction : IDisposable
+        {
+            private Ao3TrackDatabase db;
+
+            public AutoCommitTransaction(Ao3TrackDatabase db)
+            {
+                this.db = db;
+            }
+
+            public void Dispose()
+            {
+                db.Commit();
+            }
+        }
+
+
+        public AutoCommitTransaction BeginTransaction()
+        {
+            Monitor.Enter(locker);
+            database.BeginTransaction();
+            return new AutoCommitTransaction(this);
+        }
+
+        public void Commit()
+        {
+            database.Commit();
+            Monitor.Exit(locker);
+        }
         #endregion
     }
 }

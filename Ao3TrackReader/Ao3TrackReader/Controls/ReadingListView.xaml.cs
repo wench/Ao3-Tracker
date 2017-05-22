@@ -46,101 +46,103 @@ namespace Ao3TrackReader.Controls
         protected override void OnWebViewPageSet()
         {
             base.OnWebViewPageSet();
-            Device.BeginInvokeOnMainThread(async () => await RestoreReadingList().ConfigureAwait(false));
+            Device.BeginInvokeOnMainThread(() => RestoreReadingList());
         }
 
-        async Task RestoreReadingList()
+        void RestoreReadingList()
         {
             SyncIndicator.Content = new ActivityIndicator();
-
-            // Restore the reading list contents!
-            var items = new Dictionary<string, Models.ReadingList>();
-            foreach (var i in App.Database.GetReadingListItems())
-            {
-                items[i.Uri] = i;
-            }
-
-            List<Task> tasks = new List<Task>();
-            var vms = new List<Models.Ao3PageViewModel>();
-
-            if (items.Count == 0)
-            {
-                tasks.Add(AddAsync("http://archiveofourown.org/"));
-            }
-            else
-            {
-                var timestamp = DateTime.UtcNow.ToUnixTime();
-                var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
-                foreach (var model in models)
+            Task.Factory.StartNew(async () =>
+            {              
+                // Restore the reading list contents!
+                var items = new Dictionary<string, Models.ReadingList>();
+                foreach (var i in App.Database.GetReadingListItems())
                 {
-                    if (model.Value != null)
+                    items[i.Uri] = i;
+                }
+
+                List<Task> tasks = new List<Task>();
+                var vms = new List<Models.Ao3PageViewModel>();
+
+                if (items.Count == 0)
+                {
+                    tasks.Add(AddAsync("http://archiveofourown.org/"));
+                }
+                else
+                {
+                    var timestamp = DateTime.UtcNow.ToUnixTime();
+                    var models = Data.Ao3SiteDataLookup.LookupQuick(items.Keys);
+                    foreach (var model in models)
                     {
-                        var item = items[model.Key];
-                        if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
-                            model.Value.Title = item.Title;
-                        if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
+                        if (model.Value != null)
                         {
-                            model.Value.PrimaryTag = item.PrimaryTag;
-                            var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                            if (tagdata != null) model.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
-                            else model.Value.PrimaryTagType = Models.Ao3TagType.Other;
-                        }
-                        if (model.Value.Details != null && model.Value.Details.Summary == null && !string.IsNullOrEmpty(item.Summary))
-                            model.Value.Details.Summary = item.Summary;
-
-                        if (model.Value.Uri.AbsoluteUri != model.Key)
-                        {
-                            App.Database.DeleteReadingListItems(model.Key);
-                            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = item.Unread });
-                        }
-
-                        if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
-                        {
-                            var viewmodel = new Models.Ao3PageViewModel(model.Value, item.Unread)
+                            var item = items[model.Key];
+                            if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
+                                model.Value.Title = item.Title;
+                            if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
                             {
-                                TagsVisible = tags_visible
-                            };
-                            viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                            readingListBacking.Add(viewmodel);
-                            vms.Add(viewmodel);
+                                model.Value.PrimaryTag = item.PrimaryTag;
+                                var tagdata = Data.Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
+                                if (tagdata != null) model.Value.PrimaryTagType = Data.Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                                else model.Value.PrimaryTagType = Models.Ao3TagType.Other;
+                            }
+                            if (model.Value.Details != null && model.Value.Details.Summary == null && !string.IsNullOrEmpty(item.Summary))
+                                model.Value.Details.Summary = item.Summary;
+
+                            if (model.Value.Uri.AbsoluteUri != model.Key)
+                            {
+                                App.Database.DeleteReadingListItems(model.Key);
+                                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = item.Unread });
+                            }
+
+                            if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) == null)
+                            {
+                                var viewmodel = new Models.Ao3PageViewModel(model.Value, model.Value.HasChapters ? item.Unread : (int?)null)
+                                {
+                                    TagsVisible = tags_visible
+                                };
+                                viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                                readingListBacking.Add(viewmodel);
+                                vms.Add(viewmodel);
+                            }
                         }
                     }
                 }
-            }
-            SyncToServerAsync(false);
+                SyncToServerAsync(false);
 
-            wvp.DoOnMainThread(() =>
-            {
-                ListView.ItemsSource = readingListBacking;
-                App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
-            });
-
-            // If we don't have network access, we wait till it's available
-            if (!App.Current.HaveNetwork)
-            {
-                tcsNetworkAvailable = new TaskCompletionSource<bool>();
-                App.Current.HaveNetworkChanged += App_HaveNetworkChanged;
-                await tcsNetworkAvailable.Task;
-            }
-
-            foreach (var viewmodel in vms)
-            {
-                await RefreshSemaphore.WaitAsync();
-
-                tasks.Add(Task.Run(async () =>
+                wvp.DoOnMainThread(() =>
                 {
-                    await RefreshAsync(viewmodel);
-                    RefreshSemaphore.Release();
-                }));
+                    ListView.ItemsSource = readingListBacking;
+                    App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
+                });
 
-            }
-            await Task.WhenAll(tasks);
+                // If we don't have network access, we wait till it's available
+                if (!App.Current.HaveNetwork)
+                {
+                    tcsNetworkAvailable = new TaskCompletionSource<bool>();
+                    App.Current.HaveNetworkChanged += App_HaveNetworkChanged;
+                    await tcsNetworkAvailable.Task;
+                }
 
-            wvp.DoOnMainThread(() =>
-            {
-                RefreshButton.IsEnabled = true;
-                SyncIndicator.Content = null;
-            });
+                foreach (var viewmodel in vms)
+                {
+                    await RefreshSemaphore.WaitAsync();
+
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        await RefreshAsync(viewmodel);
+                        RefreshSemaphore.Release();
+                    }));
+
+                }
+                await Task.WhenAll(tasks);
+
+                wvp.DoOnMainThread(() =>
+                {
+                    RefreshButton.IsEnabled = true;
+                    SyncIndicator.Content = null;
+                });
+            }, TaskCreationOptions.PreferFairness|TaskCreationOptions.LongRunning);
         }
 
         TaskCompletionSource<bool> tcsNetworkAvailable;
@@ -254,12 +256,12 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        private void OnMenuRefresh(object sender, EventArgs e)
+        private async void OnMenuRefresh(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
             if (mi.CommandParameter is Models.Ao3PageViewModel item)
             {
-                RefreshAsync(item);
+                await RefreshAsync(item).ConfigureAwait(false);
             }
 
         }
@@ -279,7 +281,7 @@ namespace Ao3TrackReader.Controls
             ListView.Focus();
             RefreshButton.IsEnabled = false;
             SyncIndicator.Content = new ActivityIndicator();
-            Task.Run(async () =>
+            Task.Factory.StartNew(async () =>
             {
                 List<Task> tasks = new List<Task>();
                 foreach (var viewmodel in readingListBacking.AllSafe)
@@ -302,7 +304,7 @@ namespace Ao3TrackReader.Controls
                     SyncIndicator.Content = null;
                     PageChange(wvp.CurrentUri);
                 });
-            });
+            }, TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning);
         }
 
         private void OnShowHidden(object sender, EventArgs e)
@@ -447,17 +449,16 @@ namespace Ao3TrackReader.Controls
             if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href) != null)
                 return;
 
-            var models = Data.Ao3SiteDataLookup.LookupQuick(new[] { href });
-            var model = models.SingleOrDefault();
-            if (model.Value == null) return;
+            var model = Data.Ao3SiteDataLookup.LookupQuick(href);
+            if (model == null) return;
 
-            if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) != null)
+            if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Uri.AbsoluteUri) != null)
                 return;
 
-            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Timestamp = timestamp, Unread = null });
+            App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Uri.AbsoluteUri, PrimaryTag = model.PrimaryTag, Title = model.Title, Timestamp = timestamp, Unread = null });
             wvp.DoOnMainThread(() =>
             {
-                var viewmodel = new Models.Ao3PageViewModel(model.Value, 0) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
+                var viewmodel = new Models.Ao3PageViewModel(model, model.HasChapters?0:(int?)null) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
                 {
                     TagsVisible = tags_visible
                 };
@@ -582,37 +583,32 @@ namespace Ao3TrackReader.Controls
             });
         }
 
-        public Task RefreshAsync(Models.Ao3PageViewModel viewmodel)
+        public async Task RefreshAsync(Models.Ao3PageViewModel viewmodel)
         {
-            return Task.Run(async () =>
+            var model = await Data.Ao3SiteDataLookup.LookupAsync(viewmodel.Uri.AbsoluteUri);
+            if (model != null)
             {
-                var models = await Data.Ao3SiteDataLookup.LookupAsync(new[] { viewmodel.Uri.AbsoluteUri });
-
-                var model = models.SingleOrDefault();
-                if (model.Value != null)
+                if (viewmodel.Uri.AbsoluteUri != model.Uri.AbsoluteUri)
                 {
-                    if (viewmodel.Uri.AbsoluteUri != model.Value.Uri.AbsoluteUri)
+                    App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
+
+                    var pvm = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Uri.AbsoluteUri);
+                    if (pvm != null)
                     {
-                        App.Database.DeleteReadingListItems(viewmodel.Uri.AbsoluteUri);
-
-                        var pvm = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri);
-                        if (pvm != null)
+                        await wvp.DoOnMainThreadAsync(() =>
                         {
-                            await wvp.DoOnMainThreadAsync(() =>
-                            {
-                                readingListBacking.Remove(pvm);
-                                pvm.Dispose();
-                            });
-                        }
+                            readingListBacking.Remove(pvm);
+                            pvm.Dispose();
+                        });
                     }
-                    App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Value.Uri.AbsoluteUri, PrimaryTag = model.Value.PrimaryTag, Title = model.Value.Title, Unread = viewmodel.Unread });
                 }
-                wvp.DoOnMainThread(() =>
-                {
-                    viewmodel.BaseData = model.Value;
-                    //if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == viewmodel.Uri.AbsoluteUri) == null)
-                    //    readingListBacking.Add(viewmodel);
-                });
+                App.Database.SaveReadingListItems(new Models.ReadingList { Uri = model.Uri.AbsoluteUri, PrimaryTag = model.PrimaryTag, Title = model.Title, Unread = viewmodel.Unread });
+            }
+            wvp.DoOnMainThread(() =>
+            {
+                viewmodel.BaseData = model;
+                //if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == viewmodel.Uri.AbsoluteUri) == null)
+                //    readingListBacking.Add(viewmodel);
             });
         }
     }

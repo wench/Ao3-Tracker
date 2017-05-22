@@ -178,7 +178,7 @@ namespace Ao3TrackReader.Data
 
         public void DoSyncAsync(bool force = false)
         {
-            Task.Run(() =>
+            Task.Factory.StartNew(() =>
             {
                 using (ReadWriteLock.UpgradeableReadLock())
                 {
@@ -406,7 +406,7 @@ namespace Ao3TrackReader.Data
                         }
                     }
                 }
-            });
+            }, TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning);
         }
 
         public Task<IDictionary<long, WorkChapter>> GetWorkChaptersAsync(IEnumerable<long> works)

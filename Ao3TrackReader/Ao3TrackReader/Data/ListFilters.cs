@@ -27,37 +27,38 @@ namespace Ao3TrackReader.Data
 
         private ListFilters()
         {
-            var resetevent = new ManualResetEventSlim(false);
-
-            Task.Run(() =>
+            using (var resetevent = new ManualResetEventSlim(false))
             {
-                using (rwlock.WriteLock())
+                Task.Factory.StartNew(() =>
                 {
-                    resetevent.Set();
-
-                    Parallel.ForEach(App.Database.GetListFilters().ToList(), (filter) =>
+                    using (rwlock.WriteLock())
                     {
-                        var key = AddToLookup(filter.data);
-                        if (key == null || filter.data != key)
+                        resetevent.Set();                       
+
+                        Parallel.ForEach(App.Database.GetListFilters().ToList(), (filter) =>
                         {
-                            App.Database.DeleteListFilters(filter.data);
-                            if (key != null) App.Database.SaveListFilters(new ListFilter { data = key, timestamp = DateTime.UtcNow.ToUnixTime() });
+                            var key = AddToLookup(filter.data);
+                            if (key == null || filter.data != key)
+                            {
+                                App.Database.DeleteListFilters(filter.data);
+                                if (key != null) App.Database.SaveListFilters(new ListFilter { data = key, timestamp = DateTime.UtcNow.ToUnixTime() });
+                            }
+                        });
+
+                        if (App.Current.HaveNetwork)
+                        {
+                            SyncWithServerAsync(false);
                         }
-                    });
+                        else
+                        {
+                            App.Current.HaveNetworkChanged += Current_HaveNetworkChanged;
+                        }
 
-                    if (App.Current.HaveNetwork)
-                    {
-                        SyncWithServerAsync(false);
                     }
-                    else
-                    {
-                        App.Current.HaveNetworkChanged += Current_HaveNetworkChanged;
-                    }
+                }, TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning);
 
-                }
-            });
-
-            resetevent.Wait();
+                resetevent.Wait();
+            }            
         }
 
         private void Current_HaveNetworkChanged(object sender, EventArgs<bool> e)
