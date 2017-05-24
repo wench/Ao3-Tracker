@@ -235,5 +235,12 @@ namespace Ao3TrackReader
             }
             return task.Result;
         }
+
+        public static int GetHashCodeSafe<T>(this T obj)
+            where T : class
+        {
+            if (obj == null) return 0;
+            return obj.GetHashCode();
+        }
     }
 }

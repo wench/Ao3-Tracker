@@ -64,11 +64,11 @@ namespace Ao3TrackReader.Controls
 
         private void LogFontSizeUI_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
         {
-            wvp.DoOnMainThread(() =>
+            wvp.DoOnMainThreadAsync(() =>
             {
                 ListView.ItemsSource = null;
                 ListView.ItemsSource = helpBacking;
-            });
+            }).ConfigureAwait(false);
         }
 
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)

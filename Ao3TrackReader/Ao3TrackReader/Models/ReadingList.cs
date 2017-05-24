@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SQLite;
+using Ao3TrackReader.Data;
 
 namespace Ao3TrackReader.Models
 {
@@ -27,8 +28,18 @@ namespace Ao3TrackReader.Models
         public Dictionary<string, long> paths { get; set; }
     }
 
-    public class ReadingList
+    public class ReadingList : ICachedTimestampedTableRow<string>, IEquatable<ReadingList>
     {
+        public ReadingList() { }
+        public ReadingList(Ao3PageModel model, long timestamp, int? unread)
+        {
+            Uri = model.Uri.AbsoluteUri;
+            PrimaryTag = model.PrimaryTag;
+            Title = model.Title;
+            Timestamp = timestamp;
+            Unread = unread;
+        }
+
         [PrimaryKey]
         public string Uri { get; set; }
         public string PrimaryTag { get; set; }
@@ -36,5 +47,51 @@ namespace Ao3TrackReader.Models
         public long Timestamp { get; set; }
         public int? Unread { get; set; }
         public string Summary { get; set; }
+
+        string ICachedTableRow<string>.Primarykey => Uri; 
+
+        #region Equality checks and Hashing
+        public bool Equals(ReadingList other)
+        {
+            if (ReferenceEquals(this, other)) return true;
+            return !(other is null) && Uri == other.Uri &&
+                PrimaryTag == other.PrimaryTag &&
+                Title == other.Title &&
+                Timestamp == other.Timestamp &&
+                Unread == other.Unread &&
+                Summary == other.Summary;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is ReadingList other) && Equals(other);
+        }            
+
+        public static bool operator ==(ReadingList left, ReadingList right)
+        {
+            if (left is null && right is null) return true;
+            else if (left is null) return false;
+            else if (right is null) return false;
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ReadingList left, ReadingList right)
+        {
+            if (left is null && right is null) return false;
+            else if (left is null) return true;
+            else if (right is null) return true;
+            return !left.Equals(right);
+        }
+
+        public override int GetHashCode()
+        {
+            return Uri.GetHashCodeSafe() ^
+                PrimaryTag.GetHashCodeSafe() ^
+                Title.GetHashCodeSafe() ^
+                Timestamp.GetHashCode() ^
+                Unread.GetHashCode() ^
+                Summary.GetHashCodeSafe();
+        }
+        #endregion
     }
 }

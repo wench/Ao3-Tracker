@@ -37,7 +37,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TextView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3SiteDataLookup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Data\ListFilters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\CachedTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\ListFiltering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JavascriptException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ListFilter.cs" />

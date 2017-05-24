@@ -22,43 +22,61 @@ using SQLite;
 using Ao3TrackReader.Models;
 using System.Threading;
 using System.Threading.Tasks;
+using Ao3TrackReader.Data;
 
 namespace Ao3TrackReader
 {
-	public class Ao3TrackDatabase
-	{
-		static object locker = new object();   
+    public struct AutoCommitTransaction : IDisposable
+    {
+        private Ao3TrackDatabase db;
 
-		SQLiteConnection database;
-		string DatabasePath {
-			get { 
-				var sqliteFilename = "Ao3TrackSQLite.db3";
-				#if __IOS__
+        public AutoCommitTransaction(Ao3TrackDatabase db)
+        {
+            this.db = db;
+        }
+
+        public void Dispose()
+        {
+            db.Commit();
+        }
+    }
+
+    public class Ao3TrackDatabase : ICachedTableProvider<ReadingList, string>, ICachedTableProvider<ListFilter, string>
+    {
+        static object locker = new object();
+
+        SQLiteConnection database;
+        string DatabasePath
+        {
+            get
+            {
+                var sqliteFilename = "Ao3TrackSQLite.db3";
+#if __IOS__
 				string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
 				string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder
 				var path = Path.Combine(libraryPath, sqliteFilename);
-				#else
-				#if __ANDROID__
-				string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
-				var path = Path.Combine(documentsPath, sqliteFilename);
-				#else
+#else
+#if __ANDROID__
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
+                var path = Path.Combine(documentsPath, sqliteFilename);
+#else
 				// WinPhone
 				var path = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, sqliteFilename);;
-				#endif
-				#endif
-				return path;
-			}
-		}
+#endif
+#endif
+                return path;
+            }
+        }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Tasky.DL.TaskDatabase"/> TaskDatabase. 
-		/// if the database doesn't exist, it will create the database and all the tables.
-		/// </summary>
-		/// <param name='path'>
-		/// Path.
-		/// </param>
-		public Ao3TrackDatabase()
-		{
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tasky.DL.TaskDatabase"/> TaskDatabase. 
+        /// if the database doesn't exist, it will create the database and all the tables.
+        /// </summary>
+        /// <param name='path'>
+        /// Path.
+        /// </param>
+        public Ao3TrackDatabase()
+        {
             SQLitePCL.Batteries_V2.Init();
             SQLitePCL.raw.FreezeProvider();
             SQLitePCL.raw.sqlite3_shutdown();
@@ -84,95 +102,101 @@ namespace Ao3TrackReader
                 database.Query<TagCache>("UPDATE TagCache SET expires=0"); // Invalidate the entire cache
             }
 
-            SaveVariable("DatabaseVersion", Version.Version.Integer);
+            if (DatabaseVersion != Version.Version.Integer)
+                SaveVariable("DatabaseVersion", Version.Version.Integer);
+
+            ReadingListCached = new CachedTimestampedTable<ReadingList, string, Ao3TrackDatabase>(this);
+            ListFiltersCached = new CachedTimestampedTable<ListFilter, string, Ao3TrackDatabase>(this);
+        }
+
+        public IEnumerable<Work> GetItems()
+        {
+            lock (locker)
+            {
+                return (from i in database.Table<Work>() select i);
+            }
+        }
+
+        public Work GetItem(long id)
+        {
+            lock (locker)
+            {
+                return database.Table<Work>().FirstOrDefault(x => x.workid == id);
+            }
+        }
+
+        public IReadOnlyCollection<Work> GetItems(params long[] items)
+        {
+            return GetItems(items as IReadOnlyCollection<long>);
+        }
+
+        public IReadOnlyCollection<Work> GetItems(IReadOnlyCollection<long> items)
+        {
+            lock (locker)
+            {
+                Dictionary<long, Work> result = new Dictionary<long, Work>();
+
+                foreach (var item in items)
+                {
+                    var row = database.Table<Work>().FirstOrDefault(x => x.workid == item);
+                    if (!(row is null))
+                    {
+                        result[item] = row;
+                    }
+                }
+
+                return result.Values.ToReadOnly();
+            }
+        }
+
+        public IReadOnlyCollection<Work> SaveItems(params Work[] items)
+        {
+            return SaveItems(items as IReadOnlyCollection<Work>);
 
         }
 
-		public IEnumerable<Work> GetItems ()
-		{
-			lock (locker) {
-				return (from i in database.Table<Work>() select i);
-			}
-		}
-
-		public Work GetItem(long id)
-		{
+        public IReadOnlyCollection<Work> SaveItems(IReadOnlyCollection<Work> items)
+        {
             lock (locker)
             {
-				return database.Table<Work>().FirstOrDefault(x => x.workid == id);
-			}
-		}
+                Dictionary<long, Work> newitems = new Dictionary<long, Work>();
 
-		public IReadOnlyCollection<Work> GetItems(params long[] items)
-		{
-			return GetItems(items as IReadOnlyCollection<long>);
-		}
+                foreach (var item in items)
+                {
 
-		public IReadOnlyCollection<Work> GetItems(IReadOnlyCollection<long> items)
-		{
+                    var row = database.Table<Work>().FirstOrDefault(x => x.workid == item.workid);
+                    if (!(row is null))
+                    {
+                        if (row.LessThan(item))
+                        {
+                            database.Update(item);
+                            newitems[item.workid] = item;
+                        }
+                    }
+                    else
+                    {
+                        database.Insert(item);
+                        newitems[item.workid] = item;
+                    }
+                }
+
+                return newitems.Values.ToReadOnly();
+            }
+        }
+
+        public int DeleteItem(int id)
+        {
             lock (locker)
             {
-				Dictionary<long, Work> result = new Dictionary<long, Work>();
-
-				foreach (var item in items)
-				{
-					var row = database.Table<Work>().FirstOrDefault(x => x.workid == item);
-					if (row != null)
-					{
-						result[item] = row;
-					}
-				}
-
-				return result.Values.ToReadOnly();
-			}
-		}
-
-		public IReadOnlyCollection<Work> SaveItems (params Work[] items) 
-		{
-			return SaveItems(items as IReadOnlyCollection<Work>);
-
-		}
-
-		public IReadOnlyCollection<Work> SaveItems(IReadOnlyCollection<Work> items)
-		{
-            lock (locker)
-            {
-				Dictionary<long,Work> newitems = new Dictionary<long, Work>();
-
-				foreach (var item in items) {
-
-					var row = database.Table<Work>().FirstOrDefault(x => x.workid == item.workid);
-					if (row != null)
-					{
-						if (row.LessThan(item)) { 
-							database.Update(item);
-							newitems[item.workid] = item;
-						}
-					}
-					else
-					{
-						database.Insert(item);
-						newitems[item.workid] = item;
-					}
-				}
-
-				return newitems.Values.ToReadOnly();
-			}
-		}
-
-		public int DeleteItem(int id)
-		{
-            lock (locker)
-            {
-				return database.Delete<Work>(id);
-			}
-		}
+                return database.Delete<Work>(id);
+            }
+        }
 
         public class VariableEventArgs : EventArgs
         {
             public string VarName { get; set; }
         };
-        
+
         public class VariableUpdatedEventArgs : VariableEventArgs
         {
             public string NewValue { get; set; }
@@ -213,20 +237,20 @@ namespace Ao3TrackReader
         }
 
         public string GetVariable(string name)
-		{
+        {
             lock (locker)
             {
-				var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-				if (row != null)
-				{
-					return row.value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-		}
+                var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
+                if (!(row is null))
+                {
+                    return row.value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         public delegate bool TryParseDelegate<T>(string s, out T result);
 
@@ -235,9 +259,9 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (row != null)
+                if (!(row is null))
                 {
-                    if (row.value != null && tryparse(row.value, out result))
+                    if (!(row.value is null) && tryparse(row.value, out result))
                         return true;
 
                 }
@@ -252,9 +276,9 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (row != null)
+                if (!(row is null))
                 {
-                    if (row.value != null) 
+                    if (!(row.value is null))
                     {
                         if (tryparse(row.value, out T res))
                         {
@@ -278,7 +302,7 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (row != null)
+                if (!(row is null))
                 {
                     database.Update(new Variable { name = name, value = value });
                 }
@@ -311,14 +335,14 @@ namespace Ao3TrackReader
         }
 
         public string GetTag(int id)
-		{
+        {
             lock (locker)
             {
-				var now = DateTime.UtcNow;
-				var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
-				return row?.name;
-			}
-		}
+                var now = DateTime.UtcNow;
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.id == id && x.expires > now);
+                return row?.name;
+            }
+        }
 
         public TagCache GetTag(string name, bool ignoreexpires = false)
         {
@@ -341,50 +365,50 @@ namespace Ao3TrackReader
 
         TimeSpan RandomExpires(int days, int variation)
         {
-            return TimeSpan.FromDays(days + random.NextDouble()*variation);
+            return TimeSpan.FromDays(days + random.NextDouble() * variation);
         }
 
         public void SetTagId(string name, int id)
-		{
+        {
             lock (locker)
             {
-				var now = DateTime.UtcNow;
-				var expires = now + RandomExpires(21,14);
-				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
-				if (row != null)
-				{
-					if (row.expires <= now) row = new TagCache { name = name };
-					row.id = id;
-					row.expires = expires;
-					database.Update(row);
-				}
-				else
-				{
-					database.Insert(new TagCache { name = name, id = id, expires = expires });
-				}
-			}
+                var now = DateTime.UtcNow;
+                var expires = now + RandomExpires(21, 14);
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                if (!(row is null))
+                {
+                    if (row.expires <= now) row = new TagCache { name = name };
+                    row.id = id;
+                    row.expires = expires;
+                    database.Update(row);
+                }
+                else
+                {
+                    database.Insert(new TagCache { name = name, id = id, expires = expires });
+                }
+            }
 
-		}
+        }
 
-		public void SetTagDetails(TagCache tag)
-		{
+        public void SetTagDetails(TagCache tag)
+        {
             lock (locker)
             {
-				var now = DateTime.UtcNow;
-				tag.expires = now + RandomExpires(21, 14);
-				var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
-				if (row != null)
-				{
-					if (row.expires <= now) tag.id = 0;
-					database.Update(tag);
-				}
-				else
-				{
-					tag.id = 0;
-					database.Insert(tag);
-				}
-			}
-		}
+                var now = DateTime.UtcNow;
+                tag.expires = now + RandomExpires(21, 14);
+                var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
+                if (!(row is null))
+                {
+                    if (row.expires <= now) tag.id = 0;
+                    database.Update(tag);
+                }
+                else
+                {
+                    tag.id = 0;
+                    database.Insert(tag);
+                }
+            }
+        }
 
         public string GetLanguage(int id)
         {
@@ -400,7 +424,7 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
-                if (row != null)
+                if (!(row is null))
                 {
                     row.id = id;
                     database.Update(row);
@@ -427,7 +451,7 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var row = database.Table<SortColumn>().FirstOrDefault(x => x.name == name);
-                if (row != null)
+                if (!(row is null))
                 {
                     row.id = id;
                     database.Update(row);
@@ -439,8 +463,11 @@ namespace Ao3TrackReader
             }
 
         }
+
         #region ReadingList
-        public IEnumerable<ReadingList> GetReadingListItems()
+        public CachedTimestampedTable<ReadingList, string, Ao3TrackDatabase> ReadingListCached { get; }
+
+        IEnumerable<ReadingList> ICachedTableProvider<ReadingList, string>.Select()
         {
             lock (locker)
             {
@@ -448,7 +475,7 @@ namespace Ao3TrackReader
             }
         }
 
-        public ReadingList GetReadingListItem(string uri)
+        ReadingList ICachedTableProvider<ReadingList, string>.Select(string uri)
         {
             lock (locker)
             {
@@ -456,50 +483,27 @@ namespace Ao3TrackReader
             }
         }
 
-        public void SaveReadingListItems(params ReadingList[] items)
-        {
-            SaveReadingListItems(items as IReadOnlyCollection<ReadingList>);
-        }
-
-        public void SaveReadingListItems(IReadOnlyCollection<ReadingList> items)
+        void ICachedTableProvider<ReadingList, string>.InsertOrUpdate(ReadingList item)
         {
             lock (locker)
             {
-                foreach (var item in items)
-                {
-
-                    var row = database.Table<ReadingList>().FirstOrDefault(x => x.Uri == item.Uri);
-                    if (row != null)
-                    {
-                        if (item.Timestamp == 0) item.Timestamp = row.Timestamp;
-                        database.Update(item);
-                    }
-                    else
-                    {
-                        database.Insert(item);
-                    }
-                }
+                database.InsertOrReplace(item);
             }
         }
-        public void DeleteReadingListItems(params string[] items)
-        {
-            DeleteReadingListItems(items as IReadOnlyCollection<string>);        
-        }
 
-        public void DeleteReadingListItems(IReadOnlyCollection<string> items)
+        void ICachedTableProvider<ReadingList, string>.Delete(string item)
         {
             lock (locker)
             {
-                foreach (var item in items)
-                {
-                    database.Delete<ReadingList>(item);
-                }
+                database.Delete<ReadingList>(item);
             }
         }
         #endregion
 
         #region ListFilters
-        public IEnumerable<ListFilter> GetListFilters()
+        public CachedTimestampedTable<ListFilter, string, Ao3TrackDatabase> ListFiltersCached { get; }
+
+        IEnumerable<ListFilter> ICachedTableProvider<ListFilter, string>.Select()
         {
             lock (locker)
             {
@@ -507,83 +511,40 @@ namespace Ao3TrackReader
             }
         }
 
-        public ListFilter GetListFilter(string data)
+        ListFilter ICachedTableProvider<ListFilter, string>.Select(string data)
         {
             lock (locker)
             {
-                return database.Table<ListFilter>().FirstOrDefault(x => x.data== data);
+                return database.Table<ListFilter>().FirstOrDefault(x => x.data == data);
             }
         }
 
-        public void SaveListFilters(params ListFilter[] items)
-        {
-            SaveListFilters(items as IReadOnlyCollection<ListFilter>);
-        }
-
-        public void SaveListFilters(IReadOnlyCollection<ListFilter> items)
+        void ICachedTableProvider<ListFilter, string>.InsertOrUpdate(ListFilter item)
         {
             lock (locker)
             {
-                foreach (var item in items)
-                {
-
-                    var row = database.Table<ListFilter>().FirstOrDefault(x => x.data == item.data);
-                    if (row != null)
-                    {
-                        if (item.timestamp == 0) item.timestamp = row.timestamp;
-                        database.Update(item);
-                    }
-                    else
-                    {
-                        database.Insert(item);
-                    }
-                }
+                database.InsertOrReplace(item);
             }
         }
 
-        public void DeleteListFilters(params string[] items)
-        {
-            DeleteListFilters(items as IReadOnlyCollection<string>);
-        }
-
-        public void DeleteListFilters(IReadOnlyCollection<string> items)
+        void ICachedTableProvider<ListFilter, string>.Delete(string item)
         {
             lock (locker)
             {
-                foreach (var item in items)
-                {
-                    database.Delete<ListFilter>(item);
-                }
+                database.Delete<ListFilter>(item);
             }
         }
-
         #endregion
 
-        #region Transactions
-        public struct AutoCommitTransaction : IDisposable
-        {
-            private Ao3TrackDatabase db;
-
-            public AutoCommitTransaction(Ao3TrackDatabase db)
-            {
-                this.db = db;
-            }
-
-            public void Dispose()
-            {
-                db.Commit();
-            }
-        }
-
-
-        public AutoCommitTransaction BeginTransaction()
+        #region Transactions    
+        public AutoCommitTransaction DoTransaction()
         {
             Monitor.Enter(locker);
             database.BeginTransaction();
             return new AutoCommitTransaction(this);
         }
 
-        public void Commit()
+        internal void Commit()
         {
             database.Commit();
             Monitor.Exit(locker);

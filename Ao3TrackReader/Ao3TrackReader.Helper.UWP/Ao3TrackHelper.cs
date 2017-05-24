@@ -38,14 +38,36 @@ namespace Ao3TrackReader.Helper
             this.wvp = wvp;
         }
 
-        private T DoOnMainThread<T>(Func<T> func)
+        private async Task<T> DoOnMainThreadAsync<T>(Func<T> func)
         {
-            return (T)wvp.DoOnMainThread(() => func());
+            return (T)await wvp.DoOnMainThreadAsync(() => 
+                func()
+            );
         }
 
-        private void DoOnMainThread(Action func)
+        private async Task<T> DoOnMainThreadAsync<T>(Func<Task<T>> func)
         {
-            wvp.DoOnMainThread(() => func());
+            return (T)await wvp.DoOnMainThreadAsync(() => 
+                Task.Run(async () => 
+                    (object) await func()
+                ).AsAsyncOperation()
+            );
+        }
+
+        private async Task DoOnMainThreadAsync(Action func)
+        {
+            await wvp.DoOnMainThreadAsync(() => 
+                func()
+            );
+        }
+
+        private async Task DoOnMainThreadAsync(Func<Task> func)
+        {
+            await wvp.DoOnMainThreadAsync(() =>
+                Task.Run(async () => 
+                    await func()
+                ).AsAsyncAction()
+            );
         }
 
         static HelperDef s_def;
@@ -86,7 +108,7 @@ namespace Ao3TrackReader.Helper
         {
             add
             {
-                DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = true; });
+                DoOnMainThreadAsync(() => { wvp.JumpToLastLocationEnabled = true; }).Wait();
 
                 return EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
@@ -95,7 +117,7 @@ namespace Ao3TrackReader.Helper
 
             remove
             {
-                DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = false; });
+                DoOnMainThreadAsync(() => { wvp.JumpToLastLocationEnabled = false; }).Wait();
 
                 EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
@@ -109,9 +131,7 @@ namespace Ao3TrackReader.Helper
                 .GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent)
                 .InvocationList;
 
-            //DoOnMainThread(() => {
-                handlers?.Invoke(this, pagejump);
-            //});
+            handlers?.Invoke(this, pagejump);
         }
 
         private EventRegistrationTokenTable<EventHandler<object>> _AlterFontSizeEvent;
@@ -141,9 +161,7 @@ namespace Ao3TrackReader.Helper
                 .GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent)
                 .InvocationList;
 
-            //DoOnMainThread(() => {
-                handlers?.Invoke(this, fontSize);
-            //});
+            handlers?.Invoke(this, fontSize);
         }
 
         public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
@@ -198,7 +216,7 @@ namespace Ao3TrackReader.Helper
 
         public void ShowContextMenu(double x, double y, string url, string innerText)
         {
-            wvp.DoOnMainThread(() => wvp.ShowContextMenu(x, y, url, innerText));
+            DoOnMainThreadAsync(() => wvp.ShowContextMenu(x, y, url, innerText)).ConfigureAwait(false);
         }
 
         public void AddToReadingList(string href)
@@ -215,58 +233,58 @@ namespace Ao3TrackReader.Helper
         public string NextPage
         {
             get { throw new NotSupportedException(); }
-            set { DoOnMainThread(() => { wvp.NextPage = value; }); }
+            set { DoOnMainThreadAsync(() => { wvp.NextPage = value; }).ConfigureAwait(false); }
         }
 
         internal static MemberDef md_PrevPage = new MemberDef { getter = "false" };
         public string PrevPage
         {
             get { throw new NotSupportedException(); }
-            set { DoOnMainThread(() => { wvp.PrevPage = value; }); }
+            set { DoOnMainThreadAsync(() => { wvp.PrevPage = value; }).ConfigureAwait(false); }
         }
 
         public bool SwipeCanGoBack
         {
-            get { return DoOnMainThread(() => wvp.SwipeCanGoBack); }
+            get { return DoOnMainThreadAsync(() => wvp.SwipeCanGoBack).Result; }
         }
 
         public bool SwipeCanGoForward
         {
-            get { return DoOnMainThread(() => wvp.SwipeCanGoForward); }
+            get { return DoOnMainThreadAsync(() => wvp.SwipeCanGoForward).Result; }
         }
 
         public double LeftOffset
         {
-            get { return DoOnMainThread(() => wvp.LeftOffset); }
-            set { DoOnMainThread(() => { wvp.LeftOffset = value; }); }
+            get { return DoOnMainThreadAsync(() => wvp.LeftOffset).Result; }
+            set { DoOnMainThreadAsync(() => { wvp.LeftOffset = value; }).ConfigureAwait(false); }
         }
 
         internal static MemberDef md_ShowPrevPageIndicator = new MemberDef { getter = "false" };
         public int ShowPrevPageIndicator
         {
             get { throw new NotSupportedException(); }
-            set { DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
+            set { DoOnMainThreadAsync(() => { wvp.ShowPrevPageIndicator = value; }).ConfigureAwait(false); }
         }
 
         internal static MemberDef md_ShowNextPageIndicator = new MemberDef { getter = "false" };
         public int ShowNextPageIndicator
         {
             get { throw new NotSupportedException(); }
-            set { DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
+            set { DoOnMainThreadAsync(() => { wvp.ShowNextPageIndicator = value; }).ConfigureAwait(false); }
         }
 
         internal static MemberDef md_CurrentLocation = new MemberDef { getter = "false", setter = "ToWorkChapterExNative" };
         public IWorkChapterEx CurrentLocation
         {
             get { throw new NotSupportedException(); }
-            set { DoOnMainThread(() => { wvp.CurrentLocation = value; }); }
+            set { DoOnMainThreadAsync(() => { wvp.CurrentLocation = value; }).ConfigureAwait(false); }
         }
 
         internal static MemberDef md_PageTitle = new MemberDef { getter = "false", setter = "ToPageTitleNative" };
         public PageTitle PageTitle
         {
             get { throw new NotSupportedException(); }
-            set { DoOnMainThread(() => { wvp.PageTitle = value; }); }
+            set { DoOnMainThreadAsync(() => { wvp.PageTitle = value; }).ConfigureAwait(false); }
         }
 
         internal static MemberDef md_AreUrlsInReadingListAsync = new MemberDef { @return = "FromJSON" };
@@ -281,7 +299,7 @@ namespace Ao3TrackReader.Helper
 
         public void StartWebViewDragAccelerate(double velocity)
         {
-            DoOnMainThread(() => wvp.StartWebViewDragAccelerate(velocity));
+            DoOnMainThreadAsync(() => wvp.StartWebViewDragAccelerate(velocity)).ConfigureAwait(false);
         }
 
         public void StopWebViewDragAccelerate()
@@ -293,7 +311,7 @@ namespace Ao3TrackReader.Helper
         {
             get
             {
-                return DoOnMainThread(() => wvp.DeviceWidth);
+                return DoOnMainThreadAsync(() => wvp.DeviceWidth).Result;
             }
         }
 
@@ -304,6 +322,5 @@ namespace Ao3TrackReader.Helper
                 return (object) wvp.UnitConvOptions;
             }).AsAsyncOperation();
         }
-
     }
 }

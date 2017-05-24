@@ -74,7 +74,7 @@ namespace Ao3TrackReader
 
             WebViewHolder.Content = CreateWebView();
 
-            ListFilters.Create();
+            ListFiltering.Create();
 
             string url = App.Database.GetVariable("Sleep:URI");
             App.Database.DeleteVariable("Sleep:URI");
@@ -169,8 +169,8 @@ namespace Ao3TrackReader
             ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
 
             SyncCommand = new DisableableCommand(() => App.Storage.DoSyncAsync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
-            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThread(() => { SyncCommand.IsEnabled = false; });
-            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThread(() => { SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync; });
+            App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThreadAsync(() => { SyncCommand.IsEnabled = false; }).ConfigureAwait(false);
+            App.Storage.EndSyncEvent += (sender, e) => DoOnMainThreadAsync(() => { SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync; }).ConfigureAwait(false);
             SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
 
             RefreshCommand = new DisableableCommand(Refresh);
@@ -279,12 +279,12 @@ namespace Ao3TrackReader
 
                 new KeyValuePair<string, DisableableCommand<string>>("Add as Listing Filter", ContextMenuAddFilter = new DisableableCommand<string>((url) =>
                 {
-                    Data.ListFilters.Instance.AddFilterAsync(ContextMenuFilterDetails);
+                    Data.ListFiltering.Instance.AddFilterAsync(ContextMenuFilterDetails);
                 })),
 
                 new KeyValuePair<string, DisableableCommand<string>>("Remove as Listing Filter", ContextMenuRemoveFilter = new DisableableCommand<string>((url) =>
                 {
-                    Data.ListFilters.Instance.RemoveFilterAsync(ContextMenuFilterDetails);
+                    Data.ListFiltering.Instance.RemoveFilterAsync(ContextMenuFilterDetails);
                 })),
 
                 new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) =>
@@ -320,7 +320,7 @@ namespace Ao3TrackReader
         {
             var workchaps = await App.Storage.GetWorkChaptersAsync(new[] { workid }).ConfigureAwait(false);
 
-            DoOnMainThread(() =>
+            await DoOnMainThreadAsync(() =>
             {
                 UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
                 if (!fullwork && workchaps.TryGetValue(workid, out var wc) && wc.chapterid != 0)
@@ -335,13 +335,13 @@ namespace Ao3TrackReader
 
         public void Navigate(long workid, bool fullwork)
         {
-            DoOnMainThread(() =>
+            DoOnMainThreadAsync(() =>
             {
                 UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
                 if (fullwork) uri.Query = "view_full_work=true";
                 uri.Fragment = "ao3tjump";
                 Navigate(uri.Uri);
-            });
+            }).ConfigureAwait(false);
         }
 
         private void UpdateUrlBar(Uri uri)
@@ -498,13 +498,13 @@ namespace Ao3TrackReader
                 if (log_font_size < LogFontSizeMin) log_font_size = LogFontSizeMin;
                 if (log_font_size > LogFontSizeMax) log_font_size = LogFontSizeMax;
 
-                DoOnMainThread(() =>
+                DoOnMainThreadAsync(() =>
                 {
                     ResetFontSizeCommand.IsEnabled = log_font_size != 0;
                     FontDecreaseCommand.IsEnabled = log_font_size > LogFontSizeMin;
                     FontIncreaseCommand.IsEnabled = log_font_size < LogFontSizeMax;
                     helper?.OnAlterFontSize(FontSize);
-                });
+                }).ConfigureAwait(false);
             }
         }
         public int FontSize
@@ -563,18 +563,12 @@ namespace Ao3TrackReader
         {
             return ReadingList.AreUrlsInListAsync(urls);
         }
-
-        public T DoOnMainThread<T>(Func<T> function)
-        {
-            var task = DoOnMainThreadAsync(function);
-            task.Wait();
-            return task.Result;
-        }
-        public async Task<T> DoOnMainThreadAsync<T>(Func<T> function)
+        
+        public Task<T> DoOnMainThreadAsync<T>(Func<T> function)
         {
             if (IsMainThread)
             {
-                return function();
+                return Task.FromResult(function());
             }
             else
             {
@@ -584,20 +578,16 @@ namespace Ao3TrackReader
                 {
                     cs.SetResult(function());
                 });
-                return await cs.Task;
+                return cs.Task;
             }
         }
 
-        public async void DoOnMainThread(MainThreadAction function)
-        {
-            await DoOnMainThreadAsync(() => function()).ConfigureAwait(false);
-        }
-
-        public async Task DoOnMainThreadAsync(MainThreadAction function)
+        public Task DoOnMainThreadAsync(MainThreadAction function)
         {
             if (IsMainThread)
             {
                 function();
+                return Task.CompletedTask;
             }
             else
             {
@@ -607,10 +597,44 @@ namespace Ao3TrackReader
                     function();
                     complete.SetResult(null);
                 });
-                await complete.Task;
+                return complete.Task;
             }
         }
 
+        public Task DoOnMainThreadAsync(Func<Task> function)
+        {
+            if (IsMainThread)
+            {
+                return function();
+            }
+            else
+            {
+                var complete = new TaskCompletionSource<object>();
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                {
+                    await function();
+                    complete.SetResult(null);
+                });
+                return complete.Task;
+            }
+        }
+
+        public Task<T> DoOnMainThreadAsync<T>(Func<Task<T>> function)
+        {
+            if (IsMainThread)
+            {
+                return function();
+            }
+            else
+            {
+                var complete = new TaskCompletionSource<T>();
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                {
+                    complete.SetResult(await function());
+                });
+                return complete.Task;
+            }
+        }
 
         public async void SetWorkChaptersAsync(IDictionary<long, WorkChapter> works)
         {
@@ -1241,7 +1265,7 @@ namespace Ao3TrackReader
         CancellationTokenSource _cancelShowErrorHide;
         public void ShowError(string message)
         {
-            DoOnMainThread(async () =>
+            DoOnMainThreadAsync(async () =>
             {
                 if (_cancelShowErrorHide != null) _cancelShowErrorHide.Cancel();
                 var cancel = _cancelShowErrorHide = new CancellationTokenSource();
@@ -1296,7 +1320,7 @@ namespace Ao3TrackReader
                     cancel.Dispose();
                     if (cancel == _cancelShowErrorHide) _cancelShowErrorHide = null;
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
         string GetErrorPageHtml(string message, Uri uri)
@@ -1368,9 +1392,9 @@ namespace Ao3TrackReader
             return "<!DOCTYPE html>\n" + writer.ToString();
         }
 
-        Task<string> ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses)
+        public Task<string> ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses)
         {
-            return Task.Run(() => Data.ListFilters.Instance.ShouldFilterWork(workId, workauthors, worktags, workserieses));
+            return Task.Run(() => Data.ListFiltering.Instance.ShouldFilterWork(workId, workauthors, worktags, workserieses));
         }
     }
 }

@@ -215,7 +215,7 @@ namespace Ao3TrackReader.Data
                             {
                             }
 
-                            await start.WaitAsync(5000);
+                            await start.WaitAsync(1000);
 
                             lock (workSummaryLock)
                             {
@@ -254,7 +254,7 @@ namespace Ao3TrackReader.Data
                         }
                     }
 
-                    if (worker == null) workLookupWorkers.Add(worker = new WorkWorker());
+                    if (worker is null) workLookupWorkers.Add(worker = new WorkWorker());
 
                     worker.works.Add(workid);
                 }
@@ -301,7 +301,7 @@ namespace Ao3TrackReader.Data
 
         static string EscapeTag(string tag)
         {
-            if (tag == null) return null;
+            if (tag is null) return null;
             return regexEscTag.Replace(tag, (match) =>
             {
                 int i = Array.IndexOf(usescTagStrings, match.Value);
@@ -312,7 +312,7 @@ namespace Ao3TrackReader.Data
 
         static public string UnescapeTag(string tag)
         {
-            if (tag == null) return null;
+            if (tag is null) return null;
             return regexUnescTag.Replace(tag, (match) =>
             {
                 int i = Array.IndexOf(escTagStrings, match.Value);
@@ -381,7 +381,7 @@ namespace Ao3TrackReader.Data
                 }
             }
 
-            if (tag != null) App.Database.SetTagId(tag, tagid);
+            if (!(tag is null)) App.Database.SetTagId(tag, tagid);
             return tag;
         }
 
@@ -449,16 +449,16 @@ namespace Ao3TrackReader.Data
                     var main = doc.GetElementbyId("main");
 
                     HtmlNode tagnode = main?.ElementByClass("div", "tag");
-                    if (tagnode != null)
+                    if (!(tagnode is null))
                     {
                         // Merger?
                         HtmlNode mergernode = tagnode.ElementByClass("div", "merger");
-                        if (mergernode != null)
+                        if (!(mergernode is null))
                         {
                             foreach (var e in mergernode.DescendantsByClass("a", "tag"))
                             {
                                 var href = e.Attributes["href"];
-                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                if (!(href is null) && !string.IsNullOrEmpty(href.Value))
                                 {
                                     var newuri = new Uri(uri, href.Value.HtmlDecode());
                                     var m = regexTag.Match(newuri.LocalPath);
@@ -474,12 +474,12 @@ namespace Ao3TrackReader.Data
 
                         // Parents
                         HtmlNode parenttagsnode = tagnode.ElementByClass("div", "parent")?.Element("ul");
-                        if (parenttagsnode != null)
+                        if (!(parenttagsnode is null))
                         {
                             foreach (var e in parenttagsnode.DescendantsByClass("a", "tag"))
                             {
                                 var href = e.Attributes["href"];
-                                if (href != null && !string.IsNullOrEmpty(href.Value))
+                                if (!(href is null) && !string.IsNullOrEmpty(href.Value))
                                 {
                                     var newuri = new Uri(uri, href.Value.HtmlDecode());
                                     var m = regexTag.Match(newuri.LocalPath);
@@ -493,7 +493,7 @@ namespace Ao3TrackReader.Data
                         // Category
                         foreach (var p in tagnode.Elements("p"))
                         {
-                            if (p.InnerText != null)
+                            if (!(p.InnerText is null))
                             {
                                 var m = regexTagCategory.Match(p.InnerText.HtmlDecode());
                                 if (m.Success)
@@ -504,18 +504,18 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        using (App.Database.BeginTransaction()) // All txn commands must be on same thread or deadlock!
+                        using (App.Database.DoTransaction()) // All txn commands must be on same thread or deadlock!
                         {
                             App.Database.SetTagDetails(tag);
 
                             // synonyms
                             HtmlNode synonymstagsnode = tagnode.ElementByClass("div", "synonym")?.Element("ul");
-                            if (synonymstagsnode != null)
+                            if (!(synonymstagsnode is null))
                             {
                                 foreach (var e in synonymstagsnode.DescendantsByClass("a", "tag"))
                                 {
                                     var href = e.Attributes["href"];
-                                    if (href != null && !string.IsNullOrEmpty(href.Value))
+                                    if (!(href is null) && !string.IsNullOrEmpty(href.Value))
                                     {
                                         var newuri = new Uri(uri, href.Value.HtmlDecode());
                                         var m = regexTag.Match(newuri.LocalPath);
@@ -659,7 +659,7 @@ namespace Ao3TrackReader.Data
                 {
                     var value = opt.Attributes["value"];
 
-                    if (value != null && !string.IsNullOrEmpty(value.Value) && !string.IsNullOrWhiteSpace(opt.InnerText))
+                    if (!(value is null) && !string.IsNullOrEmpty(value.Value) && !string.IsNullOrWhiteSpace(opt.InnerText))
                     {
                         if (int.TryParse(value.Value, out int i))
                         {
@@ -677,7 +677,7 @@ namespace Ao3TrackReader.Data
                 {
                     var value = opt.Attributes["value"];
 
-                    if (value != null && !string.IsNullOrEmpty(value.Value) && !string.IsNullOrWhiteSpace(opt.InnerText))
+                    if (!(value is null) && !string.IsNullOrEmpty(value.Value) && !string.IsNullOrWhiteSpace(opt.InnerText))
                     {
                         string i = value.Value.HtmlDecode().Trim();
                         var n = opt.InnerText.HtmlDecode().Trim();
@@ -827,7 +827,7 @@ namespace Ao3TrackReader.Data
                 var tagdetails = LookupTagQuick(sTAGNAME);
                 model.PrimaryTag = tagdetails?.actual ?? UnescapeTag(sTAGNAME);
                 model.PrimaryTagType = GetTypeForCategory(tagdetails?.category);
-                if (tagdetails != null)
+                if (!(tagdetails is null))
                 {
                     SortedDictionary<Ao3TagType, List<string>> tags = model.Tags = new SortedDictionary<Ao3TagType, List<string>>();
                     foreach (string ptag in tagdetails.parents)
@@ -1009,7 +1009,7 @@ namespace Ao3TrackReader.Data
 
                 var worknode = await WorkWorker.LookupSummaryAsync(model.Details.WorkId);
 
-                if (worknode == null)
+                if (worknode is null)
                 {
                     // No worknode, try with cookies
                     string cookies = App.Database.GetVariable("siteCookies");
@@ -1025,7 +1025,7 @@ namespace Ao3TrackReader.Data
                     }
                 }
 
-                if (worknode != null) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
+                if (!(worknode is null)) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
             }
             else if ((match = regexSeries.Match(uri.LocalPath)).Success)
             {
@@ -1040,7 +1040,7 @@ namespace Ao3TrackReader.Data
 
                     var main = doc.GetElementbyId("main");
 
-                    if (main != null)
+                    if (!(main is null))
                     {
                         var title = main.ElementByClass("h2", "heading");
                         model.Title = title?.InnerText?.HtmlDecode()?.Trim();
@@ -1066,7 +1066,7 @@ namespace Ao3TrackReader.Data
 
                     var colnode = doc.GetElementbyId("main")?.ElementByClass("div", "collection");
 
-                    if (colnode != null)
+                    if (!(colnode is null))
                     {
                         var title = colnode.ElementByClass("div", "header")?.ElementByClass("h2", "heading");
                         model.Title = title?.InnerText?.HtmlDecode()?.Trim();
@@ -1094,12 +1094,12 @@ namespace Ao3TrackReader.Data
             // Tags node
             HtmlNode tagsnode = worknode?.ElementByClass("ul", "tags");
 
-            if (tagsnode != null)
+            if (!(tagsnode is null))
             {
                 foreach (var tn in tagsnode.Elements("li"))
                 {
                     var a = tn.DescendantsByClass("a", "tag").FirstOrDefault();
-                    if (a == null) continue;
+                    if (a is null) continue;
 
                     Ao3TagType type = Ao3TagType.Other;
 
@@ -1112,7 +1112,7 @@ namespace Ao3TrackReader.Data
                     }
 
                     var href = a.Attributes["href"];
-                    if (href != null && !string.IsNullOrEmpty(href.Value))
+                    if (!(href is null) && !string.IsNullOrEmpty(href.Value))
                     {
                         var reluri = new Uri(baseuri, href.Value.HtmlDecode());
                         var m = regexTag.Match(reluri.LocalPath);
@@ -1137,12 +1137,12 @@ namespace Ao3TrackReader.Data
 
             // Get Fandom tags
             HtmlNode fandomnode = headernode?.ElementByClass("fandoms");
-            if (fandomnode != null)
+            if (!(fandomnode is null))
             {
                 foreach (var a in fandomnode.Elements("a"))
                 {
                     var href = a.Attributes["href"];
-                    if (href != null && !string.IsNullOrEmpty(href.Value))
+                    if (!(href is null) && !string.IsNullOrEmpty(href.Value))
                     {
                         var reluri = new Uri(baseuri, href.Value.HtmlDecode());
                         var m = regexTag.Match(reluri.LocalPath);
@@ -1159,12 +1159,12 @@ namespace Ao3TrackReader.Data
             }
 
             HtmlNode headingnode = headernode?.ElementByClass("heading");
-            if (headingnode != null)
+            if (!(headingnode is null))
             {
                 var links = headingnode.Elements("a");
                 Dictionary<string, string> authors = new Dictionary<string, string>(1);
                 Dictionary<string, string> recipiants = new Dictionary<string, string>();
-                if (links != null)
+                if (!(links is null))
                 {
                     var titlenode = links.FirstOrDefault();
                     model.Title = titlenode?.InnerText?.HtmlDecode();
@@ -1203,7 +1203,7 @@ namespace Ao3TrackReader.Data
             model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
             foreach (var n in required)
             {
-                if (n.Value == null)
+                if (n.Value is null)
                 {
                     model.RequiredTags[n.Key] = null;
                     continue;
@@ -1216,7 +1216,7 @@ namespace Ao3TrackReader.Data
                     return val.StartsWith(search + "-", StringComparison.OrdinalIgnoreCase) || val.StartsWith(search.TrimEnd('s') + "-", StringComparison.OrdinalIgnoreCase);
                 });
 
-                if (tag == null)
+                if (tag is null)
                     model.RequiredTags[n.Key] = null;
                 else
                     model.RequiredTags[n.Key] = new Ao3RequredTagData(tag, n.Value.InnerText.HtmlDecode().Trim());
@@ -1239,7 +1239,7 @@ namespace Ao3TrackReader.Data
                 model.PrimaryTagType = Ao3TagType.Fandoms;
             }
 
-            if (model.PrimaryTag != null)
+            if (!(model.PrimaryTag is null))
             {
                 var tagdetails = await LookupTagAsync(model.PrimaryTag);
                 model.PrimaryTag = tagdetails.actual;
@@ -1261,29 +1261,29 @@ namespace Ao3TrackReader.Data
 #pragma warning disable IDE0018 // Inline variable declaration
             int intval;
 #pragma warning restore IDE0018 // Inline variable declaration
-            if (stats != null && int.TryParse(stats.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""), out intval))
+            if (!(stats is null) && int.TryParse(stats.ElementByClass("dd", "words")?.InnerText?.HtmlDecode()?.Replace(",", ""), out intval))
                 model.Details.Words = intval;
-            if (stats != null && int.TryParse(stats.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode(), out intval))
+            if (!(stats is null) && int.TryParse(stats.ElementByClass("dd", "collections")?.InnerText?.HtmlDecode(), out intval))
                 model.Details.Collections = intval;
-            if (stats != null && int.TryParse(stats.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode(), out intval))
+            if (!(stats is null) && int.TryParse(stats.ElementByClass("dd", "comments")?.InnerText?.HtmlDecode(), out intval))
                 model.Details.Comments = intval;
-            if (stats != null && int.TryParse(stats.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode(), out intval))
+            if (!(stats is null) && int.TryParse(stats.ElementByClass("dd", "kudos")?.InnerText?.HtmlDecode(), out intval))
                 model.Details.Kudos = intval;
-            if (stats != null && int.TryParse(stats.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode(), out intval))
+            if (!(stats is null) && int.TryParse(stats.ElementByClass("dd", "bookmarks")?.InnerText?.HtmlDecode(), out intval))
                 model.Details.Bookmarks = intval;
-            if (stats != null && int.TryParse(stats.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode(), out intval))
+            if (!(stats is null) && int.TryParse(stats.ElementByClass("dd", "hits")?.InnerText?.HtmlDecode(), out intval))
                 model.Details.Hits = intval;
 
             // Series
 
             var seriesnode = worknode?.ElementByClass("ul", "series");
-            if (seriesnode != null)
+            if (!(seriesnode is null))
             {
                 Dictionary<string, Ao3SeriesLink> series = new Dictionary<string, Ao3SeriesLink>(1);
                 foreach (var n in seriesnode.Elements("li"))
                 {
                     var link = n.Element("a");
-                    if (link == null || String.IsNullOrWhiteSpace(link.InnerText)) continue;
+                    if (link is null || String.IsNullOrWhiteSpace(link.InnerText)) continue;
 
                     var s = link.Attributes["href"]?.Value;
                     if (String.IsNullOrWhiteSpace(s)) continue;
@@ -1300,7 +1300,7 @@ namespace Ao3TrackReader.Data
             }
 
             var chapters = stats?.ElementByClass("dd", "chapters")?.InnerText?.Trim()?.Split('/');
-            if (chapters != null)
+            if (!(chapters is null))
             {
                 int? total;
                 if (chapters[1] == "?") total = null;
@@ -1312,7 +1312,7 @@ namespace Ao3TrackReader.Data
 
             // Horrible horrible dirty grabbing of the summary
             var summarynode = worknode?.ElementByClass("blockquote", "summary");
-            if (summarynode != null)
+            if (!(summarynode is null))
             {
 
                 try
@@ -1365,7 +1365,7 @@ namespace Ao3TrackReader.Data
             var languages = new HashSet<string>();
             var reqtags = new Dictionary<string, string>();
 
-            if (model.RequiredTags == null) model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
+            if (model.RequiredTags is null) model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
 
             DateTime updated = DateTime.MinValue;
             int words = 0;
@@ -1416,12 +1416,12 @@ namespace Ao3TrackReader.Data
                 languages.Add(workmodel.Language);
 
                 chapsavail += workmodel.Details.Chapters.Available;
-                if (workmodel.Details.Chapters.Total == null) chapstotal = null;
-                else if (chapstotal != null) chapstotal += workmodel.Details.Chapters.Total;
+                if (workmodel.Details.Chapters.Total is null) chapstotal = null;
+                else if (!(chapstotal is null)) chapstotal += workmodel.Details.Chapters.Total;
 
-                if (workmodel.Details.Words != null) words += (int)workmodel.Details.Words;
+                if (!(workmodel.Details.Words is null)) words += (int)workmodel.Details.Words;
 
-                if (workmodel.Details.LastUpdated != null && updated < workmodel.Details.LastUpdated) updated = (DateTime)workmodel.Details.LastUpdated;
+                if (!(workmodel.Details.LastUpdated is null) && updated < workmodel.Details.LastUpdated) updated = (DateTime)workmodel.Details.LastUpdated;
             }
 
             // Generate required tags
@@ -1450,7 +1450,7 @@ namespace Ao3TrackReader.Data
                     model.RequiredTags[Ao3RequiredTag.Rating] = new Ao3RequredTagData("rating-na", string.Join(", ", req));
             }
 
-            if (model.Details.Words == null) model.Details.Words = words;
+            if (model.Details.Words is null) model.Details.Words = words;
 
             model.Details.Chapters = new Ao3ChapterDetails(chapsavail, chapstotal);
             model.Language = string.Join(", ", languages);
@@ -1458,7 +1458,7 @@ namespace Ao3TrackReader.Data
             model.PrimaryTag = primaries.OrderByDescending(kvp => kvp.Value).First().Key;
             model.PrimaryTagType = tagtypes[model.PrimaryTag];
 
-            if (model.Details.LastUpdated != null && updated > DateTime.MinValue)
+            if (!(model.Details.LastUpdated is null) && updated > DateTime.MinValue)
                 model.Details.LastUpdated = updated;
         }
 
@@ -1471,12 +1471,12 @@ namespace Ao3TrackReader.Data
 
             var meta = main.ElementByClass("div", "wrapper")?.ElementByClass("dl", "meta");
             model.RequiredTags = new Dictionary<Ao3RequiredTag, Ao3RequredTagData>(4);
-            if (meta != null)
+            if (!(meta is null))
             {
                 foreach (var dt in meta.Elements("dt"))
                 {
                     var dd = dt.NextSibling;
-                    if (dd == null) continue;
+                    if (dd is null) continue;
                     while (dd.Name == "#text") dd = dd.NextSibling;
                     if (dd.Name != "dd") continue;
 
@@ -1504,7 +1504,7 @@ namespace Ao3TrackReader.Data
                         case "Description:":
                             {
                                 var blockquote = dd.Element("blockquote");
-                                if (blockquote != null)
+                                if (!(blockquote is null))
                                 {
                                     try
                                     {
@@ -1522,7 +1522,7 @@ namespace Ao3TrackReader.Data
                             foreach (var sdt in dd.ElementByClass("dl", "stats").Elements("dt"))
                             {
                                 var sdd = sdt.NextSibling;
-                                if (sdd == null) continue;
+                                if (sdd is null) continue;
                                 while (sdd.Name == "#text") sdd = sdd.NextSibling;
                                 if (sdd.Name != "dd") continue;
 
@@ -1590,12 +1590,12 @@ namespace Ao3TrackReader.Data
 
             var mods = new Dictionary<string, string>(1);
             var meta = colnode.ElementByClass("div", "wrapper")?.ElementByClass("dl", "meta");
-            if (meta != null)
+            if (!(meta is null))
             {
                 foreach (var dt in meta.Elements("dt"))
                 {
                     var dd = dt.NextSibling;
-                    if (dd == null) continue;
+                    if (dd is null) continue;
                     while (dd.Name == "#text") dd = dd.NextSibling;
                     if (dd.Name != "dd") continue;
 
@@ -1617,7 +1617,7 @@ namespace Ao3TrackReader.Data
             // Get the collections works!
             var worksuri = new Uri(baseuri, "works");
             List<Ao3PageModel> works = new List<Ao3PageModel>();
-            while (worksuri != null)
+            while (!(worksuri is null))
             {
                 var response = await HttpRequestAsync(worksuri);
 
@@ -1627,7 +1627,7 @@ namespace Ao3TrackReader.Data
 
                     var main = doc.GetElementbyId("main");
 
-                    if (main != null)
+                    if (!(main is null))
                     {
                         var workstag = main.ElementByClass("ol", "work");
                         works.AddRange(await Task.WhenAll(GatherWorksAsync(worksuri, workstag, model)));
@@ -1739,7 +1739,7 @@ namespace Ao3TrackReader.Data
                     }
                 }
             }
-            if (!model.RequiredTags.ContainsKey(Ao3RequiredTag.Complete) || model.RequiredTags[Ao3RequiredTag.Complete] == null)
+            if (!model.RequiredTags.ContainsKey(Ao3RequiredTag.Complete) || model.RequiredTags[Ao3RequiredTag.Complete] is null)
                 model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("category-none", "Complete and Incomplete");
 
             tasks.Add(Task.Run(() =>
@@ -1786,7 +1786,7 @@ namespace Ao3TrackReader.Data
             Dictionary<string, int> idmap = new Dictionary<string, int>(tasks.Count);
             foreach (var t in await Task.WhenAll(tasks))
             {
-                if (t.Value == null || string.IsNullOrEmpty(t.Value.Item1))
+                if (t.Value is null || string.IsNullOrEmpty(t.Value.Item1))
                     continue;
 
                 if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;
@@ -1905,7 +1905,7 @@ namespace Ao3TrackReader.Data
                     }
                 }
             }
-            if (!model.RequiredTags.ContainsKey(Ao3RequiredTag.Complete) || model.RequiredTags[Ao3RequiredTag.Complete] == null)
+            if (!model.RequiredTags.ContainsKey(Ao3RequiredTag.Complete) || model.RequiredTags[Ao3RequiredTag.Complete] is null)
                 model.RequiredTags[Ao3RequiredTag.Complete] = new Ao3RequredTagData("category-none", "Complete and Incomplete");
 
             tlist.Add(new KeyValuePair<Ao3TagType, Tuple<string, int>>(Ao3TagType.Other, new Tuple<string, int>(model.RequiredTags[Ao3RequiredTag.Complete].Label, 0)));
@@ -1949,7 +1949,7 @@ namespace Ao3TrackReader.Data
             Dictionary<string, int> idmap = new Dictionary<string, int>(tlist.Count);
             foreach (var t in tlist)
             {
-                if (t.Value == null || string.IsNullOrEmpty(t.Value.Item1))
+                if (t.Value is null || string.IsNullOrEmpty(t.Value.Item1))
                     continue;
 
                 if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;

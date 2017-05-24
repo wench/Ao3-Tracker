@@ -210,8 +210,8 @@ namespace Ao3TrackReader.Controls
             else
             {
                 UpdateSyncForm();
-                wvp.ReadingList.SyncToServerAsync(old_username != s_username);
-                Data.ListFilters.Instance.SyncWithServerAsync(old_username != s_username);
+                await wvp.ReadingList.SyncToServerAsync(old_username != s_username).ConfigureAwait(false);
+                Data.ListFiltering.Instance.SyncWithServerAsync(old_username != s_username);
             }
             syncSubmitButton.IsEnabled = true;
             syncIndicator.Content = null;
@@ -372,7 +372,7 @@ namespace Ao3TrackReader.Controls
 
         void UpdateListFilters()
         {
-            Data.ListFilters.Instance.GetFilterStrings(out var tags, out var authors, out var works, out var serieses);
+            Data.ListFiltering.Instance.GetFilterStrings(out var tags, out var authors, out var works, out var serieses);
             listFilterTags.Text = tags;
             listFilterAuthors.Text = authors;
             listFilterWorks.Text = works;
@@ -381,7 +381,7 @@ namespace Ao3TrackReader.Controls
 
         void OnSaveFilters(object sender, EventArgs e)
         {
-            Data.ListFilters.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
+            Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
         }
     }
 }

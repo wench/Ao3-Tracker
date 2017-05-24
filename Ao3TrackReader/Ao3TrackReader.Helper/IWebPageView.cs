@@ -27,7 +27,6 @@ using IAsyncOp_StringBoolMap = Windows.Foundation.IAsyncOperation<System.Collect
 using IAsyncOp_String = Windows.Foundation.IAsyncOperation<string>;
 #else 
 using System.Threading.Tasks;
-using IAsyncOperation = System.Threading.Tasks.Task;
 using IAsyncOp_WorkWorkDetailsMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<long, Ao3TrackReader.Helper.IWorkDetails>>;
 using IAsyncOp_StringBoolMap = System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, bool>>;
 using IAsyncOp_String = System.Threading.Tasks.Task<string>;
@@ -51,17 +50,27 @@ namespace Ao3TrackReader.Helper
 
 
     public delegate void MainThreadAction();
+
+#if WINDOWS_UWP
     public delegate object MainThreadFunc();
+    public delegate IAsyncOperation<object> MainThreadAsyncFunc();
+    public delegate IAsyncAction MainThreadAsyncAction();
+#endif
 
     public interface IWebViewPage
     {
 #if WINDOWS_UWP
         [DefaultOverload]
-        object DoOnMainThread(MainThreadFunc function);
+        IAsyncOperation<object> DoOnMainThreadAsync(MainThreadFunc function);
+        IAsyncOperation<object> DoOnMainThreadAsync(MainThreadAsyncFunc function);
+        IAsyncAction DoOnMainThreadAsync(MainThreadAction function);
+        IAsyncAction DoOnMainThreadAsync(MainThreadAsyncAction function);
 #else
-        T DoOnMainThread<T>(Func<T> function);
+        Task<T> DoOnMainThreadAsync<T>(Func<T> function);
+        Task<T> DoOnMainThreadAsync<T>(Func<Task<T>> function);
+        Task DoOnMainThreadAsync(MainThreadAction function);
+        Task DoOnMainThreadAsync(Func<Task> function);
 #endif
-        void DoOnMainThread(MainThreadAction function);
 
         double DeviceWidth { get; }
 

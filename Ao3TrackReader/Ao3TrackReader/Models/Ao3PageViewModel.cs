@@ -45,10 +45,10 @@ namespace Ao3TrackReader.Models
 
     public sealed class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
     {
-        public Ao3PageViewModel(Ao3PageModel baseData, int? unread)
+        public Ao3PageViewModel(Uri uri, int? unread)
         {
-            this.Unread = unread;
-            this.BaseData = baseData;
+            Uri = uri;
+            Unread = unread;
         }
 
         public int CompareTo(Ao3PageViewModel y)
@@ -374,98 +374,99 @@ namespace Ao3TrackReader.Models
         public Ao3PageModel BaseData
         {
             get { return baseData; }
-            set
+        }
+
+        public async Task SetBaseDataAsync(Ao3PageModel value)
+        {
+            if (value == null) throw new ArgumentNullException("value", "BaseData can not be set to null.");
+
+            if (value == BaseData) return;
+
+            OnPropertyChanging("");
+            Deregister();
+            baseData = value;
+            //Unread = null;
+            ChaptersRead = null;
+
+            // Generate everything from Ao3PageModel 
+            string newGroup = baseData.PrimaryTag ?? "";
+            if (Group != newGroup)
             {
-                if (value == null) throw new ArgumentNullException("value", "BaseData can not be set to null.");
-
-                if (value == BaseData) return;
-
-                OnPropertyChanging("");
-                Deregister();
-                baseData = value;
-                //Unread = null;
-                ChaptersRead = null;
-
-                // Generate everything from Ao3PageModel 
-                string newGroup = baseData.PrimaryTag ?? "";
-                if (Group != newGroup)
-                {
-                    Group = newGroup;
-                }
-
-                if (!string.IsNullOrWhiteSpace(newGroup))
-                {
-                    string newgrouptype = baseData.PrimaryTagType.ToString().TrimEnd('s');
-                    if (newgrouptype != GroupType)
-                    {
-                        GroupType = newgrouptype;
-                    }
-                }
-
-                imageRatingUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Rating);
-                imageWarningsUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Warnings);
-                imageCategoryUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Category);
-                imageCompleteUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Complete);
-
-                Uri = baseData.Uri;
-
-                Date = baseData.Details?.LastUpdated;// baseData.Details?.LastUpdated?.ToString("d MMM yyyy") ?? "";
-
-                if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
-                else Subtitle = null;
-
-                tags = baseData.Tags;
-
-                UpdateTitle();
-                UpdateSummary();
-                UpdateDetails();
-
-                OnPropertyChanged("");
-
-                RecalculateChaptersAsync().ContinueWith((task) =>
-                {
-                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-                    {
-                        if (baseData != value)
-                            return;
-
-                        Register();
-
-                        OnPropertyChanging("SortOrder");
-                        OnPropertyChanging("Unread");
-                        OnPropertyChanging("ChaptersRead");
-
-                        ChaptersRead = task.Result;
-                        if (ChaptersRead != null && baseData?.Details?.Chapters?.Available != null)
-                        {
-                            Unread = baseData.Details.Chapters.Available - ChaptersRead;
-                        }
-                        else if (!HasChapters)
-                        {
-                            Unread = null;
-                        }
-
-                        OnPropertyChanging("Title");
-                        UpdateTitle();
-                        OnPropertyChanged("Title");
-
-                        OnPropertyChanging("Details");
-                        UpdateDetails();
-                        OnPropertyChanged("Details");
-
-                        if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
-                        {
-                            OnPropertyChanging("Summary");
-                            UpdateSummary();
-                            OnPropertyChanged("Summary");
-                        }
-
-                        OnPropertyChanged("ChaptersRead");
-                        OnPropertyChanged("Unread");
-                        OnPropertyChanged("SortOrder");
-                    });
-                });
+                Group = newGroup;
             }
+
+            if (!string.IsNullOrWhiteSpace(newGroup))
+            {
+                string newgrouptype = baseData.PrimaryTagType.ToString().TrimEnd('s');
+                if (newgrouptype != GroupType)
+                {
+                    GroupType = newgrouptype;
+                }
+            }
+
+            imageRatingUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Rating);
+            imageWarningsUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Warnings);
+            imageCategoryUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Category);
+            imageCompleteUri = baseData.GetRequiredTagUri(Ao3RequiredTag.Complete);
+
+            Uri = baseData.Uri;
+
+            Date = baseData.Details?.LastUpdated;// baseData.Details?.LastUpdated?.ToString("d MMM yyyy") ?? "";
+
+            if (baseData.Tags != null && baseData.Tags.ContainsKey(Ao3TagType.Fandoms)) Subtitle = string.Join(",  ", baseData.Tags[Ao3TagType.Fandoms].Select((s) => s.Replace(' ', '\xA0')));
+            else Subtitle = null;
+
+            tags = baseData.Tags;
+
+            UpdateTitle();
+            UpdateSummary();
+            UpdateDetails();
+
+            OnPropertyChanged("");
+
+            var chapsread = await RecalculateChaptersAsync();
+
+            if (baseData != value) return;
+
+            await App.Current.WebViewPage.DoOnMainThreadAsync(() =>
+            {
+                if (baseData != value) return;
+
+                Register();
+
+                OnPropertyChanging("SortOrder");
+                OnPropertyChanging("Unread");
+                OnPropertyChanging("ChaptersRead");
+
+                ChaptersRead = chapsread;
+                if (ChaptersRead != null && baseData?.Details?.Chapters?.Available != null)
+                {
+                    Unread = baseData.Details.Chapters.Available - ChaptersRead;
+                }
+                else if (!HasChapters)
+                {
+                    Unread = null;
+                }
+
+                OnPropertyChanging("Title");
+                UpdateTitle();
+                OnPropertyChanged("Title");
+
+                OnPropertyChanging("Details");
+                UpdateDetails();
+                OnPropertyChanged("Details");
+
+                if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
+                {
+                    OnPropertyChanging("Summary");
+                    UpdateSummary();
+                    OnPropertyChanged("Summary");
+                }
+
+                OnPropertyChanged("ChaptersRead");
+                OnPropertyChanged("Unread");
+                OnPropertyChanged("SortOrder");
+            });
         }
 
         public IDictionary<long, Helper.WorkChapter> WorkChapters { get; private set; }

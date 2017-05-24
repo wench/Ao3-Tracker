@@ -174,7 +174,7 @@ namespace Ao3TrackReader
             var cs = new TaskCompletionSource<string>();
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
             {
-                DoOnMainThread(() => webView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
+                await DoOnMainThreadAsync(() => webView.EvaluateJavascript(code, new ValueCallback((value) => { cs.SetResult(value); })));
             }
             else
             {
@@ -210,11 +210,11 @@ namespace Ao3TrackReader
         {
             get
             {
-                return DoOnMainThread(() =>
+                return DoOnMainThreadAsync(() =>
                 {
                     if (!string.IsNullOrWhiteSpace(webView.Url)) return new Uri(webView.Url);
                     else return new Uri("about:blank");
-                });
+                }).WaitGetResult();
             }
         }
 
@@ -307,8 +307,8 @@ namespace Ao3TrackReader
             ContextMenuAdd.IsEnabled = inturl && !res[url];
             ContextMenuRemove.IsEnabled = inturl && res[url];
 
-            ContextMenuFilterDetails = await Data.ListFilters.Instance.GetFilterFromUrlAsync(url, innerText);
-            bool isFilter = ContextMenuFilterDetails != null ? await Data.ListFilters.Instance.GetIsFilterAsync(ContextMenuFilterDetails) : false;
+            ContextMenuFilterDetails = Data.ListFiltering.Instance.GetFilterFromUrl(url, innerText);
+            bool isFilter = ContextMenuFilterDetails != null ? await Data.ListFiltering.Instance.GetIsFilterAsync(ContextMenuFilterDetails) : false;
 
             ContextMenuAddFilter.IsEnabled = ContextMenuFilterDetails != null ? !isFilter : false;
             ContextMenuRemoveFilter.IsEnabled = ContextMenuFilterDetails != null ? isFilter : false;

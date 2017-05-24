@@ -348,6 +348,8 @@ namespace Ao3Track {
 
                 ShouldFilterWork(workid, authors, tags, serieses, (filter) => {
                     if (filter) {
+                        $work.addClass("ao3t-filtered ao3t-filtered-hide");
+
                         let message = document.createElement("div");
                         message.setAttribute("class","ao3t-filtered-message");
 
@@ -373,7 +375,7 @@ namespace Ao3Track {
                         message.appendChild(document.createElement("br"));
                         message.appendChild(document.createTextNode(filter));
 
-                        $work.addClass("ao3t-filtered ao3t-filtered-hide").prepend(message);
+                        $work.prepend(message);
                     }
                 });
             }

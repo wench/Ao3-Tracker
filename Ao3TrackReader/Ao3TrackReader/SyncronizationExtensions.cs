@@ -15,12 +15,89 @@ namespace Ao3TrackReader
             public ReadLockStruct(ReaderWriterLockSlim rwlock)
             {
                 this.rwlock = rwlock;
+                disposed = false;
             }
 
+            bool disposed;
             public void Dispose()
             {
+                if (disposed) return;
+                disposed = true;
                 rwlock.ExitReadLock();
             }
+
+            public void TaskRun(Action action)
+            {
+                try
+                {
+                    var task = Task.Run(action);
+                    task.Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+
+            public void TaskRun(Func<Task> action)
+            {
+                try
+                {
+                    var task = Task.Run(action);
+                    task.Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+
+            public T TaskRun<T>(Func<T> func)
+            {
+                try
+                {
+                    var task = Task.Run(func);
+                    task.Wait();
+                    return task.Result;
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                    return default(T);
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+
+            public T TaskRun<T>(Func<Task<T>> func)
+            {
+                try
+                {
+                    var task = Task.Run(func);
+                    task.Wait();
+                    return task.Result;
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                    return default(T);
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+
         }
 
         public struct WriteLockStruct : IDisposable
@@ -30,11 +107,86 @@ namespace Ao3TrackReader
             public WriteLockStruct(ReaderWriterLockSlim rwlock)
             {
                 this.rwlock = rwlock;
+                disposed = false;
             }
 
+            bool disposed;
             public void Dispose()
             {
+                if (disposed) return;
+                disposed = true;
                 rwlock.ExitWriteLock();
+            }
+
+            public void TaskRun(Action action)
+            {
+                try
+                {
+                    var task = Task.Run(action);
+                    task.Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+
+            public void TaskRun(Func<Task> action)
+            {
+                try
+                {
+                    var task = Task.Run(action);
+                    task.Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+
+            public T TaskRun<T>(Func<T> func)
+            {
+                try
+                {
+                    var task = Task.Run(func);
+                    task.Wait();
+                    return task.Result;
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                    return default(T);
+                }
+                finally
+                {
+                    Dispose();
+                }
+            }
+            public T TaskRun<T>(Func<Task<T>> func)
+            {
+                try
+                {
+                    var task = Task.Run(func);
+                    task.Wait();
+                    return task.Result;
+                }
+                catch (AggregateException ae)
+                {
+                    ae.Flatten();
+                    return default(T);
+                }
+                finally
+                {
+                    Dispose();
+                }
             }
         }
 

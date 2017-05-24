@@ -116,16 +116,16 @@ namespace Ao3TrackReader.Helper
             set
             {
                 _onjumptolastlocationevent = value;
-                wvp.DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value != 0; });
+                wvp.DoOnMainThreadAsync(() => { wvp.JumpToLastLocationEnabled = value != 0; }).ConfigureAwait(false);
             }
         }
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
-            wvp.DoOnMainThread(() => 
+            wvp.DoOnMainThreadAsync(() => 
             {
                 if (_onjumptolastlocationevent != 0)
                     wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onjumptolastlocationevent, pagejump);
-            });
+            }).ConfigureAwait(false);
         }
 
         int _onalterfontsizeevent;
@@ -134,14 +134,14 @@ namespace Ao3TrackReader.Helper
             [JavascriptInterface, Export("set_onalterfontsizeevent"), Converter("Event")]
             set
             {
-                if (value != 0) wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", value, wvp.FontSize); });
+                if (value != 0) wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", value, wvp.FontSize); }).ConfigureAwait(false);
                 _onalterfontsizeevent = value;
             }
         }
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); });
+                wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); }).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("logError")]
@@ -155,7 +155,7 @@ namespace Ao3TrackReader.Helper
         {
             var works = JsonConvert.DeserializeObject<long[]>(works_json);
             var workchapters = await wvp.GetWorkDetailsAsync(works,(WorkDetailsFlags) flags);
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); });
+            await wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); }).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("setWorkChapters")]
@@ -172,13 +172,13 @@ namespace Ao3TrackReader.Helper
             string[] worktags = JsonConvert.DeserializeObject<string[]>(worktags_json);
             long[] workserieses = JsonConvert.DeserializeObject <long[]>(workserieses_json);
             var result = await wvp.ShouldFilterWorkAsync(workId, workauthors, worktags, workserieses);
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, result); });
+            await wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, result); }).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("showContextMenu")]
         public void ShowContextMenu(double x, double y, string url, string innerText)
         {
-            wvp.DoOnMainThread(() => { wvp.ShowContextMenu(x, y, url, innerText); } );
+            wvp.DoOnMainThreadAsync(() => { wvp.ShowContextMenu(x, y, url, innerText); } ).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("addToReadingList")]
@@ -196,41 +196,41 @@ namespace Ao3TrackReader.Helper
         public string NextPage
         {
             [JavascriptInterface, Export("set_nextPage")]
-            set { wvp.DoOnMainThread(() => { wvp.NextPage = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.NextPage = value; }).ConfigureAwait(false); }
         }
         public string PrevPage
         {
             [JavascriptInterface, Export("set_prevPage")]
-            set { wvp.DoOnMainThread(() => { wvp.PrevPage = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.PrevPage = value; }).ConfigureAwait(false); }
         }
 
         public bool SwipeCanGoBack
         {
             [JavascriptInterface, Export("get_swipeCanGoBack")]
-            get { return wvp.DoOnMainThread(() => wvp.SwipeCanGoBack); }
+            get { return wvp.DoOnMainThreadAsync(() => wvp.SwipeCanGoBack).Result; }
         }
         public bool SwipeCanGoForward
         {
             [JavascriptInterface, Export("get_swipeCanGoForward")]
-            get { return wvp.DoOnMainThread(() => wvp.SwipeCanGoForward); }
+            get { return wvp.DoOnMainThreadAsync(() => wvp.SwipeCanGoForward).Result; }
         }
 
         public double LeftOffset
         {
             [JavascriptInterface, Export("get_leftOffset")]
-            get { return wvp.DoOnMainThread(() => wvp.LeftOffset); }
+            get { return wvp.DoOnMainThreadAsync(() => wvp.LeftOffset).Result; }
             [JavascriptInterface, Export("set_leftOffset")]
-            set { wvp.DoOnMainThread(() => { wvp.LeftOffset = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.LeftOffset = value; }).ConfigureAwait(false); }
         }
         public int ShowPrevPageIndicator
         {
             [JavascriptInterface, Export("set_showPrevPageIndicator")]
-            set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.ShowPrevPageIndicator = value; }); }
         }
         public int ShowNextPageIndicator
         {
             [JavascriptInterface, Export("set_showNextPageIndicator")]
-            set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.ShowNextPageIndicator = value; }).ConfigureAwait(false); }
         }
 
         public string CurrentLocation
@@ -238,11 +238,11 @@ namespace Ao3TrackReader.Helper
             [JavascriptInterface, Export("set_currentLocation"), Converter("ToJSON")]
             set
             {
-                wvp.DoOnMainThread(() =>
+                wvp.DoOnMainThreadAsync(() =>
                 {
                     if (value == null || value == "(null)" || value == "null") wvp.CurrentLocation = null;
                     else wvp.CurrentLocation = JsonConvert.DeserializeObject<WorkChapter>(value);
-                });
+                }).ConfigureAwait(false);
             }
         }
 
@@ -251,11 +251,11 @@ namespace Ao3TrackReader.Helper
             [JavascriptInterface, Export("set_pageTitle"), Converter("ToJSON")]
             set
             {
-                wvp.DoOnMainThread(() =>
+                wvp.DoOnMainThreadAsync(() =>
                 {
                     if (value == null || value == "(null)" || value == "null") wvp.PageTitle = null;
                     else wvp.PageTitle = JsonConvert.DeserializeObject<PageTitle>(value);
-                });
+                }).ConfigureAwait(false);
             }
         }
 
@@ -264,13 +264,13 @@ namespace Ao3TrackReader.Helper
         {
             var urls = JsonConvert.DeserializeObject<string[]>(urls_json);
             var res = await wvp.AreUrlsInReadingListAsync(urls);
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, res); });
+            await wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, res); }).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("startWebViewDragAccelerate")]
         public void StartWebViewDragAccelerate(double velocity)
         {
-            wvp.DoOnMainThread(() => { wvp.StartWebViewDragAccelerate(velocity); });
+            wvp.DoOnMainThreadAsync(() => { wvp.StartWebViewDragAccelerate(velocity); }).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("stopWebViewDragAccelerate")]
@@ -291,7 +291,7 @@ namespace Ao3TrackReader.Helper
         [JavascriptInterface, Export("getUnitConvOptions")]
         public void GetUnitConvOptions([Converter("Callback")] int hCallback)
         {
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, wvp.UnitConvOptions); });
+            wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, wvp.UnitConvOptions); }).ConfigureAwait(false);
         }
 
     }

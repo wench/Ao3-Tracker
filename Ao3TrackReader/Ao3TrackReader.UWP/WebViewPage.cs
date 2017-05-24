@@ -81,11 +81,28 @@ namespace Ao3TrackReader
             return Task.CompletedTask;
         }
 
-        object IWebViewPage.DoOnMainThread(MainThreadFunc function)
+        IAsyncOperation<object> IWebViewPage.DoOnMainThreadAsync(MainThreadFunc function)
         {
-            var task = DoOnMainThreadAsync(() => function());
-            task.Wait();
-            return task.Result;
+            return DoOnMainThreadAsync(() => 
+                function()).AsAsyncOperation();
+        }
+
+        IAsyncOperation<object> IWebViewPage.DoOnMainThreadAsync(MainThreadAsyncFunc function)
+        {
+            return DoOnMainThreadAsync(async () => 
+                await function()).AsAsyncOperation();
+        }
+
+        IAsyncAction IWebViewPage.DoOnMainThreadAsync(MainThreadAction function)
+        {
+            return DoOnMainThreadAsync(() => 
+                function()).AsAsyncAction();
+        }
+
+        IAsyncAction IWebViewPage.DoOnMainThreadAsync(MainThreadAsyncAction function)
+        {
+            return DoOnMainThreadAsync(async () => 
+                await function()).AsAsyncAction();
         }
 
         IAsyncOperation<IDictionary<long, IWorkDetails>> IWebViewPage.GetWorkDetailsAsync(long[] works, WorkDetailsFlags flags)
