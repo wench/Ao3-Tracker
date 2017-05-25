@@ -498,7 +498,7 @@ namespace Ao3TrackReader.Data
                     List<Task<string>> tasks = new List<Task<string>>();
 
                     // Do this parallel cause it's a pain in the ass
-                    foreach (var tagstr in tags.Split('\n'))
+                    foreach (var tagstr in tags.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         if (string.IsNullOrWhiteSpace(tagstr)) continue;
 
@@ -519,7 +519,10 @@ namespace Ao3TrackReader.Data
                     await App.Database.ListFiltersCached.BeginDeferralAsync();
                     try
                     {                        
-                        var existingfilters = new HashSet<string>((await App.Database.ListFiltersCached.SelectAsync()).Select((item) => item.data));
+                        var existingfilters = new HashSet<string>((await App.Database.ListFiltersCached.SelectAsync()).Select(
+                            (item) => 
+                                item.data
+                        ));
 
                         this.tags.Clear();
                         this.authors.Clear();
@@ -542,7 +545,7 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        foreach (var author in authors.Split('\n'))
+                        foreach (var author in authors.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
                         {
                             if (string.IsNullOrWhiteSpace(author)) continue;
 
@@ -556,7 +559,7 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        foreach (var work in works.Split('\n'))
+                        foreach (var work in works.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
                         {
                             if (string.IsNullOrWhiteSpace(work)) continue;
 
@@ -570,7 +573,7 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        foreach (var series in serieses.Split('\n'))
+                        foreach (var series in serieses.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
                         {
                             if (string.IsNullOrWhiteSpace(series)) continue;
 

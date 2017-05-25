@@ -409,12 +409,12 @@ namespace Ao3TrackReader.Data
             oldtaglocks.Push(sem);
         }
 
-        static public async Task<TagCache> LookupTagAsync(string intag)
+        static public async Task<TagCache> LookupTagAsync(string intag, string synallow = null)
         {
             if (string.IsNullOrWhiteSpace(intag)) return new TagCache { name = intag, actual = intag };
 
             intag = UnescapeTag(intag);
-            var tag = App.Database.GetTag(intag) ?? new TagCache { name = intag };
+            var tag = App.Database.GetTag(intag);
             if (!string.IsNullOrEmpty(tag?.actual))
             {
                 return tag;
@@ -424,7 +424,8 @@ namespace Ao3TrackReader.Data
             SemaphoreSlim taglock;
             using (await taglockslock.LockAsync())
             {
-                if (!taglocks.TryGetValue(intag, out taglock)) taglocks[intag] = taglock = GetTagLockSem();
+                if (!taglocks.TryGetValue(intag, out taglock))
+                    taglocks[intag] = taglock = GetTagLockSem();
             }
 
             await taglock.LockAsync();
@@ -437,9 +438,8 @@ namespace Ao3TrackReader.Data
                 }
 
                 tag.actual = intag;
-                intag = EscapeTag(intag);
 
-                var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + intag);
+                var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + EscapeTag(intag));
 
                 var response = await HttpRequestAsync(uri);
 
@@ -464,8 +464,24 @@ namespace Ao3TrackReader.Data
                                     var m = regexTag.Match(newuri.LocalPath);
                                     if (m.Success)
                                     {
-                                        tag.actual = UnescapeTag(m.Groups["TAGNAME"].Value);
-                                        await LookupTagAsync(tag.actual).ConfigureAwait(false);
+                                        var merger = UnescapeTag(m.Groups["TAGNAME"].Value);
+                                        var mergertag = await LookupTagAsync(merger, intag);                         
+
+                                        var frommerger = App.Database.GetTag(intag);
+                                        if (!string.IsNullOrEmpty(frommerger?.actual))
+                                            return frommerger;
+
+                                        // Unlucky we hit a race condition where the merger was already being looked up 
+                                        // and our lock on ourselves blocked it from writing this tags details to the db
+                                        // Is a small performance loss having to do it here
+                                        tag.actual = merger;
+                                        if (mergertag != null)
+                                        {
+                                            tag.parentsStr = mergertag.parentsStr;
+                                            tag.category = mergertag.category;
+                                            App.Database.SetTagDetails(tag);
+                                            return tag;
+                                        }
                                     }
                                     break;
                                 }
@@ -504,65 +520,76 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        using (App.Database.DoTransaction()) // All txn commands must be on same thread or deadlock!
+                        TaskCompletionSource<object> wait = new TaskCompletionSource<object>();
+                        await Task.Run(() =>
                         {
-                            App.Database.SetTagDetails(tag);
-
-                            // synonyms
-                            HtmlNode synonymstagsnode = tagnode.ElementByClass("div", "synonym")?.Element("ul");
-                            if (!(synonymstagsnode is null))
+                            // All txn commands must be on same thread or deadlock!
+                            using (App.Database.DoTransaction()) 
                             {
-                                foreach (var e in synonymstagsnode.DescendantsByClass("a", "tag"))
+                                App.Database.SetTagDetails(tag);
+                                wait.SetResult(null);
+
+                                // synonyms
+                                HtmlNode synonymstagsnode = tagnode.ElementByClass("div", "synonym")?.Element("ul");
+                                if (!(synonymstagsnode is null))
                                 {
-                                    var href = e.Attributes["href"];
-                                    if (!(href is null) && !string.IsNullOrEmpty(href.Value))
+                                    var links = synonymstagsnode.DescendantsByClass("a", "tag");
+                                    foreach (var e in links)
                                     {
-                                        var newuri = new Uri(uri, href.Value.HtmlDecode());
-                                        var m = regexTag.Match(newuri.LocalPath);
-                                        if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
+                                        var href = e.Attributes["href"];
+                                        if (!(href is null) && !string.IsNullOrEmpty(href.Value))
                                         {
-                                            var ssyntag = UnescapeTag(m.Groups["TAGNAME"].Value);
-
-                                            SemaphoreSlim syntaglock;
-                                            using (taglockslock.Lock())
+                                            var newuri = new Uri(uri, href.Value.HtmlDecode());
+                                            var m = regexTag.Match(newuri.LocalPath);
+                                            if (m.Success && !string.IsNullOrWhiteSpace(m.Groups["TAGNAME"].Value))
                                             {
-                                                if (!taglocks.TryGetValue(ssyntag, out syntaglock)) taglocks[ssyntag] = syntaglock = GetTagLockSem();
-                                            }
+                                                var ssyntag = UnescapeTag(m.Groups["TAGNAME"].Value);
 
-                                            // If the lock is already held then another thread is already working on this, we wont even attempt to do anything to it
-                                            if (syntaglock.Wait(0))
-                                            {
-                                                try
+                                                SemaphoreSlim syntaglock = null;
+                                                if (ssyntag != synallow) using(taglockslock.Lock())
                                                 {
-                                                    var syntag = App.Database.GetTag(ssyntag) ?? new TagCache { name = ssyntag };
-                                                    if (string.IsNullOrEmpty(syntag?.actual))
+                                                    if (!taglocks.TryGetValue(ssyntag, out syntaglock))
+                                                        taglocks[ssyntag] = syntaglock = GetTagLockSem();
+                                                }
+
+                                                // If the lock is already held then another thread is already working on this, we wont even attempt to do anything to it
+                                                if (syntaglock?.Wait(0) != false)
+                                                {
+                                                    try
                                                     {
-                                                        syntag.actual = tag.actual;
-                                                        syntag.parents = tag.parents;
-                                                        syntag.category = tag.category;
-                                                        App.Database.SetTagDetails(syntag);
+                                                        var syntag = App.Database.GetTag(ssyntag) ?? new TagCache { name = ssyntag };
+                                                        if (string.IsNullOrEmpty(syntag?.actual))
+                                                        {
+                                                            syntag.actual = tag.actual;
+                                                            syntag.parents = tag.parents;
+                                                            syntag.category = tag.category;
+                                                            App.Database.SetTagDetails(syntag);
+                                                        }
+                                                    }
+                                                    finally
+                                                    {
+                                                        syntaglock?.Release();
                                                     }
                                                 }
-                                                finally
-                                                {
-                                                    syntaglock.Release();
-                                                }
-                                            }
 
-                                            // Release lock and delete if no thread waiting
-                                            using (taglockslock.Lock())
-                                            {
-                                                if (syntaglock.CurrentCount == 1)
+                                                // Release lock and delete if no thread waiting
+
+                                                if (!(syntaglock is null)) using (taglockslock.Lock())
                                                 {
-                                                    DisposeTagLockSem(syntaglock);
-                                                    taglocks.Remove(ssyntag);
+                                                    if (syntaglock.CurrentCount == 1)
+                                                    {
+                                                        DisposeTagLockSem(syntaglock);
+                                                        taglocks.Remove(ssyntag);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
+                        }).ConfigureAwait(false);
+
+                        await wait.Task;
                     }
 
                 }

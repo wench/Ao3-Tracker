@@ -86,6 +86,15 @@ namespace Ao3TrackReader
             // create the tables
             database.CreateTable<Variable>();
 
+            // Do any database upgrades if necessaey
+            TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
+
+            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5))
+            {
+                database.Execute("UPDATE Work SET seq=0 WHERE seq IS NULL");
+                database.Execute("DROP TABLE TagCache"); // Delete the entire cache cause it's behaviour has slightly changed
+            }
+
             database.CreateTable<Work>();
             database.CreateTable<TagCache>();
             database.CreateTable<LanguageCache>();
@@ -93,20 +102,12 @@ namespace Ao3TrackReader
             database.CreateTable<SortColumn>();
             database.CreateTable<ListFilter>();
 
-            // Do any database upgrades if necessaey
-            TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
-
-            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5))
-            {
-                database.Query<Work>("UPDATE Work SET seq=0 WHERE seq IS NULL");
-                database.Query<TagCache>("UPDATE TagCache SET expires=0"); // Invalidate the entire cache
-            }
-
             if (DatabaseVersion != Version.Version.Integer)
                 SaveVariable("DatabaseVersion", Version.Version.Integer);
 
             ReadingListCached = new CachedTimestampedTable<ReadingList, string, Ao3TrackDatabase>(this);
             ListFiltersCached = new CachedTimestampedTable<ListFilter, string, Ao3TrackDatabase>(this);
+            // Work should be cached table too?
         }
 
         public IEnumerable<Work> GetItems()
@@ -363,17 +364,22 @@ namespace Ao3TrackReader
 
         Random random = new Random();
 
-        TimeSpan RandomExpires(int days, int variation)
+        DateTime RandomExpires()
         {
-            return TimeSpan.FromDays(days + random.NextDouble() * variation);
+            return DateTime.UtcNow + TimeSpan.FromDays(21 + random.NextDouble() * 14);
         }
+
+        bool intxn = false;
+        DateTime txnExpires = DateTime.MinValue;
+
+        DateTime TagExpires => intxn ? txnExpires : RandomExpires();
 
         public void SetTagId(string name, int id)
         {
             lock (locker)
             {
                 var now = DateTime.UtcNow;
-                var expires = now + RandomExpires(21, 14);
+                var expires = TagExpires;
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
                 if (!(row is null))
                 {
@@ -395,16 +401,15 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var now = DateTime.UtcNow;
-                tag.expires = now + RandomExpires(21, 14);
+                tag.expires = TagExpires;
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
                 if (!(row is null))
                 {
-                    if (row.expires <= now) tag.id = 0;
+                    tag.id = row.expires <= now ? 0 : row.id;
                     database.Update(tag);
                 }
                 else
                 {
-                    tag.id = 0;
                     database.Insert(tag);
                 }
             }
@@ -540,6 +545,8 @@ namespace Ao3TrackReader
         public AutoCommitTransaction DoTransaction()
         {
             Monitor.Enter(locker);
+            intxn = true;
+            txnExpires = RandomExpires();
             database.BeginTransaction();
             return new AutoCommitTransaction(this);
         }
@@ -547,6 +554,7 @@ namespace Ao3TrackReader
         internal void Commit()
         {
             database.Commit();
+            intxn = false;
             Monitor.Exit(locker);
         }
         #endregion

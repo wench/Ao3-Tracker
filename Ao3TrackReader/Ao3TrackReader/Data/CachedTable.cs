@@ -101,7 +101,10 @@ namespace Ao3TrackReader.Data
                     }
                     gotall = true;
                 }
-                return values.Values.ToList();
+                return values.Values.Where(
+                    (row) => 
+                        row != null
+                ).ToList();
             }
         }
 
