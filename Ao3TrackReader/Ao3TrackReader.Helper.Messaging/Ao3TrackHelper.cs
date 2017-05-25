@@ -62,6 +62,25 @@ namespace Ao3TrackReader.Helper
             _onalterfontsizeevent = 0;
         }
 
+        public void Init()
+        {
+            wvp.DoOnMainThreadAsync(async () =>
+            {
+                await wvp.EvaluateJavascriptAsync(string.Format(
+                    "Ao3Track.Messaging.helper.setValue({0},{1});" +
+                    "Ao3Track.Messaging.helper.setValue({2},{3});" +
+                    "Ao3Track.Messaging.helper.setValue({4},{5});" +
+                    "Ao3Track.Messaging.helper.setValue({6},{7});" +
+                    "Ao3Track.Messaging.helper.setValue({8},{9});",
+                    JsonConvert.SerializeObject("leftOffset"), JsonConvert.SerializeObject(wvp.LeftOffset),
+                    JsonConvert.SerializeObject("swipeCanGoBack"), JsonConvert.SerializeObject(wvp.SwipeCanGoBack),
+                    JsonConvert.SerializeObject("swipeCanGoForward"), JsonConvert.SerializeObject(wvp.SwipeCanGoForward),
+                    JsonConvert.SerializeObject("deviceWidth"), JsonConvert.SerializeObject(wvp.DeviceWidth),
+                    JsonConvert.SerializeObject("settings"), JsonConvert.SerializeObject(wvp.Settings))
+                    );
+            }).ConfigureAwait(false);
+        }
+
         int _onjumptolastlocationevent;
         public int onjumptolastlocationevent
         {
@@ -222,11 +241,5 @@ namespace Ao3TrackReader.Helper
                 throw new NotSupportedException();
             }
         }
-
-        public void GetUnitConvOptions([Converter("Callback")] int hCallback)
-        {
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, wvp.UnitConvOptions); });
-        }
-
     }
 }

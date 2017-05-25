@@ -27,6 +27,7 @@ declare namespace Ao3Track {
     }    
 
     export interface IAo3TrackHelperMethods {
+        init(): void;
         logError(name: string, message: string, url:string, lineNo:number, columnNo:number, stack: string): void;
 
         getWorkDetailsAsync (works: number[], flags: WorkDetailsFlags, callback: (details: { [key:number]:IWorkDetails }) => void) : void;
@@ -42,8 +43,6 @@ declare namespace Ao3Track {
 
         startWebViewDragAccelerate(velocity: number) : void;
         stopWebViewDragAccelerate(): void;
-
-        getUnitConvOptions(callback:(result: IUnitConvOptions)=>void): void;
     }
 
     export interface IAo3TrackHelperProperties {
@@ -63,6 +62,8 @@ declare namespace Ao3Track {
 
         currentLocation: IWorkChapterEx | null;
         pageTitle : IPageTitle | null;
+
+        settings: ISettings;
     }
 
     export interface IAo3TrackHelper extends IAo3TrackHelperMethods, IAo3TrackHelperProperties {

@@ -56,7 +56,7 @@ namespace Ao3Track {
         sendMessage({ type: "SET", data: workchapters, sendResponse: undefined });
     };
 
-    ShouldFilterWork = (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string|null)=>void) => {
+    ShouldFilterWork = (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string | null) => void) => {
         callback(null);
     }
 
@@ -133,8 +133,13 @@ namespace Ao3Track {
         sendMessage({ type: "RL_URLSINLIST", data: urls, sendResponse: callback });
     };
 
-
-    GetUnitConvOptions = (callback: (result: IUnitConvOptions) => void) => {
-        callback({ tempToC: true, distToM: true, volumeToM: true, weightToM: true });
+    Settings = {
+        tempToC: true,
+        distToM: true,
+        volumeToM: true,
+        weightToM: true,
+        showCatTags: true,
+        showRatingTags: true,
+        showWIPTags: true
     };
 }

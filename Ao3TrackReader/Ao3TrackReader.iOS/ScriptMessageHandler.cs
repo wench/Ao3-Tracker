@@ -23,7 +23,7 @@ namespace Ao3TrackReader.iOS
             }
         }
 
-        public ScriptMessageHandler(WebViewPage wvp, Ao3TrackHelper helper) : base(wvp, helper)
+        public ScriptMessageHandler(Ao3TrackHelper helper) : base(helper)
         {
         }
 

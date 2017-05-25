@@ -14,6 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#if __ANDROID__
+// Android doesn't support: Enough ES2015, passing js functions directly to native code
+// Android supports: Native methods returning values to js
+#define NEED_INJECT_POLYFILLS
+#define NEED_INJECT_CALLBACKS
+
+#elif __IOS__
+// iOS doesn't support: Enough ES2015, native methods returning values to js, passing js functions directly to native
+#define NEED_INJECT_POLYFILLS
+#define NEED_INJECT_CALLBACKS
+#define NEED_INJECT_MESSAGING
+
+#elif WINDOWS_UWP
+// UWP supports: Enough ES2015, native methods returning values to js, passing js functions directly to native
+
+#elif __WINDOWS__
+// Win8.1 doesn't support: Enough ES2015, native methods returning values to js, passing js functions directly to native
+#define NEED_INJECT_POLYFILLS
+#define NEED_INJECT_CALLBACKS
+#define NEED_INJECT_MESSAGING
+
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +68,31 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
-        public IEnumerable<Models.IHelpInfo> HelpItems {
+        public string[] Injections { get; } =
+            new[] {
+                "jquery-3.1.1.js",
+                "init.js",
+                "marshal.js",
+                "tracker.css",
+#if NEED_INJECT_POLYFILLS
+                "polyfills.js",
+#endif
+                "utils.js",
+#if NEED_INJECT_CALLBACKS
+                "callbacks.js",
+#endif
+                "platform.js",
+#if NEED_INJECT_MESSAGING
+                "messaging.js",
+#endif
+                "reader.js",
+                "tracker.js",
+                "unitconv.js",
+                "touch.js"
+            };
+
+        public IEnumerable<Models.IHelpInfo> HelpItems
+        {
             get { return ExtraHelp.Concat((IEnumerable<Models.IHelpInfo>)AllToolbarItems); }
         }
 
@@ -71,6 +118,8 @@ namespace Ao3TrackReader
             HelpPane.Init();
             SetupContextMenu();
             UpdateToolbar();
+
+            InitSettings();
 
             WebViewHolder.Content = CreateWebView();
 
@@ -406,9 +455,11 @@ namespace Ao3TrackReader
         }
 
         PageTitle pageTitle = null;
-        public PageTitle PageTitle {
+        public PageTitle PageTitle
+        {
             get { return pageTitle; }
-            set {
+            set
+            {
                 pageTitle = value;
 
                 // Title by Author,Author - Chapter N: Title - Relationship - Fandoms
@@ -529,7 +580,7 @@ namespace Ao3TrackReader
                     {
                         foreach (var kvp in workchapters)
                         {
-                            if (!result.TryGetValue(kvp.Key,out var detail))
+                            if (!result.TryGetValue(kvp.Key, out var detail))
                                 result.Add(kvp.Key, detail = new WorkDetails());
                             detail.savedLoc = kvp.Value;
                         }
@@ -563,7 +614,7 @@ namespace Ao3TrackReader
         {
             return ReadingList.AreUrlsInListAsync(urls);
         }
-        
+
         public Task<T> DoOnMainThreadAsync<T>(Func<T> function)
         {
             if (IsMainThread)
@@ -671,7 +722,8 @@ namespace Ao3TrackReader
 
         public int ShowPrevPageIndicator
         {
-            get {
+            get
+            {
                 if (PrevPageIndicator.TextColor == Colors.Highlight)
                     return 2;
                 else if (PrevPageIndicator.TextColor == Colors.Base.VeryLow)
@@ -690,7 +742,8 @@ namespace Ao3TrackReader
         }
         public int ShowNextPageIndicator
         {
-            get {
+            get
+            {
                 if (NextPageIndicator.TextColor == Colors.Highlight)
                     return 2;
                 else if (NextPageIndicator.TextColor == Colors.Base.VeryLow)
@@ -878,9 +931,11 @@ namespace Ao3TrackReader
         IWorkChapterEx currentLocation;
         WorkChapter currentSavedLocation;
         object currentLocationLock = new object();
-        public IWorkChapterEx CurrentLocation {
+        public IWorkChapterEx CurrentLocation
+        {
             get { return currentLocation; }
-            set {
+            set
+            {
                 lock (currentLocationLock)
                 {
                     currentLocation = value;
@@ -958,7 +1013,8 @@ namespace Ao3TrackReader
         {
             var end = DeviceWidth;
             var centre = end / 2;
-            if ((!SwipeCanGoBack && offset > 0.0) || (!SwipeCanGoForward && offset < 0.0)) {
+            if ((!SwipeCanGoBack && offset > 0.0) || (!SwipeCanGoForward && offset < 0.0))
+            {
                 offset = 0.0;
             }
             else if (offset < -end)
@@ -972,19 +1028,23 @@ namespace Ao3TrackReader
             LeftOffset = offset;
 
 
-            if (SwipeCanGoForward && offset < -centre) {
+            if (SwipeCanGoForward && offset < -centre)
+            {
                 ShowNextPageIndicator = 2;
                 if (offset <= -end) return -3;
                 return -2;
             }
-            else if (SwipeCanGoForward && offset < 0) {
+            else if (SwipeCanGoForward && offset < 0)
+            {
                 ShowNextPageIndicator = 1;
             }
-            else {
+            else
+            {
                 ShowNextPageIndicator = 0;
             }
 
-            if (SwipeCanGoBack && offset >= centre) {
+            if (SwipeCanGoBack && offset >= centre)
+            {
                 ShowPrevPageIndicator = 2;
                 if (offset >= end) return 3;
                 return 2;
@@ -993,7 +1053,8 @@ namespace Ao3TrackReader
             {
                 ShowPrevPageIndicator = 1;
             }
-            else {
+            else
+            {
                 ShowPrevPageIndicator = 0;
             }
 
@@ -1011,7 +1072,8 @@ namespace Ao3TrackReader
             var offsetCat = SwipeOffsetChanged(offset);
 
             Device.StartTimer(TimeSpan.FromMilliseconds(15),
-                () => {
+                () =>
+                {
                     if (!webViewDragAccelerateStopWatch.IsRunning) return false;
 
                     double now = webViewDragAccelerateStopWatch.ElapsedMilliseconds;
@@ -1021,7 +1083,8 @@ namespace Ao3TrackReader
                     else if (offsetCat == -1) acceleration = 3000.0;
                     else if (offsetCat >= 2) acceleration = 3000.0;
                     else if (offsetCat == 1) acceleration = -3000.0;
-                    else {
+                    else
+                    {
                         return false;
                     }
 
@@ -1036,11 +1099,13 @@ namespace Ao3TrackReader
                     }
 
                     offsetCat = SwipeOffsetChanged(offset);
-                    if (offsetCat == 3) {
+                    if (offsetCat == 3)
+                    {
                         SwipeGoBack();
                         return false;
                     }
-                    else if (offsetCat == -3) {
+                    else if (offsetCat == -3)
+                    {
                         SwipeGoForward();
                         return false;
                     }
@@ -1178,31 +1243,29 @@ namespace Ao3TrackReader
 
             try
             {
-
                 var ct = cts.Token;
                 ct.ThrowIfCancellationRequested();
                 await OnInjectingScripts(ct);
 
-                foreach (string s in ScriptsToInject)
+                foreach (string s in Injections)
                 {
                     ct.ThrowIfCancellationRequested();
                     var content = await ReadFile(s, ct);
 
                     ct.ThrowIfCancellationRequested();
-                    await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
-                }
+                    switch (System.IO.Path.GetExtension(s))
+                    {
+                        case ".js":
+                            await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
+                            break;
 
-                foreach (string s in CssToInject)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    var content = await ReadFile(s, ct);
-
-                    ct.ThrowIfCancellationRequested();
-                    await CallJavascriptAsync("Ao3Track.InjectCSS", content);
+                        case ".css":
+                            await CallJavascriptAsync("Ao3Track.Marshal.InjectCSS", content);
+                            break;
+                    }
                 }
 
                 ct.ThrowIfCancellationRequested();
-                await OnInjectedScripts(ct);
             }
             catch (AggregateException ae)
             {
@@ -1228,22 +1291,87 @@ namespace Ao3TrackReader
             }
         }
 
-        public IUnitConvOptions UnitConvOptions {
-            get
+
+        void InitSettings()
+        {
+            bool b;
+            bool? nb;
+
+            App.Database.GetVariableEvents("UnitConvOptions.tempToC").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out nb);
+            settings.tempToC = nb;
+
+            App.Database.GetVariableEvents("UnitConvOptions.distToM").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out nb);
+            settings.distToM = nb;
+
+            App.Database.GetVariableEvents("UnitConvOptions.volumeToM").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out nb);
+            settings.volumeToM = nb;
+
+            App.Database.GetVariableEvents("UnitConvOptions.weightToM").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out nb);
+            settings.weightToM = nb;
+
+            App.Database.GetVariableEvents("TagOptions.showCatTags").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("TagOptions.showCatTags", bool.TryParse, out b);
+            settings.showCatTags = b;
+
+            App.Database.GetVariableEvents("TagOptions.showWIPTags").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("TagOptions.showWIPTags", bool.TryParse, out b);
+            settings.showWIPTags = b;
+
+            App.Database.GetVariableEvents("TagOptions.showRatingTags").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
+            settings.showRatingTags = b;
+        }
+
+        private void SettingsVariable_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+            bool b = false;
+            bool? nb = null;
+
+            switch (e.VarName)
             {
-                var r = new Models.UnitConvOptions();
+                case "UnitConvOptions.tempToC":
+                    if (bool.TryParse(e.NewValue, out b)) nb = b;
+                    settings.tempToC = nb;
+                    break;
 
-#pragma warning disable IDE0018 // Inline variable declaration
-                bool? v;
-#pragma warning restore IDE0018 // Inline variable declaration
-                if (App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out v)) r.tempToC = v;
-                if (App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out v)) r.distToM = v;
-                if (App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out v)) r.volumeToM = v;
-                if (App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out v)) r.weightToM = v;
+                case "UnitConvOptions.distToM":
+                    if (bool.TryParse(e.NewValue, out b)) nb = b;
+                    settings.distToM = nb;
+                    break;
 
-                return r;
+                case "UnitConvOptions.volumeToM":
+                    if (bool.TryParse(e.NewValue, out b)) nb = b;
+                    settings.volumeToM = nb;
+                    break;
+
+                case "UnitConvOptions.weightToM":
+                    if (bool.TryParse(e.NewValue, out b)) nb = b;
+                    settings.weightToM = nb;
+                    break;
+
+                case "TagOptions.showCatTags":
+                    bool.TryParse(e.NewValue, out b);
+                    settings.showCatTags = b;
+                    break;
+
+                case "TagOptions.showWIPTags":
+                    bool.TryParse(e.NewValue, out b);
+                    settings.showWIPTags = b;
+                    break;
+
+                case "TagOptions.showRatingTags":
+                    bool.TryParse(e.NewValue, out b);
+                    settings.showRatingTags = b;
+                    break;
             }
         }
+
+        Helper.Settings settings = new Helper.Settings();
+        public Helper.ISettings Settings => settings;
 
         public async void OpenExternal(Uri uri)
         {
@@ -1252,7 +1380,7 @@ namespace Ao3TrackReader
         }
 
         public void JavascriptError(string name, string message, string url, int lineNo, int coloumNo, string stack)
-        {           
+        {
             App.Log(new JavascriptException(message, stack)
             {
                 Name = name,

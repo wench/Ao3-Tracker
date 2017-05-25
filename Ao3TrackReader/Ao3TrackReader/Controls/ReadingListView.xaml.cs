@@ -35,6 +35,8 @@ namespace Ao3TrackReader.Controls
 
         GroupList<Ao3PageViewModel> readingListBacking;
 
+
+
         public ReadingListView()
         {
             AddToReadingListCommand = new DisableableCommand(() => AddAsync(wvp.CurrentUri.AbsoluteUri));
@@ -43,8 +45,29 @@ namespace Ao3TrackReader.Controls
 
             readingListBacking = new GroupList<Ao3PageViewModel>();
 
+            bool b;
+
+            App.Database.TryGetVariable("ReadingList.showTagsDefault", bool.TryParse, out b);
+            TagsVisible = b;
+            App.Database.TryGetVariable("ReadingList.showCompleteDefault", bool.TryParse, out b);
+            readingListBacking.ShowHidden = b;
+
             ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
             ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+
+            tagTypeVisible = new Dictionary<Ao3TagType, bool>(3);
+
+            App.Database.TryGetVariable("TagOptions.showCatTags", bool.TryParse, out b);
+            tagTypeVisible[Ao3TagType.Category] = b;
+            App.Database.TryGetVariable("TagOptions.showWIPTags", bool.TryParse, out b);
+            tagTypeVisible[Ao3TagType.Complete] = b;
+            App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
+            tagTypeVisible[Ao3TagType.Rating] = b;
+
+            App.Database.GetVariableEvents("TagOptions.showCatTags").Updated += TagVisibilities_Updated;
+            App.Database.GetVariableEvents("TagOptions.showWIPTags").Updated += TagVisibilities_Updated;
+            App.Database.GetVariableEvents("TagOptions.showRatingTags").Updated += TagVisibilities_Updated;
+
         }
 
         protected override void OnWebViewPageSet()
@@ -107,7 +130,7 @@ namespace Ao3TrackReader.Controls
 
                                     if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) is null)
                                     {
-                                        var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null)
+                                        var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null, model.Value.Type == Ao3PageType.Work?tagTypeVisible:null)
                                         {
                                             TagsVisible = tags_visible
                                         };
@@ -358,6 +381,8 @@ namespace Ao3TrackReader.Controls
         }
 
         bool tags_visible = false;
+        Dictionary<Ao3TagType, bool> tagTypeVisible;
+
         public bool TagsVisible
         {
             get { return tags_visible; }
@@ -369,6 +394,40 @@ namespace Ao3TrackReader.Controls
                     readingListBacking.ForEachInAll((item) => { item.TagsVisible = tags_visible; });
                 }
             }
+        }
+
+        private void TagVisibilities_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+            Ao3TagType type;
+            switch (e.VarName)
+            {
+                case "TagOptions.showCatTags":
+                    type = Ao3TagType.Category;
+                    break;
+
+                case "TagOptions.showWIPTags":
+                    type = Ao3TagType.Complete;
+                    break;
+
+                case "TagOptions.showRatingTags":
+                    type = Ao3TagType.Rating;
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (!bool.TryParse(e.NewValue, out var b))
+                return;
+
+            wvp.DoOnMainThreadAsync(() =>
+            {
+                tagTypeVisible[type] = b;
+                readingListBacking.ForEachInAll((item) =>
+                {
+                    if (item?.BaseData?.Type == Ao3PageType.Work) item.SetTagVisibilities(type, b);
+                });
+            });
         }
 
         private void OnShowTags(object sender, EventArgs e)
@@ -526,7 +585,7 @@ namespace Ao3TrackReader.Controls
 
             await wvp.DoOnMainThreadAsync(async () =>
             {
-                viewmodel = new Ao3PageViewModel(model.Uri, model.HasChapters ? 0 : (int?)null) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
+                viewmodel = new Ao3PageViewModel(model.Uri, model.HasChapters ? 0 : (int?)null, model.Type == Ao3PageType.Work ? tagTypeVisible : null) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
                 {
                     TagsVisible = tags_visible
                 };

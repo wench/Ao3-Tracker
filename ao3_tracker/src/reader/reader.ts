@@ -14,48 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-interface Window {
-    jQuery: JQueryStatic;
-}
-
 namespace Ao3Track {
-
-    export let jQuery = window.jQuery.noConflict(true);
-    export let $ = jQuery;
-
-    // Don't want wrapped function please. >:(
-    export function unWrapHR<T extends Function>(f: T, bindto?: object) : T
-    {
-        let ret : T;
-        if ((f as any)["nr@original"]) ret = (f as any)["nr@original"];
-        else ret = f;
-        if (bindto) ret = ret.bind(bindto);
-        return ret;
-    }
-    
-    export let setImmediate = unWrapHR(window.setImmediate,window);
-    export let setInterval = unWrapHR(window.setInterval,window);
-    export let setTimeout = unWrapHR(window.setTimeout,window);
-    export let clearImmediate = unWrapHR(window.clearImmediate,window);
-    export let clearInterval = unWrapHR(window.clearInterval,window);
-    export let clearTimeout = unWrapHR(window.clearTimeout,window);
-    export let addEventListener = unWrapHR(EventTarget.prototype.addEventListener);
-    export let removeEventListener = unWrapHR(EventTarget.prototype.removeEventListener);
-
-    export function InjectCSS (styles: string){
-            let blob = new Blob([styles],{type: 'text/css', endings: "transparent"});
-            let link = document.createElement('link');
-            link.type = 'text/css';
-            link.rel = 'stylesheet';
-            link.href = URL.createObjectURL(blob);
-            document.getElementsByTagName('head')[0].appendChild(link);
-        };
-
-    window.addEventListener("error",(event)=>{
-        let ev = event as ErrorEvent;
-        let error = ev.error as Error;
-        Ao3Track.Helper.logError(error.name, error.message, ev.filename, ev.lineno, ev.colno, error.stack || "");
-    });
 
     GetWorkDetails = (works: number[],  callback: (details: { [key:number]:IWorkDetails }) => void, flags?: WorkDetailsFlags) => {
         Ao3Track.Helper.getWorkDetailsAsync(works, flags || WorkDetailsFlags.All, callback);
@@ -119,9 +78,7 @@ namespace Ao3Track {
         Ao3Track.Helper.areUrlsInReadingListAsync(urls,callback);
     };
 
-    GetUnitConvOptions = (callback: (result: IUnitConvOptions)=>void) => {
-        Ao3Track.Helper.getUnitConvOptions(callback);
-    };
+    Settings = Ao3Track.Helper.settings;
 
     function contextMenuHandler(ev: MouseEvent) {
         for (let target = ev.target as (HTMLElement|null); target && target !== document.body; target = target.parentElement) {

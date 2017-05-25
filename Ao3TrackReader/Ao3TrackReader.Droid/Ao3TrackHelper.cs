@@ -288,12 +288,11 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        [JavascriptInterface, Export("getUnitConvOptions")]
-        public void GetUnitConvOptions([Converter("Callback")] int hCallback)
+        public ISettings Settings
         {
-            wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, wvp.UnitConvOptions); }).ConfigureAwait(false);
+            [JavascriptInterface, Export("get_settings"), Converter("FromJSON")]
+            get => wvp.Settings;
         }
-
     }
 }
 

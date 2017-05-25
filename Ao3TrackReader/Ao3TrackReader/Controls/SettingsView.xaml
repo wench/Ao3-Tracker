@@ -121,7 +121,7 @@ limitations under the License.
             </StackLayout>
 
             <ScrollView Orientation="Vertical" >
-                <StackLayout Spacing="24" Padding="4,0,12,0">
+                <StackLayout Spacing="32" Padding="4,0,12,0">
                     <StackLayout x:Name="cloudSyncForm" Style="{StaticResource SettingGroup}">
                         <Label Text="Cloud Sync" Style="{StaticResource Heading}" />
 
@@ -250,6 +250,52 @@ limitations under the License.
                             <Label Text="Convert Weight" HorizontalOptions="Start" />
                             <local:DropDown x:Name="unitConvWeightDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
                         </StackLayout>
+                    </StackLayout>
+
+                    <StackLayout x:Name="unitSumDispForm" Style="{StaticResource SettingGroup}">
+                        <Label Text="Work Display Options" Style="{StaticResource Heading}" />
+                        <Label Text="Options to adjust the way works are displayed in listings and the Reading List." Style="{StaticResource Remark}" />
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Show Rating Tags" HorizontalOptions="StartAndExpand" />
+                                <Switch x:Name="sumShowRatingTags" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                            </StackLayout>
+                            <Label Text="eg. General Audiences, Teen, Mature" Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Show Category Tags"  HorizontalOptions="StartAndExpand" />
+                                <Switch x:Name="sumShowCatTags" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                            </StackLayout>
+                            <Label Text="eg. F/M, M/M, F/F" Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Show Work In Progress Tags" HorizontalOptions="StartAndExpand" />
+                                <Switch x:Name="sumShowWIPTags" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                            </StackLayout>
+                            <Label Text="eg. Work In Progress, Complete Work" Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Show Tags in Reading List by default" HorizontalOptions="StartAndExpand" />
+                                <Switch x:Name="sumShowRLTagsDef" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                            </StackLayout>
+                            <Label Text="Selects whether tags are displayed in the Reading List when the app starts" Style="{StaticResource Remark}" />
+                        </StackLayout>
+
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Show all works in Reading List by default" HorizontalOptions="StartAndExpand" />
+                                <Switch x:Name="sumShowRLCompleteDef" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                            </StackLayout>
+                            <Label Text="Selects whether works with no unread chapters are displayed in the Reading List when the app starts" Style="{StaticResource Remark}" />
+                        </StackLayout>
+
                     </StackLayout>
 
                     <StackLayout x:Name="listFiltersForm" Style="{StaticResource SettingGroup}">

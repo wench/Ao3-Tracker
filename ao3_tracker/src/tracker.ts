@@ -73,6 +73,7 @@ namespace Ao3Track {
     let regex_tag_url = new RegExp("^/tags/([^/?#]+)(?:/(works|bookmarks)?)?$");           // 1 => TAGNAME, 2 => TYPE
     let regex_user_url = new RegExp("^/users/([^/?#]+)(?:/.*)?$");                         // 1 => USERID
     let regex_series_url = new RegExp("^/series/(\\d+)$");                                 // 1 => SERIESID
+    let regex_comma_split = new RegExp("\s*,\s*");
     export let work_chapter = window.location.pathname.match(regex_work_url);
 
     export let workid = 0;
@@ -332,6 +333,46 @@ namespace Ao3Track {
                         if (tags.indexOf(tag) === -1) tags.push(tag);
                     }
                 });     
+
+                // Required tags are a bit different
+                let insertafter = $work.find(".tags > li.warnings").last().get(0) as HTMLLIElement;
+                $work.find(".required-tags a > span").each((index,elem)=>{
+                    let span = elem as HTMLSpanElement;
+
+                    if (span.title) {
+                        for (let tag of span.title.split(regex_comma_split)) {
+                            if (tags.indexOf(tag) === -1) tags.push(tag);     
+
+                            let tagtype = "ao3t_unknown";
+
+                            if (span.classList.contains("warnings"))
+                                continue;   // warnings are already in the list so we don't add again
+                            else if (span.classList.contains("rating")) {
+                                if (!Settings.showRatingTags) continue;
+                                tagtype = "ao3t_rating";
+                            }
+                            else if (span.classList.contains("category")) {
+                                if (!Settings.showCatTags) continue;
+                                tagtype = "ao3t_category";
+                            }
+                            else if (span.classList.contains("iswip")) {
+                                if (!Settings.showWIPTags) continue;
+                                tagtype = "ao3t_iswip";                 
+                            }               
+
+                            let link = document.createElement("a");
+                            link.href = "/tags/" + Utils.escapeTag(tag) + "/works";
+                            link.classList.add("tag");
+                            link.innerText = tag;
+                            
+                            let li = document.createElement("li");
+                            li.appendChild(link);
+
+                            insertafter.insertAdjacentElement('afterend', li);
+                            insertafter = li;
+                        }
+                    }
+                });
                 
                 // Gather all the serieses
                 let serieses : number[] = [];

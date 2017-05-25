@@ -615,36 +615,35 @@ namespace Ao3Track {
             }
         }
 
-        Ao3Track.GetUnitConvOptions((options) => {
 
-            let convs: UnitRegex[] = [];
+        let convs: UnitRegex[] = [];
 
-            function createRegExps<T extends MultiUnitRegex>(c: { new (regex: RegExp | null, groups: string[]): T; units: UnitType[]; }): void {
-                let exp = "";
-                let units: string[] = [];
-                for (let s = 0; s < c.units.length; s++) {
-                    exp += "(?:" + ws + valueExp + ws + c.units[s].exp + ")?";
-                    units.push(c.units[s].name);
-                    convs.push(new WordyRegex(c.units[s].exp, new c(null, [c.units[s].name])));
-                }
-                convs.push(new c(new RegExp("(?=\\d)" + exp + "(?!\\d)", "i"), units));
+        function createRegExps<T extends MultiUnitRegex>(c: { new (regex: RegExp | null, groups: string[]): T; units: UnitType[]; }): void {
+            let exp = "";
+            let units: string[] = [];
+            for (let s = 0; s < c.units.length; s++) {
+                exp += "(?:" + ws + valueExp + ws + c.units[s].exp + ")?";
+                units.push(c.units[s].name);
+                convs.push(new WordyRegex(c.units[s].exp, new c(null, [c.units[s].name])));
             }
+            convs.push(new c(new RegExp("(?=\\d)" + exp + "(?!\\d)", "i"), units));
+        }
 
-            if (options.distToM === true) createRegExps(DistanceUStoM);
-            else if (options.distToM === false) createRegExps(DistanceMtoUS);
+        if (Settings.distToM === true) createRegExps(DistanceUStoM);
+        else if (Settings.distToM === false) createRegExps(DistanceMtoUS);
 
-            if (options.volumeToM === true) createRegExps(VolumeUStoM);
-            else if (options.volumeToM === false) createRegExps(VolumeMtoUS);
+        if (Settings.volumeToM === true) createRegExps(VolumeUStoM);
+        else if (Settings.volumeToM === false) createRegExps(VolumeMtoUS);
 
-            if (options.weightToM === true) createRegExps(WeightUStoM);
-            else if (options.weightToM === false) createRegExps(WeightMtoUS);
+        if (Settings.weightToM === true) createRegExps(WeightUStoM);
+        else if (Settings.weightToM === false) createRegExps(WeightMtoUS);
 
-            if (options.tempToC === true)
-                convs.push(new TemperatureFtoC(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|F|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
-            else if (options.tempToC === false)
-                convs.push(new TemperatureCtoF(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|C|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
+        if (Settings.tempToC === true)
+            convs.push(new TemperatureFtoC(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|F|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
+        else if (Settings.tempToC === false)
+            convs.push(new TemperatureCtoF(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|C|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
 
-            if (convs.length === 0) return;
+        if (convs.length !== 0) {
 
             let all_regex = new RegExp('(^|\\b|\\.|,|\\s|"|\')((?:' + convs.join(')|(?:').replace(/\((?!\?)/g, "(?:") + '))(?=\\b|\\.|,|\\s|"|\'|$)', 'gi');
 
@@ -723,6 +722,6 @@ namespace Ao3Track {
                     parent.replaceChild(fragment, text_nodes[i]);
                 }
             }
-        });
+        }
     }
 }

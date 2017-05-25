@@ -74,7 +74,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Text\Super.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\TextExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\TextEx.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Models\UnitConvOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Work.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PageEx.cs" />

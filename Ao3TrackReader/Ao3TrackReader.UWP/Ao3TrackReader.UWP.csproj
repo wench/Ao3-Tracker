@@ -465,6 +465,12 @@
     <Content Include="..\..\ao3_tracker\build\reader\uwp\unitconv.js">
       <Link>Content\unitconv.js</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\utils.js">
+      <Link>Content\utils.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\init.js">
+      <Link>Content\init.js</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

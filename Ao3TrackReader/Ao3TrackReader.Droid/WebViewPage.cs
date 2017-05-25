@@ -47,26 +47,10 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage
     {
-        public string[] ScriptsToInject { get; } =
-            new[] {
-                "jquery-3.1.1.js",
-                "polyfills.js",
-                "marshal.js",
-                "callbacks.js",
-                "platform.js",
-                "reader.js",
-                "tracker.js",
-                "unitconv.js",
-                "touch.js"
-            };
-
-        public string[] CssToInject { get; } = { "tracker.css" };
-
         public bool IsMainThread
         {
             get { return Looper.MainLooper == Looper.MyLooper(); }
         }
-
 
         WebView webView;
         WebClient webClient;
@@ -189,11 +173,6 @@ namespace Ao3TrackReader
         }
 
         Task OnInjectingScripts(CancellationToken ct)
-        {
-            return Task.CompletedTask;
-        }
-
-        Task OnInjectedScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }

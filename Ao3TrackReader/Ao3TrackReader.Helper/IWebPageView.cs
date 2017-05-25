@@ -88,8 +88,6 @@ namespace Ao3TrackReader.Helper
         double LeftOffset { get; set; }
         int ShowPrevPageIndicator { get; set; }
         int ShowNextPageIndicator { get; set; }
-        string[] ScriptsToInject { get; }
-        string[] CssToInject { get; }
         int FontSize { get; }
         IWorkChapterEx CurrentLocation { get; set; }
         PageTitle PageTitle { get; set; }
@@ -105,7 +103,7 @@ namespace Ao3TrackReader.Helper
         IAsyncOp_String CallJavascriptAsync(string function, params object[] args);
         IAsyncOp_String EvaluateJavascriptAsync(string code);
 
-        IUnitConvOptions UnitConvOptions { get; }
+        ISettings Settings{ get; }
 
         IAsyncOp_String ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses);
     }

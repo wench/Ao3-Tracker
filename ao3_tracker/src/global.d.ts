@@ -37,11 +37,14 @@ declare namespace Ao3Track {
         timestamp: timestamp;
     }
 
-    interface IUnitConvOptions {
+    interface ISettings {
         tempToC?: boolean;
         distToM?: boolean;
         volumeToM?: boolean;
         weightToM?: boolean;
+        showCatTags: boolean;
+        showWIPTags: boolean;
+        showRatingTags: boolean;
     }
 
     interface IWorkDetails {
@@ -56,7 +59,8 @@ declare namespace Ao3Track {
     export let DisableLastLocationJump : () => void;
     export let EnableLastLocationJump : (workid: number, lastloc: IWorkChapter) => void;
     export let SetCurrentLocation : (current : IWorkChapterEx) => void;    
-    export let GetUnitConvOptions : (callback: (result :IUnitConvOptions)=>void) => void;
     export let AreUrlsInReadingList : (urls: string[], callback: (result: { [key:string]:boolean})=> void) => void;
     export let ShouldFilterWork : (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string|null)=>void) => void;
+
+    export let Settings: ISettings;    
 }

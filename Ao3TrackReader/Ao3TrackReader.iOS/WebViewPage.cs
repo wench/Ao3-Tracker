@@ -39,23 +39,6 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage
     {
-        public string[] ScriptsToInject { get; } =
-            new[] {
-                "jquery-3.1.1.js",
-                "polyfills.js",
-                "marshal.js",
-                "callbacks.js",
-                "platform.js",
-                "messaging.js",
-                "reader.js",
-                "tracker.js",
-                "touch.js",
-                "unitconv.js"
-            };
-
-        public string[] CssToInject { get; } = { "tracker.css" };
-
-
         public bool IsMainThread
         {
             get { return Foundation.NSThread.IsMain; }
@@ -103,7 +86,7 @@ namespace Ao3TrackReader
                 UserContentController = userContentController = new WKUserContentController()
             };
             var helper = new Ao3TrackHelper(this);
-            var messageHandler = new Ao3TrackReader.iOS.ScriptMessageHandler(this, helper);
+            var messageHandler = new Ao3TrackReader.iOS.ScriptMessageHandler(helper);
             userContentController.AddScriptMessageHandler((WKScriptMessageHandler) messageHandler, "ao3track");
             this.helper = helper;
 
@@ -151,11 +134,6 @@ namespace Ao3TrackReader
             await EvaluateJavascriptAsync("window.Ao3TrackHelperNative = " + helper.HelperDefJson + ";");
         }
 
-        Task OnInjectedScripts(CancellationToken ct)
-        {
-            return Task.CompletedTask;
-        }
-
         async Task<string> ReadFile(string name, CancellationToken ct)
         {
             using (StreamReader sr = new StreamReader(Path.Combine(NSBundle.MainBundle.BundlePath, "Content", name), Encoding.UTF8))
@@ -168,11 +146,11 @@ namespace Ao3TrackReader
         {
             get
             {
-                return DoOnMainThread(() =>
+                return DoOnMainThreadAsync(() =>
                 {
                     if (!string.IsNullOrWhiteSpace(webView.Url?.AbsoluteString)) return new Uri(webView.Url.AbsoluteString);
                     else return new Uri("about:blank");
-                });
+                }).Result;
             }
         }
 

@@ -45,10 +45,15 @@ namespace Ao3TrackReader.Models
 
     public sealed class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
     {
-        public Ao3PageViewModel(Uri uri, int? unread)
+        public Ao3PageViewModel(Uri uri, int? unread, IDictionary<Ao3TagType,bool> tagvis)
         {
             Uri = uri;
             Unread = unread;
+
+            if (tagvis == null)
+                tagTypeVisible = new Dictionary<Ao3TagType, bool>();
+            else
+                tagTypeVisible = new Dictionary<Ao3TagType, bool>(tagvis);
         }
 
         public int CompareTo(Ao3PageViewModel y)
@@ -186,6 +191,22 @@ namespace Ao3TrackReader.Models
 
         public bool SummaryVisible { get { return Summary != null && !Summary.IsEmpty; } }
 
+        Dictionary<Ao3TagType, bool> tagTypeVisible;
+        public void SetTagVisibilities(Ao3TagType type, bool visible)
+        {
+            if (!TagsVisible || type == Ao3TagType.Fandoms || !tags.TryGetValue(type,out var t) || t.Count == 0)
+                return;
+
+            if (!tagTypeVisible.TryGetValue(type, out var existing))
+                existing = true;
+
+            if (existing == visible)
+                return;
+
+            OnPropertyChanging("Tags");
+            tagTypeVisible[type] = visible;
+            OnPropertyChanged("Tags");
+        }
 
         SortedDictionary<Ao3TagType, List<string>> tags;
         public Text.TextEx Tags
@@ -198,7 +219,8 @@ namespace Ao3TrackReader.Models
                 {
                     foreach (var t in tags)
                     {
-                        if (t.Key == Ao3TagType.Fandoms) continue;
+                        if (t.Key == Ao3TagType.Fandoms || (tagTypeVisible.TryGetValue(t.Key,out var vis) && !vis))
+                            continue;
 
                         var s = new Text.Span();
 
@@ -207,7 +229,7 @@ namespace Ao3TrackReader.Models
                             s.Foreground = Colors.Base.High;
                             s.Bold = true;
                         }
-                        else if (t.Key == Ao3TagType.Rating || t.Key == Ao3TagType.Category)
+                        else if (t.Key == Ao3TagType.Rating || t.Key == Ao3TagType.Category || t.Key == Ao3TagType.Complete)
                             s.Foreground = Colors.Base.High;
                         else if (t.Key == Ao3TagType.Relationships)
                             s.Foreground = Colors.Base.MediumHigh;

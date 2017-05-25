@@ -33,9 +33,8 @@ namespace Ao3Track {
         export interface IHelperDef {
             [key: string]: IMemberDef;
         }
-        export interface IPromise<T>
-        {
-            then(onComplete: (value:T)=>void, onError?: (reason:any)=>void) : IPromise<T>;
+        export interface IPromise<T> {
+            then(onComplete: (value: T) => void, onError?: (reason: any) => void): IPromise<T>;
         }
         export namespace Converters {
             export let ToJSON = JSON.stringify;
@@ -50,10 +49,10 @@ namespace Ao3Track {
                 helperDef = JSON.parse(helperDef) as IHelperDef;
             }
 
-            let convs = Ao3Track.Marshal.Converters as any as {[key:string]:(value:any)=>any};
+            let convs = Ao3Track.Marshal.Converters as any as { [key: string]: (value: any) => any };
 
             for (let name in helperDef) {
-                let n = name;                
+                let n = name;
                 let def = helperDef[n];
 
                 if (typeof def.return === "string") {
@@ -69,7 +68,7 @@ namespace Ao3Track {
                 // It's a function!
                 if (def.args !== undefined) {
                     let newprop: PropertyDescriptor = { enumerable: false };
-                    
+
                     let func = (nativeHelper[n] as Function).bind(nativeHelper) as Function;
 
                     for (let i in def.args) {
@@ -124,10 +123,10 @@ namespace Ao3Track {
                         else {
                             if (typeof def.getter === "function") {
                                 let getter = def.getter;
-                                newprop.get = function() { return getter(nativeHelper[n]); };
+                                newprop.get = function () { return getter(nativeHelper[n]); };
                             }
                             else {
-                                newprop.get = function() { return nativeHelper[n]; };
+                                newprop.get = function () { return nativeHelper[n]; };
                             }
                         }
                     }
@@ -136,7 +135,7 @@ namespace Ao3Track {
                             let func = (nativeHelper[def.setterfunc] as Function).bind(nativeHelper) as (v: any) => void;
                             if (typeof def.setter === "function") {
                                 let setter = def.setter;
-                                newprop.set = function(v) { func(setter(v)); };
+                                newprop.set = function (v) { func(setter(v)); };
                             }
                             else {
                                 newprop.set = func;
@@ -145,16 +144,33 @@ namespace Ao3Track {
                         else {
                             if (typeof def.setter === "function") {
                                 let setter = def.setter;
-                                newprop.set = function(v) { nativeHelper[n] = setter(v); };
+                                newprop.set = function (v) { nativeHelper[n] = setter(v); };
                             }
                             else {
-                                newprop.set = function(v) { nativeHelper[n] = v; };
+                                newprop.set = function (v) { nativeHelper[n] = v; };
                             }
                         }
                     }
                     Object.defineProperty(Ao3Track.Helper, n, newprop);
                 }
             }
+
+            window.addEventListener("error", (event) => {
+                let ev = event as ErrorEvent;
+                let error = ev.error as Error;
+                Ao3Track.Helper.logError(error.name, error.message, ev.filename, ev.lineno, ev.colno, error.stack || "");
+            });
+
+            Ao3Track.Helper.init();
         }
+
+        export function InjectCSS(styles: string) {
+            let blob = new Blob([styles], { type: 'text/css', endings: "transparent" });
+            let link = document.createElement('link');
+            link.type = 'text/css';
+            link.rel = 'stylesheet';
+            link.href = URL.createObjectURL(blob);
+            document.getElementsByTagName('head')[0].appendChild(link);
+        };
     }
 }

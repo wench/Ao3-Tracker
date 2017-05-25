@@ -513,6 +513,12 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\unitconv.js">
       <Link>Assets\unitconv.js</Link>
     </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\utils.js">
+      <Link>Assets\utils.js</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\init.js">
+      <Link>Assets\init.js</Link>
+    </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />

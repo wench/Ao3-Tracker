@@ -36,17 +36,6 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        public string[] ScriptsToInject { get; } = new[] {
-                "jquery-3.1.1.js",
-                "marshal.js",
-                "platform.js",
-                "reader.js",
-                "tracker.js",
-                "touch.js",
-                "unitconv.js"
-        };
-        public string[] CssToInject { get; } = new[] { "tracker.css" };
-
         public void CreateWebViewAdditional()
         {
             webView.NewWindowRequested += WebView_NewWindowRequested;
@@ -72,11 +61,6 @@ namespace Ao3TrackReader
         }
 
         Task OnInjectingScripts(CancellationToken ct)
-        {
-            return Task.CompletedTask;
-        }
-
-        Task OnInjectedScripts(CancellationToken ct)
         {
             return Task.CompletedTask;
         }

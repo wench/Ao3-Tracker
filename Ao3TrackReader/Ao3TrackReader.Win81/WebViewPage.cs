@@ -37,20 +37,6 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        public string[] ScriptsToInject { get; } = new[] {
-                "jquery-3.1.1.js",
-                "marshal.js",
-                "polyfills.js",
-                "callbacks.js",
-                "platform.js",
-                "messaging.js",
-                "reader.js",
-                "tracker.js",
-                "touch.js",
-                "unitconv.js"
-        };
-        public string[] CssToInject { get; } = new[] { "tracker.css" };
-
         Xamarin.Forms.View contextMenuPlaceholder;
 
 

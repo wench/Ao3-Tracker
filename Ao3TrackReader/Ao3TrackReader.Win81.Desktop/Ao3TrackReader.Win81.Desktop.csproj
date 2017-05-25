@@ -283,6 +283,12 @@
     <Content Include="..\..\ao3_tracker\build\reader\win81\unitconv.js">
       <Link>Content\unitconv.js</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\utils.js">
+      <Link>Content\utils.js</Link>
+    </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\init.js">
+      <Link>Content\init.js</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

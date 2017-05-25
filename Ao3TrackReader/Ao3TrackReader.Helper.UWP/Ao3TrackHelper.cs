@@ -40,23 +40,23 @@ namespace Ao3TrackReader.Helper
 
         private async Task<T> DoOnMainThreadAsync<T>(Func<T> func)
         {
-            return (T)await wvp.DoOnMainThreadAsync(() => 
+            return (T)await wvp.DoOnMainThreadAsync(() =>
                 func()
             );
         }
 
         private async Task<T> DoOnMainThreadAsync<T>(Func<Task<T>> func)
         {
-            return (T)await wvp.DoOnMainThreadAsync(() => 
-                Task.Run(async () => 
-                    (object) await func()
+            return (T)await wvp.DoOnMainThreadAsync(() =>
+                Task.Run(async () =>
+                    (object)await func()
                 ).AsAsyncOperation()
             );
         }
 
         private async Task DoOnMainThreadAsync(Action func)
         {
-            await wvp.DoOnMainThreadAsync(() => 
+            await wvp.DoOnMainThreadAsync(() =>
                 func()
             );
         }
@@ -64,7 +64,7 @@ namespace Ao3TrackReader.Helper
         private async Task DoOnMainThreadAsync(Func<Task> func)
         {
             await wvp.DoOnMainThreadAsync(() =>
-                Task.Run(async () => 
+                Task.Run(async () =>
                     await func()
                 ).AsAsyncAction()
             );
@@ -144,7 +144,7 @@ namespace Ao3TrackReader.Helper
 
                 return EventRegistrationTokenTable<EventHandler<object>>
                     .GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent)
-                    .AddEventHandler((s,e)=> { Task.Run(()=>value(s, e)); });
+                    .AddEventHandler((s, e) => { Task.Run(() => value(s, e)); });
             }
 
             remove
@@ -315,12 +315,9 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        public IAsyncOperation<object> GetUnitConvOptions()
+        public ISettings Settings
         {
-            return Task.Run(() =>
-            {
-                return (object) wvp.UnitConvOptions;
-            }).AsAsyncOperation();
+            get => wvp.Settings;
         }
     }
 }

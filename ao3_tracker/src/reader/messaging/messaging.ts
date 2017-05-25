@@ -30,12 +30,8 @@ namespace Ao3Track {
             name: keyof IAo3TrackHelperMethods;
             args: string[];
         }
-        export interface InitMessage
-        {
-            type: "INIT";
-        }
 
-        export type Message = SetMessage | CallMessage | InitMessage;
+        export type Message = SetMessage | CallMessage;
 
         // IOS doesn't have a global containing the helper interface, instead it just sets a global containing the HelperDef
         export let helperDef : Marshal.IHelperDef = Ao3TrackHelperNative;
@@ -101,6 +97,4 @@ namespace Ao3Track {
         }
     }
     Marshal.MarshalNativeHelper(Messaging.helperDef, Messaging.helper);
-
-    Messaging.notify(JSON.stringify({ type: "INIT" }));
 }

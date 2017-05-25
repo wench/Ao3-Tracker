@@ -73,6 +73,7 @@ namespace Ao3TrackReader.Controls
                 UpdateNavOptions();
                 UpdateFontSizeUI();
                 UpdateListFilters();
+                UpdateSummaryDisplay();
             }
         }
 
@@ -445,6 +446,43 @@ namespace Ao3TrackReader.Controls
             await Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
 
             await UpdateListFiltersAsync();
+        }
+
+        private void UpdateSummaryDisplay()
+        {
+            bool b;
+
+            App.Database.TryGetVariable("TagOptions.showCatTags", bool.TryParse, out b);
+            sumShowCatTags.IsToggled = b;
+
+            App.Database.TryGetVariable("TagOptions.showWIPTags", bool.TryParse, out b);
+            sumShowWIPTags.IsToggled = b;
+
+            App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
+            sumShowRatingTags.IsToggled = b;
+
+            App.Database.TryGetVariable("ReadingList.showTagsDefault", bool.TryParse, out b);
+            sumShowRLTagsDef.IsToggled = b;
+
+            App.Database.TryGetVariable("ReadingList.showCompleteDefault", bool.TryParse, out b);
+            sumShowRLCompleteDef.IsToggled = b;
+        }
+
+        void OnSummaryDisplayChanged(object sender, EventArgs e)
+        {
+            if (!IsOnScreen) return;
+
+            string varname;
+            if (sender == sumShowCatTags) varname = "TagOptions.showCatTags";
+            else if (sender == sumShowWIPTags) varname = "TagOptions.showWIPTags";
+            else if (sender == sumShowRatingTags) varname = "TagOptions.showRatingTags";
+            else if (sender == sumShowRLTagsDef) varname = "ReadingList.showTagsDefault";
+            else if (sender == sumShowRLCompleteDef) varname = "ReadingList.showCompleteDefault";
+            else return;
+
+            var sw = sender as Switch;
+           
+            App.Database.SaveVariable(varname, sw.IsToggled);
         }
     }
 }

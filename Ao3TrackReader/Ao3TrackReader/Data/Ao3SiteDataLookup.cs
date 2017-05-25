@@ -1236,6 +1236,19 @@ namespace Ao3TrackReader.Data
                     continue;
                 }
 
+                // Add req tags to the tag listing
+                if (n.Key != Ao3RequiredTag.Warnings)
+                {
+                    var type = RequiredTagToType[n.Key];
+                    foreach (var t in n.Value.GetAttributeValue("title", "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        var unescaped = UnescapeTag(t.Trim());
+                        if (string.IsNullOrWhiteSpace(unescaped)) continue;
+                        if (!tags.TryGetValue(type, out List<string> list)) tags[type] = list = new List<string>();
+                        if (!list.Contains(unescaped)) list.Add(unescaped);
+                    }
+                }
+
                 var classes = n.Value.GetClasses();
                 var search = n.Key.ToString();
                 var tag = Array.Find(classes, (val) =>
@@ -2019,7 +2032,8 @@ namespace Ao3TrackReader.Data
         static Dictionary<Ao3RequiredTag, Ao3TagType> RequiredTagToType = new Dictionary<Ao3RequiredTag, Ao3TagType> {
             {Ao3RequiredTag.Warnings, Ao3TagType.Warnings },
             {Ao3RequiredTag.Category, Ao3TagType.Category },
-            {Ao3RequiredTag.Rating, Ao3TagType.Rating }
+            {Ao3RequiredTag.Rating, Ao3TagType.Rating },
+            {Ao3RequiredTag.Complete, Ao3TagType.Complete },
         };
 
         static Dictionary<int, string> TagIdToReqClass = new Dictionary<int, string> {

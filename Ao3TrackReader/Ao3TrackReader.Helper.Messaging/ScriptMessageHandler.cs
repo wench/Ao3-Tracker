@@ -7,12 +7,10 @@ namespace Ao3TrackReader.Helper.Messaging
 {
     public class ScriptMessageHandler
     {
-        WebViewPage wvp;
         private Ao3TrackHelper helper;
 
-        protected ScriptMessageHandler(WebViewPage wvp, Ao3TrackHelper helper)
+        protected ScriptMessageHandler(Ao3TrackHelper helper)
         {
-            this.wvp = wvp;
             this.helper = helper;
         }
 
@@ -35,23 +33,7 @@ namespace Ao3TrackReader.Helper.Messaging
         {
             var msg = JsonConvert.DeserializeObject<Message>(message);
 
-            if (msg.type == "INIT")
-            {
-                wvp.DoOnMainThread(async () =>
-                {
-                    await wvp.EvaluateJavascriptAsync(string.Format(
-                        "Ao3Track.Messaging.helper.setValue({0},{1});" +
-                        "Ao3Track.Messaging.helper.setValue({2},{3});" +
-                        "Ao3Track.Messaging.helper.setValue({4},{5});" +
-                        "Ao3Track.Messaging.helper.setValue({6},{7});",
-                        JsonConvert.SerializeObject("leftOffset"), JsonConvert.SerializeObject(wvp.LeftOffset),
-                        JsonConvert.SerializeObject("swipeCanGoBack"), JsonConvert.SerializeObject(wvp.SwipeCanGoBack),
-                        JsonConvert.SerializeObject("swipeCanGoForward"), JsonConvert.SerializeObject(wvp.SwipeCanGoForward),
-                        JsonConvert.SerializeObject("deviceWidth"), JsonConvert.SerializeObject(wvp.DeviceWidth)));
-                });
-                return;
-            }
-            else if (helper.HelperDef.TryGetValue(msg.name, out var md))
+            if (helper.HelperDef.TryGetValue(msg.name, out var md))
             {
                 if (msg.type == "SET" && md.pi?.CanWrite == true)
                 {

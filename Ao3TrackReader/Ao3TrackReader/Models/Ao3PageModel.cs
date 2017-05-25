@@ -38,6 +38,7 @@ namespace Ao3TrackReader.Models
         Warnings,
         Rating,
         Category,
+        Complete,
         Fandoms,
         Relationships,
         Characters,
