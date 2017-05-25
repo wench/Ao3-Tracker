@@ -62,7 +62,7 @@ namespace Ao3TrackReader.Data
 
                             if (App.Current.HaveNetwork)
                             {
-                                SyncWithServerAsync(false);
+                                await Task.Run(() => SyncWithServerAsync(false).ConfigureAwait(false));
                             }
                             else
                             {
@@ -80,12 +80,12 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        private void Current_HaveNetworkChanged(object sender, EventArgs<bool> e)
+        private async void Current_HaveNetworkChanged(object sender, EventArgs<bool> e)
         {
             if (e)
             {
                 App.Current.HaveNetworkChanged -= Current_HaveNetworkChanged;
-                SyncWithServerAsync(false);
+                await SyncWithServerAsync(false).ConfigureAwait(false);
             }
         }
 
@@ -144,7 +144,7 @@ namespace Ao3TrackReader.Data
                     if (!(key is null))
                     {
                         await App.Database.ListFiltersCached.InsertOrUpdateAsync(new ListFilter { data = key, timestamp = DateTime.UtcNow.ToUnixTime() });
-                        if (App.Current.HaveNetwork) SyncWithServerAsync(false);
+                        if (App.Current.HaveNetwork) await Task.Run(() => SyncWithServerAsync(false).ConfigureAwait(false));
                     }
                 });
             });
@@ -160,7 +160,7 @@ namespace Ao3TrackReader.Data
                     if (!(dbkey is null))
                     {
                         await App.Database.ListFiltersCached.DeleteAsync(dbkey);
-                        if (App.Current.HaveNetwork) SyncWithServerAsync(false);
+                        if (App.Current.HaveNetwork) await Task.Run(() => SyncWithServerAsync(false).ConfigureAwait(false));
                     }
                 });
             });
@@ -413,9 +413,9 @@ namespace Ao3TrackReader.Data
             return null;
         }
 
-        public void SyncWithServerAsync(bool newuser)
+        public Task SyncWithServerAsync(bool newuser)
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 var slf = rwlock.ReadLock().TaskRun(async () =>
                 {
@@ -587,7 +587,7 @@ namespace Ao3TrackReader.Data
                         foreach (var filter in existingfilters) await App.Database.ListFiltersCached.DeleteAsync(filter);
                         foreach (var filter in newfilters) await App.Database.ListFiltersCached.InsertOrUpdateAsync(filter);
 
-                        if (App.Current.HaveNetwork) SyncWithServerAsync(false);
+                        if (App.Current.HaveNetwork) await Task.Run(() => SyncWithServerAsync(false).ConfigureAwait(false));
                     }
                     finally
                     {

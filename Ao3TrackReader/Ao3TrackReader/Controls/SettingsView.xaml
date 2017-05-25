@@ -282,7 +282,8 @@ limitations under the License.
                         </StackLayout>
 
                         <StackLayout Style="{StaticResource Setting}">
-                            <local:Button Text="Save Filters" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
+                            <local:Button x:Name="listFilterSave" Text="Save Filters" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
+                            <ContentView IsVisible="False" x:Name="listFilterIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
                     </StackLayout>
 

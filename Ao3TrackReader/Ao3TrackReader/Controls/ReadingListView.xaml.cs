@@ -30,8 +30,10 @@ namespace Ao3TrackReader.Controls
 {
     public partial class ReadingListView : PaneView
     {
+        const int MaxRefreshTasks = 20;
+        const int RefreshDelay = 64;
+
         GroupList<Ao3PageViewModel> readingListBacking;
-        SemaphoreSlim RefreshSemaphore = new SemaphoreSlim(20);       
 
         public ReadingListView()
         {
@@ -70,64 +72,67 @@ namespace Ao3TrackReader.Controls
                     var tasks = new Queue<Task>();
                     var vms = new List<Ao3PageViewModel>();
 
-                    if (items.Count == 0)
+                    using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
-                        tasks.Enqueue(AddAsyncImpl("http://archiveofourown.org/", DateTime.UtcNow.ToUnixTime()));
-                    }
-                    else
-                    {
-                        var timestamp = DateTime.UtcNow.ToUnixTime();
-                        var models = Ao3SiteDataLookup.LookupQuick(items.Keys);
-                        foreach (var model in models)
+                        if (items.Count == 0)
                         {
-                            if (!(model.Value is null))
+                            tasks.Enqueue(AddAsyncImpl("http://archiveofourown.org/", DateTime.UtcNow.ToUnixTime()));
+                        }
+                        else
+                        {
+                            var timestamp = DateTime.UtcNow.ToUnixTime();
+                            var models = Ao3SiteDataLookup.LookupQuick(items.Keys);
+                            foreach (var model in models)
                             {
-                                var item = items[model.Key];
-                                if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
-                                    model.Value.Title = item.Title;
-                                if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
+                                if (!(model.Value is null))
                                 {
-                                    model.Value.PrimaryTag = item.PrimaryTag;
-                                    var tagdata = Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                                    if (tagdata is null) model.Value.PrimaryTagType = Models.Ao3TagType.Other;
-                                    else model.Value.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category); 
-                                }
-                                if (!(model.Value.Details is null) && model.Value.Details.Summary is null && !string.IsNullOrEmpty(item.Summary))
-                                    model.Value.Details.Summary = item.Summary;
-
-                                if (model.Value.Uri.AbsoluteUri != model.Key)
-                                {
-                                    await App.Database.ReadingListCached.DeleteAsync(model.Key);
-                                    await App.Database.ReadingListCached.InsertOrUpdateAsync(new ReadingList(model.Value, timestamp, item.Unread));
-                                }
-
-                                if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) is null)
-                                {
-                                    var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null)
+                                    var item = items[model.Key];
+                                    if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
+                                        model.Value.Title = item.Title;
+                                    if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
                                     {
-                                        TagsVisible = tags_visible
-                                    };
-                                    readingListBacking.Add(viewmodel);
-                                    vms.Add(viewmodel);
+                                        model.Value.PrimaryTag = item.PrimaryTag;
+                                        var tagdata = Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
+                                        if (tagdata is null) model.Value.PrimaryTagType = Models.Ao3TagType.Other;
+                                        else model.Value.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                                    }
+                                    if (!(model.Value.Details is null) && model.Value.Details.Summary is null && !string.IsNullOrEmpty(item.Summary))
+                                        model.Value.Details.Summary = item.Summary;
 
-                                    await RefreshSemaphore.WaitAsync();
-                                    tasks.Enqueue(Task.Run(async () =>
+                                    if (model.Value.Uri.AbsoluteUri != model.Key)
                                     {
-                                        await viewmodel.SetBaseDataAsync(model.Value);
-                                        viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                                        RefreshSemaphore.Release();
-                                    }));
+                                        await App.Database.ReadingListCached.DeleteAsync(model.Key);
+                                        await App.Database.ReadingListCached.InsertOrUpdateAsync(new ReadingList(model.Value, timestamp, item.Unread));
+                                    }
+
+                                    if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) is null)
+                                    {
+                                        var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null)
+                                        {
+                                            TagsVisible = tags_visible
+                                        };
+                                        readingListBacking.Add(viewmodel);
+                                        vms.Add(viewmodel);
+
+                                        await tasklimit.WaitAsync();
+                                        tasks.Enqueue(Task.Run(async () =>
+                                        {
+                                            await viewmodel.SetBaseDataAsync(model.Value);
+                                            viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                                            tasklimit.Release();
+                                        }));
+                                    }
                                 }
-                            }
 
 #pragma warning disable 4014
-                            while (tasks.Count > 0 && tasks.Peek().IsCompleted)
-                                tasks.Dequeue();
+                                while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                                    tasks.Dequeue();
 #pragma warning restore 4014
+                            }
                         }
+                        await Task.WhenAll(tasks);
+                        tasks.Clear();
                     }
-                    await Task.WhenAll(tasks);
-                    tasks.Clear();
 
                     await wvp.DoOnMainThreadAsync(() =>
                     {
@@ -143,21 +148,26 @@ namespace Ao3TrackReader.Controls
                         await tcsNetworkAvailable.Task;
                     }
 
-                    foreach (var viewmodel in vms)
+                    using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
-                        await RefreshSemaphore.WaitAsync();
-
-                        tasks.Enqueue(Task.Run(async () =>
+                        foreach (var viewmodel in vms)
                         {
-                            await RefreshAsync(viewmodel);
-                            RefreshSemaphore.Release();
-                        }));
+                            await tasklimit.WaitAsync();
+
+                            tasks.Enqueue(Task.Run(async () =>
+                            {
+                                await RefreshAsync(viewmodel);
+                                await Task.Delay(RefreshDelay);
+                                tasklimit.Release();
+                            }));
 #pragma warning disable 4014
-                        while (tasks.Count > 0 && tasks.Peek().IsCompleted)
-                            tasks.Dequeue();
+                            while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                                tasks.Dequeue();
 #pragma warning restore 4014
+                        }
+                        await Task.WhenAll(tasks);
+                        tasks.Clear();
                     }
-                    await Task.WhenAll(tasks);
 
                     await SyncToServerAsync(false);
                 }
@@ -314,18 +324,23 @@ namespace Ao3TrackReader.Controls
             {
                 await SyncToServerAsync(false);
 
-                List<Task> tasks = new List<Task>();
-                foreach (var viewmodel in readingListBacking.AllSafe)
+                using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                 {
-                    await RefreshSemaphore.WaitAsync();
+                    List<Task> tasks = new List<Task>();
+                    foreach (var viewmodel in readingListBacking.AllSafe)
+                    {
+                        await tasklimit.WaitAsync();
 
-                    tasks.Add(Task.Run(async () => {
-                        await RefreshAsync(viewmodel);
-                        RefreshSemaphore.Release();
-                    }));
+                        tasks.Add(Task.Run(async () =>
+                        {
+                            await RefreshAsync(viewmodel);
+                            await Task.Delay(RefreshDelay);
+                            tasklimit.Release();
+                        }));
+                    }
+
+                    await Task.WhenAll(tasks);
                 }
-
-                await Task.WhenAll(tasks);
 
                 await wvp.DoOnMainThreadAsync(() =>
                 {
@@ -428,25 +443,35 @@ namespace Ao3TrackReader.Controls
                 srl = await App.Storage.SyncReadingListAsync(srl);
                 if (!(srl is null))
                 {
-                    List<Task> tasks = new List<Task>();
-                    foreach (var item in srl.paths)
+                    using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
-                        await RefreshSemaphore.WaitAsync();
-
-                        tasks.Add(Task.Run(async () =>
+                        var tasks = new Queue<Task>();
+                        foreach (var item in srl.paths)
                         {
-                            if (item.Value == -1)
+                            await tasklimit.WaitAsync();
+
+                            tasks.Enqueue(Task.Run(async () =>
                             {
-                                await RemoveAsyncImpl(item.Key);
-                            }
-                            else
-                            {
-                                await AddAsyncImpl(item.Key, item.Value);
-                            }
-                            RefreshSemaphore.Release();
-                        }));
+                                if (item.Value == -1)
+                                {
+                                    await RemoveAsyncImpl(item.Key);
+                                }
+                                else
+                                {
+                                    await AddAsyncImpl(item.Key, item.Value);
+                                }
+                                await Task.Delay(RefreshDelay);
+                                tasklimit.Release();
+
+                            }));
+#pragma warning disable 4014
+                            while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                                tasks.Dequeue();
+#pragma warning restore 4014
+                        }
+                        await Task.WhenAll(tasks);
+                        tasks.Clear();
                     }
-                    await Task.WhenAll(tasks);
                     App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
                 }
             }

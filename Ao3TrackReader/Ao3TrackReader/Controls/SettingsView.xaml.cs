@@ -210,13 +210,27 @@ namespace Ao3TrackReader.Controls
             else
             {
                 UpdateSyncForm();
-                await wvp.ReadingList.SyncToServerAsync(old_username != s_username).ConfigureAwait(false);
-                Data.ListFiltering.Instance.SyncWithServerAsync(old_username != s_username);
+                await Task.Factory.StartNew(async () =>
+                {
+                    await Task.WhenAll(
+                        wvp.ReadingList.SyncToServerAsync(old_username != s_username),
+                        Task.Run(async()=>
+                        {
+                            await Data.ListFiltering.Instance.SyncWithServerAsync(old_username != s_username);
+                            if (IsOnScreen)
+                            {
+                                await wvp.DoOnMainThreadAsync(async () => await UpdateListFiltersAsync());
+                            }
+                        })
+                    );
+                }, TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning).ConfigureAwait(false);
             }
-            syncSubmitButton.IsEnabled = true;
-            syncIndicator.Content = null;
-            syncIndicator.IsVisible = false;
-
+            await wvp.DoOnMainThreadAsync(() =>
+            {
+                syncSubmitButton.IsEnabled = true;
+                syncIndicator.Content = null;
+                syncIndicator.IsVisible = false;
+            });
         }
 
         public async void OnSyncLogout(object sender, EventArgs e)
@@ -372,16 +386,65 @@ namespace Ao3TrackReader.Controls
 
         void UpdateListFilters()
         {
-            Data.ListFiltering.Instance.GetFilterStrings(out var tags, out var authors, out var works, out var serieses);
-            listFilterTags.Text = tags;
-            listFilterAuthors.Text = authors;
-            listFilterWorks.Text = works;
-            listFilterSerieses.Text = serieses;
+            UpdateListFiltersAsync().ConfigureAwait(false);
+        }
+
+        async Task UpdateListFiltersAsync()
+        {
+            await wvp.DoOnMainThreadAsync(() =>
+            {
+                listFilterTags.IsEnabled = false;
+                listFilterAuthors.IsEnabled = false;
+                listFilterWorks.IsEnabled = false;
+                listFilterSerieses.IsEnabled = false;
+                listFilterSave.IsEnabled = false;
+                if (listFilterIndicator.Content == null) listFilterIndicator.Content = new ActivityIndicator();
+                listFilterIndicator.IsVisible = true;
+            });
+
+            await Task.Run(async () =>
+            {
+                Data.ListFiltering.Instance.GetFilterStrings(out var tags, out var authors, out var works, out var serieses);
+
+                await wvp.DoOnMainThreadAsync(() =>
+                {
+                    listFilterTags.Text = tags;
+                    listFilterAuthors.Text = authors;
+                    listFilterWorks.Text = works;
+                    listFilterSerieses.Text = serieses;
+
+                    listFilterTags.IsEnabled = true;
+                    listFilterAuthors.IsEnabled = true;
+                    listFilterWorks.IsEnabled = true;
+                    listFilterSerieses.IsEnabled = true;
+                    listFilterSave.IsEnabled = true;
+                    listFilterIndicator.Content = null;
+                    listFilterIndicator.IsVisible = false;
+                });
+            });
         }
 
         void OnSaveFilters(object sender, EventArgs e)
         {
-            Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
+            OnSaveFiltersAsync().ConfigureAwait(false);
+        }
+
+        async Task OnSaveFiltersAsync()
+        {
+            await wvp.DoOnMainThreadAsync(() =>
+            {
+                listFilterTags.IsEnabled = false;
+                listFilterAuthors.IsEnabled = false;
+                listFilterWorks.IsEnabled = false;
+                listFilterSerieses.IsEnabled = false;
+                listFilterSave.IsEnabled = false;
+                if (listFilterIndicator.Content == null) listFilterIndicator.Content = new ActivityIndicator();
+                listFilterIndicator.IsVisible = true;
+            });
+
+            await Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
+
+            await UpdateListFiltersAsync();
         }
     }
 }
