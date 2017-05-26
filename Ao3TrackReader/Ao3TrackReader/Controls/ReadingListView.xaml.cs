@@ -171,6 +171,8 @@ namespace Ao3TrackReader.Controls
                         await tcsNetworkAvailable.Task;
                     }
 
+                    await SyncToServerAsync(false, true);
+
                     using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
                         foreach (var viewmodel in vms)
@@ -191,8 +193,6 @@ namespace Ao3TrackReader.Controls
                         await Task.WhenAll(tasks);
                         tasks.Clear();
                     }
-
-                    await SyncToServerAsync(false);
                 }
                 finally
                 {
@@ -345,24 +345,32 @@ namespace Ao3TrackReader.Controls
             SyncIndicator.Content = new ActivityIndicator();
             Task.Factory.StartNew(async () =>
             {
-                await SyncToServerAsync(false);
-
-                using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
+                await App.Database.ReadingListCached.BeginDeferralAsync();
+                try
                 {
-                    List<Task> tasks = new List<Task>();
-                    foreach (var viewmodel in readingListBacking.AllSafe)
+                    await SyncToServerAsync(false, true);
+
+                    using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
-                        await tasklimit.WaitAsync();
-
-                        tasks.Add(Task.Run(async () =>
+                        List<Task> tasks = new List<Task>();
+                        foreach (var viewmodel in readingListBacking.AllSafe)
                         {
-                            await RefreshAsync(viewmodel);
-                            await Task.Delay(RefreshDelay);
-                            tasklimit.Release();
-                        }));
-                    }
+                            await tasklimit.WaitAsync();
 
-                    await Task.WhenAll(tasks);
+                            tasks.Add(Task.Run(async () =>
+                            {
+                                await RefreshAsync(viewmodel);
+                                await Task.Delay(RefreshDelay);
+                                tasklimit.Release();
+                            }));
+                        }
+
+                        await Task.WhenAll(tasks);
+                    }
+                }
+                finally
+                {
+                    await App.Database.ReadingListCached.EndDeferralAsync().ConfigureAwait(false);
                 }
 
                 await wvp.DoOnMainThreadAsync(() =>
@@ -489,7 +497,7 @@ namespace Ao3TrackReader.Controls
             }).ConfigureAwait(false);
         }
 
-        public async Task SyncToServerAsync(bool newuser)
+        public async Task SyncToServerAsync(bool newuser, bool dontrefresh=false)
         {
             await App.Database.ReadingListCached.BeginDeferralAsync();
             try
@@ -517,11 +525,13 @@ namespace Ao3TrackReader.Controls
                                 }
                                 else
                                 {
-                                    await AddAsyncImpl(item.Key, item.Value);
+                                    var viewmodel = await AddAsyncImpl(item.Key, item.Value);
+                                    if (!dontrefresh && viewmodel != null) {
+                                        await RefreshAsync(viewmodel);
+                                        await Task.Delay(RefreshDelay);
+                                    }
                                 }
-                                await Task.Delay(RefreshDelay);
                                 tasklimit.Release();
-
                             }));
 #pragma warning disable 4014
                             while (tasks.Count > 0 && tasks.Peek().IsCompleted)
@@ -552,7 +562,7 @@ namespace Ao3TrackReader.Controls
         {
             var uri = Ao3SiteDataLookup.ReadingListlUri(href);
             if (uri == null) return;
-            await App.Database.ReadingListCached.DeleteAsync(href);
+            await App.Database.ReadingListCached.DeleteAsync(uri.AbsoluteUri);
             var viewmodel = readingListBacking.FindInAll((m) => m.Uri == uri);
             if (viewmodel is null) return;
             viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
@@ -567,26 +577,26 @@ namespace Ao3TrackReader.Controls
 
         public async void AddAsync(string href)
         {
-            await AddAsyncImpl(href, DateTime.UtcNow.ToUnixTime());
+            var viewmodel = await AddAsyncImpl(href, DateTime.UtcNow.ToUnixTime());
+            if (viewmodel != null) await RefreshAsync(viewmodel);
             await Task.Factory.StartNew(() => SyncToServerAsync(false), TaskCreationOptions.LongRunning | TaskCreationOptions.PreferFairness).ConfigureAwait(false);
         }
 
-        async Task AddAsyncImpl(string href, long timestamp)
+        async Task<Ao3PageViewModel> AddAsyncImpl(string href, long timestamp)
         {
             if (!(readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href) is null))
-                return;
+                return null;
 
             var model = Ao3SiteDataLookup.LookupQuick(href);
-            if (model is null) return;
+            if (model is null)
+                return null;
 
             if (!(readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Uri.AbsoluteUri) is null))
-                return;
+                return null;
 
-            Ao3PageViewModel viewmodel = null;
-
-            await wvp.DoOnMainThreadAsync(async () =>
+            return await wvp.DoOnMainThreadAsync(async () =>
             {
-                viewmodel = new Ao3PageViewModel(model.Uri, model.HasChapters ? 0 : (int?)null, model.Type == Ao3PageType.Work ? tagTypeVisible : null) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
+                var viewmodel = new Ao3PageViewModel(model.Uri, model.HasChapters ? 0 : (int?)null, model.Type == Ao3PageType.Work ? tagTypeVisible : null) // Set unread to 0. this is to prevents UI locks when importing huge reading lists during syncs
                 {
                     TagsVisible = tags_visible
                 };
@@ -600,9 +610,9 @@ namespace Ao3TrackReader.Controls
 
                 var uri = Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri);
                 if (uri == viewmodel.Uri) AddToReadingListCommand.IsEnabled = false;
-            });
 
-            await RefreshAsync(viewmodel);
+                return viewmodel;
+            });            
         }
 
         public async Task<IDictionary<string, bool>> AreUrlsInListAsync(string[] urls)
