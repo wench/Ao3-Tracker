@@ -550,15 +550,16 @@ namespace Ao3TrackReader.Controls
 
         async Task RemoveAsyncImpl(string href)
         {
+            var uri = Ao3SiteDataLookup.ReadingListlUri(href);
+            if (uri == null) return;
             await App.Database.ReadingListCached.DeleteAsync(href);
-            var viewmodel = readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == href);
+            var viewmodel = readingListBacking.FindInAll((m) => m.Uri == uri);
             if (viewmodel is null) return;
             viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
             await wvp.DoOnMainThreadAsync(() =>
             {
                 if (viewmodel == selectedItem) UpdateSelectedItem(null);
-                var uri = Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri);
-                if (uri == viewmodel.Uri) AddToReadingListCommand.IsEnabled = true;
+                if (Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri) == viewmodel.Uri) AddToReadingListCommand.IsEnabled = true;
                 readingListBacking.Remove(viewmodel);
                 viewmodel.Dispose();
             });
