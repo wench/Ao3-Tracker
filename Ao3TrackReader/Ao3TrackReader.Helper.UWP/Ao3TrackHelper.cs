@@ -164,6 +164,10 @@ namespace Ao3TrackReader.Helper
             handlers?.Invoke(this, fontSize);
         }
 
+        public void Init()
+        {
+        }
+
         public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
         {
             wvp.JavascriptError(name, message, url, lineNo, coloumNo, stack);

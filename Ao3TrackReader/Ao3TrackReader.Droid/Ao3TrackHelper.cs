@@ -144,6 +144,11 @@ namespace Ao3TrackReader.Helper
                 wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); }).ConfigureAwait(false);
         }
 
+        [JavascriptInterface, Export("init")]
+        public void Init()
+        {
+        }
+
         [JavascriptInterface, Export("logError")]
         public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
         {
