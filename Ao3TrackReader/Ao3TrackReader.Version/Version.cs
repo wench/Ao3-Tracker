@@ -9,11 +9,11 @@ namespace Ao3TrackReader.Version
     {
         public const int Major = 1;
         public const int Minor = 0;
-        public const int Build = 5;
+        public const int Build = 6;
 
-        public const string String = "1.0.5";
-        public const string LongString = "1.0.5.0";
-        public const string AltString = "1.0.0.5";
+        public const string String = "1.0.6";
+        public const string LongString = "1.0.6.0";
+        public const string AltString = "1.0.0.6";
         public const int Integer = Major * 1000000 + Minor * 1000 + Build;
 
         public const string Copyright = "Copyright © 2017 Alexis Ryan";

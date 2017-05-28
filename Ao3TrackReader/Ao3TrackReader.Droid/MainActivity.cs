@@ -44,7 +44,7 @@ namespace Ao3TrackReader.Droid
                 {
                     var cm = (ConnectivityManager)context.GetSystemService(ConnectivityService);
                     NetworkInfo netInfo = cm.ActiveNetworkInfo;
-                    App.Current.HaveNetwork = netInfo.IsConnectedOrConnecting;
+                    App.Current.HaveNetwork = netInfo?.IsConnectedOrConnecting == true;
                 });
             }
         }
@@ -70,7 +70,7 @@ namespace Ao3TrackReader.Droid
             var cm = (ConnectivityManager) GetSystemService(ConnectivityService);
             var netInfo = cm.ActiveNetworkInfo;
 
-            var app = new App(netInfo.IsConnectedOrConnecting);
+            var app = new App(netInfo?.IsConnectedOrConnecting == true);
 
             IntentFilter filter = new IntentFilter(ConnectivityManager.ConnectivityAction);
             receiver = new NetworkReceiver();
