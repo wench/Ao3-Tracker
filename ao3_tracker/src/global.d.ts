@@ -45,6 +45,7 @@ declare namespace Ao3Track {
         showCatTags: boolean;
         showWIPTags: boolean;
         showRatingTags: boolean;
+        hideFilteredWorks: boolean;
     }
 
     interface IWorkDetails {

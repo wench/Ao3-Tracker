@@ -13,6 +13,7 @@ namespace Ao3TrackReader.Helper
         bool showCatTags { get; }
         bool showWIPTags { get; }
         bool showRatingTags { get; }
+        bool hideFilteredWorks { get; }
     }
 
     public sealed class Settings : ISettings
@@ -24,5 +25,6 @@ namespace Ao3TrackReader.Helper
         public bool showCatTags { get; set; }
         public bool showWIPTags { get; set; }
         public bool showRatingTags { get; set; }
+        public bool hideFilteredWorks { get; set; }
     }
 }

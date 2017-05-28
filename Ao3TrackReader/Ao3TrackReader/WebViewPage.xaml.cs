@@ -1331,6 +1331,10 @@ namespace Ao3TrackReader
             App.Database.GetVariableEvents("TagOptions.showRatingTags").Updated += SettingsVariable_Updated;
             App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
             settings.showRatingTags = b;
+
+            App.Database.GetVariableEvents("ListFiltering.HideWorks").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out b, false);
+            settings.hideFilteredWorks = b;
         }
 
         private void SettingsVariable_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
@@ -1373,6 +1377,11 @@ namespace Ao3TrackReader
                 case "TagOptions.showRatingTags":
                     bool.TryParse(e.NewValue, out b);
                     settings.showRatingTags = b;
+                    break;
+
+                case "ListFiltering.HideWorks":
+                    bool.TryParse(e.NewValue, out b);
+                    settings.hideFilteredWorks = b;
                     break;
             }
         }

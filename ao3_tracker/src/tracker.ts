@@ -389,7 +389,13 @@ namespace Ao3Track {
 
                 ShouldFilterWork(workid, authors, tags, serieses, (filter) => {
                     if (filter) {
+                        if (Settings.hideFilteredWorks) {
+                            $work.addClass("ao3t-filtered ao3t-filtered-hide-full");
+                            return;
+                        }
                         $work.addClass("ao3t-filtered ao3t-filtered-hide");
+
+
 
                         let message = document.createElement("div");
                         message.setAttribute("class","ao3t-filtered-message");

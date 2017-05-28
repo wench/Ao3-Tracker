@@ -400,6 +400,7 @@ namespace Ao3TrackReader.Controls
                 listFilterWorks.IsEnabled = false;
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
+                listFiltersShowWorks.IsEnabled = false;
                 listFilterIndicator.IsVisible = true;
                 if (listFilterIndicator.Content == null)
                 {
@@ -424,8 +425,13 @@ namespace Ao3TrackReader.Controls
                     listFilterWorks.IsEnabled = true;
                     listFilterSerieses.IsEnabled = true;
                     listFilterSave.IsEnabled = true;
+                    listFiltersShowWorks.IsEnabled = true;
                     listFilterIndicator.Content = null;
                     listFilterIndicator.IsVisible = false;
+
+                    App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out bool b, false);
+                    listFiltersShowWorks.SelectedItem = listFiltersShowWorksAsList.Find(b);
+
                 });
             });
         }
@@ -444,6 +450,7 @@ namespace Ao3TrackReader.Controls
                 listFilterWorks.IsEnabled = false;
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
+                listFiltersShowWorks.IsEnabled = false;
                 listFilterIndicator.IsVisible = true;
                 if (listFilterIndicator.Content == null)
                 {
@@ -451,6 +458,8 @@ namespace Ao3TrackReader.Controls
                     listFilterIndicator.Content.IsRunning = true;
                 }
             });
+
+            App.Database.SaveVariable("ListFiltering.HideWorks", (listFiltersShowWorks.SelectedItem as KeyedItem<bool>).Key);
 
             await Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
 

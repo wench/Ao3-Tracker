@@ -110,6 +110,11 @@ limitations under the License.
                 <m:KeyedItem x:TypeArguments="x:Int32" Key="9"  Value="Huge"/>
             </m:KeyedItemList>
 
+            <m:KeyedItemList x:TypeArguments="x:Boolean" x:Key="ListFiltersShowWorksAsList" x:Name="listFiltersShowWorksAsList">
+                <m:KeyedItem x:TypeArguments="x:Boolean" Key="True" Value="Hidden Completely"/>
+                <m:KeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Replaced with messages"/>
+            </m:KeyedItemList>
+            
         </ResourceDictionary>
     </local:PaneView.Resources>
 
@@ -300,35 +305,42 @@ limitations under the License.
 
                     <StackLayout x:Name="listFiltersForm" Style="{StaticResource SettingGroup}">
                         <Label Text="Work Listing Filters" Style="{StaticResource Heading}" />
-                        <Label Text="Works matching any of the filters below will be excluded from showing up on listing pages. Only one filter allowed per line." Style="{StaticResource Remark}" />
+                        <Label Text="Works matching any of the filter blacklists below will be excluded from showing up on listing pages. Only one filter allowed per line." Style="{StaticResource Remark}" />
                         <Label Text="Filters can also be added via the context menu shown when right clicking or tapping and holding on links." Style="{StaticResource Remark}" />
 
                         <StackLayout Style="{StaticResource SettingVert}">
-                            <Label Text="Tags"  HorizontalOptions="Start" />
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Filtered works should be" HorizontalOptions="StartAndExpand" />
+                                <local:DropDown x:Name="listFiltersShowWorks" ItemsSource="{StaticResource ListFiltersShowWorksAsList}" />
+                            </StackLayout>
+                        </StackLayout>
+                        
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <Label Text="Tag Blacklist"  HorizontalOptions="Start" />
                             <Editor x:Name="listFilterTags" />
                             <Label Text="Tags will match against all tags with same meaning." Style="{StaticResource Remark}" />
                         </StackLayout>
 
                         <StackLayout Style="{StaticResource SettingVert}">
-                            <Label Text="Authors" HorizontalOptions="Start" />
+                            <Label Text="Author Blacklist" HorizontalOptions="Start" />
                             <Editor x:Name="listFilterAuthors" />
                             <Label Text="Enter Author usernames, not psueds." Style="{StaticResource Remark}" />
                         </StackLayout>
 
                         <StackLayout Style="{StaticResource SettingVert}">
-                            <Label Text="Works" HorizontalOptions="Start" />
+                            <Label Text="Work Blacklist" HorizontalOptions="Start" />
                             <Editor x:Name="listFilterWorks" />
                             <Label Text="Enter WorkId optionally followed by a space the work title." Style="{StaticResource Remark}" />
                         </StackLayout>
 
                         <StackLayout Style="{StaticResource SettingVert}">
-                            <Label Text="Serieses" HorizontalOptions="Start" />
+                            <Label Text="Series Blacklist" HorizontalOptions="Start" />
                             <Editor x:Name="listFilterSerieses" />
                             <Label Text="Enter SeriesId optionally followed by a space the series name." Style="{StaticResource Remark}" />
                         </StackLayout>
 
                         <StackLayout Style="{StaticResource Setting}">
-                            <local:Button x:Name="listFilterSave" Text="Save Filters" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
+                            <local:Button x:Name="listFilterSave" Text="Save Filter Settings" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
                             <local:ContentView x:TypeArguments="ActivityIndicator"  IsVisible="False" x:Name="listFilterIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
                     </StackLayout>
