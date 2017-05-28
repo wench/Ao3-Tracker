@@ -20,6 +20,12 @@ limitations under the License.
     xmlns:local="using:Ao3TrackReader.UWP"
     >
     <Application.Resources>
-        <SolidColorBrush x:Key="HighlightColor" Color="#FF900000" />
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="HighlightColor" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

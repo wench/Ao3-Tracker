@@ -43,7 +43,6 @@ namespace Ao3TrackReader
 
             if (e.NewElement != null)
             {
-                Control.Padding = new Windows.UI.Xaml.Thickness(0);
                 FixImageSize();
             }
         }
@@ -70,6 +69,10 @@ namespace Ao3TrackReader
                     image = c as Image;
                     if (c != null) break;
                 }
+            }
+            else
+            {
+                Control.Padding = new Windows.UI.Xaml.Thickness(0);
             }
 
             if (image == null) return;
