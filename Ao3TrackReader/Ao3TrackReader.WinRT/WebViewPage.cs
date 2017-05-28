@@ -174,24 +174,24 @@ namespace Ao3TrackReader
             webView.Refresh();
         }
 
-        bool WebViewCanGoBack => webView.CanGoBack;
+        bool WebViewCanGoBack => DoOnMainThreadAsync(()=>webView.CanGoBack).Result;
 
-        bool WebViewCanGoForward => webView.CanGoForward;
+        bool WebViewCanGoForward => DoOnMainThreadAsync(() => webView.CanGoForward).Result;
 
-        void WebViewGoBack()
+        async void WebViewGoBack()
         {
-            webView.GoBack();
+            await DoOnMainThreadAsync(() => webView.GoBack()).ConfigureAwait(false);
         }
-        void WebViewGoForward()
+        async void WebViewGoForward()
         {
-            webView.GoForward();
+            await DoOnMainThreadAsync(() => webView.GoForward()).ConfigureAwait(false);
         }
 
         public double DeviceWidth
         {
             get
             {
-                return webView.ActualWidth;
+                return DoOnMainThreadAsync(() => webView.ActualWidth).Result;
             }
         }
 
