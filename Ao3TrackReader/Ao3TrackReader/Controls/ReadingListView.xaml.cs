@@ -120,7 +120,7 @@ namespace Ao3TrackReader.Controls
                                         if (tagdata is null) model.Value.PrimaryTagType = Models.Ao3TagType.Other;
                                         else model.Value.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
                                     }
-                                    if (!(model.Value.Details is null) && model.Value.Details.Summary is null && !string.IsNullOrEmpty(item.Summary))
+                                    if (!(model.Value.Details is null) && (model.Value.Details.Summary is null) && !string.IsNullOrEmpty(item.Summary))
                                         model.Value.Details.Summary = item.Summary;
 
                                     if (model.Value.Uri.AbsoluteUri != model.Key)

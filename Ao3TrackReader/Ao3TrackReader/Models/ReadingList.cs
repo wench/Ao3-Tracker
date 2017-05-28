@@ -69,7 +69,7 @@ namespace Ao3TrackReader.Models
 
         public static bool operator ==(ReadingList left, ReadingList right)
         {
-            if (left is null && right is null) return true;
+            if ((left is null) && (right is null)) return true;
             else if (left is null) return false;
             else if (right is null) return false;
             return left.Equals(right);
@@ -77,7 +77,7 @@ namespace Ao3TrackReader.Models
 
         public static bool operator !=(ReadingList left, ReadingList right)
         {
-            if (left is null && right is null) return false;
+            if ((left is null) && (right is null)) return false;
             else if (left is null) return true;
             else if (right is null) return true;
             return !left.Equals(right);

@@ -89,16 +89,16 @@ namespace Ao3TrackReader.Helper
             set
             {
                 _onjumptolastlocationevent = value;
-                wvp.DoOnMainThread(() => { wvp.JumpToLastLocationEnabled = value != 0; });
+                wvp.DoOnMainThreadAsync(() => { wvp.JumpToLastLocationEnabled = value != 0; }).ConfigureAwait(false);
             }
         }
         void IAo3TrackHelper.OnJumpToLastLocation(bool pagejump)
         {
-            wvp.DoOnMainThread(() =>
+            wvp.DoOnMainThreadAsync(() =>
             {
                 if (_onjumptolastlocationevent != 0)
                     wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onjumptolastlocationevent, pagejump);
-            });
+            }).ConfigureAwait(false);
         }
 
 
@@ -109,7 +109,7 @@ namespace Ao3TrackReader.Helper
             [Converter("Event")]
             set
             {
-                if (value != 0) wvp.DoOnMainThread(async () => await wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", value, wvp.FontSize));
+                if (value != 0) wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", value, wvp.FontSize); }).ConfigureAwait(false);
                 _onalterfontsizeevent = value;
             }
         }
@@ -117,7 +117,7 @@ namespace Ao3TrackReader.Helper
         void IAo3TrackHelper.OnAlterFontSize(int fontSize)
         {
             if (_onalterfontsizeevent != 0)
-                wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); });
+                wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); }).ConfigureAwait(false);
         }
 
         public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
@@ -128,7 +128,7 @@ namespace Ao3TrackReader.Helper
         public async void GetWorkDetailsAsync(long[] works, int flags, [Converter("Callback")] int hCallback)
         {
             var workchapters = await wvp.GetWorkDetailsAsync(works, (WorkDetailsFlags)flags);
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); });
+            await wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, workchapters); }).ConfigureAwait(false);
         }
 
         public void SetWorkChapters(Dictionary<long, WorkChapter> workchapters)
@@ -139,7 +139,7 @@ namespace Ao3TrackReader.Helper
         public async void ShouldFilterWork(long workId, string[] workauthors, string[] worktags, long[] workserieses, [Converter("Callback")] int hCallback)
         {
             var result = await wvp.ShouldFilterWorkAsync(workId, workauthors, worktags, workserieses);
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, result); });
+            await wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, result); }).ConfigureAwait(false);
         }
 
         public void ShowContextMenu(double x, double y, string url, string innerText    )
@@ -159,18 +159,18 @@ namespace Ao3TrackReader.Helper
 
         public string NextPage
         {
-            set { wvp.DoOnMainThread(() => {
+            set { wvp.DoOnMainThreadAsync(() => {
                 wvp.NextPage = value;
                 wvp.CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "swipeCanGoForward", wvp.SwipeCanGoForward);
-            }); }
+            }).ConfigureAwait(false); }
 
         }
         public string PrevPage
         {
-            set { wvp.DoOnMainThread(() => {
+            set { wvp.DoOnMainThreadAsync(() => {
                 wvp.PrevPage = value;
                 wvp.CallJavascriptAsync("Ao3Track.Messaging.helper.setValue", "swipeCanGoBack", wvp.SwipeCanGoBack);
-            }); }
+            }).ConfigureAwait(false); }
         }
 
         public bool SwipeCanGoBack
@@ -185,25 +185,25 @@ namespace Ao3TrackReader.Helper
         public double LeftOffset
         {
             get { throw new NotSupportedException(); }
-            set { wvp.DoOnMainThread(() => { wvp.LeftOffset = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.LeftOffset = value; }).ConfigureAwait(false); }
         }
         public int ShowPrevPageIndicator
         {
-            set { wvp.DoOnMainThread(() => { wvp.ShowPrevPageIndicator = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.ShowPrevPageIndicator = value; }).ConfigureAwait(false); }
         }
         public int ShowNextPageIndicator
         {
-            set { wvp.DoOnMainThread(() => { wvp.ShowNextPageIndicator = value; }); }
+            set { wvp.DoOnMainThreadAsync(() => { wvp.ShowNextPageIndicator = value; }).ConfigureAwait(false); }
         }
 
         public WorkChapter CurrentLocation
         {
             set
             {
-                wvp.DoOnMainThread(() =>
+                wvp.DoOnMainThreadAsync(() =>
                 {
                     wvp.CurrentLocation = value;
-                });
+                }).ConfigureAwait(false);
             }
         }
 
@@ -211,30 +211,38 @@ namespace Ao3TrackReader.Helper
         {
             set
             {
-                wvp.DoOnMainThread(() =>
+                wvp.DoOnMainThreadAsync(() =>
                 {
                     wvp.PageTitle = value;
-                });
+                }).ConfigureAwait(false);
             }
         }
 
         public async void AreUrlsInReadingListAsync(string[] urls, [Converter("Callback")] int hCallback)
         {
             var res = await wvp.AreUrlsInReadingListAsync(urls);
-            wvp.DoOnMainThread(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, res); });
+            await wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", hCallback, res); }).ConfigureAwait(false);
         }
 
         public void StartWebViewDragAccelerate(double velocity)
         {
-            wvp.DoOnMainThread(() => { wvp.StartWebViewDragAccelerate(velocity); });
+            wvp.DoOnMainThreadAsync(() => { wvp.StartWebViewDragAccelerate(velocity); }).ConfigureAwait(false);
         }
 
         public void StopWebViewDragAccelerate()
         {
-            wvp.DoOnMainThread(() => { wvp.StopWebViewDragAccelerate(); });
+            wvp.DoOnMainThreadAsync(() => { wvp.StopWebViewDragAccelerate(); }).ConfigureAwait(false);
         }
 
         public double DeviceWidth
+        {
+            get
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public ISettings Settings
         {
             get
             {

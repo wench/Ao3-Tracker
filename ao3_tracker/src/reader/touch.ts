@@ -38,12 +38,12 @@ namespace Ao3Track {
             if (!keepOffset) Ao3Track.Helper.leftOffset = 0.0;
             Ao3Track.Helper.showPrevPageIndicator = 0;
             Ao3Track.Helper.showNextPageIndicator = 0;
-            removeEventListener.call(window,"touchmove", touchMoveHandler);
-            removeEventListener.call(window,"touchend", touchEndHandler);
-            removeEventListener.call(window,"touchcancel", touchCancelHandler);
-            removeEventListener.call(window,"pointermove", pointerMoveHandler);
-            removeEventListener.call(window,"pointerup", pointerEndHandler);
-            removeEventListener.call(window,"pointercancel", pointerCancelHandler);
+            removeEventListener.window("touchmove", touchMoveHandler);
+            removeEventListener.window("touchend", touchEndHandler);
+            removeEventListener.window("touchcancel", touchCancelHandler);
+            removeEventListener.window("pointermove", pointerMoveHandler);
+            removeEventListener.window("pointerup", pointerEndHandler);
+            removeEventListener.window("pointercancel", pointerCancelHandler);
         }
 
         function swipeStart(x : number, y : number) : boolean
@@ -205,9 +205,9 @@ namespace Ao3Track {
             }
 
             if (swipeStart(event.screenX,event.screenY)) {
-                addEventListener.call(window,"pointermove", pointerMoveHandler);
-                addEventListener.call(window,"pointerup", pointerEndHandler);
-                addEventListener.call(window,"pointercancel", pointerCancelHandler);                
+                addEventListener.window("pointermove", pointerMoveHandler);
+                addEventListener.window("pointerup", pointerEndHandler);
+                addEventListener.window("pointercancel", pointerCancelHandler);                
             }
         }
         function pointerMoveHandler(event: PointerEvent) {
@@ -284,9 +284,9 @@ namespace Ao3Track {
                 return;
             }
             if (swipeStart(touch.screenX,touch.screenY)) {
-                addEventListener.call(document,"touchmove", touchMoveHandler); 
-                addEventListener.call(document,"touchend", touchEndHandler); 
-                addEventListener.call(document,"touchcancel", touchCancelHandler);
+                addEventListener.document("touchmove", touchMoveHandler); 
+                addEventListener.document("touchend", touchEndHandler); 
+                addEventListener.document("touchcancel", touchCancelHandler);
             }
         }
 
@@ -341,10 +341,10 @@ namespace Ao3Track {
                 document.documentElement.classList.add("mw_ao3track_zoomed");
                 swipeCleanup();
                 if ('ontouchstart' in window) {
-                    removeEventListener.call(window,"touchstart", touchStartHandler);
+                    removeEventListener.window("touchstart", touchStartHandler);
                 }
                 else if ('PointerEvent' in window) {
-                    removeEventListener.call(window,"pointerdown", pointerDownHandler);
+                    removeEventListener.window("pointerdown", pointerDownHandler);
                 }
             }
             else {
@@ -352,18 +352,18 @@ namespace Ao3Track {
                 document.documentElement.classList.add("mw_ao3track_unzoomed");
                 swipeCleanup();
                 if ('ontouchstart' in window) {
-                    addEventListener.call(window,"touchstart", touchStartHandler);
+                    addEventListener.window("touchstart", touchStartHandler);
                 }
                 else if ('PointerEvent' in window) {
-                    addEventListener.call(window,"pointerdown", pointerDownHandler);
+                    addEventListener.window("pointerdown", pointerDownHandler);
                 }
             }
         }
 
-        addEventListener.call(document,"MSContentZoom", () => {
+        addEventListener.document("MSContentZoom", () => {
             updateTouchState();
         });
-        addEventListener.call(document,"resize", () => {
+        addEventListener.document("resize", () => {
             updateTouchState();
         });        
         updateTouchState();

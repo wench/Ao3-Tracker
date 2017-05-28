@@ -43,7 +43,7 @@ namespace Ao3TrackReader
         public void CreateWebViewAdditional()
         {
             var helper = new Ao3TrackHelper(this);
-            var messageHandler = new Win81.ScriptMessageHandler(this, helper);
+            var messageHandler = new Win81.ScriptMessageHandler(helper);
             webView.ScriptNotify += messageHandler.WebView_ScriptNotify;
             this.helper = helper;
 

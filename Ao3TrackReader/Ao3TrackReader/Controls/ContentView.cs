@@ -34,7 +34,7 @@ namespace Ao3TrackReader.Controls
         {
             if (string.IsNullOrEmpty(propertyName) || propertyName == "Content")
             {
-                if (!(base.Content is null || base.Content is T))
+                if (!((base.Content is null) || (base.Content is T)))
                 {
                     throw new InvalidCastException("Content must be of type " + typeof(T).Name);
                 }

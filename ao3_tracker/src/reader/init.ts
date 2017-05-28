@@ -23,7 +23,7 @@ namespace Ao3Track {
     export let $ = jQuery;
     
     // Don't want wrapped function please. >:(
-    function unWrapHR<T extends Function>(f: T, bindto?: object) : T
+    export function unWrapNR<T extends Function>(f: T, bindto?: object) : T
     {
         if (!f) return f;
         let ret : T;
@@ -32,13 +32,42 @@ namespace Ao3Track {
         if (bindto) ret = ret.bind(bindto);
         return ret;
     }
+
+    class UnwrappedEventListenerFunc {
+        funcName: string;
+
+        constructor(funcName: string)
+        {
+            this.funcName = funcName;
+            this.window = this.get(window).bind(window);
+            this.document = this.get(document).bind(document);
+        }
+
+        get(obj: object) : (type: string, listener?: EventListenerOrEventListenerObject, options?: boolean) => void
+        {
+            for (let proto = obj; proto !== null; proto = Object.getPrototypeOf(proto)) {
+                let props = Object.getOwnPropertyNames(proto);
+                if (props.indexOf(this.funcName) !== -1) {
+                    return unWrapNR((proto as any)[this.funcName]);
+                }        
+            }            
+            return () => { }
+        }
+
+        window: (type: string, listener?: EventListenerOrEventListenerObject, options?: boolean) => void;
+        document: (type: string, listener?: EventListenerOrEventListenerObject, options?: boolean) => void;
+        call (target: object, type: string, listener?: EventListenerOrEventListenerObject, options?: boolean) : void
+        {
+            this.get(target).call(target, type, listener||undefined, options||undefined);
+        }
+    };
     
-    export let setImmediate = unWrapHR(window.setImmediate,window);
-    export let setInterval = unWrapHR(window.setInterval,window);
-    export let setTimeout = unWrapHR(window.setTimeout,window);
-    export let clearImmediate = unWrapHR(window.clearImmediate,window);
-    export let clearInterval = unWrapHR(window.clearInterval,window);
-    export let clearTimeout = unWrapHR(window.clearTimeout,window);
-    export let addEventListener = unWrapHR(EventTarget.prototype.addEventListener);
-    export let removeEventListener = unWrapHR(EventTarget.prototype.removeEventListener);        
+    export let setImmediate = unWrapNR(window.setImmediate,window);
+    export let setInterval = unWrapNR(window.setInterval,window);
+    export let setTimeout = unWrapNR(window.setTimeout,window);
+    export let clearImmediate = unWrapNR(window.clearImmediate,window);
+    export let clearInterval = unWrapNR(window.clearInterval,window);
+    export let clearTimeout = unWrapNR(window.clearTimeout,window);
+    export let addEventListener = new UnwrappedEventListenerFunc("addEventListener");
+    export let removeEventListener = new UnwrappedEventListenerFunc("removeEventListener");
 }

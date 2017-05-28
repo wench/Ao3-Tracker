@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)INotifyPropertyChanging.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScriptMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />

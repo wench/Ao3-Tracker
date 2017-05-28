@@ -638,7 +638,14 @@ namespace Ao3TrackReader
             if (IsMainThread)
             {
                 function();
+
+#if WINDOWS_APP || WINDOWS_PHONE_APP
+                var complete = new TaskCompletionSource<object>();
+                complete.SetResult(null);
+                return complete.Task;
+#else
                 return Task.CompletedTask;
+#endif
             }
             else
             {

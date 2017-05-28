@@ -1323,7 +1323,7 @@ namespace Ao3TrackReader.Data
                 foreach (var n in seriesnode.Elements("li"))
                 {
                     var link = n.Element("a");
-                    if (link is null || String.IsNullOrWhiteSpace(link.InnerText)) continue;
+                    if ((link is null) || String.IsNullOrWhiteSpace(link.InnerText)) continue;
 
                     var s = link.Attributes["href"]?.Value;
                     if (String.IsNullOrWhiteSpace(s)) continue;
@@ -1826,7 +1826,7 @@ namespace Ao3TrackReader.Data
             Dictionary<string, int> idmap = new Dictionary<string, int>(tasks.Count);
             foreach (var t in await Task.WhenAll(tasks))
             {
-                if (t.Value is null || string.IsNullOrEmpty(t.Value.Item1))
+                if ((t.Value is null) || string.IsNullOrEmpty(t.Value.Item1))
                     continue;
 
                 if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;
@@ -1989,7 +1989,7 @@ namespace Ao3TrackReader.Data
             Dictionary<string, int> idmap = new Dictionary<string, int>(tlist.Count);
             foreach (var t in tlist)
             {
-                if (t.Value is null || string.IsNullOrEmpty(t.Value.Item1))
+                if ((t.Value is null) || string.IsNullOrEmpty(t.Value.Item1))
                     continue;
 
                 if (t.Value.Item2 != 0) idmap[t.Value.Item1] = t.Value.Item2;

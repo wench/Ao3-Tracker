@@ -8,7 +8,7 @@ namespace Ao3TrackReader.Win81
 {
     public class ScriptMessageHandler : Ao3TrackReader.Helper.Messaging.ScriptMessageHandler
     {
-        public ScriptMessageHandler(WebViewPage wvp, Ao3TrackHelper helper) : base(wvp, helper)
+        public ScriptMessageHandler(Ao3TrackHelper helper) : base(helper)
         {
         }
 

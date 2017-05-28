@@ -48,7 +48,7 @@ namespace Ao3TrackReader.Data
                                     tasks.Add(Task.Run(async () =>
                                     {
                                         var key = await AddToLookupAsync(filter.data);
-                                        if (key is null || filter.data != key)
+                                        if ((key is null) || filter.data != key)
                                         {
                                             await App.Database.ListFiltersCached.DeleteAsync(filter.data);
                                             if (!(key is null)) await App.Database.ListFiltersCached.InsertOrUpdateAsync(new ListFilter { data = key, timestamp = DateTime.UtcNow.ToUnixTime() });

@@ -26,7 +26,7 @@ using System.Linq;
 
 namespace Ao3TrackReader
 {
-    static class Extensions
+    public static partial class Extensions
     {
         static readonly IDictionary<string, string> m_replaceDict = new Dictionary<string, string> {
             {"\a", @"\a"},
