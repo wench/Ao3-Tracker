@@ -53,6 +53,8 @@ namespace Ao3TrackReader.Win81
                     RequestedTheme = ApplicationTheme.Dark;
                     break;
             }
+
+
         }
 
         public Ao3TrackReader.App XApp { get; private set; }

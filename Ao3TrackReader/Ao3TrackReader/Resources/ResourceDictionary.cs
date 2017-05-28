@@ -44,12 +44,14 @@ namespace Ao3TrackReader.Resources
                     break;
             }
 #else
+            var thm = App.Theme.Substring(0, 1).ToUpper() + App.Theme.Substring(1);
             if (!Windows.UI.Xaml.Application.Current.Resources.ThemeDictionaries.TryGetValue("Default", out var omd))
             {
                 Windows.UI.Xaml.Application.Current.Resources.ThemeDictionaries.Add("Default", omd = new Windows.UI.Xaml.ResourceDictionary());
             }
             var md = (Windows.UI.Xaml.ResourceDictionary)omd;
             md["SystemAccentColor"] = Colors.Highlight.Solid.High.ToWindows();
+
 #endif
 
             var sets = new Dictionary<string, BaseColorSet>();
@@ -65,7 +67,7 @@ namespace Ao3TrackReader.Resources
 
                 var color = (Color)set;
                 Add(cat.Name + "Color", color);
-#if WINDOWS_UWP
+#if __WINDOWS__
                 md[cat.Name + "Color"] = new Windows.UI.Xaml.Media.SolidColorBrush(color.ToWindows());
 #endif
             }
@@ -90,8 +92,8 @@ namespace Ao3TrackReader.Resources
                     }
 
                     Add(kp.Key + prop.Name + "Color", color);
-#if WINDOWS_UWP
-                    md[kp.Key + prop.Name] = new Windows.UI.Xaml.Media.SolidColorBrush(color.ToWindows());
+#if __WINDOWS__
+                    md[kp.Key + prop.Name + "Color"] = new Windows.UI.Xaml.Media.SolidColorBrush(color.ToWindows());
 #endif
                 }
 
@@ -101,7 +103,7 @@ namespace Ao3TrackReader.Resources
             {
                 var icon = (string)prop.GetValue(null);
                 Add(prop.Name + "Icon", icon);
-#if WINDOWS_UWP
+#if __WINDOWS__
                 md[prop.Name + "Icon"] = icon;
 #endif
             }

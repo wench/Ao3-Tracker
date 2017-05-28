@@ -70,6 +70,7 @@ namespace Ao3TrackReader.WinRT
 #elif WINDOWS_APP
             IsOpen = true;
             IsSticky = true;
+            Background = new SolidColorBrush(Ao3TrackReader.Resources.Colors.Alt.Solid.MediumHigh.ToWindows());
 #endif
             PrimaryCommands.VectorChanged += VectorChanged;
             SecondaryCommands.VectorChanged += VectorChanged;
@@ -111,7 +112,7 @@ namespace Ao3TrackReader.WinRT
                     {
                         var ellipsis = new AppBarEllipsis
                         {
-                            Flyout = secondaryFlyout = new MenuFlyout(),
+                            Flyout = secondaryFlyout = new MenuFlyout()
                         };
 
                         PrimaryCommands.Add(ellipsis);
@@ -138,7 +139,7 @@ namespace Ao3TrackReader.WinRT
                         {
                             Text = button.Label,
                             Command = button.Command,
-                            DataContext = button.DataContext
+                            DataContext = button.DataContext,
                         };
                         if (button.Icon is BitmapIcon bmp) menuitem.Icon = new BitmapIcon { UriSource = bmp.UriSource };
                         else if (button.Icon is SymbolIcon sym) menuitem.Icon = new SymbolIcon(sym.Symbol);

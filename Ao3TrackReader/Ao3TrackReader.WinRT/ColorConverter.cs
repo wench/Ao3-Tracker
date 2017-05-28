@@ -29,7 +29,8 @@ namespace Ao3TrackReader
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             var color = (Xamarin.Forms.Color) value;
-            if (color == null || color == Xamarin.Forms.Color.Default) return null;
+            if (color == null || color == Xamarin.Forms.Color.Default)
+                return null;
             return new SolidColorBrush(color.ToWindows());
         }
 

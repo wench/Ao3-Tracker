@@ -5,12 +5,22 @@
     xmlns:local="using:Ao3TrackReader.Win81">
 
     <Application.Resources>
-        <x:Double x:Key="AppBarThemeMinHeight">48</x:Double>
-        <Thickness x:Key="AppBarBottomBorderThemeThickness">0,0,0,0</Thickness>
-        <Thickness x:Key="AppBarBottomThemePadding">0,0,0,0</Thickness>
-        <Thickness x:Key="AppBarTopBorderThemeThickness">0,0,0,0</Thickness>
-        <Thickness x:Key="AppBarTopThemePadding">0,0,0,0</Thickness>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="AltMediumHighColor" />
+                    <SolidColorBrush x:Key="AltMediumLowColor" />
+                    <SolidColorBrush x:Key="BaseMediumLowColor" />
+                    <SolidColorBrush x:Key="BaseLowColor" />
+                    <SolidColorBrush x:Key="HighlightColor" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
 
-        <SolidColorBrush x:Key="HighlightColor" Color="#FF900000" />
+            <x:Double x:Key="AppBarThemeMinHeight">48</x:Double>
+            <Thickness x:Key="AppBarBottomBorderThemeThickness">0,0,0,0</Thickness>
+            <Thickness x:Key="AppBarBottomThemePadding">0,0,0,0</Thickness>
+            <Thickness x:Key="AppBarTopBorderThemeThickness">0,0,0,0</Thickness>
+            <Thickness x:Key="AppBarTopThemePadding">0,0,0,0</Thickness>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
