@@ -86,21 +86,21 @@ namespace Ao3TrackReader
             // create the tables
             database.CreateTable<Variable>();
 
-            // Do any database upgrades if necessaey
-            TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
-
-            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5))
-            {
-                database.Execute("UPDATE Work SET seq=0 WHERE seq IS NULL");
-                database.Execute("DROP TABLE TagCache"); // Delete the entire cache cause it's behaviour has slightly changed
-            }
-
             database.CreateTable<Work>();
             database.CreateTable<TagCache>();
             database.CreateTable<LanguageCache>();
             database.CreateTable<ReadingList>();
             database.CreateTable<SortColumn>();
             database.CreateTable<ListFilter>();
+
+            // Do any database upgrades if necessaey
+            TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
+
+            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5))
+            {
+                database.Execute("UPDATE Work SET seq=0 WHERE seq IS NULL");
+                database.Execute("DELETE FROM TagCache"); // Delete the entire cache cause it's behaviour has slightly changed
+            }
 
             if (DatabaseVersion != Version.Version.Integer)
                 SaveVariable("DatabaseVersion", Version.Version.Integer);

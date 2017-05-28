@@ -117,7 +117,7 @@ limitations under the License.
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Settings" Style="{StaticResource PaneName}" />
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" Style="{StaticResource ImageButton}" />
             </StackLayout>
 
             <ScrollView Orientation="Vertical" >
@@ -166,7 +166,7 @@ limitations under the License.
 
                             <StackLayout Style="{StaticResource Setting}">
                                 <local:Button Text="Submit" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSyncSubmit" x:Name="syncSubmitButton" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
-                                <ContentView IsVisible="False" x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                                <local:ContentView x:TypeArguments="ActivityIndicator" IsVisible="False" x:Name="syncIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                             </StackLayout>
                         </StackLayout>
 
@@ -329,7 +329,7 @@ limitations under the License.
 
                         <StackLayout Style="{StaticResource Setting}">
                             <local:Button x:Name="listFilterSave" Text="Save Filters" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
-                            <ContentView IsVisible="False" x:Name="listFilterIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                            <local:ContentView x:TypeArguments="ActivityIndicator"  IsVisible="False" x:Name="listFilterIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
                     </StackLayout>
 

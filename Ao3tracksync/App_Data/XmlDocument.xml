@@ -594,7 +594,7 @@
             </summary>
             <param name="id">Workid</param>
             <remarks>Warning there is no way for clients to detect deletions so this wont work as expected.
-            The next time the clients sync the workchapter will be readded to the database.</remarks>
+            The next time the clients sync the workchapter will be re-added to the database.</remarks>
         </member>
     </members>
 </doc>

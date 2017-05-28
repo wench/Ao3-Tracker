@@ -7,7 +7,7 @@
     "Microsoft.NETNative.Analyzer": "1.0.0",
     "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "10.0.2",
-    "sqlite-net-pcl": "1.3.1",
+    "sqlite-net-pcl": "1.3.3",
     "SQLitePCLRaw.bundle_green": "1.1.5",
     "SQLitePCLRaw.core": "1.1.5",
     "SQLitePCLRaw.provider.e_sqlite3.uwp10": "1.1.5",

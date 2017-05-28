@@ -27,6 +27,8 @@ namespace Ao3tracksync
         {
             // Web API configuration and services
 
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+
             // Web API routes
             config.MapHttpAttributeRoutes();            
 

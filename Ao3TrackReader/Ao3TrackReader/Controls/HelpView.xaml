@@ -20,7 +20,7 @@ limitations under the License.
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Help" Style="{StaticResource PaneName}" />
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" Style="{StaticResource ImageButton}" />
             </StackLayout>
 
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" 

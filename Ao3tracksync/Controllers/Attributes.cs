@@ -51,9 +51,11 @@ namespace Ao3tracksync.Controllers
             if (ActionContext.Request.Headers.Contains("Origin"))
             {
                 var url = ActionContext.Request.Headers.GetValues("Origin").FirstOrDefault();
-                if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                if (!string.IsNullOrWhiteSpace(url) 
+                    && Uri.TryCreate(url, UriKind.Absolute, out var uri))
                 {
-                    if (uri.Host == "wenchy.net" || uri.Scheme.Contains("extension"))
+                    if (uri?.Host == "wenchy.net" 
+                        || uri?.Scheme?.Contains("extension") == true)
                         origin = url;
                 }
             }

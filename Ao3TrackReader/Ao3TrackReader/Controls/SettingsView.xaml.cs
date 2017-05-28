@@ -140,8 +140,9 @@ namespace Ao3TrackReader.Controls
         public async void OnSyncSubmit(object sender, EventArgs e)
         {
             syncSubmitButton.IsEnabled = false;
-            syncIndicator.Content = new ActivityIndicator();
             syncIndicator.IsVisible = true;
+            syncIndicator.Content = new ActivityIndicator();
+            syncIndicator.Content.IsRunning = true;
             usernameErrors.IsVisible = false;
             passwordErrors.IsVisible = false;
             verifyErrors.IsVisible = false;
@@ -399,8 +400,12 @@ namespace Ao3TrackReader.Controls
                 listFilterWorks.IsEnabled = false;
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
-                if (listFilterIndicator.Content == null) listFilterIndicator.Content = new ActivityIndicator();
                 listFilterIndicator.IsVisible = true;
+                if (listFilterIndicator.Content == null)
+                {
+                    listFilterIndicator.Content = new ActivityIndicator();
+                    listFilterIndicator.Content.IsRunning = true;
+                }
             });
 
             await Task.Run(async () =>
@@ -439,8 +444,12 @@ namespace Ao3TrackReader.Controls
                 listFilterWorks.IsEnabled = false;
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
-                if (listFilterIndicator.Content == null) listFilterIndicator.Content = new ActivityIndicator();
                 listFilterIndicator.IsVisible = true;
+                if (listFilterIndicator.Content == null)
+                {
+                    listFilterIndicator.Content = new ActivityIndicator();
+                    listFilterIndicator.Content.IsRunning = true;
+                }
             });
 
             await Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);

@@ -293,10 +293,13 @@ namespace Ao3TrackReader.Helper
             }
         }
 
-        public ISettings Settings
+        public string Settings
         {
             [JavascriptInterface, Export("get_settings"), Converter("FromJSON")]
-            get => wvp.Settings;
+            get
+            {
+                return JsonConvert.SerializeObject(wvp.Settings);
+            }
         }
     }
 }

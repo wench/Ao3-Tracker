@@ -36,24 +36,24 @@ limitations under the License.
         <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" HorizontalOptions="FillAndExpand" Orientation="Horizontal" x:Name="buttonBar">
                 <local:Button Image="{StaticResource AddPageIcon}" HorizontalOptions="Start" x:Name="AddPageButton" Command="{Binding AddToReadingListCommand,Source={x:Reference root}}"
-                              local:HelpView.Text="Add Page To Reading List Button" local:HelpView.Group="Reading List" >
+                              local:HelpView.Text="Add Page To Reading List Button" local:HelpView.Group="Reading List" Style="{StaticResource ImageButton}">
                     <local:HelpView.Description>Add the currently displayed work, search or webpage to the reading list. </local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource RefreshIcon}" Clicked="OnRefresh" IsEnabled="False" HorizontalOptions="Start" x:Name="RefreshButton" 
-                              local:HelpView.Text="Refresh Reading List Button" local:HelpView.Group="Reading List">
+                              local:HelpView.Text="Refresh Reading List Button" local:HelpView.Group="Reading List" Style="{StaticResource ImageButton}">
                     <local:HelpView.Description>Refresh all Reading List Data from Archive of Our Own. This button is disabled while the list is being refreshed.</local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource TagIcon}" Clicked="OnShowTags" HorizontalOptions="Start" x:Name="ShowTagsButton" 
-                              local:HelpView.Text="Toggle Tags Button" local:HelpView.Group="Reading List">
+                              local:HelpView.Text="Toggle Tags Button" local:HelpView.Group="Reading List" Style="{StaticResource ImageButton}">
                     <local:HelpView.Description>Toggle the display of tags. Default is hidden.</local:HelpView.Description>
                 </local:Button>
                 <local:Button Image="{StaticResource FilterIcon}" Clicked="OnShowHidden" HorizontalOptions="Start" x:Name="ShowHiddenButton" 
-                              local:HelpView.Text="Toggle Work Filter Button" local:HelpView.Group="Reading List">
+                              local:HelpView.Text="Toggle Work Filter Button" local:HelpView.Group="Reading List" Style="{StaticResource ImageButton}">
                     <local:HelpView.Description>Toggle the display of incomplete works and series with no unread chapters. Default is hidden.</local:HelpView.Description>
                 </local:Button>
-                <ContentView HorizontalOptions="FillAndExpand" VerticalOptions="Center" x:Name="SyncIndicator" HeightRequest="20" IsVisible="True" />
+                <local:ContentView x:TypeArguments="ActivityIndicator" HorizontalOptions="FillAndExpand" VerticalOptions="Center" x:Name="SyncIndicator" HeightRequest="20" IsVisible="True" />
 
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End" />
+                <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End"  Style="{StaticResource ImageButton}" />
             </StackLayout>
 
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" 

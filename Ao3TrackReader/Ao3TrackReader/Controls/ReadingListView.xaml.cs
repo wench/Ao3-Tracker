@@ -79,6 +79,7 @@ namespace Ao3TrackReader.Controls
         void RestoreReadingList()
         {
             SyncIndicator.Content = new ActivityIndicator();
+            SyncIndicator.Content.IsRunning = true;
             Task.Factory.StartNew(async () =>
             {
                 await App.Database.ReadingListCached.BeginDeferralAsync();
@@ -163,6 +164,8 @@ namespace Ao3TrackReader.Controls
                         App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
                     });
 
+                    GC.Collect();
+
                     // If we don't have network access, we wait till it's available
                     if (!App.Current.HaveNetwork)
                     {
@@ -192,6 +195,7 @@ namespace Ao3TrackReader.Controls
                         }
                         await Task.WhenAll(tasks);
                         tasks.Clear();
+                        GC.Collect();
                     }
                 }
                 finally
@@ -343,6 +347,7 @@ namespace Ao3TrackReader.Controls
             ListView.Focus();
             RefreshButton.IsEnabled = false;
             SyncIndicator.Content = new ActivityIndicator();
+            SyncIndicator.Content.IsRunning = true;
             Task.Factory.StartNew(async () =>
             {
                 await App.Database.ReadingListCached.BeginDeferralAsync();
@@ -549,6 +554,7 @@ namespace Ao3TrackReader.Controls
                 await App.Database.ReadingListCached.EndDeferralAsync().ConfigureAwait(false);
             }
 
+            GC.Collect();
             PageChange(wvp?.CurrentUri);
         }
 
