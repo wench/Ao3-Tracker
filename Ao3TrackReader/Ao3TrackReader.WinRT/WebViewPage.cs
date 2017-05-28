@@ -78,6 +78,7 @@ namespace Ao3TrackReader
                 {
                     var item = new MenuFlyoutItem { Text = kvp.Key };
                     item.Command = kvp.Value;
+                    item.Foreground = new SolidColorBrush(Ao3TrackReader.Resources.Colors.Base.MediumHigh.ToWindows());
                     contextMenu.Items.Add(item);
                 }
             }
@@ -273,7 +274,9 @@ namespace Ao3TrackReader
                 {
                     item.CommandParameter = url;
                     if (item.Command != null)
+                    {
                         item.Visibility = item.Command.CanExecute(url) ? Visibility.Visible : Visibility.Collapsed;
+                    }
                 }
             }
 
