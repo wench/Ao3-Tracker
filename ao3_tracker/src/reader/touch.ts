@@ -361,10 +361,10 @@ namespace Ao3Track {
         }
 
         addEventListener.document("MSContentZoom", () => {
-            updateTouchState();
+            Ao3Track.Touch.updateTouchState();
         });
         addEventListener.document("resize", () => {
-            updateTouchState();
+            Ao3Track.Touch.updateTouchState();
         });        
         updateTouchState();
     }

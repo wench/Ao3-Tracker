@@ -100,14 +100,19 @@ namespace Ao3Track {
             // First chapter on the page
             if (index === 0 && workchap.location === 0) {
                 console.log("Should scroll to: %i page top", workchap.number);
-                window.scrollTo(0, 0);
+                let rect = elem.getBoundingClientRect();
+                window.scrollTo(0, rect.top + window.scrollY - centre);
                 return false;
             }
             // Last chapter on page
             else if (index === ($chapter_text.length - 1) && workchap.location === null) {
                 console.log("Should scroll to: %i page bottom", workchap.number);
-                if ($feedback_actions.length) {
+                if ($feedback_actions.length && $chapter_text.length === 1) {
                     $feedback_actions[0].scrollIntoView(false);
+                }
+                else {
+                    let rect = elem.getBoundingClientRect();
+                    window.scrollTo(0, rect.bottom + window.scrollY - centre);                
                 }
                 return false;
             }
@@ -126,15 +131,27 @@ namespace Ao3Track {
             console.log("Should scroll to: %i p %i c %i", workchap.number, paragraph, offset);
 
             let $child = $children.eq(paragraph);
-            let child = $child[0];
-            let p_rect = child.getBoundingClientRect();
+            if ($child.length === 0) 
+            {
+                return scrollToLocation(workid, { 
+                    chapterid: workchap.chapterid, 
+                    number: workchap.number, 
+                    seq:0, 
+                    location: paragraph!==0? (paragraph-1) * LOC_PARA_MULTIPLIER + LOC_PARA_BOTTOM : 0
+                }, false);
+            }
+            else 
+            {
+                let child = $child[0];
+                let p_rect = child.getBoundingClientRect();
 
-            if (offset >= LOC_PARA_BOTTOM) {
-                window.scrollTo(0, p_rect.bottom + window.scrollY - centre);
-                return false;
+                if (offset >= LOC_PARA_BOTTOM) {
+                    window.scrollTo(0, p_rect.bottom + window.scrollY - centre);
+                    return false;
+                }
+                window.scrollTo(0, p_rect.top + p_rect.height * offset / LOC_PARA_FRAC_MULTIPLER + window.scrollY - centre);
             }
 
-            window.scrollTo(0, p_rect.top + p_rect.height * offset / LOC_PARA_FRAC_MULTIPLER + window.scrollY - centre);
 
             return false;
         });
@@ -157,6 +174,10 @@ namespace Ao3Track {
         // Find which $userstuff is at the centre of the screen
 
         let centre = window.innerHeight / 2;
+
+        if (!$chapter_text || !$chapter_text.length) {
+            return;
+        }
 
         // Feedback actions block is above the bottom of the screen? Declare the chapters read
         if ($feedback_actions.length && $feedback_actions[0].getBoundingClientRect().top < window.innerHeight) {
