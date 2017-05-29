@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" package="net.wenchy.ao3track.reader" android:versionName="1.0.5" android:versionCode="1000005">
-	<uses-sdk android:minSdkVersion="17" />
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<application android:label="Ao3Track Reader" android:icon="@drawable/Icon"></application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" package="net.wenchy.ao3track.reader" android:versionName="1.0.6" android:versionCode="1000006">
+  <uses-sdk android:minSdkVersion="17" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <application android:label="Ao3Track Reader" android:icon="@drawable/Icon">
+  </application>
 </manifest>

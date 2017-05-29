@@ -14,6 +14,14 @@ namespace Ao3tracksync.Controllers
     [RoutePrefix("api/ErrorReport"), Authorize(Roles = "administrators"), System.Web.Mvc.OutputCache(Location = OutputCacheLocation.None)]
     public class ErrorReportController : ApiController
     {
+        public class ExceptionStub
+        {
+            public string ClassName { get; set; }
+            public string Message { get; set; }
+            public ExceptionStub InnerException {get;set;}
+        }
+
+
         public class ReportMetaData
         {
             public string Version { get; set; }
@@ -26,6 +34,7 @@ namespace Ao3tracksync.Controllers
             public string HWType { get; set; }
             public string HWName { get; set; }
             public DateTime Date { get; set; }
+            public ExceptionStub Exception { get; set; }
         }
 
         static List<(string Platform, Version Version)> ignoreErrors = new List<(string platform, Version version)> {
