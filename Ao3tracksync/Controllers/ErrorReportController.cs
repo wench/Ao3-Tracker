@@ -18,6 +18,10 @@ namespace Ao3tracksync.Controllers
         {
             public string ClassName { get; set; }
             public string Message { get; set; }
+            public string Name { get; set; }
+            public string Url { get; set; }
+            public string Line { get; set; }
+            public string Column { get; set; }
             public ExceptionStub InnerException {get;set;}
         }
 
@@ -68,6 +72,8 @@ namespace Ao3tracksync.Controllers
                 Formatting = Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore
             });
+
+            message.Headers["References"] = "<" + meta[0].Platform + "-" + meta[0].Version + "-" + meta[0].Date.ToShortDateString() + "@wenchy.net>";
 
             var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(report));
             message.Attachments.Add(new Attachment(stream, "ErrorReport.json", "application/json"));
