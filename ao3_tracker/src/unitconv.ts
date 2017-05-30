@@ -209,10 +209,10 @@ namespace Ao3Track {
             }
 
             static readonly units: UnitType[] = [
-                { name: "km", exp: "(?:km|(?:(kilometre|kilometer)s?)" },
-                { name: "m", exp: "(?:m|(?:(metre|meter)s?)" },
-                { name: "cm", exp: "(?:cm|(?:(centimetre|centimeter)s?)" },
-                { name: "mm", exp: "(?:mm|(?:(millimetre|millimeter)s?)" },
+                { name: "km", exp: "(?:km|(?:kilometre|kilometer)s?)" },
+                { name: "m", exp: "(?:m|(?:metre|meter)s?)" },
+                { name: "cm", exp: "(?:cm|(?:centimetre|centimeter)s?)" },
+                { name: "mm", exp: "(?:mm|(?:millimetre|millimeter)s?)" },
             ];
 
             process(values: (string | number)[]): string {
@@ -342,9 +342,9 @@ namespace Ao3Track {
             }
 
             static readonly units: UnitType[] = [
-                { name: "kl", exp: "(?:kl|m3|m^3|m\xB3|(?:(kilolitre|kiloliter)s?)" },
-                { name: "l", exp: "(?:l|(?:(litre|liter)s?)" },
-                { name: "ml", exp: "(?:ml|cc|cm3|cm^3|cm\xB3|(?:(millilitre|milliliter)s?)" },
+                { name: "kl", exp: "(?:kl|m3|m^3|m\xB3|(?:kilolitre|kiloliter)s?)" },
+                { name: "l", exp: "(?:l|(?:litre|liter)s?)" },
+                { name: "ml", exp: "(?:ml|cc|cm3|cm^3|cm\xB3|(?:millilitre|milliliter)s?)" },
             ];
 
             process(values: (string | number)[]): string {
@@ -456,9 +456,9 @@ namespace Ao3Track {
             }
 
             static readonly units: UnitType[] = [
-                { name: "t", exp: "(?:t|(?:(ton|tonne|metric ton)s?)" },
-                { name: "kg", exp: "(?:kg|(?:(kilogram|kilogramme)s?)" },
-                { name: "g", exp: "(?:g|(?:(gram|gramme)s?)" },
+                { name: "t", exp: "(?:t|(?:ton|tonne|metric ton)s?)" },
+                { name: "kg", exp: "(?:kg|(?:kilogram|kilogramme)s?)" },
+                { name: "g", exp: "(?:g|(?:gram|gramme)s?)" },
             ];
 
             process(values: (string | number)[]): string {
