@@ -51,7 +51,7 @@ namespace Ao3Track {
                     return unWrapNR((proto as any)[this.funcName]);
                 }        
             }            
-            return () => { }
+            return () => { };
         }
 
         window: (type: string, listener?: EventListenerOrEventListenerObject, options?: boolean) => void;

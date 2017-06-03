@@ -23,6 +23,7 @@ using Ao3TrackReader.Models;
 using System.Threading;
 using System.Threading.Tasks;
 using Ao3TrackReader.Data;
+using Ao3TrackReader.Helper;
 
 namespace Ao3TrackReader
 {
@@ -101,9 +102,23 @@ namespace Ao3TrackReader
                 database.Execute("UPDATE Work SET seq=0 WHERE seq IS NULL");
                 database.Execute("DELETE FROM TagCache"); // Delete the entire cache cause it's behaviour has slightly changed
             }
+            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 7))
+            {
+                TryParseDelegate<bool?> tryparse = (string s, out bool? res) => { return TryParseNullable(s, out res, bool.TryParse); };
+                var map = new NullKeyDictionary<bool?, UnitConvSetting>
+                {
+                    { null, UnitConvSetting.None },
+                    { true, UnitConvSetting.USToMetric },
+                    { false, UnitConvSetting.MetricToUS }
+                };
 
-            if (DatabaseVersion != Version.Version.Integer)
-                SaveVariable("DatabaseVersion", Version.Version.Integer);
+                ConvertVariable("UnitConvOptions.tempToC", map, tryparse, "UnitConvOptions.temp");
+                ConvertVariable("UnitConvOptions.distToM", map, tryparse, "UnitConvOptions.dist");
+                ConvertVariable("UnitConvOptions.volumeToM", map, tryparse, "UnitConvOptions.volume");
+                ConvertVariable("UnitConvOptions.weightToM", map, tryparse, "UnitConvOptions.weight");
+            }
+
+            if (DatabaseVersion != Version.Version.Integer) SaveVariable("DatabaseVersion", Version.Version.Integer);
 
             ReadingListCached = new CachedTimestampedTable<ReadingList, string, Ao3TrackDatabase>(this);
             ListFiltersCached = new CachedTimestampedTable<ListFilter, string, Ao3TrackDatabase>(this);
@@ -117,7 +132,7 @@ namespace Ao3TrackReader
                 return (from i in database.Table<Work>() select i);
             }
         }
-
+        
         public Work GetItem(long id)
         {
             lock (locker)
@@ -255,6 +270,23 @@ namespace Ao3TrackReader
 
         public delegate bool TryParseDelegate<T>(string s, out T result);
 
+        public bool TryParseNullable<T>(string s, out T? result, TryParseDelegate<T> tryparse)
+            where T : struct
+        {
+            if (s == null)
+            {
+                result = null;
+                return true;
+            }
+            else if (tryparse(s, out T parsed))
+            {
+                result = parsed;
+                return true;
+            }
+            result = null;
+            return false;
+        }
+
         public bool TryGetVariable<T>(string name, TryParseDelegate<T> tryparse, out T result, T onFailure = default(T))
         {
             lock (locker)
@@ -262,7 +294,8 @@ namespace Ao3TrackReader
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
                 if (!(row is null))
                 {
-                    if (!(row.value is null) && tryparse(row.value, out result))
+                    
+                    if (tryparse(row.value, out result))
                         return true;
 
                 }
@@ -297,6 +330,25 @@ namespace Ao3TrackReader
                 return false;
             }
         }
+
+        private void ConvertVariable<TSource, TDest>(string name, IDictionary<TSource, TDest> map, TryParseDelegate<TSource> tryparse, string newname = null)
+        {
+            if (string.IsNullOrEmpty(newname)) newname = name;
+
+            if (TryGetVariable(name,tryparse, out var value))
+            {
+                if (map.TryGetValue(value,out var newvalue))
+                {
+                    SaveVariable(newname, newvalue);
+                }
+
+                if (name != newname)
+                {
+                    DeleteVariable(name);
+                }
+            }
+        }
+
 
         public void SaveVariable(string name, string value)
         {

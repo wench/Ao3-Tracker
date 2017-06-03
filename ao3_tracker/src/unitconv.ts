@@ -15,6 +15,21 @@ limitations under the License.
 */
 
 namespace Ao3Track {
+    export enum UnitConvSetting
+    {
+        None = 0,
+        MetricToUS = 1,
+        USToMetric = 2
+    }
+
+    export interface IUnitConvSettings
+    {
+        temp : UnitConvSetting;
+        dist : UnitConvSetting;
+        volume : UnitConvSetting;
+        weight : UnitConvSetting;
+    }
+    
     namespace UnitConv {
 
         const valueExp = "(\\d+\\.\\d+||\\d+)";
@@ -629,18 +644,18 @@ namespace Ao3Track {
             convs.push(new c(new RegExp("(?=\\d)" + exp + "(?!\\d)", "i"), units));
         }
 
-        if (Settings.distToM === true) createRegExps(DistanceUStoM);
-        else if (Settings.distToM === false) createRegExps(DistanceMtoUS);
+        if (Settings.unitConv.dist === UnitConvSetting.USToMetric) createRegExps(DistanceUStoM);
+        else if (Settings.unitConv.dist === UnitConvSetting.MetricToUS) createRegExps(DistanceMtoUS);
 
-        if (Settings.volumeToM === true) createRegExps(VolumeUStoM);
-        else if (Settings.volumeToM === false) createRegExps(VolumeMtoUS);
+        if (Settings.unitConv.volume === UnitConvSetting.USToMetric) createRegExps(VolumeUStoM);
+        else if (Settings.unitConv.volume === UnitConvSetting.MetricToUS) createRegExps(VolumeMtoUS);
 
-        if (Settings.weightToM === true) createRegExps(WeightUStoM);
-        else if (Settings.weightToM === false) createRegExps(WeightMtoUS);
+        if (Settings.unitConv.weight  === UnitConvSetting.USToMetric) createRegExps(WeightUStoM);
+        else if (Settings.unitConv.weight === UnitConvSetting.MetricToUS) createRegExps(WeightMtoUS);
 
-        if (Settings.tempToC === true)
+        if (Settings.unitConv.temp  === UnitConvSetting.USToMetric)
             convs.push(new TemperatureFtoC(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|fahrenheit|F|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
-        else if (Settings.tempToC === false)
+        else if (Settings.unitConv.temp === UnitConvSetting.MetricToUS)
             convs.push(new TemperatureCtoF(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|celcius|centigrade|C|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
 
         if (convs.length !== 0) {

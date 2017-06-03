@@ -77,7 +77,5 @@ declare namespace Ao3Track {
     export interface IAo3TrackHelper extends IAo3TrackHelperMethods, IAo3TrackHelperProperties {
     }
 
-    export var Helper : Ao3Track.IAo3TrackHelper;
+    export let Helper : Ao3Track.IAo3TrackHelper;
 }
-
-declare var Ao3TrackHelperNative : any;

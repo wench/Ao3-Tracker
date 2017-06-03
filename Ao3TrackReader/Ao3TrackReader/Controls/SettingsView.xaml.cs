@@ -293,18 +293,18 @@ namespace Ao3TrackReader.Controls
 
         private void UpdateUnitConvs()
         {
-            bool? v;
+            UnitConvSetting v;
 
-            App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out v);
+            App.Database.TryGetVariable("UnitConvOptions.temp", Enum.TryParse, out v);
             unitConvTempDropDown.SelectedItem = unitConvModeTemp.Find(v);
 
-            App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out v);
+            App.Database.TryGetVariable("UnitConvOptions.dist", Enum.TryParse, out v);
             unitConvDistDropDown.SelectedItem = unitConvMode.Find(v);
 
-            App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out v);
+            App.Database.TryGetVariable("UnitConvOptions.volume", Enum.TryParse, out v);
             unitConvVolumeDropDown.SelectedItem = unitConvMode.Find(v);
 
-            App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out v);
+            App.Database.TryGetVariable("UnitConvOptions.weight", Enum.TryParse, out v);
             unitConvWeightDropDown.SelectedItem = unitConvMode.Find(v);
         }
 
@@ -313,14 +313,14 @@ namespace Ao3TrackReader.Controls
             if (!IsOnScreen) return;
 
             string varname;
-            if (sender == unitConvTempDropDown) varname = "UnitConvOptions.tempToC";
-            else if (sender == unitConvDistDropDown) varname = "UnitConvOptions.distToM";
-            else if (sender == unitConvVolumeDropDown) varname = "UnitConvOptions.volumeToM";
-            else if (sender == unitConvWeightDropDown) varname = "UnitConvOptions.weightToM";
+            if (sender == unitConvTempDropDown) varname = "UnitConvOptions.temp";
+            else if (sender == unitConvDistDropDown) varname = "UnitConvOptions.dist";
+            else if (sender == unitConvVolumeDropDown) varname = "UnitConvOptions.volume";
+            else if (sender == unitConvWeightDropDown) varname = "UnitConvOptions.weight";
             else return;
 
             var dropdown = sender as DropDown;
-            var val = (KeyedItem<bool?>)dropdown.SelectedItem;
+            var val = (KeyedItem<UnitConvSetting>)dropdown.SelectedItem;
 
             App.Database.SaveVariable(varname, val.Key);
         }

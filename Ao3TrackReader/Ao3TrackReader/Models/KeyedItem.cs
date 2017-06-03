@@ -78,6 +78,11 @@ namespace Ao3TrackReader.Models
         {
 
         }
+
+        public void Add(TKey key,TValue value)
+        {
+            Add(new KeyedItem<TKey, TValue>(key, value));
+        }
     }
 
     public class KeyedItemList<TKey> : KeyedItemList<TKey,string>

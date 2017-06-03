@@ -1302,92 +1302,92 @@ namespace Ao3TrackReader
         void InitSettings()
         {
             bool b;
-            bool? nb;
+            UnitConvSetting uc = UnitConvSetting.None;
 
-            App.Database.GetVariableEvents("UnitConvOptions.tempToC").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.tempToC", bool.TryParse, out nb);
-            settings.tempToC = nb;
+            App.Database.GetVariableEvents("UnitConvOptions.temp").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.temp", Enum.TryParse, out uc);
+            settings.unitConv.temp = uc;
 
-            App.Database.GetVariableEvents("UnitConvOptions.distToM").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.distToM", bool.TryParse, out nb);
-            settings.distToM = nb;
+            App.Database.GetVariableEvents("UnitConvOptions.dist").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.dist", Enum.TryParse, out uc);
+            settings.unitConv.dist = uc;
 
-            App.Database.GetVariableEvents("UnitConvOptions.volumeToM").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.volumeToM", bool.TryParse, out nb);
-            settings.volumeToM = nb;
+            App.Database.GetVariableEvents("UnitConvOptions.volume").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.volume", Enum.TryParse, out uc);
+            settings.unitConv.volume = uc;
 
-            App.Database.GetVariableEvents("UnitConvOptions.weightToM").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.weightToM", bool.TryParse, out nb);
-            settings.weightToM = nb;
+            App.Database.GetVariableEvents("UnitConvOptions.weight").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("UnitConvOptions.weight", Enum.TryParse, out uc);
+            settings.unitConv.weight = uc;
 
             App.Database.GetVariableEvents("TagOptions.showCatTags").Updated += SettingsVariable_Updated;
             App.Database.TryGetVariable("TagOptions.showCatTags", bool.TryParse, out b);
-            settings.showCatTags = b;
+            settings.tags.showCatTags = b;
 
             App.Database.GetVariableEvents("TagOptions.showWIPTags").Updated += SettingsVariable_Updated;
             App.Database.TryGetVariable("TagOptions.showWIPTags", bool.TryParse, out b);
-            settings.showWIPTags = b;
+            settings.tags.showWIPTags = b;
 
             App.Database.GetVariableEvents("TagOptions.showRatingTags").Updated += SettingsVariable_Updated;
             App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
-            settings.showRatingTags = b;
+            settings.tags.showRatingTags = b;
 
             App.Database.GetVariableEvents("ListFiltering.HideWorks").Updated += SettingsVariable_Updated;
             App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out b, false);
-            settings.hideFilteredWorks = b;
+            settings.listFiltering.hideFilteredWorks = b;
         }
 
         private void SettingsVariable_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
         {
             bool b = false;
-            bool? nb = null;
+            UnitConvSetting uc = UnitConvSetting.None;
 
             switch (e.VarName)
             {
-                case "UnitConvOptions.tempToC":
-                    if (bool.TryParse(e.NewValue, out b)) nb = b;
-                    settings.tempToC = nb;
+                case "UnitConvOptions.temp":
+                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
+                    settings.unitConv.temp = uc;
                     break;
 
-                case "UnitConvOptions.distToM":
-                    if (bool.TryParse(e.NewValue, out b)) nb = b;
-                    settings.distToM = nb;
+                case "UnitConvOptions.dist":
+                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
+                    settings.unitConv.dist = uc;
                     break;
 
-                case "UnitConvOptions.volumeToM":
-                    if (bool.TryParse(e.NewValue, out b)) nb = b;
-                    settings.volumeToM = nb;
+                case "UnitConvOptions.volume":
+                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
+                    settings.unitConv.volume = uc;
                     break;
 
-                case "UnitConvOptions.weightToM":
-                    if (bool.TryParse(e.NewValue, out b)) nb = b;
-                    settings.weightToM = nb;
+                case "UnitConvOptions.weight":
+                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
+                    settings.unitConv.weight = uc;
                     break;
 
                 case "TagOptions.showCatTags":
                     bool.TryParse(e.NewValue, out b);
-                    settings.showCatTags = b;
+                    settings.tags.showCatTags = b;
                     break;
 
                 case "TagOptions.showWIPTags":
                     bool.TryParse(e.NewValue, out b);
-                    settings.showWIPTags = b;
+                    settings.tags.showWIPTags = b;
                     break;
 
                 case "TagOptions.showRatingTags":
                     bool.TryParse(e.NewValue, out b);
-                    settings.showRatingTags = b;
+                    settings.tags.showRatingTags = b;
                     break;
 
                 case "ListFiltering.HideWorks":
                     bool.TryParse(e.NewValue, out b);
-                    settings.hideFilteredWorks = b;
+                    settings.listFiltering.hideFilteredWorks = b;
                     break;
             }
         }
 
-        Helper.Settings settings = new Helper.Settings();
-        public Helper.ISettings Settings => settings;
+        Settings settings = new Settings();
+        public ISettings Settings => settings;
 
         public async void OpenExternal(Uri uri)
         {

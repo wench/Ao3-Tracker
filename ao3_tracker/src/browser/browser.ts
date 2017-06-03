@@ -134,13 +134,19 @@ namespace Ao3Track {
     };
 
     Settings = {
-        tempToC: true,
-        distToM: true,
-        volumeToM: true,
-        weightToM: true,
-        showCatTags: true,
-        showRatingTags: true,
-        showWIPTags: true,
-        hideFilteredWorks: false
+        unitConv: {
+            temp: UnitConvSetting.USToMetric,
+            dist: UnitConvSetting.USToMetric,
+            volume: UnitConvSetting.USToMetric,
+            weight: UnitConvSetting.USToMetric
+        },
+        tags: {
+            showCatTags: true,
+            showRatingTags: true,
+            showWIPTags: true
+        },
+        listFiltering: {
+            hideFilteredWorks: false
+        }
     };
 }

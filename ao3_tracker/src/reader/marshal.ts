@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+declare var Ao3TrackHelperNative : any;
+
 namespace Ao3Track {
     Helper = {} as Ao3Track.IAo3TrackHelper;
 

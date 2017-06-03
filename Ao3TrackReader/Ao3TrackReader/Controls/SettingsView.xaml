@@ -90,17 +90,17 @@ limitations under the License.
                 <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Never Shown"/>
             </m:NullableKeyedItemList>
 
-            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="UnitConvMode" x:Name="unitConvMode">
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Disabled"/>
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="US to Metric"/>
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Metric to US"/>
-            </m:NullableKeyedItemList>
+            <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvMode" x:Name="unitConvMode">
+                <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="None" Value="Disabled"/>
+                <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="USToMetric" Value="US to Metric"/>
+                <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="MetricToUS" Value="Metric to US"/>
+            </m:KeyedItemList>
 
-            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="UnitConvModeTemp" x:Name="unitConvModeTemp">
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Disabled"/>
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="&#xB0;F to &#xB0;C"/>
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="&#xB0;C to &#xB0;F"/>
-            </m:NullableKeyedItemList>
+            <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvModeTemp" x:Name="unitConvModeTemp">
+                <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="None" Value="Disabled"/>
+                <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="USToMetric" Value="&#xB0;F to &#xB0;C"/>
+                <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="MetricToUS" Value="&#xB0;C to &#xB0;F"/>
+            </m:KeyedItemList>
 
             <m:KeyedItemList x:TypeArguments="x:Int32" x:Key="FontSizeUIList" x:Name="fontSizeUIList" >
                 <m:KeyedItem x:TypeArguments="x:Int32" Key="-3" Value="Tiny"/>

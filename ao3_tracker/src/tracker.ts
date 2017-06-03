@@ -369,15 +369,15 @@ namespace Ao3Track {
                             if (span.classList.contains("warnings"))
                                 continue;   // warnings are already in the list so we don't add again
                             else if (span.classList.contains("rating")) {
-                                if (!Settings.showRatingTags) continue;
+                                if (!Settings.tags.showRatingTags) continue;
                                 tagtype = "ao3t_rating";
                             }
                             else if (span.classList.contains("category")) {
-                                if (!Settings.showCatTags) continue;
+                                if (!Settings.tags.showCatTags) continue;
                                 tagtype = "ao3t_category";
                             }
                             else if (span.classList.contains("iswip")) {
-                                if (!Settings.showWIPTags) continue;
+                                if (!Settings.tags.showWIPTags) continue;
                                 tagtype = "ao3t_iswip";                 
                             }               
 
@@ -410,7 +410,7 @@ namespace Ao3Track {
 
                 ShouldFilterWork(workid, authors, tags, serieses, (filter) => {
                     if (filter) {
-                        if (Settings.hideFilteredWorks) {
+                        if (Settings.listFiltering.hideFilteredWorks) {
                             $work.addClass("ao3t-filtered ao3t-filtered-hide-full");
                             return;
                         }

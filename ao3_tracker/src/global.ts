@@ -18,39 +18,47 @@ limitations under the License.
 
 interface DirectoryEntry { }
 
-declare namespace Ao3Track {
+namespace Ao3Track {
 
-    type FormErrorList = { [key:string]:string; };
+    export type FormErrorList = { [key:string]:string; };
 
-    type timestamp = number;
+    export type timestamp = number;
 
-    interface IWorkChapter {
+    export interface IWorkChapter {
         number: number;
         chapterid: number;
         location: number | null;
         seq: number | null;
     }
-    interface IWorkChapterEx extends IWorkChapter {
+
+    export interface IWorkChapterEx extends IWorkChapter {
         workid: number;
     } 
-    interface IWorkChapterTS extends IWorkChapter {
+    export interface IWorkChapterTS extends IWorkChapter {
         timestamp: timestamp;
     }
 
-    interface ISettings {
-        tempToC?: boolean;
-        distToM?: boolean;
-        volumeToM?: boolean;
-        weightToM?: boolean;
+    export interface ITagSettings
+    {
         showCatTags: boolean;
         showWIPTags: boolean;
         showRatingTags: boolean;
+    }
+
+    export interface IListFilteringSettings
+    {
         hideFilteredWorks: boolean;
     }
 
-    interface IWorkDetails {
-        savedLoc?: IWorkChapter,
-        inReadingList?: boolean
+    export interface ISettings {
+        unitConv: IUnitConvSettings;
+        tags: ITagSettings;
+        listFiltering: IListFilteringSettings;
+    }
+
+    export interface IWorkDetails {
+        savedLoc?: IWorkChapter;
+        inReadingList?: boolean;
     }
 
     export let GetWorkDetails : (works: number[],  callback: (details: { [key:number]:IWorkDetails }) => void, flags?: WorkDetailsFlags) => void;
