@@ -1,0 +1,36 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "0.1.0",
+    "command": "gulp",
+    "isShellCommand": true,
+    "args": [],
+    "showOutput": "always",
+    "suppressTaskName": false,
+    "_runner": "terminal",
+    "options": {
+        "cwd": "${workspaceRoot}/ao3_tracker"        
+    },
+    "tasks": [
+        {
+            "taskName": "default",
+            "isBuildCommand": true,           
+            "problemMatcher": [                
+                {
+
+                    "owner": "lessCompile",
+                    "base": "$lessCompile",
+                    "fileLocation": [ "relative", "${workspaceRoot}/ao3_tracker" ]
+                },
+                {
+                    "owner": "tsc",
+                    "base": "$tsc",
+                    "fileLocation": [ "relative", "${workspaceRoot}/ao3_tracker" ]
+                }
+            ]            
+        },
+        {
+            "taskName": "sourcemapserver"
+        }
+   ]
+}
