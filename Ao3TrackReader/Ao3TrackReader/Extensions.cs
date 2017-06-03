@@ -28,20 +28,6 @@ namespace Ao3TrackReader
 {
     public static partial class Extensions
     {
-        static readonly IDictionary<string, string> m_replaceDict = new Dictionary<string, string> {
-            {"\a", @"\a"},
-            {"\b", @"\b"},
-            {"\f", @"\f"},
-            {"\n", @"\n"},
-            {"\r", @"\r"},
-            {"\t", @"\t"},
-            {"\v", @"\v"},
-            {"\\", @"\\"},
-            {"\0", @"\0"},
-            {"\"", "\\\""}
-        };
-
-
         public static string ToLiteral(this string i_string)
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(i_string);
