@@ -416,8 +416,8 @@
     </BundleResource>
   </ItemGroup>
   <ItemGroup>
-    <BundleResource Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
-      <Link>Resources\Content\jquery-3.1.1.js</Link>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\jquery.js">
+      <Link>Resources\Content\jquery.js</Link>
     </BundleResource>
     <BundleResource Include="..\..\ao3_tracker\build\reader\ios\callbacks.js">
       <Link>Resources\Content\callbacks.js</Link>

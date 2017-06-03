@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+interface Window {
+    jQuery: object;
+}
+
 declare var Ao3TrackHelperNative : any;
 
 namespace Ao3Track {
@@ -174,5 +178,11 @@ namespace Ao3Track {
             link.href = URL.createObjectURL(blob);
             document.getElementsByTagName('head')[0].appendChild(link);
         };
+
+        export function InjectJQuery(code: string) {
+            eval(code);
+            Ao3Track.jQuery = (window.jQuery as JQueryStatic).noConflict(true);
+            Ao3Track.$ = Ao3Track.jQuery;            
+        }        
     }
 }

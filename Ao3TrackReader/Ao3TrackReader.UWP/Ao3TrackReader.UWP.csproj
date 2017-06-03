@@ -441,8 +441,8 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
-      <Link>Content\jquery-3.1.1.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\jquery.js">
+      <Link>Content\jquery.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\marshal.js">
       <Link>Content\marshal.js</Link>

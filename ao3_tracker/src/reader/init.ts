@@ -14,13 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-interface Window {
-    jQuery: JQueryStatic;
-}
-
 namespace Ao3Track {
-    export let jQuery = window.jQuery.noConflict(true);
-    export let $ = jQuery;
+    export let jQuery : JQueryStatic;
+    export let $ : JQueryStatic;
     
     // Don't want wrapped function please. >:(
     export function unWrapNR<T extends Function>(f: T, bindto?: object) : T

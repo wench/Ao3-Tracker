@@ -489,8 +489,8 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\marshal.js">
       <Link>Assets\marshal.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
-      <Link>Assets\jquery-3.1.1.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\jquery.js">
+      <Link>Assets\jquery.js</Link>
     </AndroidAsset>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\platform.js">
       <Link>Assets\platform.js</Link>

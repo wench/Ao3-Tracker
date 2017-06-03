@@ -225,8 +225,8 @@
     <None Include="Package.StoreAssociation.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\ao3_tracker\lib\jquery-3.1.1.js">
-      <Link>Content\jquery-3.1.1.js</Link>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\jquery.js">
+      <Link>Content\jquery.js</Link>
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\win81\callbacks.js">
       <Link>Content\callbacks.js</Link>

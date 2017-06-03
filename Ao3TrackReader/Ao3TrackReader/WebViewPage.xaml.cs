@@ -68,11 +68,11 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
-        public string[] Injections { get; } =
+        public Injection[] Injections { get; } =
             new[] {
-                "jquery-3.1.1.js",
                 "init.js",
                 "marshal.js",
+                new Injection("jquery.js", "Ao3Track.Marshal.InjectJQuery"),
                 "tracker.css",
 #if NEED_INJECT_POLYFILLS
                 "polyfills.js",
@@ -1234,6 +1234,34 @@ namespace Ao3TrackReader
             InjectScripts();
         }
 
+        public class Injection
+        {
+            public Injection()
+            {
+
+            }
+            public Injection(string filename)
+            {
+                Filename = filename;
+                Type = System.IO.Path.GetExtension(filename);
+            }
+            public Injection(string filename, string function)
+            {
+                Filename = filename;
+                Type = System.IO.Path.GetExtension(filename);
+                Function = function;
+            }
+            public string Filename { get; set; }
+            public string Type { get; set; }
+            public string Function { get; set; }
+
+            public static implicit operator Injection(string filename)
+            {
+                return new Injection(filename);
+            }
+        }
+
+
         async void InjectScripts()
         {
             try
@@ -1254,21 +1282,28 @@ namespace Ao3TrackReader
                 ct.ThrowIfCancellationRequested();
                 await OnInjectingScripts(ct);
 
-                foreach (string s in Injections)
+                foreach (var injection in Injections)
                 {
                     ct.ThrowIfCancellationRequested();
-                    var content = await ReadFile(s, ct);
+                    var content = await ReadFile(injection.Filename, ct);
 
                     ct.ThrowIfCancellationRequested();
-                    switch (System.IO.Path.GetExtension(s))
+                    if (!string.IsNullOrWhiteSpace(injection.Function))
                     {
-                        case ".js":
-                            await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + s);
-                            break;
+                        await CallJavascriptAsync(injection.Function, content);
+                    }
+                    else
+                    {
+                        switch (injection.Type)
+                        {
+                            case ".js":
+                                await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + injection.Filename);
+                                break;
 
-                        case ".css":
-                            await CallJavascriptAsync("Ao3Track.Marshal.InjectCSS", content);
-                            break;
+                            case ".css":
+                                await CallJavascriptAsync("Ao3Track.Marshal.InjectCSS", content);
+                                break;
+                        }
                     }
                 }
 

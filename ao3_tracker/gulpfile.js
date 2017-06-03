@@ -24,6 +24,8 @@ const preprocess = require('gulp-preprocess');
 const merge = require('merge-stream');
 const url = require('url');
 const shell = require('gulp-shell')
+const gap = require('gulp-append-prepend');
+const rename = require("gulp-rename");
 
 const tsOptions = require('./tsconfig.json').compilerOptions;
 
@@ -75,33 +77,41 @@ function scripts() {
 }
 gulp.task('scripts', scripts);
 
+function copyJQuery(dest)
+{
+    return gulp.src("node_modules/jquery/dist/jquery.slim.min.js")
+        .pipe(rename({ basename: "jquery" }))
+        .pipe(gap.appendText("//# sourceMappingURL=http://10.0.0.51:8080/node_modules/jquery/dist/jquery.slim.min.map"))
+        .pipe(gulp.dest('build/' + dest));
+}
+
 var reader = {
     "reader.scripts.uwp": () => {
         return gulp.src(uwp_scripts)
             .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES6))
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/uwp/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/uwp/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/uwp'));
     },
     "reader.scripts.droid": () => {
         return gulp.src(droid_scripts)
             .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES5))
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/droid/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/droid/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/droid'));
     },
     "reader.scripts.ios": () => {
         return gulp.src(ios_scripts)
             .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES5))
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/ios/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/ios/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/ios'));
     },
     "reader.scripts.win81": () => {
         return gulp.src(win81_scripts)
             .pipe(sourcemaps.init())
             .pipe(ts(tsOptions_ES5))
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/win81/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/win81/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/win81'));
     },
 
@@ -109,31 +119,44 @@ var reader = {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
+            .pipe(sourcemaps.write('src-maps', {sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/uwp/src-maps/' + file.basename + ".map").href; }}))
             .pipe(gulp.dest('build/reader/uwp'));
     },
     "reader.styles.droid": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/droid/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/droid/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/droid'));
     },
     "reader.styles.ios": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/iso/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/ios/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/ios'));
     },
     "reader.styles.win81": () => {
         return gulp.src('src/*.less')
             .pipe(sourcemaps.init())
             .pipe(less())
-            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/reader/win81/src-maps/' + file.basename + ".map").href; } }))
+            .pipe(sourcemaps.write('src-maps', { sourceMappingURL: (file) => { return url.parse('http://10.0.0.51:8080/build/reader/win81/src-maps/' + file.basename + ".map").href; } }))
             .pipe(gulp.dest('build/reader/win81'));
     },
+    "reader.jquery.uwp": () =>  {
+        return copyJQuery('reader/uwp');
+    },
+    "reader.jquery.droid": () =>  {
+        return copyJQuery('reader/droid');
+    },
+    "reader.jquery.ios": () =>  {
+        return copyJQuery('reader/ios');
+    },
+    "reader.jquery.win81": () =>  {
+        return copyJQuery('reader/win81');
+    }
 };
+
 exports["reader.scripts"] = reader.scripts = gulp.series(reader["reader.scripts.uwp"], reader["reader.scripts.droid"], reader["reader.scripts.ios"], reader["reader.scripts.win81"]);
 exports["reader.scripts.uwp"] = reader.scripts.uwp = reader["reader.scripts.uwp"];
 exports["reader.scripts.droid"] = reader.scripts.droid = reader["reader.scripts.droid"]
@@ -146,23 +169,33 @@ exports["reader.styles.droid"] = reader.styles.droid = reader["reader.styles.dro
 exports["reader.styles.ios"] = reader.styles.ios = reader["reader.styles.ios"];
 exports["reader.styles.win81"] = reader.styles.win81 = reader["reader.styles.win81"];
 
-exports["reader.uwp"] = reader.uwp = gulp.series(reader.scripts.uwp, reader.styles.uwp);
+exports["reader.jquery"] = reader.jquery = gulp.series(reader["reader.jquery.uwp"], reader["reader.jquery.droid"], reader["reader.jquery.ios"], reader["reader.jquery.win81"]);
+exports["reader.jquery.uwp"] = reader.jquery.uwp = reader["reader.jquery.uwp"];
+exports["reader.jquery.droid"] = reader.jquery.droid = reader["reader.jquery.droid"];
+exports["reader.jquery.ios"] = reader.jquery.ios = reader["reader.jquery.ios"];
+exports["reader.jquery.win81"] = reader.jquery.win81 = reader["reader.jquery.win81"];
+
+exports["reader.uwp"] = reader.uwp = gulp.series(reader.scripts.uwp, reader.styles.uwp, reader.jquery.uwp);
 exports["reader.uwp.scripts"] = reader.uwp.scripts = reader.scripts.uwp;
 exports["reader.uwp.styles"] = reader.uwp.styles = reader.styles.uwp;
+exports["reader.uwp.jquery"] = reader.uwp.jquery = reader.jquery.uwp;
 
-exports["reader.droid"] = reader.droid = gulp.series(reader.scripts.droid, reader.styles.droid);
+exports["reader.droid"] = reader.droid = gulp.series(reader.scripts.droid, reader.styles.droid, reader.jquery.droid);
 exports["reader.droid.scripts"] = reader.droid.scripts = reader.scripts.droid;
 exports["reader.droid.styles"] = reader.droid.styles = reader.styles.droid;
+exports["reader.droid.jquery"] = reader.droid.jquery = reader.jquery.droid;
 
-exports["reader.ios"] = reader.ios = gulp.series(reader.scripts.ios, reader.styles.ios);
+exports["reader.ios"] = reader.ios = gulp.series(reader.scripts.ios, reader.styles.ios, reader.jquery.ios);
 exports["reader.ios.scripts"] = reader.ios.scripts = reader.scripts.ios;
 exports["reader.ios.styles"] = reader.ios.styles = reader.styles.ios;
+exports["reader.ios.jquery"] = reader.ios.jquery = reader.jquery.ios;
 
-exports["reader.win81"] = reader.win81 = gulp.series(reader.scripts.win81, reader.styles.win81);
+exports["reader.win81"] = reader.win81 = gulp.series(reader.scripts.win81, reader.styles.win81, reader.jquery.win81);
 exports["reader.win81.scripts"] = reader.win81.scripts = reader.scripts.win81;
 exports["reader.win81.styles"] = reader.win81.styles = reader.styles.win81;
+exports["reader.win81.jquery"] = reader.win81.jquery = reader.jquery.win81;
 
-exports["reader"] = reader = Object.assign(gulp.series(reader.scripts, reader.styles), reader);
+exports["reader"] = reader = Object.assign(gulp.series(reader.scripts, reader.styles, reader.jquery), reader);
 
 function styles() {
     return gulp.src('src/*.less')
@@ -207,7 +240,7 @@ function extras() {
 gulp.task('extras', extras);
 
 function libs() {
-    return gulp.src('lib/**/*')
+    return gulp.src(['lib/**/*', 'node_modules/jquery/dist/jquery*'])
         .pipe(gulp.dest('build/browser/edge/lib'))
         .pipe(gulp.dest('build/browser/chrome/lib'));
 }
@@ -239,4 +272,4 @@ gulp.task('watch', gulp.series(build, function () {
     gulp.watch('lib/**/*', libs);
 }));
 
-gulp.task('sourcemapserver', shell.task(['http-server build']));
+gulp.task('sourcemapserver', shell.task(['http-server .']));
