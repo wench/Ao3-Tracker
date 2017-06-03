@@ -58,7 +58,7 @@ namespace Ao3Track {
 
     ShouldFilterWork = (workid: number, authors: string[], tags: string[], series: number[], callback: (filter: string | null) => void) => {
         callback(null);
-    }
+    };
 
     export function DoSync(callback: (result: boolean) => void) {
         sendMessage({ type: "DO_SYNC", data: undefined, sendResponse: callback });
@@ -140,6 +140,7 @@ namespace Ao3Track {
         weightToM: true,
         showCatTags: true,
         showRatingTags: true,
-        showWIPTags: true
+        showWIPTags: true,
+        hideFilteredWorks: false
     };
 }
