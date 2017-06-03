@@ -639,9 +639,9 @@ namespace Ao3Track {
         else if (Settings.weightToM === false) createRegExps(WeightMtoUS);
 
         if (Settings.tempToC === true)
-            convs.push(new TemperatureFtoC(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|F|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
+            convs.push(new TemperatureFtoC(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|fahrenheit|F|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
         else if (Settings.tempToC === false)
-            convs.push(new TemperatureCtoF(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|C|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
+            convs.push(new TemperatureCtoF(new RegExp(valueNegExp + "(?:" + ws + "(?:degree|degrees|celcius|centigrade|C|\xB0))+((?:ws+(?:below|below zero))?)", "i")));
 
         if (convs.length !== 0) {
 
@@ -654,7 +654,7 @@ namespace Ao3Track {
                         return true;
                     }
                 }
-                if (elem.tagName === "LINK" || elem.tagName === "SCRIPT" || elem.tagName === "HEAD" || elem.tagName === "SELECT" || elem.tagName === "INPUT" || elem.getAttribute("contenteditable") === "true") {
+                if (elem.tagName === "LINK" || elem.tagName === "SCRIPT" || elem.tagName === "HEAD" || elem.tagName === "SELECT" || elem.tagName === "INPUT" || elem.tagName === "TEXTAREA" || elem.getAttribute("contenteditable") === "true") {
                     return true;
                 }
                 return false;
