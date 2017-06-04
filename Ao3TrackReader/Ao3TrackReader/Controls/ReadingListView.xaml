@@ -66,6 +66,7 @@ limitations under the License.
                                 <MenuItem Text="Open"                     Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Open Full Work at Read To Location" Command="{local:MenuOpenFullWorkLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Open Full Work"           Command="{local:MenuOpenFullWorkCommand ReadingList={x:Reference root}}"  CommandParameter="{Binding .}" />
+                                <MenuItem Text="Copy Link"                Clicked="OnMenuCopyLink" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Refresh"                  Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
                                 <MenuItem Text="Delete"                   Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
                             </ViewCell.ContextActions>

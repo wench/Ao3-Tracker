@@ -318,10 +318,20 @@ namespace Ao3TrackReader.Controls
             var mi = ((MenuItem)sender);
             if (mi.CommandParameter is Ao3PageViewModel item)
             {
-                Goto(item,false,false);
+                Goto(item, false, false);
             }
         }
 
+        private void OnMenuCopyLink(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            if (mi.CommandParameter is Ao3PageViewModel item)
+            {
+                wvp.CopyToClipboard(item.Uri.AbsoluteUri, "url");
+                
+            }
+        }
+        
         private async void OnMenuRefresh(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
