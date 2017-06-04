@@ -451,9 +451,9 @@ namespace Ao3Track {
     }
 
     let regex_chapter_count = /^(\d+)\/(\d+|\?)/;
-    const in_reading_list_html = '<abbr class="ao3-track-inlist" title="Ao3Track: In Reading List">' + String.fromCodePoint(0x1F4DA) + "</abbr>";
-    const unfinished_html = '<abbr class="ao3-track-inlist" title="Ao3Track: Unread chapters">' + String.fromCodePoint(0x1F4D1) + "</abbr>";
-    const read_all_html  = '<abbr class="ao3-track-readall" title="Ao3Track: Read all chapters">' + String.fromCodePoint(0x1F4DC) + "</abbr>";
+    const in_reading_list_html = '<abbr class="ao3-track-emoji ao3-track-inlist" title="Ao3Track: In Reading List">' + String.fromCodePoint(0x1F4DA) + "</abbr>";
+    const unfinished_html = '<abbr class="ao3-track-emoji ao3-track-unreadchaps" title="Ao3Track: Unread chapters">' + String.fromCodePoint(0x1F4D1) + "</abbr>";
+    const read_all_html  = '<abbr class="ao3-track-emoji ao3-track-readall" title="Ao3Track: Read all chapters">' + String.fromCodePoint(0x1F4DC) + "</abbr>";
 
     export function ExtendWorkSummary($work: JQuery, workid: number, workchap: IWorkChapter, inreadinglist : boolean) {
         $work.find(".stats .lastchapters").remove();
