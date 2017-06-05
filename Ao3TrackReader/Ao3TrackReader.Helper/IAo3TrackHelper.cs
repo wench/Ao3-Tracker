@@ -26,6 +26,7 @@ namespace Ao3TrackReader.Helper
         void Reset();
         void OnAlterFontSize(int fontSize);
         void OnJumpToLastLocation(bool pagejump);
+        void OnRequestSpeechText();
 
 #if __ANDROID__
         string GetEvalJavascriptUrl(string code, System.Threading.Tasks.TaskCompletionSource<string> cs);

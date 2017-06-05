@@ -118,7 +118,7 @@ namespace Ao3Track {
             }
 
             let paragraph: number;
-            let $children = $e.children();
+            let $children = $e.children().not('h3.landmark.heading');
             if (workchap.location === null || (paragraph = Math.floor(workchap.location / LOC_PARA_MULTIPLIER)) >= $children.length) {
                 // Scroll to bottom of the element
                 console.log("Should scroll to: %i p end", workchap.number);
@@ -204,7 +204,7 @@ namespace Ao3Track {
 
                 let rect = elem.getBoundingClientRect();
                 if (rect.top <= centre) {
-                    let $e = $(elem);
+                    let $e = $(elem).not('h3.landmark.heading');
                     let data: { num: number, id: number } = $e.data('ao3t');
                     let loc: number | null = 0;
 

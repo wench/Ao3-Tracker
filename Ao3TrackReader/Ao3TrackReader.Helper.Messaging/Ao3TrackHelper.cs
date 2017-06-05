@@ -60,6 +60,7 @@ namespace Ao3TrackReader.Helper
         {
             _onjumptolastlocationevent = 0;
             _onalterfontsizeevent = 0;
+            _onrequestspeechtext = 0;
         }
 
         public void Init()
@@ -118,6 +119,22 @@ namespace Ao3TrackReader.Helper
         {
             if (_onalterfontsizeevent != 0)
                 wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); }).ConfigureAwait(false);
+        }
+
+        int _onrequestspeechtext;
+        public int onrequestspeechtext
+        {
+            [Converter("Event")]
+            set
+            {
+                _onrequestspeechtext = value;
+                wvp.DoOnMainThreadAsync(() => { wvp.HasSpeechText = value != 0; }).ConfigureAwait(false);
+            }
+        }
+        void IAo3TrackHelper.OnRequestSpeechText()
+        {
+            if (_onrequestspeechtext != 0)
+                wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onrequestspeechtext, true); }).ConfigureAwait(false);
         }
 
         public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
@@ -248,6 +265,11 @@ namespace Ao3TrackReader.Helper
             {
                 throw new NotSupportedException();
             }
+        }
+
+        public void SetSpeechText(SpeechText speechText)
+        {
+            wvp.DoOnMainThreadAsync(() => wvp.SetSpeechText(speechText)).ConfigureAwait(false);
         }
     }
 }

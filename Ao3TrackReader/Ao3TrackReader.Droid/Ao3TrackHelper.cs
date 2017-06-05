@@ -107,6 +107,7 @@ namespace Ao3TrackReader.Helper
         {
             _onjumptolastlocationevent = 0;
             _onalterfontsizeevent = 0;
+            _onrequestspeechtext = 0;
         }
 
         int _onjumptolastlocationevent;
@@ -142,6 +143,22 @@ namespace Ao3TrackReader.Helper
         {
             if (_onalterfontsizeevent != 0)
                 wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onalterfontsizeevent, fontSize); }).ConfigureAwait(false);
+        }
+
+        int _onrequestspeechtext;
+        public int onrequestspeechtext
+        {
+            [JavascriptInterface, Export("set_onrequestspeechtext"), Converter("Event")]
+            set
+            {
+                _onrequestspeechtext = value;
+                wvp.DoOnMainThreadAsync(() => { wvp.HasSpeechText = value != 0; }).ConfigureAwait(false);
+            }
+        }
+        void IAo3TrackHelper.OnRequestSpeechText()
+        {
+            if (_onrequestspeechtext != 0)
+                wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onrequestspeechtext, true); }).ConfigureAwait(false);
         }
 
         [JavascriptInterface, Export("init")]
@@ -301,6 +318,14 @@ namespace Ao3TrackReader.Helper
                 return JsonConvert.SerializeObject(wvp.Settings);
             }
         }
+
+        [JavascriptInterface, Export("setSpeechText")]
+        public void SetSpeechText([Converter("ToJSON")] string speechText_json)
+        {
+            var speechText = JsonConvert.DeserializeObject<SpeechText>(speechText_json);
+            wvp.DoOnMainThreadAsync(() => wvp.SetSpeechText(speechText)).ConfigureAwait(false);
+        }
+
     }
 }
 

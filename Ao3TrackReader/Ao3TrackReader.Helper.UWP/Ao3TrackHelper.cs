@@ -100,6 +100,7 @@ namespace Ao3TrackReader.Helper
         {
             EventRegistrationTokenTable<EventHandler<object>>.GetOrCreateEventRegistrationTokenTable(ref _JumpToLastLocationEvent).InvocationList = null;
             EventRegistrationTokenTable<EventHandler<object>>.GetOrCreateEventRegistrationTokenTable(ref _AlterFontSizeEvent).InvocationList = null;
+            EventRegistrationTokenTable<EventHandler<object>>.GetOrCreateEventRegistrationTokenTable(ref _RequestSpeechText).InvocationList = null;
         }
 
         private EventRegistrationTokenTable<EventHandler<object>> _JumpToLastLocationEvent;
@@ -164,6 +165,40 @@ namespace Ao3TrackReader.Helper
             handlers?.Invoke(this, fontSize);
         }
 
+        private EventRegistrationTokenTable<EventHandler<object>> _RequestSpeechText;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1009:DeclareEventHandlersCorrectly")]
+        public event EventHandler<object> RequestSpeechText
+        {
+            add
+            {
+                var ret = EventRegistrationTokenTable<EventHandler<object>>
+                    .GetOrCreateEventRegistrationTokenTable(ref _RequestSpeechText)
+                    .AddEventHandler((s, e) => { Task.Run(() => value(s, e)); });
+
+                DoOnMainThreadAsync(() => { wvp.HasSpeechText = true; }).Wait();
+
+                return ret;
+            }
+
+            remove
+            {
+                DoOnMainThreadAsync(() => { wvp.HasSpeechText = false; }).Wait();
+
+                EventRegistrationTokenTable<EventHandler<object>>
+                    .GetOrCreateEventRegistrationTokenTable(ref _RequestSpeechText)
+                    .RemoveEventHandler(value);
+            }
+        }
+        void IAo3TrackHelper.OnRequestSpeechText()
+        {
+            var handlers =
+                EventRegistrationTokenTable<EventHandler<object>>
+                .GetOrCreateEventRegistrationTokenTable(ref _RequestSpeechText)
+                .InvocationList;
+
+            handlers?.Invoke(this, true);
+        }
+
         public void Init()
         {
         }
@@ -207,6 +242,12 @@ namespace Ao3TrackReader.Helper
 
                 case "PageTitleNative":
                     return new PageTitle();
+
+                case "SpeechTextNative":
+                    return new SpeechText();
+
+                case "SpeechTextChapterNative":
+                    return new SpeechTextChapter();
             }
 
             return null;
@@ -322,6 +363,12 @@ namespace Ao3TrackReader.Helper
         public ISettings Settings
         {
             get => wvp.Settings;
+        }
+
+        internal static MemberDef md_SetSpeechText = new MemberDef { args = new Dictionary<int, string> { { 0, "ToSpeechTextNative" } } };
+        public void SetSpeechText(SpeechText speechText)
+        {
+            DoOnMainThreadAsync(() => wvp.SetSpeechText(speechText)).ConfigureAwait(false);
         }
     }
 }

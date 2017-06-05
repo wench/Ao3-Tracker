@@ -264,6 +264,9 @@
     <Content Include="..\..\ao3_tracker\build\reader\win81\init.js">
       <Link>Content\init.js</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\win81\speech.js">
+      <Link>Content\speech.js</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

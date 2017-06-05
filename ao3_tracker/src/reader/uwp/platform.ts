@@ -53,6 +53,7 @@ namespace Ao3Track {
             remove: (key: K) => void;
             size: number;
         }
+
         const IMapKeys = [
             "clear",
             "getView",
@@ -68,6 +69,8 @@ namespace Ao3Track {
             "WorkChapterExNative": IWorkChapterEx;
             "WorkChapterMapNative": { [key: number]: IWorkChapter } | IMap<number,IWorkChapter & Native>;
             "PageTitleNative": IPageTitle;
+            "SpeechTextNative": ISpeechText;
+            "SpeechTextChapterNative": ISpeechTextChapter;
         }
 
         export let helper = Ao3TrackHelperNative as  {
@@ -182,7 +185,9 @@ namespace Ao3Track {
         }
 
         export function ToNative<K extends keyof ClassNameMap>(classname: K, source: ClassNameMap[K]): ClassNameMap[K] & UWP.Native{
-            return Object.assign(helper.createObject(classname), source);
+            let newobj = helper.createObject(classname);
+            newobj = Object.assign(newobj, source);
+            return newobj;
         }
     }
 
@@ -204,6 +209,10 @@ namespace Ao3Track {
                     m.insert(key as any, ToWorkChapterNative(source[key]));
                 }
                 return m;
+            }
+            export function ToSpeechTextNative(source: ISpeechText) {
+                for(let i in source.chapters) source.chapters[i] = UWP.ToNative("SpeechTextChapterNative",source.chapters[i]);
+                return UWP.ToNative("SpeechTextNative", source);
             }
 
             export function WrapIMapNum<V>(map: UWP.IMap<number, V>) {

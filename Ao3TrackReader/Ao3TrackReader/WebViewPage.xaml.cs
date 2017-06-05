@@ -88,7 +88,8 @@ namespace Ao3TrackReader
                 "reader.js",
                 "tracker.js",
                 "unitconv.js",
-                "touch.js"
+                "touch.js",
+                "speech.js"
             };
 
         public IEnumerable<Models.IHelpInfo> HelpItems
@@ -1575,5 +1576,18 @@ namespace Ao3TrackReader
         {
             return Task.Run(() => Data.ListFiltering.Instance.ShouldFilterWork(workId, workauthors, worktags, workserieses));
         }
+
+        bool hasSpeechText = false;
+        public bool HasSpeechText
+        {
+            get { return hasSpeechText; }
+            set { hasSpeechText = value; }
+        }
+
+        public void SetSpeechText(SpeechText speechText)
+        {
+
+        }
+
     }
 }

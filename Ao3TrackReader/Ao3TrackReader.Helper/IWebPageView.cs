@@ -106,5 +106,8 @@ namespace Ao3TrackReader.Helper
         ISettings Settings{ get; }
 
         IAsyncOp_String ShouldFilterWorkAsync(long workId, IEnumerable<string> workauthors, IEnumerable<string> worktags, IEnumerable<long> workserieses);
+
+        bool HasSpeechText { get; set; }
+        void SetSpeechText(SpeechText speechText);
     }
 }

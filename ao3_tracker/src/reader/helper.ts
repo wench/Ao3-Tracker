@@ -26,10 +26,6 @@ declare namespace Ao3Track {
         primarytag?: string | null;
     }    
 
-    export interface ISpeechText
-    {
-    }
-
     export interface IAo3TrackHelperMethods {
         init(): void;
         logError(name: string, message: string, url:string, lineNo:number, columnNo:number, stack: string): void;
@@ -48,7 +44,7 @@ declare namespace Ao3Track {
         startWebViewDragAccelerate(velocity: number) : void;
         stopWebViewDragAccelerate(): void;
 
-        setSpeechText(speechText: ISpeechText[]) : void;
+        setSpeechText(speechText: ISpeechText) : void;
     }
 
     export interface IAo3TrackHelperProperties {

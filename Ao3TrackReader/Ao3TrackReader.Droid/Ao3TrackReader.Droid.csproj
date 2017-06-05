@@ -519,6 +519,9 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\init.js">
       <Link>Assets\init.js</Link>
     </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\speech.js">
+      <Link>Assets\speech.js</Link>
+    </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />

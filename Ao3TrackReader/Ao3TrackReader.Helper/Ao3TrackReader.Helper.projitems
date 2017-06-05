@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)IAo3TrackHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HelperDef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpeechText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IWebPageView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ISettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WorkChapter.cs" />

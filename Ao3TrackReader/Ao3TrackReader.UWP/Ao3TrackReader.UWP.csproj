@@ -471,6 +471,9 @@
     <Content Include="..\..\ao3_tracker\build\reader\uwp\init.js">
       <Link>Content\init.js</Link>
     </Content>
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\speech.js">
+      <Link>Content\speech.js</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
