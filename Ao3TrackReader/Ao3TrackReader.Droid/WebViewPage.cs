@@ -325,15 +325,16 @@ namespace Ao3TrackReader
                 }
             }
 
-            public override void OnPageStarted(WebView view, string url, Bitmap favicon)
+            public override async void OnPageStarted(WebView view, string url, Bitmap favicon)
             {
                 base.OnPageStarted(view, url, favicon);
-                wvp.OnContentLoading();
+
                 canDoOnContentLoaded = true;
                 wvp.AddJavascriptObject("Ao3TrackHelperNative", wvp.helper);
+
             }
 
-            public override void OnPageCommitVisible(WebView view, string url)
+            public override async void OnPageCommitVisible(WebView view, string url)
             {
                 base.OnPageCommitVisible(view, url);
             }
@@ -398,6 +399,20 @@ namespace Ao3TrackReader
             public override void OnConsoleMessage(string message, int lineNumber, string sourceID)
             {
                 return;
+            }
+
+            bool loaded = false;
+            public override void OnProgressChanged(WebView view, int newProgress)
+            {
+                base.OnProgressChanged(view, newProgress);
+
+                if (!loaded && newProgress >= 50)
+                {
+                    wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
+                    loaded = true;
+                }
+
+                if (newProgress == 100) loaded = false;
             }
         }
 

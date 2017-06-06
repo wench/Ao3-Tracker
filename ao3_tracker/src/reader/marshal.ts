@@ -176,7 +176,7 @@ namespace Ao3Track {
             link.type = 'text/css';
             link.rel = 'stylesheet';
             link.href = URL.createObjectURL(blob);
-            document.getElementsByTagName('head')[0].appendChild(link);
+            document.head.appendChild(link);
         };
 
         export function InjectJQuery(code: string) {

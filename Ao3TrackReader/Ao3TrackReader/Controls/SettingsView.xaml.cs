@@ -401,6 +401,7 @@ namespace Ao3TrackReader.Controls
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
                 listFiltersShowWorks.IsEnabled = false;
+                listFiltersOnlyGT.IsEnabled = false;
                 listFilterIndicator.IsVisible = true;
                 if (listFilterIndicator.Content == null)
                 {
@@ -426,11 +427,15 @@ namespace Ao3TrackReader.Controls
                     listFilterSerieses.IsEnabled = true;
                     listFilterSave.IsEnabled = true;
                     listFiltersShowWorks.IsEnabled = true;
+                    listFiltersOnlyGT.IsEnabled = true;
                     listFilterIndicator.Content = null;
                     listFilterIndicator.IsVisible = false;
 
                     App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out bool b, false);
                     listFiltersShowWorks.SelectedItem = listFiltersShowWorksAsList.Find(b);
+
+                    App.Database.TryGetVariable("ListFiltering.OnlyGeneralTeen", bool.TryParse, out b, ListFilteringSettings.def_onlyGeneralTeen);
+                    listFiltersOnlyGT.IsToggled = b;
 
                 });
             });
@@ -451,6 +456,7 @@ namespace Ao3TrackReader.Controls
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
                 listFiltersShowWorks.IsEnabled = false;
+                listFiltersOnlyGT.IsEnabled = false;
                 listFilterIndicator.IsVisible = true;
                 if (listFilterIndicator.Content == null)
                 {
@@ -458,6 +464,8 @@ namespace Ao3TrackReader.Controls
                     listFilterIndicator.Content.IsRunning = true;
                 }
             });
+
+            App.Database.SaveVariable("ListFiltering.OnlyGeneralTeen", listFiltersOnlyGT.IsToggled);
 
             App.Database.SaveVariable("ListFiltering.HideWorks", (listFiltersShowWorks.SelectedItem as KeyedItem<bool>).Key);
 

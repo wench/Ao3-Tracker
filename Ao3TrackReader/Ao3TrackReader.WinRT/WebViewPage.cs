@@ -115,7 +115,7 @@ namespace Ao3TrackReader
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
         {
-            OnContentLoading();
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() => OnContentLoading());
         }
 
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)

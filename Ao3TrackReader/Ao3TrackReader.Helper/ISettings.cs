@@ -38,6 +38,7 @@ namespace Ao3TrackReader.Helper
     public interface IListFilteringSettings
     {
         bool hideFilteredWorks { get; }
+        bool onlyGeneralTeen { get; }
     }
 
     public interface ISettings

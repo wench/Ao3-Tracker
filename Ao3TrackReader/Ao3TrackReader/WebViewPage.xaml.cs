@@ -68,6 +68,13 @@ namespace Ao3TrackReader
     {
         IAo3TrackHelper helper;
 
+
+        public Injection[] InjectionsLoading { get; } =
+            new []
+            {
+                new Injection("hider.js")
+            };
+
         public Injection[] Injections { get; } =
             new[] {
                 "init.js",
@@ -1209,8 +1216,13 @@ namespace Ao3TrackReader
             return false;
         }
 
-        void OnContentLoading()
+        async void OnContentLoading()
         {
+            CancellationToken ct = new CancellationToken(false);
+            foreach (var injection in InjectionsLoading)
+            {
+                await InjectScript(injection, ct);
+            }
         }
 
         private void OnContentLoaded()
@@ -1262,6 +1274,30 @@ namespace Ao3TrackReader
             }
         }
 
+        async Task InjectScript(Injection injection, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+            var content = await ReadFile(injection.Filename, ct);
+
+            ct.ThrowIfCancellationRequested();
+            if (!string.IsNullOrWhiteSpace(injection.Function))
+            {
+                await CallJavascriptAsync(injection.Function, content);
+            }
+            else
+            {
+                switch (injection.Type)
+                {
+                    case ".js":
+                        await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + injection.Filename);
+                        break;
+
+                    case ".css":
+                        await CallJavascriptAsync("Ao3Track.Marshal.InjectCSS", content);
+                        break;
+                }
+            }
+        }
 
         async void InjectScripts()
         {
@@ -1285,27 +1321,7 @@ namespace Ao3TrackReader
 
                 foreach (var injection in Injections)
                 {
-                    ct.ThrowIfCancellationRequested();
-                    var content = await ReadFile(injection.Filename, ct);
-
-                    ct.ThrowIfCancellationRequested();
-                    if (!string.IsNullOrWhiteSpace(injection.Function))
-                    {
-                        await CallJavascriptAsync(injection.Function, content);
-                    }
-                    else
-                    {
-                        switch (injection.Type)
-                        {
-                            case ".js":
-                                await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + injection.Filename);
-                                break;
-
-                            case ".css":
-                                await CallJavascriptAsync("Ao3Track.Marshal.InjectCSS", content);
-                                break;
-                        }
-                    }
+                    await InjectScript(injection, ct);
                 }
 
                 ct.ThrowIfCancellationRequested();
@@ -1371,6 +1387,10 @@ namespace Ao3TrackReader
             App.Database.GetVariableEvents("ListFiltering.HideWorks").Updated += SettingsVariable_Updated;
             App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out b, false);
             settings.listFiltering.hideFilteredWorks = b;
+
+            App.Database.GetVariableEvents("ListFiltering.OnlyGeneralTeen").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable("ListFiltering.OnlyGeneralTeen", bool.TryParse, out b, ListFilteringSettings.def_onlyGeneralTeen);
+            settings.listFiltering.onlyGeneralTeen = b;            
         }
 
         private void SettingsVariable_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
@@ -1418,6 +1438,11 @@ namespace Ao3TrackReader
                 case "ListFiltering.HideWorks":
                     bool.TryParse(e.NewValue, out b);
                     settings.listFiltering.hideFilteredWorks = b;
+                    break;
+
+                case "ListFiltering.OnlyGeneralTeen":
+                    bool.TryParse(e.NewValue, out b);
+                    settings.listFiltering.onlyGeneralTeen = b;
                     break;
             }
         }

@@ -310,6 +310,13 @@ limitations under the License.
 
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Only show General and Teen rated content" HorizontalOptions="StartAndExpand" />
+                                <Switch x:Name="listFiltersOnlyGT" HorizontalOptions="EndAndExpand"  />
+                            </StackLayout>
+                        </StackLayout>
+                        
+                        <StackLayout Style="{StaticResource SettingVert}">
+                            <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Filtered works should be" HorizontalOptions="StartAndExpand" />
                                 <local:DropDown x:Name="listFiltersShowWorks" ItemsSource="{StaticResource ListFiltersShowWorksAsList}" />
                             </StackLayout>

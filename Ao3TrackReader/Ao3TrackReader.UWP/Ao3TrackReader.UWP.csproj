@@ -473,6 +473,9 @@
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\speech.js">
       <Link>Content\speech.js</Link>
+    </Content>    
+    <Content Include="..\..\ao3_tracker\build\reader\uwp\hider.js">
+      <Link>Content\hider.js</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>

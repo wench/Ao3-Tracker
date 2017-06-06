@@ -458,6 +458,9 @@
     <BundleResource Include="..\..\ao3_tracker\build\reader\ios\speech.js">
       <Link>Resources\Content\speech.js</Link>
     </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\hider.js">
+      <Link>Resources\Content\hider.js</Link>
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, processorArchitecture=MSIL">

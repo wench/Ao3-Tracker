@@ -146,7 +146,8 @@ namespace Ao3Track {
             showWIPTags: true
         },
         listFiltering: {
-            hideFilteredWorks: false
+            hideFilteredWorks: false,
+            onlyGeneralTeen: false
         }
     };
 }

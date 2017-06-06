@@ -35,6 +35,13 @@ namespace Ao3TrackReader
     public sealed class ListFilteringSettings : IListFilteringSettings
     {
         public bool hideFilteredWorks { get; set; }
+        public bool onlyGeneralTeen { get; set; }
+
+#if __ANDROID__
+        public const bool def_onlyGeneralTeen = false;
+#else
+        public const bool def_onlyGeneralTeen = true;
+#endif
     }
 
     public sealed class Settings : ISettings

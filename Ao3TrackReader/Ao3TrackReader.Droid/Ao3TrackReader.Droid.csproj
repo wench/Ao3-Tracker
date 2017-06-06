@@ -29,7 +29,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>True</DebugSymbols>
+    <DebugSymbols>false</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
@@ -38,7 +38,7 @@
     <WarningLevel>4</WarningLevel>
     <AndroidUseSharedRuntime>True</AndroidUseSharedRuntime>
     <AndroidLinkMode>None</AndroidLinkMode>
-    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
     <AotAssemblies>false</AotAssemblies>
@@ -62,7 +62,7 @@
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
     <AndroidSupportedAbis>armeabi;armeabi-v7a;x86</AndroidSupportedAbis>
-    <Debugger>.Net (Xamarin)</Debugger>
+    <Debugger>Xamarin</Debugger>
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableMultiDex>False</AndroidEnableMultiDex>
@@ -521,6 +521,9 @@
     </AndroidAsset>
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\speech.js">
       <Link>Assets\speech.js</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\hider.js">
+      <Link>Assets\hider.js</Link>
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>

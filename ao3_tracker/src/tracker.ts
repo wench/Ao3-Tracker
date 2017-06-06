@@ -369,6 +369,19 @@ namespace Ao3Track {
                             if (span.classList.contains("warnings"))
                                 continue;   // warnings are already in the list so we don't add again
                             else if (span.classList.contains("rating")) {
+                                if (Settings.listFiltering.onlyGeneralTeen && tag !== "Teen And Up Audiences" && tag !== "General Audiences") {
+                                    if (Settings.listFiltering.hideFilteredWorks) {
+                                        $work.addClass("ao3t-filtered ao3t-filtered-hide-full ao3t-processed");
+                                    }
+                                    else {
+                                        let message = document.createElement("div");
+                                        message.setAttribute("class","ao3t-filtered-message");
+                                        message.appendChild(document.createTextNode("Work filtered due to Rating"));
+                                        $work.addClass("ao3t-filtered ao3t-filtered-hide ao3t-processed").prepend(message);                                        
+                                    }
+                                    return false;                                    
+                                }
+
                                 if (!Settings.tags.showRatingTags) continue;
                                 tagtype = "ao3t_rating";
                             }
@@ -394,7 +407,9 @@ namespace Ao3Track {
                         }
                     }
                 });
-                
+                if ($work.hasClass("ao3t-filtered"))
+                     return;
+
                 // Gather all the serieses
                 let serieses : number[] = [];
                 $work.find(".series a").each((index,elem)=>{
@@ -414,10 +429,6 @@ namespace Ao3Track {
                             $work.addClass("ao3t-filtered ao3t-filtered-hide-full");
                             return;
                         }
-                        $work.addClass("ao3t-filtered ao3t-filtered-hide");
-
-
-
                         let message = document.createElement("div");
                         message.setAttribute("class","ao3t-filtered-message");
 
@@ -443,8 +454,9 @@ namespace Ao3Track {
                         message.appendChild(document.createElement("br"));
                         message.appendChild(document.createTextNode(filter));
 
-                        $work.prepend(message);
+                        $work.addClass("ao3t-filtered ao3t-filtered-hide").prepend(message);
                     }
+                     $work.addClass("ao3t-processed");
                 });
             }
         });

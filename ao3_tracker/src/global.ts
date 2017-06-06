@@ -48,6 +48,7 @@ namespace Ao3Track {
     export interface IListFilteringSettings
     {
         hideFilteredWorks: boolean;
+        onlyGeneralTeen: boolean;
     }
 
     export interface ISettings {
