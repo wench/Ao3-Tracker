@@ -480,16 +480,7 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var row = database.Table<LanguageCache>().FirstOrDefault(x => x.name == name);
-                if (!(row is null))
-                {
-                    row.id = id;
-                    database.Update(row);
-                }
-                else
-                {
-                    database.Insert(new LanguageCache { name = name, id = id });
-                }
+                database.InsertOrReplace(new LanguageCache { name = name, id = id });
             }
 
         }
@@ -507,16 +498,7 @@ namespace Ao3TrackReader
         {
             lock (locker)
             {
-                var row = database.Table<SortColumn>().FirstOrDefault(x => x.name == name);
-                if (!(row is null))
-                {
-                    row.id = id;
-                    database.Update(row);
-                }
-                else
-                {
-                    database.Insert(new SortColumn { name = name, id = id });
-                }
+                database.InsertOrReplace(new SortColumn { name = name, id = id });
             }
 
         }
