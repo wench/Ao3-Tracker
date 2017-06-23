@@ -146,10 +146,8 @@ namespace Ao3TrackReader
             if (App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
             else LogFontSize = 0;
 
-            App.Database.TryGetVariable("ToolbarBackBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarBackBehaviour, NavigateBehaviour.History);
-            App.Database.TryGetVariable("ToolbarForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarForwardBehaviour, NavigateBehaviour.HistoryThenPage);
-            App.Database.TryGetVariable("SwipeBackBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeBackBehaviour, NavigateBehaviour.History);
-            App.Database.TryGetVariable("SwipeForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeForwardBehaviour, NavigateBehaviour.PageThenHistory);
+            InitNavBehav();
+
 
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
@@ -881,28 +879,80 @@ namespace Ao3TrackReader
             else if (h2 && WebViewCanGoForward) WebViewGoForward();
         }
 
-        public NavigateBehaviour ToolbarBackBehaviour = NavigateBehaviour.History;
+        void InitNavBehav()
+        {
+            App.Database.GetVariableEvents("ToolbarBackBehaviour").Updated += NavBehavDbVar_Updated;
+            App.Database.TryGetVariable("ToolbarBackBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarBackBehaviour, def_ToolbarBackBehaviour);
+
+            App.Database.GetVariableEvents("ToolbarForwardBehaviour").Updated += NavBehavDbVar_Updated;
+            App.Database.TryGetVariable("ToolbarForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarForwardBehaviour, def_ToolbarForwardBehaviour);
+
+            App.Database.GetVariableEvents("SwipeBackBehaviour").Updated += NavBehavDbVar_Updated;
+            App.Database.TryGetVariable("SwipeBackBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeBackBehaviour, def_SwipeBackBehaviour);
+
+            App.Database.GetVariableEvents("SwipeForwardBehaviour").Updated += NavBehavDbVar_Updated;
+            App.Database.TryGetVariable("SwipeForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeForwardBehaviour, def_SwipeForwardBehaviour);
+        }
+
+        private void NavBehavDbVar_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+            if (Enum.TryParse(e.NewValue, out NavigateBehaviour behav))
+            {
+                switch (e.VarName)
+                {
+                    case "ToolbarBackBehaviour":
+                        ToolbarBackBehaviour = behav;
+                        break;
+
+                    case "ToolbarForwardBehaviour":
+                        ToolbarForwardBehaviour = behav;
+                        break;
+
+                    case "SwipeBackBehaviour":
+                        SwipeBackBehaviour = behav;
+                        break;
+
+                    case "SwipeForwardBehaviour":
+                        SwipeForwardBehaviour = behav;
+                        break;
+                }
+            }
+        }
+
+        private const NavigateBehaviour def_ToolbarBackBehaviour = NavigateBehaviour.History;
+        public static string str_def_ToolbarBackBehaviour => def_ToolbarBackBehaviour.ToString();
+
+        private NavigateBehaviour ToolbarBackBehaviour = def_ToolbarBackBehaviour;
         public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
         public void ToolbarGoBack()
         {
             GoBack(ToolbarBackBehaviour);
         }
 
-        public NavigateBehaviour ToolbarForwardBehaviour = NavigateBehaviour.HistoryThenPage;
+        private const NavigateBehaviour def_ToolbarForwardBehaviour = NavigateBehaviour.HistoryThenPage;
+        public static string str_def_ToolbarForwardBehaviour => def_ToolbarForwardBehaviour.ToString();
+
+        private NavigateBehaviour ToolbarForwardBehaviour = def_ToolbarForwardBehaviour;
         public bool ToolbarCanGoForward => CanGoForward(ToolbarForwardBehaviour);
         public void ToolbarGoForward()
         {
             GoForward(ToolbarForwardBehaviour);
         }
 
-        public NavigateBehaviour SwipeBackBehaviour = NavigateBehaviour.History;
+        private const NavigateBehaviour def_SwipeBackBehaviour = NavigateBehaviour.History;
+        public static string str_def_SwipeBackBehaviour => def_SwipeBackBehaviour.ToString();
+
+        private NavigateBehaviour SwipeBackBehaviour = def_SwipeBackBehaviour;
         public bool SwipeCanGoBack => CanGoBack(SwipeBackBehaviour);
         public void SwipeGoBack()
         {
             GoBack(SwipeBackBehaviour);
         }
 
-        public NavigateBehaviour SwipeForwardBehaviour = NavigateBehaviour.PageThenHistory;
+        private const NavigateBehaviour def_SwipeForwardBehaviour = NavigateBehaviour.HistoryThenPage;
+        public static string str_def_SwipeForwardBehaviour => def_SwipeForwardBehaviour.ToString();
+
+        private NavigateBehaviour SwipeForwardBehaviour = def_SwipeForwardBehaviour;
         public bool SwipeCanGoForward => CanGoForward(SwipeForwardBehaviour);
         public void SwipeGoForward()
         {

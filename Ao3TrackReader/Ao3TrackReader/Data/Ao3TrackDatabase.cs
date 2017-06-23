@@ -367,15 +367,20 @@ namespace Ao3TrackReader
             }
         }
 
+        public void SaveVariable(string name, object value)
+        {
+            SaveVariable(name, value?.ToString());
+        }
+
         public void SaveVariable<T>(string name, T value)
         {
-            SaveVariable(name, value.ToString());
+            SaveVariable(name, value?.ToString());
         }
 
         public void SaveVariable<T>(string name, T? value)
             where T : struct
         {
-            SaveVariable(name, value.HasValue ? value.ToString() : null);
+            SaveVariable(name, value?.ToString());
         }
 
         public void DeleteVariable(string name)

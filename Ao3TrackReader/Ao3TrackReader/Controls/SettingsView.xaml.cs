@@ -29,12 +29,37 @@ namespace Ao3TrackReader.Controls
 {
     public partial class SettingsView : PaneView
     {
-        bool isCreateUser;
+        public static readonly BindableProperty DatabaseVariableProperty =
+          BindableProperty.CreateAttached("DatabaseVariable", typeof(string), typeof(SettingsView), null);
 
-        KeyedItem<string> defaultTheme;
+        public static string GetDatabaseVariable(Element view)
+        {
+            return (string)view.GetValue(DatabaseVariableProperty);
+        }
+
+        public static void SetDatabaseVariable(Element view, string value)
+        {
+            view.SetValue(DatabaseVariableProperty, value);
+        }
+
+        public static readonly BindableProperty DatabaseVariableDefaultProperty =
+          BindableProperty.CreateAttached("DatabaseVariableDefault", typeof(string), typeof(SettingsView), null);
+
+        public static string GetDatabaseVariableDefault(Element view)
+        {
+            return (string)view.GetValue(DatabaseVariableDefaultProperty);
+        }
+
+        public static void SetDatabaseVariableDefault(Element view, string value)
+        {
+            view.SetValue(DatabaseVariableDefaultProperty, value);
+        }
+
+        bool isCreateUser;
 
         public SettingsView()
         {
+            DescendantAdded += SettingsView_DescendantAdded;
             InitializeComponent();
 
             aboutText.TextEx = new Text.Span
@@ -55,9 +80,6 @@ namespace Ao3TrackReader.Controls
             };
 
             isCreateUser = false;
-
-            themes.Add(defaultTheme = new KeyedItem<string>("light", "Light"));
-            themes.Add(new KeyedItem<string>("dark", "Dark"));
         }
 
         protected override void OnIsOnScreenChanging(bool newValue)
@@ -65,15 +87,11 @@ namespace Ao3TrackReader.Controls
             if (newValue == true)
             {
                 UpdateSyncForm();
-                SelectCurrentTheme();
-                SelectBackButtonMode();
                 httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
                 sendErrorsSwitch.IsToggled = App.LogErrors;
-                UpdateUnitConvs();
-                UpdateNavOptions();
-                UpdateFontSizeUI();
+                backButtonSetting.IsVisible = App.HaveOSBackButton;
                 UpdateListFilters();
-                UpdateSummaryDisplay();
+                RefreshDatabaseVariableElems();
             }
         }
 
@@ -241,151 +259,6 @@ namespace Ao3TrackReader.Controls
             UpdateSyncForm();
         }
 
-        void SelectCurrentTheme()
-        {
-            string theme = Ao3TrackReader.App.Database.GetVariable("Theme");
-            var item = themes.Find(theme) ?? defaultTheme;
-            App.Database.SaveVariable("Theme", item.Key);
-            themeDropDown.SelectedItem = item;
-        }
-
-        void OnThemeSelected(object sender, EventArgs e)
-        {
-            if (!IsOnScreen) return;
-
-            var item = themeDropDown.SelectedItem as KeyedItem<string>;
-            if (item == null)
-            {
-                SelectCurrentTheme();
-                return;
-            }
-            App.Database.SaveVariable("Theme", item.Key);
-        }
-
-        void SelectBackButtonMode()
-        {
-            if (!App.HaveOSBackButton)
-            {
-                backButtonForm.IsVisible = false;
-                return;
-            }
-            backButtonForm.IsVisible = true;
-
-            bool? show = null;
-            App.Database.TryGetVariable("ShowBackButton", bool.TryParse, out show);
-
-            var item = backButtonMode.Find(show) ?? backButtonMode[0];
-            App.Database.SaveVariable("ShowBackButton", item.Key);
-            backButtonModeDropDown.SelectedItem = item;
-        }
-
-        void OnBackButtonModeSelected(object sender, EventArgs e)
-        {
-            if (!App.HaveOSBackButton || !IsOnScreen) return;
-
-            var item = backButtonModeDropDown.SelectedItem as KeyedItem<bool?>;
-            if (item != null)
-            {
-                App.Database.SaveVariable("ShowBackButton", item.Key);
-                wvp.UpdateBackButton();
-            }
-        }
-
-        private void UpdateUnitConvs()
-        {
-            UnitConvSetting v;
-
-            App.Database.TryGetVariable("UnitConvOptions.temp", Enum.TryParse, out v);
-            unitConvTempDropDown.SelectedItem = unitConvModeTemp.Find(v);
-
-            App.Database.TryGetVariable("UnitConvOptions.dist", Enum.TryParse, out v);
-            unitConvDistDropDown.SelectedItem = unitConvMode.Find(v);
-
-            App.Database.TryGetVariable("UnitConvOptions.volume", Enum.TryParse, out v);
-            unitConvVolumeDropDown.SelectedItem = unitConvMode.Find(v);
-
-            App.Database.TryGetVariable("UnitConvOptions.weight", Enum.TryParse, out v);
-            unitConvWeightDropDown.SelectedItem = unitConvMode.Find(v);
-        }
-
-        void OnUnitConvSelected(object sender, EventArgs e)
-        {
-            if (!IsOnScreen) return;
-
-            string varname;
-            if (sender == unitConvTempDropDown) varname = "UnitConvOptions.temp";
-            else if (sender == unitConvDistDropDown) varname = "UnitConvOptions.dist";
-            else if (sender == unitConvVolumeDropDown) varname = "UnitConvOptions.volume";
-            else if (sender == unitConvWeightDropDown) varname = "UnitConvOptions.weight";
-            else return;
-
-            var dropdown = sender as DropDown;
-            var val = (KeyedItem<UnitConvSetting>)dropdown.SelectedItem;
-
-            App.Database.SaveVariable(varname, val.Key);
-        }
-
-        private ref NavigateBehaviour UnitConvForControl(DropDown control, out string name)
-        {
-            if (control == toolbarBackDropDown)
-            {
-                name = "ToolbarBackBehaviour";
-                return ref wvp.ToolbarBackBehaviour;
-            }
-
-            if (control == toolbarForwardDropDown)
-            {
-                name = "ToolbarForwardBehaviour";
-                return ref wvp.ToolbarForwardBehaviour;
-            }
-
-            if (control == swipeBackDropDown)
-            {
-                name = "SwipeBackBehaviour";
-                return ref wvp.SwipeBackBehaviour;
-            }
-
-            if (control == swipeFowardDropDown)
-            {
-                name = "SwipeForwardBehaviour";
-                return ref wvp.SwipeForwardBehaviour;
-            }
-
-            throw new ArgumentException("Invalid control name", nameof(control));
-        }
-        private void UpdateNavOptions()
-        {
-            foreach (var dropdown in navigationForm.FindChildren<DropDown>())
-            {
-                ref NavigateBehaviour value = ref UnitConvForControl(dropdown, out var dbname);
-                dropdown.SelectedItem = navigateMode.Find(value);
-            }
-        }
-
-        void OnNavOptionSelected(object sender, EventArgs e)
-        {
-            if (!IsOnScreen) return;
-
-            var dropdown = sender as DropDown;
-            ref NavigateBehaviour value = ref UnitConvForControl(dropdown, out var dbname);
-
-            value = (dropdown.SelectedItem as KeyedItem<NavigateBehaviour>).Key;
-            App.Database.SaveVariable(dbname, value);
-        }
-
-        void UpdateFontSizeUI()
-        {
-            App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI, 0);
-            fontSizeUIDropDown.SelectedItem = fontSizeUIList.Find(LogFontSizeUI);
-        }
-
-        void OnFontSizeUISelected(object sender, EventArgs e)
-        {
-            if (!IsOnScreen) return;
-
-            App.Database.SaveVariable("LogFontSizeUI", (fontSizeUIDropDown.SelectedItem as KeyedItem<int>).Key);
-        }
-
         void UpdateListFilters()
         {
             UpdateListFiltersAsync().ConfigureAwait(false);
@@ -400,8 +273,6 @@ namespace Ao3TrackReader.Controls
                 listFilterWorks.IsEnabled = false;
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
-                listFiltersShowWorks.IsEnabled = false;
-                listFiltersOnlyGT.IsEnabled = false;
                 listFilterIndicator.IsVisible = true;
                 if (listFilterIndicator.Content == null)
                 {
@@ -426,17 +297,8 @@ namespace Ao3TrackReader.Controls
                     listFilterWorks.IsEnabled = true;
                     listFilterSerieses.IsEnabled = true;
                     listFilterSave.IsEnabled = true;
-                    listFiltersShowWorks.IsEnabled = true;
-                    listFiltersOnlyGT.IsEnabled = true;
                     listFilterIndicator.Content = null;
                     listFilterIndicator.IsVisible = false;
-
-                    App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out bool b, false);
-                    listFiltersShowWorks.SelectedItem = listFiltersShowWorksAsList.Find(b);
-
-                    App.Database.TryGetVariable("ListFiltering.OnlyGeneralTeen", bool.TryParse, out b, ListFilteringSettings.def_onlyGeneralTeen);
-                    listFiltersOnlyGT.IsToggled = b;
-
                 });
             });
         }
@@ -455,8 +317,6 @@ namespace Ao3TrackReader.Controls
                 listFilterWorks.IsEnabled = false;
                 listFilterSerieses.IsEnabled = false;
                 listFilterSave.IsEnabled = false;
-                listFiltersShowWorks.IsEnabled = false;
-                listFiltersOnlyGT.IsEnabled = false;
                 listFilterIndicator.IsVisible = true;
                 if (listFilterIndicator.Content == null)
                 {
@@ -465,50 +325,70 @@ namespace Ao3TrackReader.Controls
                 }
             });
 
-            App.Database.SaveVariable("ListFiltering.OnlyGeneralTeen", listFiltersOnlyGT.IsToggled);
-
-            App.Database.SaveVariable("ListFiltering.HideWorks", (listFiltersShowWorks.SelectedItem as KeyedItem<bool>).Key);
-
             await Data.ListFiltering.Instance.SetFilterStringsAsync(listFilterTags.Text, listFilterAuthors.Text, listFilterWorks.Text, listFilterSerieses.Text);
 
             await UpdateListFiltersAsync();
-        }
+        }       
 
-        private void UpdateSummaryDisplay()
-        {
-            bool b;
-
-            App.Database.TryGetVariable("TagOptions.showCatTags", bool.TryParse, out b);
-            sumShowCatTags.IsToggled = b;
-
-            App.Database.TryGetVariable("TagOptions.showWIPTags", bool.TryParse, out b);
-            sumShowWIPTags.IsToggled = b;
-
-            App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
-            sumShowRatingTags.IsToggled = b;
-
-            App.Database.TryGetVariable("ReadingList.showTagsDefault", bool.TryParse, out b);
-            sumShowRLTagsDef.IsToggled = b;
-
-            App.Database.TryGetVariable("ReadingList.showCompleteDefault", bool.TryParse, out b);
-            sumShowRLCompleteDef.IsToggled = b;
-        }
-
-        void OnSummaryDisplayChanged(object sender, EventArgs e)
+        void DatabaseVariableElem_Changed(object sender, EventArgs e)
         {
             if (!IsOnScreen) return;
+            Element elem = (Element)sender;
 
-            string varname;
-            if (sender == sumShowCatTags) varname = "TagOptions.showCatTags";
-            else if (sender == sumShowWIPTags) varname = "TagOptions.showWIPTags";
-            else if (sender == sumShowRatingTags) varname = "TagOptions.showRatingTags";
-            else if (sender == sumShowRLTagsDef) varname = "ReadingList.showTagsDefault";
-            else if (sender == sumShowRLCompleteDef) varname = "ReadingList.showCompleteDefault";
-            else return;
+            string varname = GetDatabaseVariable(elem);
+            if (string.IsNullOrWhiteSpace(varname)) return;
 
-            var sw = sender as Switch;
-           
-            App.Database.SaveVariable(varname, sw.IsToggled);
+            if (elem is Switch sw)
+            {
+                App.Database.SaveVariable(varname, sw.IsToggled);
+            }
+            else if (elem is DropDown dropdown)
+            {
+                App.Database.SaveVariable(varname, (dropdown.SelectedItem as IKeyedItem).Key);
+            }
+        }
+
+        void RefreshDatabaseVariableElem(Element elem)
+        {
+            string varname = GetDatabaseVariable(elem);
+            if (string.IsNullOrWhiteSpace(varname)) return;
+
+            if (elem is Switch sw)
+            {
+                if (!App.Database.TryGetVariable(varname, bool.TryParse, out bool b))
+                {
+                    bool.TryParse(GetDatabaseVariableDefault(elem), out b);
+                }
+                sw.IsToggled = b;
+            }
+            else if (elem is DropDown dropdown)
+            {
+                if (dropdown.ItemsSource is IKeyedItemList itemlist)
+                {
+                    string str = App.Database.GetVariable(varname);
+                    if (str == null) str = GetDatabaseVariableDefault(elem);
+                    IKeyedItem item = itemlist.FindItem(str);
+                    dropdown.SelectedItem = item;
+                }
+            }
+        }
+
+        HashSet<Element> dbVarElements = new HashSet<Element>();
+
+        private void SettingsView_DescendantAdded(object sender, ElementEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(GetDatabaseVariable(e.Element)))
+            {
+                dbVarElements.Add(e.Element);
+                if (e.Element is Switch sw) sw.Toggled += DatabaseVariableElem_Changed;
+                else if (e.Element is DropDown dd) dd.SelectedIndexChanged += DatabaseVariableElem_Changed;
+            }
+        }
+
+        private void RefreshDatabaseVariableElems()
+        {
+            foreach (var elem in dbVarElements)
+                RefreshDatabaseVariableElem(elem);
         }
     }
 }

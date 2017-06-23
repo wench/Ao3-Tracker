@@ -75,35 +75,38 @@ limitations under the License.
                 <Setter Property="TextColor" Value="Default" />
                 <Setter Property="BackgroundColor" Value="Default" />
             </Style>
-            
-            <m:KeyedItemList x:TypeArguments="x:String" x:Key="Themes" x:Name="themes" />
 
-            <m:KeyedItemList x:TypeArguments="a:NavigateBehaviour" x:Key="NavigateMode" x:Name="navigateMode" >
+            <m:KeyedItemList x:TypeArguments="x:String" x:Key="Themes">
+                <m:KeyedItem x:TypeArguments="x:String" Key="light" Value="Light"/>
+                <m:KeyedItem x:TypeArguments="x:String" Key="dark" Value="Dark"/>                
+            </m:KeyedItemList>
+
+            <m:KeyedItemList x:TypeArguments="a:NavigateBehaviour" x:Key="NavigateMode">
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="History"         Value="History Only"/>
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="Page"            Value="Page Only"/>
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="HistoryThenPage" Value="History then Page" />
                 <m:KeyedItem x:TypeArguments="a:NavigateBehaviour" Key="PageThenHistory" Value="Page then History"/>
             </m:KeyedItemList>
 
-            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="BackButtonMode" x:Name="backButtonMode">
+            <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="BackButtonMode">
                 <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Auto"/>
                 <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="Shown Always"/>
                 <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Never Shown"/>
             </m:NullableKeyedItemList>
 
-            <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvMode" x:Name="unitConvMode">
+            <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvMode">
                 <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="None" Value="Disabled"/>
                 <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="USToMetric" Value="US to Metric"/>
                 <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="MetricToUS" Value="Metric to US"/>
             </m:KeyedItemList>
 
-            <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvModeTemp" x:Name="unitConvModeTemp">
+            <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvModeTemp">
                 <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="None" Value="Disabled"/>
                 <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="USToMetric" Value="&#xB0;F to &#xB0;C"/>
                 <m:KeyedItem x:TypeArguments="a:UnitConvSetting" Key="MetricToUS" Value="&#xB0;C to &#xB0;F"/>
             </m:KeyedItemList>
 
-            <m:KeyedItemList x:TypeArguments="x:Int32" x:Key="FontSizeUIList" x:Name="fontSizeUIList" >
+            <m:KeyedItemList x:TypeArguments="x:Int32" x:Key="FontSizeUIList">
                 <m:KeyedItem x:TypeArguments="x:Int32" Key="-3" Value="Tiny"/>
                 <m:KeyedItem x:TypeArguments="x:Int32" Key="0"  Value="Small"/>
                 <m:KeyedItem x:TypeArguments="x:Int32" Key="3"  Value="Medium" />
@@ -111,7 +114,7 @@ limitations under the License.
                 <m:KeyedItem x:TypeArguments="x:Int32" Key="9"  Value="Huge"/>
             </m:KeyedItemList>
 
-            <m:KeyedItemList x:TypeArguments="x:Boolean" x:Key="ListFiltersShowWorksAsList" x:Name="listFiltersShowWorksAsList">
+            <m:KeyedItemList x:TypeArguments="x:Boolean" x:Key="ListFiltersShowWorksAsList">
                 <m:KeyedItem x:TypeArguments="x:Boolean" Key="True" Value="Hidden Completely"/>
                 <m:KeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Replaced with messages"/>
             </m:KeyedItemList>
@@ -179,7 +182,7 @@ limitations under the License.
                         <Label Text="Ao3Track Reader will not share any of your data with third parties. Using the cloud services will keep a history of all the works you have looked at while using the app. If this concerns you do not use the cloud login feature." Style="{StaticResource Remark}" />
                     </StackLayout>
 
-                    <StackLayout x:Name="privacyForm" Style="{StaticResource SettingGroup}">
+                    <StackLayout Style="{StaticResource SettingGroup}">
                         <Label Text="Privacy" Style="{StaticResource Heading}" />
 
                         <StackLayout Style="{StaticResource SettingVert}">
@@ -199,73 +202,74 @@ limitations under the License.
                         </StackLayout>
                     </StackLayout>
 
-                    <StackLayout x:Name="backButtonForm" Style="{StaticResource SettingGroup}">
-                        <Label Text="Toolbar Settings" Style="{StaticResource Heading}" />
-                        
-                        <StackLayout Style="{StaticResource Setting}">
-                            <Label Text="Show Back Button on Toolbar" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="backButtonModeDropDown" ItemsSource="{StaticResource BackButtonMode}" SelectedIndexChanged="OnBackButtonModeSelected" />
-                        </StackLayout>
-                    </StackLayout>
 
-                    <StackLayout x:Name="navigationForm" Style="{StaticResource SettingGroup}">
+                    <StackLayout Style="{StaticResource SettingGroup}">
                         <Label Text="Navigation Options" Style="{StaticResource Heading}" />
                         <Label Text="Choose the navigation options for the toolbar buttons and swipe gestures. Choose between Browser History style navigation, or Next/Previous Page navigation, or both." Style="{StaticResource Remark}" />
-                        
+
+                        <StackLayout x:Name="backButtonSetting" Style="{StaticResource Setting}">
+                            <Label Text="Show Back Button on Toolbar" HorizontalOptions="Start" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="ShowBackButton" ItemsSource="{StaticResource BackButtonMode}" />
+                        </StackLayout>
+
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Back Button"  HorizontalOptions="Start" />
-                            <local:DropDown x:Name="toolbarBackDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnNavOptionSelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="ToolbarBackBehaviour" ItemsSource="{StaticResource NavigateMode}"
+                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_ToolbarBackBehaviour }" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Forward Button" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="toolbarForwardDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="ToolbarForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" 
+                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_ToolbarForwardBehaviour }" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Swipe Right"  HorizontalOptions="Start" />
-                            <local:DropDown x:Name="swipeBackDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="SwipeBackBehaviour" ItemsSource="{StaticResource NavigateMode}" 
+                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_SwipeBackBehaviour }" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Swipe Left"  HorizontalOptions="Start" />
-                            <local:DropDown x:Name="swipeFowardDropDown" ItemsSource="{StaticResource NavigateMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="SwipeForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" 
+                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_SwipeForwardBehaviour }" />
                         </StackLayout>
                     </StackLayout>
 
-                    <StackLayout x:Name="unitConvForm" Style="{StaticResource SettingGroup}">
+                    <StackLayout Style="{StaticResource SettingGroup}">
                         <Label Text="Unit Conversions" Style="{StaticResource Heading}" />
                         <Label Text="Detected convertable values will have a dotted underline. Tap on the value to convert it." Style="{StaticResource Remark}" />
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Convert Temperature"  HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvTempDropDown" ItemsSource="{StaticResource UnitConvModeTemp}" SelectedIndexChanged="OnUnitConvSelected"  />
+                            <local:DropDown local:SettingsView.DatabaseVariable="UnitConvOptions.temp" ItemsSource="{StaticResource UnitConvModeTemp}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Convert Length/Distance" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvDistDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected"  />
+                            <local:DropDown local:SettingsView.DatabaseVariable="UnitConvOptions.dist" ItemsSource="{StaticResource UnitConvMode}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Convert Volume" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvVolumeDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="UnitConvOptions.volume" ItemsSource="{StaticResource UnitConvMode}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Convert Weight" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="unitConvWeightDropDown" ItemsSource="{StaticResource UnitConvMode}" SelectedIndexChanged="OnUnitConvSelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="UnitConvOptions.weight" ItemsSource="{StaticResource UnitConvMode}" />
                         </StackLayout>
                     </StackLayout>
 
-                    <StackLayout x:Name="unitSumDispForm" Style="{StaticResource SettingGroup}">
+                    <StackLayout Style="{StaticResource SettingGroup}">
                         <Label Text="Work Display Options" Style="{StaticResource Heading}" />
                         <Label Text="Options to adjust the way works are displayed in listings and the Reading List." Style="{StaticResource Remark}" />
 
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Show Rating Tags" HorizontalOptions="StartAndExpand" />
-                                <Switch x:Name="sumShowRatingTags" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                                <Switch local:SettingsView.DatabaseVariable="TagOptions.showRatingTags" HorizontalOptions="EndAndExpand"  />
                             </StackLayout>
                             <Label Text="eg. General Audiences, Teen, Mature" Style="{StaticResource Remark}" />
                         </StackLayout>
@@ -273,7 +277,7 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Show Category Tags"  HorizontalOptions="StartAndExpand" />
-                                <Switch x:Name="sumShowCatTags" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                                <Switch local:SettingsView.DatabaseVariable="TagOptions.showCatTags" HorizontalOptions="EndAndExpand"  />
                             </StackLayout>
                             <Label Text="eg. F/M, M/M, F/F" Style="{StaticResource Remark}" />
                         </StackLayout>
@@ -281,7 +285,7 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Show Work In Progress Tags" HorizontalOptions="StartAndExpand" />
-                                <Switch x:Name="sumShowWIPTags" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                                <Switch local:SettingsView.DatabaseVariable="TagOptions.showWIPTags" HorizontalOptions="EndAndExpand"  />
                             </StackLayout>
                             <Label Text="eg. Work In Progress, Complete Work" Style="{StaticResource Remark}" />
                         </StackLayout>
@@ -289,7 +293,7 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Show Tags in Reading List by default" HorizontalOptions="StartAndExpand" />
-                                <Switch x:Name="sumShowRLTagsDef" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                                <Switch local:SettingsView.DatabaseVariable="ReadingList.showTagsDefault" HorizontalOptions="EndAndExpand"  />
                             </StackLayout>
                             <Label Text="Selects whether tags are displayed in the Reading List when the app starts" Style="{StaticResource Remark}" />
                         </StackLayout>
@@ -297,14 +301,14 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Show all works in Reading List by default" HorizontalOptions="StartAndExpand" />
-                                <Switch x:Name="sumShowRLCompleteDef" Toggled="OnSummaryDisplayChanged" HorizontalOptions="EndAndExpand"  />
+                                <Switch local:SettingsView.DatabaseVariable="ReadingList.showCompleteDefault" HorizontalOptions="EndAndExpand"  />
                             </StackLayout>
                             <Label Text="Selects whether works with no unread chapters are displayed in the Reading List when the app starts" Style="{StaticResource Remark}" />
                         </StackLayout>
 
                     </StackLayout>
 
-                    <StackLayout x:Name="listFiltersForm" Style="{StaticResource SettingGroup}">
+                    <StackLayout Style="{StaticResource SettingGroup}">
                         <Label Text="Work Listing Filters" Style="{StaticResource Heading}" />
                         <Label Text="Works matching any of the filter blacklists below will be excluded from showing up on listing pages. Only one filter allowed per line." Style="{StaticResource Remark}" />
                         <Label Text="Filters can also be added via the context menu shown when right clicking or tapping and holding on links." Style="{StaticResource Remark}" />
@@ -312,14 +316,15 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Only show General and Teen rated content" HorizontalOptions="StartAndExpand" />
-                                <Switch x:Name="listFiltersOnlyGT" HorizontalOptions="EndAndExpand"  />
+                                <Switch local:SettingsView.DatabaseVariable="ListFiltering.OnlyGeneralTeen" HorizontalOptions="EndAndExpand" 
+                                        local:SettingsView.DatabaseVariableDefault="{x:Static a:ListFilteringSettings.str_def_onlyGeneralTeen }"/>
                             </StackLayout>
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Filtered works should be" HorizontalOptions="StartAndExpand" />
-                                <local:DropDown x:Name="listFiltersShowWorks" ItemsSource="{StaticResource ListFiltersShowWorksAsList}" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="ListFiltering.HideWorks" ItemsSource="{StaticResource ListFiltersShowWorksAsList}" />
                             </StackLayout>
                         </StackLayout>
                         
@@ -348,23 +353,24 @@ limitations under the License.
                         </StackLayout>
 
                         <StackLayout Style="{StaticResource Setting}">
-                            <local:Button x:Name="listFilterSave" Text="Save Filter Settings" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
+                            <local:Button x:Name="listFilterSave" Text="Save Filters" BorderColor="{DynamicResource BaseMediumColor}" Clicked="OnSaveFilters" VerticalOptions="Center" HorizontalOptions="Start" Style="{StaticResource TextButton}"/>
                             <local:ContentView x:TypeArguments="ActivityIndicator"  IsVisible="False" x:Name="listFilterIndicator" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
                     </StackLayout>
 
-                    <StackLayout x:Name="uiForm" Style="{StaticResource SettingGroup}">
+                    <StackLayout Style="{StaticResource SettingGroup}">
                         <Label Text="User Interface Options" Style="{StaticResource Heading}"/>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="UI Font Size" HorizontalOptions="Start" />
-                            <local:DropDown x:Name="fontSizeUIDropDown" ItemsSource="{StaticResource FontSizeUIList}" SelectedIndexChanged="OnFontSizeUISelected" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="LogFontSizeUI" ItemsSource="{StaticResource FontSizeUIList}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Select the Application Theme" HorizontalOptions="Start" />
-                                <local:DropDown x:Name="themeDropDown" SelectedIndexChanged="OnThemeSelected" ItemsSource="{StaticResource Themes}" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="Theme" ItemsSource="{StaticResource Themes}"
+                                                local:SettingsView.DatabaseVariableDefault="light" />
                             </StackLayout>
                             <Label Text="You must restart the app to apply a new theme" Style="{StaticResource Remark}" />
                         </StackLayout>

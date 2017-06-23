@@ -24,7 +24,7 @@ namespace Ao3TrackReader
     public class PageEx : BindableObject
     {
         public static readonly BindableProperty TitleExProperty =
-          BindableProperty.CreateAttached("TitleEx", typeof(Text.TextEx), typeof(NavigationPage), null);
+          BindableProperty.CreateAttached("TitleEx", typeof(Text.TextEx), typeof(PageEx), null);
 
         public static Text.TextEx GetTitleEx(BindableObject view)
         {
