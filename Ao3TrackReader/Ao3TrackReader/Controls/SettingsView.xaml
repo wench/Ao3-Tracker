@@ -40,9 +40,10 @@ limitations under the License.
 
             <Style TargetType="local:DropDown">
                 <Setter Property="WidthRequest" Value="180" />
+                <Setter Property="HeightRequest" Value="-1" />
                 <Setter Property="HorizontalOptions" Value="EndAndExpand" />
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
-                <Setter Property="HeightRequest" Value="{DynamicResource Size_32}" />
+                <Setter Property="MinimumHeightRequest" Value="{DynamicResource Size_32}" />
                 <Setter Property="VerticalOptions" Value="Center" />
             </Style>
 

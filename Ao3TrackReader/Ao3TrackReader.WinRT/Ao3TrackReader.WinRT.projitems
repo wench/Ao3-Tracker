@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ButtonRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ColorConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DropDownRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FormsCommandBar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MenuFlyoutItemEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text.cs" />

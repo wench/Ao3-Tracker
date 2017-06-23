@@ -108,7 +108,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DropDownRenderer.cs" />
     <Compile Include="EditorRenderer.cs" />
     <Compile Include="WebViewPage.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -473,7 +472,7 @@
     </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\speech.js">
       <Link>Content\speech.js</Link>
-    </Content>    
+    </Content>
     <Content Include="..\..\ao3_tracker\build\reader\uwp\hider.js">
       <Link>Content\hider.js</Link>
     </Content>

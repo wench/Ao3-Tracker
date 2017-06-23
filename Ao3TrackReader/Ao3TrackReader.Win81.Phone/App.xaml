@@ -3,5 +3,58 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Ao3TrackReader.Win81">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="AltMediumHighColor" />
+                    <SolidColorBrush x:Key="AltMediumLowColor" />
+                    <SolidColorBrush x:Key="BaseMediumLowColor" />
+                    <SolidColorBrush x:Key="BaseLowColor" />
+                    <SolidColorBrush x:Key="HighlightColor" />
+                </ResourceDictionary>
+                
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="SystemColorControlAccentColor">#FF970000</Color>
+                </ResourceDictionary>
+                
+                <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="SystemColorControlAccentColor">#FF5998d6</Color>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
 
+            <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="JumpListDefaultEnabledBackground" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListPickerFlyoutPresenterSelectedItemForegroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ProgressBarBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" Opacity="0.16" />
+            <SolidColorBrush x:Key="PhoneAccentBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="PhoneRadioCheckBoxPressedBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="TextSelectionHighlightColorThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ButtonPressedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="CheckBoxPressedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ComboBoxHighlightedBorderThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ComboBoxItemSelectedForegroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ComboBoxPressedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="HyperlinkPressedForegroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListBoxItemSelectedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListBoxItemSelectedPointerOverBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListViewItemCheckHintThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListViewItemCheckSelectingThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListViewItemDragBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListViewItemSelectedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListViewItemSelectedPointerOverBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ListViewItemSelectedPointerOverBorderThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ProgressBarForegroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ProgressBarIndeterminateForegroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="SliderTrackDecreaseBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="SliderTrackDecreasePointerOverBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="SliderTrackDecreasePressedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ToggleSwitchCurtainBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ToggleSwitchCurtainPointerOverBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="ToggleSwitchCurtainPressedBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+            <SolidColorBrush x:Key="LoopingSelectorSelectionBackgroundThemeBrush" Color="{ThemeResource SystemColorControlAccentColor}" />
+
+        
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

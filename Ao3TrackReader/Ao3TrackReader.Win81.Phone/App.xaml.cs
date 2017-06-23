@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -86,7 +87,12 @@ namespace Ao3TrackReader.Win81
                 rootFrame.CacheSize = 1;
 
                 Xamarin.Forms.Forms.Init(e);
-                XApp = new Ao3TrackReader.App();
+
+                ConnectionProfile connections = NetworkInformation.GetInternetConnectionProfile();
+
+                XApp = new Ao3TrackReader.App(connections != null && connections.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
+
+                NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 
                 Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
 
@@ -126,6 +132,16 @@ namespace Ao3TrackReader.Win81
             // Ensure the current window is active
             Window.Current.Activate();
         }
+
+        private void NetworkInformation_NetworkStatusChanged(object sender)
+        {
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                ConnectionProfile connections = NetworkInformation.GetInternetConnectionProfile();
+                XApp.HaveNetwork = connections != null && connections.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess;
+            });
+        }
+
 
         /// <summary>
         /// Restores the content transitions after the app has launched.

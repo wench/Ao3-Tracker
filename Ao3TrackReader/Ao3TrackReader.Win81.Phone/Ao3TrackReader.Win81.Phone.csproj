@@ -82,137 +82,271 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Icons\padded\addpage_dark.scale-200.png">
+    <Content Include="..\Icons\200\addpage_dark.scale-200.png">
       <Link>Assets\addpage_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\addpage_light.scale-200.png">
+    <Content Include="..\Icons\200\addpage_light.scale-200.png">
       <Link>Assets\addpage_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\back_dark.scale-200.png">
+    <Content Include="..\Icons\200\back_dark.scale-200.png">
       <Link>Assets\back_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\back_light.scale-200.png">
+    <Content Include="..\Icons\200\back_light.scale-200.png">
       <Link>Assets\back_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\bookmarks_dark.scale-200.png">
+    <Content Include="..\Icons\200\bookmarks_dark.scale-200.png">
       <Link>Assets\bookmarks_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\bookmarks_light.scale-200.png">
+    <Content Include="..\Icons\200\bookmarks_light.scale-200.png">
       <Link>Assets\bookmarks_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\close_dark.scale-200.png">
+    <Content Include="..\Icons\200\close_dark.scale-200.png">
       <Link>Assets\close_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\close_light.scale-200.png">
+    <Content Include="..\Icons\200\close_light.scale-200.png">
       <Link>Assets\close_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\filter_dark.scale-200.png">
+    <Content Include="..\Icons\200\filter_dark.scale-200.png">
       <Link>Assets\filter_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\filter_light.scale-200.png">
+    <Content Include="..\Icons\200\filter_light.scale-200.png">
       <Link>Assets\filter_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\fontdown_dark.scale-200.png">
+    <Content Include="..\Icons\200\fontdown_dark.scale-200.png">
       <Link>Assets\fontdown_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\fontdown_light.scale-200.png">
+    <Content Include="..\Icons\200\fontdown_light.scale-200.png">
       <Link>Assets\fontdown_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\fontup_dark.scale-200.png">
+    <Content Include="..\Icons\200\fontup_dark.scale-200.png">
       <Link>Assets\fontup_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\fontup_light.scale-200.png">
+    <Content Include="..\Icons\200\fontup_light.scale-200.png">
       <Link>Assets\fontup_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\font_dark.scale-200.png">
+    <Content Include="..\Icons\200\font_dark.scale-200.png">
       <Link>Assets\font_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\font_light.scale-200.png">
+    <Content Include="..\Icons\200\font_light.scale-200.png">
       <Link>Assets\font_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\forward_dark.scale-200.png">
+    <Content Include="..\Icons\200\forward_dark.scale-200.png">
       <Link>Assets\forward_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\forward_light.scale-200.png">
+    <Content Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Assets\forward_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\help_dark.scale-200.png">
+    <Content Include="..\Icons\200\help_dark.scale-200.png">
       <Link>Assets\help_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\help_light.scale-200.png">
+    <Content Include="..\Icons\200\help_light.scale-200.png">
       <Link>Assets\help_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\more_dark.scale-200.png">
+    <Content Include="..\Icons\200\more_dark.scale-200.png">
       <Link>Assets\more_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\more_light.scale-200.png">
+    <Content Include="..\Icons\200\more_light.scale-200.png">
       <Link>Assets\more_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\redo_dark.scale-200.png">
+    <Content Include="..\Icons\200\redo_dark.scale-200.png">
       <Link>Assets\redo_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\redo_light.scale-200.png">
+    <Content Include="..\Icons\200\redo_light.scale-200.png">
       <Link>Assets\redo_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\refresh_dark.scale-200.png">
+    <Content Include="..\Icons\200\refresh_dark.scale-200.png">
       <Link>Assets\refresh_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\refresh_light.scale-200.png">
+    <Content Include="..\Icons\200\refresh_light.scale-200.png">
       <Link>Assets\refresh_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\rename_dark.scale-200.png">
+    <Content Include="..\Icons\200\rename_dark.scale-200.png">
       <Link>Assets\rename_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\rename_light.scale-200.png">
+    <Content Include="..\Icons\200\rename_light.scale-200.png">
       <Link>Assets\rename_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\settings_dark.scale-200.png">
+    <Content Include="..\Icons\200\settings_dark.scale-200.png">
       <Link>Assets\settings_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\settings_light.scale-200.png">
+    <Content Include="..\Icons\200\settings_light.scale-200.png">
       <Link>Assets\settings_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\sync_dark.scale-200.png">
+    <Content Include="..\Icons\200\sync_dark.scale-200.png">
       <Link>Assets\sync_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\sync_light.scale-200.png">
+    <Content Include="..\Icons\200\sync_light.scale-200.png">
       <Link>Assets\sync_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\tag_dark.scale-200.png">
+    <Content Include="..\Icons\200\tag_dark.scale-200.png">
       <Link>Assets\tag_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\tag_light.scale-200.png">
+    <Content Include="..\Icons\200\tag_light.scale-200.png">
       <Link>Assets\tag_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\forceloc_dark.scale-200.png">
+    <Content Include="..\Icons\200\forceloc_dark.scale-200.png">
       <Link>Assets\forceloc_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\forceloc_light.scale-200.png">
+    <Content Include="..\Icons\200\forceloc_light.scale-200.png">
       <Link>Assets\forceloc_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\swipeleft_dark.scale-200.png">
+    <Content Include="..\Icons\200\swipeleft_dark.scale-200.png">
       <Link>Assets\swipeleft_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\swipeleft_light.scale-200.png">
+    <Content Include="..\Icons\200\swipeleft_light.scale-200.png">
       <Link>Assets\swipeleft_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\swiperight_dark.scale-200.png">
+    <Content Include="..\Icons\200\swiperight_dark.scale-200.png">
       <Link>Assets\swiperight_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\swiperight_light.scale-200.png">
+    <Content Include="..\Icons\200\swiperight_light.scale-200.png">
       <Link>Assets\swiperight_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\tap_dark.scale-200.png">
+    <Content Include="..\Icons\200\tap_dark.scale-200.png">
       <Link>Assets\tap_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\tap_light.scale-200.png">
+    <Content Include="..\Icons\200\tap_light.scale-200.png">
       <Link>Assets\tap_light.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\taphold_dark.scale-200.png">
+    <Content Include="..\Icons\200\taphold_dark.scale-200.png">
       <Link>Assets\taphold_dark.png</Link>
     </Content>
-    <Content Include="..\Icons\padded\taphold_light.scale-200.png">
+    <Content Include="..\Icons\200\taphold_light.scale-200.png">
       <Link>Assets\taphold_light.png</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Icons\padded\addpage_dark.scale-200.png">
+      <Link>Appbar\Assets\addpage_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\addpage_light.scale-200.png">
+      <Link>Appbar\Assets\addpage_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\back_dark.scale-200.png">
+      <Link>Appbar\Assets\back_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\back_light.scale-200.png">
+      <Link>Appbar\Assets\back_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\bookmarks_dark.scale-200.png">
+      <Link>Appbar\Assets\bookmarks_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\bookmarks_light.scale-200.png">
+      <Link>Appbar\Assets\bookmarks_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\close_dark.scale-200.png">
+      <Link>Appbar\Assets\close_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\close_light.scale-200.png">
+      <Link>Appbar\Assets\close_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\filter_dark.scale-200.png">
+      <Link>Appbar\Assets\filter_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\filter_light.scale-200.png">
+      <Link>Appbar\Assets\filter_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\fontdown_dark.scale-200.png">
+      <Link>Appbar\Assets\fontdown_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\fontdown_light.scale-200.png">
+      <Link>Appbar\Assets\fontdown_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\fontup_dark.scale-200.png">
+      <Link>Appbar\Assets\fontup_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\fontup_light.scale-200.png">
+      <Link>Appbar\Assets\fontup_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\font_dark.scale-200.png">
+      <Link>Appbar\Assets\font_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\font_light.scale-200.png">
+      <Link>Appbar\Assets\font_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\forward_dark.scale-200.png">
+      <Link>Appbar\Assets\forward_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\forward_light.scale-200.png">
+      <Link>Appbar\Assets\forward_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\help_dark.scale-200.png">
+      <Link>Appbar\Assets\help_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\help_light.scale-200.png">
+      <Link>Appbar\Assets\help_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\more_dark.scale-200.png">
+      <Link>Appbar\Assets\more_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\more_light.scale-200.png">
+      <Link>Appbar\Assets\more_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\redo_dark.scale-200.png">
+      <Link>Appbar\Assets\redo_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\redo_light.scale-200.png">
+      <Link>Appbar\Assets\redo_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\refresh_dark.scale-200.png">
+      <Link>Appbar\Assets\refresh_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\refresh_light.scale-200.png">
+      <Link>Appbar\Assets\refresh_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\rename_dark.scale-200.png">
+      <Link>Appbar\Assets\rename_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\rename_light.scale-200.png">
+      <Link>Appbar\Assets\rename_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\settings_dark.scale-200.png">
+      <Link>Appbar\Assets\settings_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\settings_light.scale-200.png">
+      <Link>Appbar\Assets\settings_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\sync_dark.scale-200.png">
+      <Link>Appbar\Assets\sync_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\sync_light.scale-200.png">
+      <Link>Appbar\Assets\sync_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\tag_dark.scale-200.png">
+      <Link>Appbar\Assets\tag_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\tag_light.scale-200.png">
+      <Link>Appbar\Assets\tag_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\forceloc_dark.scale-200.png">
+      <Link>Appbar\Assets\forceloc_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\forceloc_light.scale-200.png">
+      <Link>Appbar\Assets\forceloc_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\swipeleft_dark.scale-200.png">
+      <Link>Appbar\Assets\swipeleft_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\swipeleft_light.scale-200.png">
+      <Link>Appbar\Assets\swipeleft_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\swiperight_dark.scale-200.png">
+      <Link>Appbar\Assets\swiperight_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\swiperight_light.scale-200.png">
+      <Link>Appbar\Assets\swiperight_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\tap_dark.scale-200.png">
+      <Link>Appbar\Assets\tap_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\tap_light.scale-200.png">
+      <Link>Appbar\Assets\tap_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\taphold_dark.scale-200.png">
+      <Link>Appbar\Assets\taphold_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\taphold_light.scale-200.png">
+      <Link>Appbar\Assets\taphold_light.png</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>

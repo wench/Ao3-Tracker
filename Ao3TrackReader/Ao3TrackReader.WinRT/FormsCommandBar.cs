@@ -227,7 +227,11 @@ namespace Ao3TrackReader.WinRT
                 item.ClearValue(AppBarButton.IconProperty);
                 if (!string.IsNullOrWhiteSpace(xitem.Icon?.File))
                 {
+#if !WINDOWS_PHONE_APP
                     var uri = new Uri("ms-appx:///" + xitem.Icon.File);
+#else
+                    var uri = new Uri("ms-appx:///Appbar/" + xitem.Icon.File);
+#endif
                     item.Icon = new BitmapIcon() { UriSource = uri };
                 }
 
