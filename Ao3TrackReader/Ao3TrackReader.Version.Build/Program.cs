@@ -63,9 +63,9 @@ namespace Ao3TrackReader.Version.Build
                             throw new ArgumentException("Unknown type", "args[" + i + "]");
                     }                 
 
-                    Console.WriteLine("{0}: {1} => {2}", args[i].Substring(0, o).Replace("_:",""), n.InnerText, newValue);
                     if (n.InnerText != newValue)
                     {
+                        Console.WriteLine("{0}: {1} => {2}", args[i].Substring(0, o).Replace("_:", ""), n.InnerText, newValue);
                         n.InnerText = newValue;
                         changed = true;
                     }
