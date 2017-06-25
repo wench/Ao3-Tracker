@@ -38,7 +38,7 @@ namespace Ao3tracksync.Controllers
     /// <summary>
     /// Attribute to add to classes or methods to allow CORS access
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
     public class AllowCrossSiteAttribute : ActionFilterAttribute
     {
         /// <summary>
@@ -47,22 +47,19 @@ namespace Ao3tracksync.Controllers
         /// <param name="ActionContext"></param>
         public override void OnActionExecuted(HttpActionExecutedContext ActionContext)
         {
-            var origin = "https://wenchy.net";
             if (ActionContext.Request.Headers.Contains("Origin"))
             {
+                var origin = "https://wenchy.net";
                 var url = ActionContext.Request.Headers.GetValues("Origin").FirstOrDefault();
                 if (!string.IsNullOrWhiteSpace(url) 
-                    && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                    && Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
                 {
                     if (uri?.Host == "wenchy.net" 
                         || uri?.Scheme?.Contains("extension") == true)
                         origin = url;
                 }
+                ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", origin);
             }
-            if (ActionContext.Response.Headers.Contains("Access-Control-Allow-Origin"))
-                ActionContext.Response.Headers.Remove("Access-Control-Allow-Origin");
-            ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", origin);
-            ActionContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
 
             base.OnActionExecuted(ActionContext);
         }
@@ -80,11 +77,13 @@ namespace Ao3tracksync.Controllers
         /// <param name="ActionContext"></param>
         public override void OnActionExecuted(HttpActionExecutedContext ActionContext)
         {
-            if (!ActionContext.Response.Headers.Contains("Access-Control-Allow-Origin"))
-                ActionContext.Response.Headers.Add("Access-Control-Allow-Origin", "https://wenchy.net");
-            ActionContext.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, Content-Type");
-            ActionContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE");
-            ActionContext.Response.Headers.Add("Access-Control-Max-Age", "604800"); // 1 week
+            if (ActionContext.Request.Headers.Contains("Origin"))
+            {
+                ActionContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+                ActionContext.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+                ActionContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+                ActionContext.Response.Headers.Add("Access-Control-Max-Age", "604800"); // 1 week
+            }
 
             base.OnActionExecuted(ActionContext);
         }
