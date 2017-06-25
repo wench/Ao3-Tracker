@@ -24,7 +24,7 @@
             "all_frames": false,
             "run_at": "document_end",
             "js": [
-                "lib/jquery-3.1.1.min.js",
+                "lib/jquery.min.js",
                 //@if BROWSER='Edge'
                 "edge.js",
                 //@endif
