@@ -223,7 +223,7 @@ namespace Ao3TrackReader
             FontDecreaseCommand = new DisableableCommand(() => LogFontSize--);
             ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
 
-            SyncCommand = new DisableableCommand(() => App.Storage.DoSyncAsync(true), !App.Storage.IsSyncing && App.Storage.CanSync);
+            SyncCommand = new DisableableCommand(() => { App.Storage.DoSyncAsync(true); ReadingList.SyncToServerAsync(false).ConfigureAwait(false); }, !App.Storage.IsSyncing && App.Storage.CanSync);
             App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThreadAsync(() => { SyncCommand.IsEnabled = false; }).ConfigureAwait(false);
             App.Storage.EndSyncEvent += (sender, e) => DoOnMainThreadAsync(() => { SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync; }).ConfigureAwait(false);
             SyncCommand.IsEnabled = !App.Storage.IsSyncing && App.Storage.CanSync;
