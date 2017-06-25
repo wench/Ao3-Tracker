@@ -94,7 +94,6 @@ namespace Ao3TrackReader.Controls
                     }
 
                     var tasks = new Queue<Task>();
-                    var vms = new List<Ao3PageViewModel>();
 
                     using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
@@ -135,14 +134,13 @@ namespace Ao3TrackReader.Controls
                                         {
                                             TagsVisible = tags_visible
                                         };
+                                        viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                                         readingListBacking.Add(viewmodel);
-                                        vms.Add(viewmodel);
 
                                         await tasklimit.WaitAsync();
                                         tasks.Enqueue(Task.Run(async () =>
                                         {
                                             await viewmodel.SetBaseDataAsync(model.Value);
-                                            viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                                             tasklimit.Release();
                                         }));
                                     }
@@ -178,7 +176,7 @@ namespace Ao3TrackReader.Controls
 
                     using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
-                        foreach (var viewmodel in vms)
+                        foreach (var viewmodel in readingListBacking.AllSafe)
                         {
                             await tasklimit.WaitAsync();
 
@@ -616,9 +614,8 @@ namespace Ao3TrackReader.Controls
                 {
                     TagsVisible = tags_visible
                 };
-                await viewmodel.SetBaseDataAsync(model);
-
                 viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                await viewmodel.SetBaseDataAsync(model);
 
                 readingListBacking.Add(viewmodel);
 
@@ -750,9 +747,7 @@ namespace Ao3TrackReader.Controls
 
                 await wvp.DoOnMainThreadAsync(async () =>
                 {
-                    viewmodel.PropertyChanged -= Viewmodel_PropertyChanged;
                     await viewmodel.SetBaseDataAsync(model);
-                    viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
                 });
 
                 await WriteViewModelToDbAsync(viewmodel, new ReadingList(model, 0, viewmodel.Unread));
