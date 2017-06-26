@@ -24,18 +24,25 @@ using System.Reflection;
 namespace Ao3TrackReader.Models
 {
 
-    public class KeyedItem<TKey, TValue>
+    public interface IKeyedItem
+    {
+        object Key { get; set; }
+        string Value { get; set; }
+    }
+
+    public class KeyedItem<TKey> : IKeyedItem
     {
         public TKey Key { get; set; }
-        public TValue Value { get; set; }
+        object IKeyedItem.Key { get => Key; set => Key = (TKey)value; }
+
+        public string Value { get; set; }
 
         public KeyedItem() { }
-        public KeyedItem(TKey key, TValue value)
+        public KeyedItem(TKey key, string value)
         {
             Key = key;
             Value = value;
         }
-
         public override string ToString()
         {
             return Value?.ToString() ?? "(null)";
@@ -48,30 +55,14 @@ namespace Ao3TrackReader.Models
 
         public override bool Equals(object obj)
         {
-            var o = obj as KeyedItem<TKey, TValue>;
+            var o = obj as KeyedItem<TKey>;
             if (o == null) return false;
             return object.Equals(Key, o.Key) && object.Equals(Value, o.Value);
         }
+
     }
 
-    public interface IKeyedItem
-    {
-        object Key { get; set; }
-        string Value { get; set; }
-    }
-
-    public class KeyedItem<TKey> : KeyedItem<TKey, string>, IKeyedItem
-    {
-        public KeyedItem() { }
-        public KeyedItem(TKey key, string value) : base(key, value)
-        {
-        }
-
-        object IKeyedItem.Key { get => Key; set => Key = (TKey) value; }
-        string IKeyedItem.Value { get => Value; set => Value = value; }
-    }
-
-    public class NullableKeyedItem<TKey> : KeyedItem<Nullable<TKey>>
+    public class NullableKeyedItem<TKey> : KeyedItem<TKey?>
         where TKey: struct
     {
         public NullableKeyedItem() { }
@@ -80,105 +71,132 @@ namespace Ao3TrackReader.Models
         }
     }
 
-    public class KeyedItemList<TKey, TValue> : ObservableCollection<KeyedItem<TKey, TValue>>
-    {
-        public KeyedItemList() : base()
-        {
-
-        }
-        public KeyedItemList(IEnumerable<KeyedItem<TKey, TValue>> collection) : base(collection)
-        {
-
-        }
-
-        public void Add(TKey key,TValue value)
-        {
-            Add(new KeyedItem<TKey, TValue>(key, value));
-        }
-    }
-
     public interface IKeyedItemList
     {
-        IKeyedItem FindItem(string str);
+        IKeyedItem Lookup(string str);
     }
 
-    public class KeyedItemList<TKey> : KeyedItemList<TKey,string>, IKeyedItemList
+    public abstract class BaseKeyedItemList<TKey> : List<KeyedItem<TKey>>, IKeyedItemList
     {
-        public KeyedItemList() : base()
+        public BaseKeyedItemList() : base()
         {
         }
 
-        public KeyedItemList(IEnumerable<KeyedItem<TKey, string>> collection) : base(collection)
+        public BaseKeyedItemList(IEnumerable<KeyedItem<TKey>> collection) : base(collection)
         {
         }
 
-        Type typeKey;
-        MethodInfo methodTryParse;
-
-        IKeyedItem IKeyedItemList.FindItem(string str)
+        public void Add(TKey key, string value)
         {
-            if (typeKey == null) typeKey = typeof(TKey);
-            if (methodTryParse == null && !typeKey.GetTypeInfo().IsEnum)
+            Add(new KeyedItem<TKey>(key, value));
+        }
+
+        public abstract IKeyedItem Lookup(string str);
+    }
+
+    public class KeyedItemList<TKey> : BaseKeyedItemList<TKey>
+    {
+        static Type typeKey;
+        static TypeInfo typeInfoKey;
+        static MethodInfo methodTryParse;
+
+        static TKey ResolveKey(string str)
+        {
+            if (typeKey == null)
+            {
+                typeKey = typeof(TKey);
+                typeInfoKey = typeKey.GetTypeInfo();
+            }
+            if (methodTryParse == null && !typeInfoKey.IsEnum)
             {
                 if (typeKey == typeof(string))
                 {
-                    return (IKeyedItem)this.Find((TKey)(object)str);
+                    return (TKey)(object)str;
                 }
                 methodTryParse = typeKey.GetMethod("TryParse", new[] { typeof(string), typeKey.MakeByRefType() });
             }
 
-            if (str is null) return (IKeyedItem)this.Find(default(TKey));
+            if (str is null && typeInfoKey.IsClass || (typeInfoKey.IsGenericType && typeInfoKey.GetGenericTypeDefinition() == typeof(Nullable)))
+                return default(TKey);
 
             if (methodTryParse != null)
             {
                 var parameters = new object[] { str, null };
                 if ((bool)methodTryParse.Invoke(null, parameters))
-                    return (IKeyedItem)this.Find((TKey)parameters[1]);
+                    return (TKey)parameters[1];
             }
             else if (typeKey.GetTypeInfo().IsEnum)
             {
                 try
                 {
-                    var result = (TKey) Enum.Parse(typeKey, str);
-                    return (IKeyedItem)this.Find(result);
+                    return (TKey)Enum.Parse(typeKey, str);
                 }
                 catch
                 {
 
                 }
-            }            
+            }
 
-            return null;
+            throw new ArgumentException();
+        }
+
+        public override IKeyedItem Lookup(string strKey)
+        {
+            try
+            {
+                return this.Find(ResolveKey(strKey));
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 
-    public class NullableKeyedItemList<TKey> : KeyedItemList<Nullable<TKey>>, IKeyedItemList
+    public class NullableKeyedItemList<TKey> : BaseKeyedItemList<TKey?>
         where TKey: struct
     {
-        Type typeKey;
-        MethodInfo methodTryParse;
+        static Type typeKey;
+        static TypeInfo typeInfoKey;
+        static MethodInfo methodTryParse;
 
-        IKeyedItem IKeyedItemList.FindItem(string str)
+        static TKey? ResolveKey(string str)
         {
-            if (typeKey == null) typeKey = typeof(TKey);
-            if (methodTryParse == null && !typeKey.GetTypeInfo().IsEnum)
+            if (typeKey == null)
+            {
+                typeKey = typeof(TKey);
+                typeInfoKey = typeKey.GetTypeInfo();
+            }
+            if (methodTryParse == null && !typeInfoKey.IsEnum)
                 methodTryParse = typeKey.GetMethod("TryParse", new[] { typeof(string), typeKey.MakeByRefType() });
 
-            if (str is null) return (IKeyedItem) this.Find((Nullable < TKey >) null);
+            if (str is null) return null;
 
             if (methodTryParse != null)
             {
                 var parameters = new object[] { str, null };
                 if ((bool) methodTryParse.Invoke(null, parameters))
-                    return (IKeyedItem)this.Find((TKey) parameters[1]);
+                    return (TKey)parameters[1];
             }
             else if(typeKey.GetTypeInfo().IsEnum)
             {
                 if (Enum.TryParse(str, out TKey result))
-                    return (IKeyedItem)this.Find(result);
+                    return result;
             }
-            
-            return null;
+
+            throw new ArgumentException();
+        }
+
+        public override IKeyedItem Lookup(string str)
+        {
+            try
+            {
+                return this.Find(ResolveKey(str));
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 
@@ -188,10 +206,5 @@ namespace Ao3TrackReader.Models
         {
             return list.FirstOrDefault((i) => Equals(i.Key, key));
         }
-        public static KeyedItem<TKey, TValue> Find<TKey, TValue>(this IEnumerable<KeyedItem<TKey, TValue>> list, TKey key)
-        {
-            return list.FirstOrDefault((i) => Equals(i.Key, key));
-        }
     }
-
 }

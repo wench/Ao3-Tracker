@@ -367,7 +367,7 @@ namespace Ao3TrackReader.Controls
                 {
                     string str = App.Database.GetVariable(varname);
                     if (str == null) str = GetDatabaseVariableDefault(elem);
-                    IKeyedItem item = itemlist.FindItem(str);
+                    IKeyedItem item = itemlist.Lookup(str);
                     dropdown.SelectedItem = item;
                 }
             }
