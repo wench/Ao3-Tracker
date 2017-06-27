@@ -64,7 +64,7 @@ namespace Ao3TrackReader.WinRT
         {
             if (Application.Current.Resources.TryGetValue("ao3t:AppBarButtonTemplate", out var template))
                 AppBarButtonTemplate = template as ControlTemplate;
-#if WINDOWS_UWP && (WINDOWS_14393 || WINDOWS_15063)
+#if WINDOWS_14393 || WINDOWS_15063 || WINDOWS_FUTURE
             if (Ao3TrackReader.UWP.App.UniversalApi >= 3)
                 IsDynamicOverflowEnabled = haveDynamicOverflow = true;
 #elif WINDOWS_APP

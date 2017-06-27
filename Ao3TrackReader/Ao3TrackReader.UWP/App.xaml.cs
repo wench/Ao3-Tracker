@@ -44,7 +44,9 @@ namespace Ao3TrackReader.UWP
         static App()
         {
             ushort limit;
-#if WINDOWS_15063
+#if WINDOWS_FUTURE
+            limit = 5;
+#elif WINDOWS_15063
             limit = 4;
 #elif WINDOWS_14393
             limit = 3;
