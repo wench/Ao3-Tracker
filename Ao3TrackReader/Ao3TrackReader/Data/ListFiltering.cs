@@ -91,7 +91,9 @@ namespace Ao3TrackReader.Data
 
         public string GetFilterFromUrl(string url, string extra)
         {
-            var uri = new Uri(url);
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                return null;
+
             Match match = null;
 
             if ((match = Ao3SiteDataLookup.regexWork.Match(uri.LocalPath)).Success)

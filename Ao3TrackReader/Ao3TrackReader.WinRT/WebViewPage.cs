@@ -42,7 +42,7 @@ namespace Ao3TrackReader
     {
         private CoreDispatcher Dispatcher { get; } = CoreWindow.GetForCurrentThread().Dispatcher;
 
-        public bool IsMainThread => Dispatcher.HasThreadAccess; 
+        public bool IsMainThread => Dispatcher.HasThreadAccess;
 
         WebView webView;
 
@@ -129,7 +129,7 @@ namespace Ao3TrackReader
             {
                 return await webView.InvokeScriptAsync("eval", new[] { code });
             }
-            catch(Exception e)            
+            catch (Exception e)
             {
                 if (e.HResult != unchecked((int)0x80020101)) // happens sometimes
                     throw;
@@ -150,8 +150,10 @@ namespace Ao3TrackReader
 
         public Uri CurrentUri
         {
-            get {
-                return DoOnMainThreadAsync(() => {
+            get
+            {
+                return DoOnMainThreadAsync(() =>
+                {
                     return webView.Source ?? new Uri("error:///");
                 }).WaitGetResult();
             }
@@ -175,7 +177,7 @@ namespace Ao3TrackReader
             webView.Refresh();
         }
 
-        bool WebViewCanGoBack => DoOnMainThreadAsync(()=>webView.CanGoBack).Result;
+        bool WebViewCanGoBack => DoOnMainThreadAsync(() => webView.CanGoBack).Result;
 
         bool WebViewCanGoForward => DoOnMainThreadAsync(() => webView.CanGoForward).Result;
 
@@ -200,19 +202,19 @@ namespace Ao3TrackReader
         {
             get
             {
-                    TranslateTransform v = webView.RenderTransform as TranslateTransform;
-                    return v?.X ?? 0.0;
+                TranslateTransform v = webView.RenderTransform as TranslateTransform;
+                return v?.X ?? 0.0;
             }
             set
             {
-                    if (value == 0.0)
-                    {
-                        webView.RenderTransform = null;
-                    }
-                    else
-                    {
-                        webView.RenderTransform = new TranslateTransform { X = value, Y = 0.0 };
-                    }
+                if (value == 0.0)
+                {
+                    webView.RenderTransform = null;
+                }
+                else
+                {
+                    webView.RenderTransform = new TranslateTransform { X = value, Y = 0.0 };
+                }
             }
         }
 
@@ -255,27 +257,38 @@ namespace Ao3TrackReader
 #if !WINDOWS_UWP
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(x / webView.ActualWidth, y / webView.ActualHeight, 0, 0));
 #endif
+            bool hasurl = Uri.TryCreate(url, UriKind.Absolute, out Uri uri);
 
-            var inturl = Ao3SiteDataLookup.CheckUri(new Uri(url)) != null;
+            var inturl = hasurl && Ao3SiteDataLookup.CheckUri(uri) != null;
             var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
+            ContextMenuOpen.IsEnabled = hasurl;
+            ContextMenuCopyLink.IsEnabled = hasurl;
             ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
             ContextMenuAdd.IsEnabled = inturl && !res[url];
             ContextMenuRemove.IsEnabled = inturl && res[url];
 
-            ContextMenuFilterDetails = Data.ListFiltering.Instance.GetFilterFromUrl(url, innerText);
-            bool isFilter = ContextMenuFilterDetails != null ? await Data.ListFiltering.Instance.GetIsFilterAsync(ContextMenuFilterDetails) : false;
+            string filterDetails = hasurl ? Data.ListFiltering.Instance.GetFilterFromUrl(url, innerText) : null;
+            bool isFilter = filterDetails != null ? await Data.ListFiltering.Instance.GetIsFilterAsync(filterDetails) : false;
 
-            ContextMenuAddFilter.IsEnabled = ContextMenuFilterDetails != null ? !isFilter : false;
-            ContextMenuRemoveFilter.IsEnabled = ContextMenuFilterDetails != null ? isFilter : false;
+            ContextMenuAddFilter.IsEnabled = filterDetails != null ? !isFilter : false;
+            ContextMenuRemoveFilter.IsEnabled = filterDetails != null ? isFilter : false;
+
+            ContextMenuGoogleLookup.IsEnabled = !String.IsNullOrWhiteSpace(innerText.Trim());
+            ContextMenuCopyText.IsEnabled = !String.IsNullOrWhiteSpace(innerText);
+
+            if (!ContextMenuCopyLink.IsEnabled && !ContextMenuCopyText.IsEnabled)
+                return;
+
+            ContextMenuParam param = new ContextMenuParam { Text = innerText, Uri = uri, Filter = filterDetails };
 
             foreach (var baseitem in contextMenu.Items)
             {
                 if (baseitem is MenuFlyoutItem item)
                 {
-                    item.CommandParameter = url;
+                    item.CommandParameter = param;
                     if (item.Command != null)
                     {
-                        item.Visibility = item.Command.CanExecute(url) ? Visibility.Visible : Visibility.Collapsed;
+                        item.Visibility = item.Command.CanExecute(param) ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }
             }
@@ -286,6 +299,6 @@ namespace Ao3TrackReader
             var renderer = Xamarin.Forms.Platform.WinRT.Platform.GetRenderer(contextMenuPlaceholder);
             contextMenu.ShowAt(renderer.ContainerElement);
 #endif
-        }        
+        }
     }
 }

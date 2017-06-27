@@ -280,7 +280,7 @@ namespace Ao3TrackReader
 
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / webView.Width, y * Height / webView.Height, 0, 0));
 
-            var inturl = Ao3SiteDataLookup.CheckUri(new Uri(url)) != null;
+            var inturl = Uri.TryCreate(url, UriKind.Absolute, out Uri uri) && Ao3SiteDataLookup.CheckUri(uri) != null;
             var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
             ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
             ContextMenuAdd.IsEnabled = inturl && !res[url];
@@ -291,6 +291,9 @@ namespace Ao3TrackReader
 
             ContextMenuAddFilter.IsEnabled = ContextMenuFilterDetails != null ? !isFilter : false;
             ContextMenuRemoveFilter.IsEnabled = ContextMenuFilterDetails != null ? isFilter : false;
+
+            ContextMenuLookupPhrase = innerText;
+            ContextMenuGoogleLookup.IsEnabled = !string.IsNullOrWhiteSpace(ContextMenuLookupPhrase);
 
             for (int i = 0; i < ContextMenuItems.Count; i++)
             {

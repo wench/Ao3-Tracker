@@ -299,53 +299,78 @@ namespace Ao3TrackReader
             }
         }
 
-        List<KeyValuePair<string, DisableableCommand<string>>> ContextMenuItems { get; set; }
-        DisableableCommand<string> ContextMenuOpenAdd;
-        DisableableCommand<string> ContextMenuAdd;
-        DisableableCommand<string> ContextMenuRemove;
-        DisableableCommand<string> ContextMenuAddFilter;
-        DisableableCommand<string> ContextMenuRemoveFilter;
-        string ContextMenuFilterDetails;
+        class ContextMenuParam
+        {
+            public Uri Uri { get; set; }
+            public string Text { get; set; }
+            public string Filter { get; set; }
+        }
+
+
+        List<KeyValuePair<string, DisableableCommand<ContextMenuParam>>> ContextMenuItems { get; set; }
+        DisableableCommand<ContextMenuParam> ContextMenuOpen;
+        DisableableCommand<ContextMenuParam> ContextMenuOpenAdd;
+        DisableableCommand<ContextMenuParam> ContextMenuAdd;
+        DisableableCommand<ContextMenuParam> ContextMenuRemove;
+        DisableableCommand<ContextMenuParam> ContextMenuAddFilter;
+        DisableableCommand<ContextMenuParam> ContextMenuRemoveFilter;
+        DisableableCommand<ContextMenuParam> ContextMenuGoogleLookup;
+        DisableableCommand<ContextMenuParam> ContextMenuCopyLink;
+        DisableableCommand<ContextMenuParam> ContextMenuCopyText;
 
         void SetupContextMenu()
         {
-            ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<string>>>
+            ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<ContextMenuParam>>>
             {
-                new KeyValuePair<string, DisableableCommand<string>>("Open", new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Open", ContextMenuOpen = new DisableableCommand<ContextMenuParam>((param) =>
                 {
-                    Navigate(new Uri(url));
+                    Navigate(param.Uri);
                 })),
 
-                new KeyValuePair<string, DisableableCommand<string>>("Open and Add", ContextMenuOpenAdd = new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Open and Add", ContextMenuOpenAdd = new DisableableCommand<ContextMenuParam>((param) =>
                 {
-                    AddToReadingList(url);
-                    Navigate(new Uri(url));
+                    AddToReadingList(param.Uri.AbsoluteUri);
+                    Navigate(param.Uri);
                 })),
 
-                new KeyValuePair<string, DisableableCommand<string>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<ContextMenuParam>((param) =>
                 {
-                    AddToReadingList(url);
+                    AddToReadingList(param.Uri.AbsoluteUri);
                 })),
 
-                new KeyValuePair<string, DisableableCommand<string>>("Remove from Reading list", ContextMenuRemove = new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Remove from Reading list", ContextMenuRemove = new DisableableCommand<ContextMenuParam>((param) =>
                 {
-                    RemoveFromReadingList(url);
+                    RemoveFromReadingList(param.Uri.AbsoluteUri);
                 })),
 
-                new KeyValuePair<string, DisableableCommand<string>>("Add as Listing Filter", ContextMenuAddFilter = new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Add as Listing Filter", ContextMenuAddFilter = new DisableableCommand<ContextMenuParam>((param) =>
                 {
-                    Data.ListFiltering.Instance.AddFilterAsync(ContextMenuFilterDetails);
+                    Data.ListFiltering.Instance.AddFilterAsync(param.Filter);
                 })),
 
-                new KeyValuePair<string, DisableableCommand<string>>("Remove as Listing Filter", ContextMenuRemoveFilter = new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Remove as Listing Filter", ContextMenuRemoveFilter = new DisableableCommand<ContextMenuParam>((param) =>
                 {
-                    Data.ListFiltering.Instance.RemoveFilterAsync(ContextMenuFilterDetails);
+                    Data.ListFiltering.Instance.RemoveFilterAsync(param.Filter);
                 })),
 
-                new KeyValuePair<string, DisableableCommand<string>>("Copy Link", new DisableableCommand<string>((url) =>
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Google Lookup", ContextMenuGoogleLookup = new DisableableCommand<ContextMenuParam>(async (param) =>
                 {
-                    CopyToClipboard(url, "url");
-                }) { IsEnabled = HaveClipboard })
+                    var uri = new Uri("https://google.com/search?q=" + System.Net.WebUtility.UrlEncode(param.Text.Trim()));
+                    await Task.Delay(64);
+                    LookupPane.View(uri);
+                })),
+
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Copy Link", ContextMenuCopyLink  = new DisableableCommand<ContextMenuParam>((param) =>
+                {
+                    CopyToClipboard(param.Uri.AbsoluteUri, "url");
+                }) { IsEnabled = HaveClipboard }),
+
+                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Copy Text", ContextMenuCopyText = new DisableableCommand<ContextMenuParam>((param) =>
+                {
+                    CopyToClipboard(param.Text, "text");
+                }) { IsEnabled = HaveClipboard }),
+
+
             };
         }
 
