@@ -40,8 +40,9 @@ limitations under the License.
                                    x:Name="ReadingListToolBarItem" >
                     <local:ToolbarItem.Description>Open the Reading List pane.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
-                <local:ToolbarItem Text="Add to Reading List" Icon="{StaticResource AddPageIcon}"   Command="{Binding AddToReadingListCommand,Source={x:Reference ReadingListPane}}" >
-                    <local:ToolbarItem.Description>Add the currently displayed work, search or webpage to the reading list.</local:ToolbarItem.Description>
+                <local:ToolbarItem Text="Add to Reading List" Icon="{StaticResource AddPageIcon}"   Command="{Binding AddRemoveReadingListCommand,Source={x:Reference root}}" 
+                                   x:Name="AddRemoveReadingListToolBarItem" >
+                    <local:ToolbarItem.Description>Add the currently displayed work, search or webpage to the reading list if the button is not highlighted, otherwise remove it.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Font Size Decrease"       Icon="{StaticResource FontDownIcon}"  Command="{Binding FontDecreaseCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>Decrease the font size of the page text by 5%.</local:ToolbarItem.Description>

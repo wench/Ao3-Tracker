@@ -40,6 +40,18 @@ namespace Ao3TrackReader.Controls
             set { SetValue(ImageWidthProperty, value); }
         }
 
+        bool isActive = false;
+        public bool IsActive
+        {
+            get => isActive;
+            set
+            {
+                isActive = value;
+                if (value) BackgroundColor = Ao3TrackReader.Resources.Colors.Highlight.Trans.Medium;
+                else BackgroundColor = Color.Transparent;
+            }
+        }
+
         string IHelpInfo.Text => HelpView.GetText(this);
 
         Text.TextEx IHelpInfo.Description => HelpView.GetDescription(this);

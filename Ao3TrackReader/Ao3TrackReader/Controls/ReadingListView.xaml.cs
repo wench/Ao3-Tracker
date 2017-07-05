@@ -35,11 +35,16 @@ namespace Ao3TrackReader.Controls
 
         GroupList<Ao3PageViewModel> readingListBacking;
 
-
+        public DisableableCommand AddToReadingListCommand { get; private set; }
 
         public ReadingListView()
         {
-            AddToReadingListCommand = new DisableableCommand(() => AddAsync(wvp.CurrentUri.AbsoluteUri));
+            AddToReadingListCommand = new DisableableCommand(() => {
+                if (AddPageButton.IsActive)
+                    RemoveAsync(wvp.CurrentUri.AbsoluteUri);
+                else
+                    AddAsync(wvp.CurrentUri.AbsoluteUri);
+            });
 
             InitializeComponent();
 
@@ -52,8 +57,8 @@ namespace Ao3TrackReader.Controls
             App.Database.TryGetVariable("ReadingList.showCompleteDefault", bool.TryParse, out b);
             readingListBacking.ShowHidden = b;
 
-            ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
-            ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ShowHiddenButton.IsActive = readingListBacking.ShowHidden;
+            ShowTagsButton.IsActive = TagsVisible;
 
             tagTypeVisible = new Dictionary<Ao3TagType, bool>(3);
 
@@ -240,9 +245,6 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        public DisableableCommand AddToReadingListCommand { get; private set; }
-
-
         IEnumerable<Models.IHelpInfo> ButtonBarHelpItems
         {
             get
@@ -398,7 +400,7 @@ namespace Ao3TrackReader.Controls
         private void OnShowHidden(object sender, EventArgs e)
         {
             readingListBacking.ShowHidden = !readingListBacking.ShowHidden;
-            ShowHiddenButton.BackgroundColor = readingListBacking.ShowHidden ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ShowHiddenButton.IsActive = readingListBacking.ShowHidden;
         }
 
         bool tags_visible = false;
@@ -454,7 +456,7 @@ namespace Ao3TrackReader.Controls
         private void OnShowTags(object sender, EventArgs e)
         {
             TagsVisible = !TagsVisible;
-            ShowTagsButton.BackgroundColor = TagsVisible ? Colors.Highlight.Trans.Medium : Color.Transparent;
+            ShowTagsButton.IsActive = TagsVisible;
         }
 
         public void Goto(Ao3PageViewModel item, bool latest, bool fullwork)
@@ -499,13 +501,13 @@ namespace Ao3TrackReader.Controls
                 if (uri is null)
                 {
                     UpdateSelectedItem(null);
-                    AddToReadingListCommand.IsEnabled = false;
+                    wvp.AddRemoveReadingListToolBarItem_IsActive = AddPageButton.IsActive = false;
                 }
                 else
                 {
                     var item = readingListBacking.FindInAll((m) => m.HasUri(uri));
                     UpdateSelectedItem(item);
-                    AddToReadingListCommand.IsEnabled = item is null;
+                    wvp.AddRemoveReadingListToolBarItem_IsActive = AddPageButton.IsActive = !(item is null);
                 }
             }).ConfigureAwait(false);
         }
@@ -583,7 +585,7 @@ namespace Ao3TrackReader.Controls
             await wvp.DoOnMainThreadAsync(() =>
             {
                 if (viewmodel == selectedItem) UpdateSelectedItem(null);
-                if (Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri) == viewmodel.Uri) AddToReadingListCommand.IsEnabled = true;
+                if (Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri) == viewmodel.Uri) wvp.AddRemoveReadingListToolBarItem_IsActive = AddPageButton.IsActive = false;
                 readingListBacking.Remove(viewmodel);
                 viewmodel.Dispose();
             });
@@ -622,7 +624,7 @@ namespace Ao3TrackReader.Controls
                 await App.Database.ReadingListCached.InsertOrUpdateAsync(new ReadingList(model, timestamp, viewmodel.ChaptersRead));
 
                 var uri = Ao3SiteDataLookup.ReadingListlUri(wvp.CurrentUri.AbsoluteUri);
-                if (uri == viewmodel.Uri) AddToReadingListCommand.IsEnabled = false;
+                if (uri == viewmodel.Uri) wvp.AddRemoveReadingListToolBarItem_IsActive = AddPageButton.IsActive = true;
 
                 return viewmodel;
             });            

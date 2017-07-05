@@ -70,7 +70,7 @@ namespace Ao3TrackReader
 
 
         public Injection[] InjectionsLoading { get; } =
-            new []
+            new[]
             {
                 new Injection("hider.js")
             };
@@ -168,27 +168,27 @@ namespace Ao3TrackReader
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")
             {
-                if (urlBar.IsVisible == false) UrlBarToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-                else UrlBarToolBarItem.Foreground = Colors.Highlight.High;
+                if (urlBar.IsVisible == false) UrlBarToolBarItem.IsActive = false;
+                else UrlBarToolBarItem.IsActive = true;
             }
         }
 
         private void ReadingList_IsOnScreenChanged(object sender, EventArgs<bool> onscreen)
         {
-            if (!onscreen.Value) ReadingListToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else ReadingListToolBarItem.Foreground = Colors.Highlight.High;
+            if (!onscreen.Value) ReadingListToolBarItem.IsActive = false;
+            else ReadingListToolBarItem.IsActive = true;
         }
 
         private void SettingsPane_IsOnScreenChanged(object sender, EventArgs<bool> onscreen)
         {
-            if (!onscreen.Value) SettingsToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else SettingsToolBarItem.Foreground = Colors.Highlight.High;
+            if (!onscreen.Value) SettingsToolBarItem.IsActive = false;
+            else SettingsToolBarItem.IsActive = true;
         }
 
         private void HelpPane_IsOnScreenChanged(object sender, EventArgs<bool> onscreen)
         {
-            if (!onscreen.Value) HelpToolBarItem.Foreground = Xamarin.Forms.Color.Default;
-            else HelpToolBarItem.Foreground = Colors.Highlight.High;
+            if (!onscreen.Value) HelpToolBarItem.IsActive = false;
+            else HelpToolBarItem.IsActive = true;
         }
 
         private void TogglePane(PaneView pane)
@@ -209,6 +209,7 @@ namespace Ao3TrackReader
         public DisableableCommand ForceSetLocationCommand { get; private set; }
         public DisableableCommand RefreshCommand { get; private set; }
         public DisableableCommand ReadingListCommand { get; private set; }
+        public DisableableCommand AddRemoveReadingListCommand { get; private set; }
         public DisableableCommand UrlBarCommand { get; private set; }
         public DisableableCommand ResetFontSizeCommand { get; private set; }
         public DisableableCommand SettingsCommand { get; private set; }
@@ -230,6 +231,13 @@ namespace Ao3TrackReader
 
             RefreshCommand = new DisableableCommand(Refresh);
             ReadingListCommand = new DisableableCommand(() => TogglePane(ReadingList));
+
+            AddRemoveReadingListCommand = new DisableableCommand(() => {
+                if (AddRemoveReadingListToolBarItem.IsActive)
+                    ReadingList.RemoveAsync(CurrentUri.AbsoluteUri);
+                else
+                    ReadingList.AddAsync(CurrentUri.AbsoluteUri);
+            });
 
             UrlBarCommand = new DisableableCommand(() =>
             {
@@ -269,6 +277,8 @@ namespace Ao3TrackReader
             BackToolBarItem.IsVisible = show ?? def;
         }
 
+        public bool AddRemoveReadingListToolBarItem_IsActive { get => AddRemoveReadingListToolBarItem.IsActive; set => AddRemoveReadingListToolBarItem.IsActive = value; }
+        
         private void ToolBarItem_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "IsVisible")

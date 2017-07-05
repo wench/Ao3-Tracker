@@ -50,7 +50,15 @@ namespace Ao3TrackReader.Controls
             set { SetValue(IsVisibleProperty, value); }
         }
 
-
+        bool isActive = false;
+        public bool IsActive {
+            get => isActive;
+            set {
+                isActive = value;
+                if (value) Foreground = Resources.Colors.Highlight;
+                else Foreground = Color.Default;
+            }
+        }
 
 #if __ANDROID__
         internal Android.Views.IMenuItem MenuItem { get; set; }
