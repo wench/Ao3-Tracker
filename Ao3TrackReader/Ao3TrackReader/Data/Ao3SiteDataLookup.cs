@@ -89,6 +89,7 @@ namespace Ao3TrackReader.Data
         static Regex regexRSSTagTitle = new Regex(@"AO3 works tagged '(?<TAGNAME>.*)'$", RegexOptions.ExplicitCapture);
         static Regex regexTagCategory = new Regex(@"This tag belongs to the (?<CATEGORY>\w*) Category\.", RegexOptions.ExplicitCapture);
         static Regex regexPageQuery = new Regex(@"(?<PAGE>&?page=\d+&?)");
+        static Regex regexChapNumName = new Regex(@"^(?<CHAPTERNUM>\d+)\.\s*(?<CHAPTERNAME>.*)\s*$", RegexOptions.ExplicitCapture);
         static HttpClient HttpClient { get; set; }
 
         static Ao3SiteDataLookup()
@@ -465,7 +466,7 @@ namespace Ao3TrackReader.Data
                                     if (m.Success)
                                     {
                                         var merger = UnescapeTag(m.Groups["TAGNAME"].Value);
-                                        var mergertag = await LookupTagAsync(merger, intag);                         
+                                        var mergertag = await LookupTagAsync(merger, intag);
 
                                         var frommerger = App.Database.GetTag(intag);
                                         if (!string.IsNullOrEmpty(frommerger?.actual))
@@ -524,7 +525,7 @@ namespace Ao3TrackReader.Data
                         await Task.Run(() =>
                         {
                             // All txn commands must be on same thread or deadlock!
-                            using (App.Database.DoTransaction()) 
+                            using (App.Database.DoTransaction())
                             {
                                 App.Database.SetTagDetails(tag);
                                 wait.SetResult(null);
@@ -546,11 +547,11 @@ namespace Ao3TrackReader.Data
                                                 var ssyntag = UnescapeTag(m.Groups["TAGNAME"].Value);
 
                                                 SemaphoreSlim syntaglock = null;
-                                                if (ssyntag != synallow) using(taglockslock.Lock())
-                                                {
-                                                    if (!taglocks.TryGetValue(ssyntag, out syntaglock))
-                                                        taglocks[ssyntag] = syntaglock = GetTagLockSem();
-                                                }
+                                                if (ssyntag != synallow) using (taglockslock.Lock())
+                                                    {
+                                                        if (!taglocks.TryGetValue(ssyntag, out syntaglock))
+                                                            taglocks[ssyntag] = syntaglock = GetTagLockSem();
+                                                    }
 
                                                 // If the lock is already held then another thread is already working on this, we wont even attempt to do anything to it
                                                 if (syntaglock?.Wait(0) != false)
@@ -575,13 +576,13 @@ namespace Ao3TrackReader.Data
                                                 // Release lock and delete if no thread waiting
 
                                                 if (!(syntaglock is null)) using (taglockslock.Lock())
-                                                {
-                                                    if (syntaglock.CurrentCount == 1)
                                                     {
-                                                        DisposeTagLockSem(syntaglock);
-                                                        taglocks.Remove(ssyntag);
+                                                        if (syntaglock.CurrentCount == 1)
+                                                        {
+                                                            DisposeTagLockSem(syntaglock);
+                                                            taglocks.Remove(ssyntag);
+                                                        }
                                                     }
-                                                }
                                             }
                                         }
                                     }
@@ -1111,6 +1112,13 @@ namespace Ao3TrackReader.Data
                 //model.Title = uri.ToString();
             }
             return model;
+        }
+
+        public static bool TryGetWorkId(this Uri uri, out long workid)
+        {
+            workid = 0;
+            var match = regexWork.Match(uri.LocalPath);
+            return uri.Host == "archiveofourown.org" && match.Success && long.TryParse(match.Groups["WORKID"].Value, out workid);
         }
 
         private static async Task FillModelFromWorkSummaryAsync(Uri baseuri, HtmlNode worknode, Ao3PageModel model)
@@ -2056,5 +2064,63 @@ namespace Ao3TrackReader.Data
         {
         };
 
+        public class ChapterDetails
+        {
+            public string Name { get; set; }
+            public long Id { get; set; }
+            public long Number { get; set; }
+        }
+
+
+        public static async Task<List<ChapterDetails>> LookupChapters(Uri uri)
+        {
+            var model = LookupQuick(uri.AbsoluteUri);
+
+            if (model?.Type != Ao3PageType.Work) return null;
+
+            uri = new Uri(Scheme + @"://archiveofourown.org/works/" + model.Details.WorkId + "/navigate");
+            var response = await HttpRequestAsync(uri);
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            HtmlDocument doc = await response.Content.ReadAsHtmlDocumentAsync();
+
+            var ol = doc?.GetElementbyId("main")?.ElementByClass("ol", "chapter");
+            if (ol is null) return null;
+
+            var chapters = new List<ChapterDetails>(ol.ChildNodes.Count);
+
+            foreach (var li in ol.Elements("li"))
+            {
+                var a = li.Element("a");
+                if (a is null) continue;
+
+                var href = a.Attributes["href"];
+                if (string.IsNullOrEmpty(href?.Value)) continue;
+
+                var details = new ChapterDetails();
+                
+                var match = regexChapNumName.Match(a.InnerText.HtmlDecode());
+                if (!match.Success) continue;
+
+                if (!long.TryParse(match.Groups["CHAPTERNUM"].Value, out var num))
+                    continue;
+
+                details.Number = num;
+                details.Name = match.Groups["CHAPTERNAME"].Value;
+
+                match = regexWork.Match(new Uri(uri, href.Value.HtmlDecode()).LocalPath);
+                if (!match.Success) continue;
+
+                if (!long.TryParse(match.Groups["CHAPTERID"].Value, out num))
+                    continue;
+
+                details.Id = num;
+                chapters.Add(details);
+            }
+
+            return chapters;
+
+        }
     }
 }

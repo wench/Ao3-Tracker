@@ -72,12 +72,11 @@ namespace Ao3TrackReader
             {
                 if (kvp.Key == "-")
                 {
-                    contextMenu.Items.Add(new MenuFlyoutSeparator());
+                    contextMenu.Items.Add(new WinRT.MenuFlyoutSeparatorEx { Command = kvp.Value });
                 }
                 else
                 {
-                    var item = new MenuFlyoutItem { Text = kvp.Key };
-                    item.Command = kvp.Value;
+                    var item = new MenuFlyoutItem { Text = kvp.Key, Command = kvp.Value };
                     item.Foreground = new SolidColorBrush(Ao3TrackReader.Resources.Colors.Base.MediumHigh.ToWindows());
                     contextMenu.Items.Add(item);
                 }
@@ -257,30 +256,9 @@ namespace Ao3TrackReader
 #if !WINDOWS_UWP
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Xamarin.Forms.Rectangle(x / webView.ActualWidth, y / webView.ActualHeight, 0, 0));
 #endif
-            bool hasurl = Uri.TryCreate(url, UriKind.Absolute, out Uri uri);
+            var param = await GetContextMenuParamAsync(url, innerText);
 
-            var inturl = hasurl && Ao3SiteDataLookup.CheckUri(uri) != null;
-            var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
-            ContextMenuOpen.IsEnabled = hasurl;
-            ContextMenuCopyLink.IsEnabled = hasurl;
-            ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
-            ContextMenuAdd.IsEnabled = inturl && !res[url];
-            ContextMenuRemove.IsEnabled = inturl && res[url];
-
-            string filterDetails = hasurl ? Data.ListFiltering.Instance.GetFilterFromUrl(url, innerText) : null;
-            bool isFilter = filterDetails != null ? await Data.ListFiltering.Instance.GetIsFilterAsync(filterDetails) : false;
-
-            ContextMenuAddFilter.IsEnabled = filterDetails != null ? !isFilter : false;
-            ContextMenuRemoveFilter.IsEnabled = filterDetails != null ? isFilter : false;
-
-            ContextMenuGoogleLookup.IsEnabled = !String.IsNullOrWhiteSpace(innerText.Trim());
-            ContextMenuCopyText.IsEnabled = !String.IsNullOrWhiteSpace(innerText);
-
-            if (!ContextMenuCopyLink.IsEnabled && !ContextMenuCopyText.IsEnabled)
-                return;
-
-            ContextMenuParam param = new ContextMenuParam { Text = innerText, Uri = uri, Filter = filterDetails };
-
+            bool had = false;
             foreach (var baseitem in contextMenu.Items)
             {
                 if (baseitem is MenuFlyoutItem item)
@@ -289,9 +267,16 @@ namespace Ao3TrackReader
                     if (item.Command != null)
                     {
                         item.Visibility = item.Command.CanExecute(param) ? Visibility.Visible : Visibility.Collapsed;
+                        if (item.Visibility == Visibility.Visible) had = true;
                     }
                 }
+                else if (baseitem is WinRT.MenuFlyoutSeparatorEx separator && separator.Command != null)
+                {
+                    separator.Visibility = separator.Command.CanExecute(param) ? Visibility.Visible : Visibility.Collapsed;
+                }
             }
+
+            if (!had) return;
 
 #if WINDOWS_UWP
             contextMenu.ShowAt(webView, new Windows.Foundation.Point(x, y));

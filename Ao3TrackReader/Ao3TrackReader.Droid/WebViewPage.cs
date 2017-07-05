@@ -279,29 +279,20 @@ namespace Ao3TrackReader
             HideContextMenu();
 
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / webView.Width, y * Height / webView.Height, 0, 0));
+            var param = await GetContextMenuParamAsync(url, innerText);
 
-            var inturl = Uri.TryCreate(url, UriKind.Absolute, out Uri uri) && Ao3SiteDataLookup.CheckUri(uri) != null;
-            var res = inturl ? await AreUrlsInReadingListAsync(new[] { url }) : null;
-            ContextMenuOpenAdd.IsEnabled = inturl && !res[url];
-            ContextMenuAdd.IsEnabled = inturl && !res[url];
-            ContextMenuRemove.IsEnabled = inturl && res[url];
-
-            ContextMenuFilterDetails = Data.ListFiltering.Instance.GetFilterFromUrl(url, innerText);
-            bool isFilter = ContextMenuFilterDetails != null ? await Data.ListFiltering.Instance.GetIsFilterAsync(ContextMenuFilterDetails) : false;
-
-            ContextMenuAddFilter.IsEnabled = ContextMenuFilterDetails != null ? !isFilter : false;
-            ContextMenuRemoveFilter.IsEnabled = ContextMenuFilterDetails != null ? isFilter : false;
-
-            ContextMenuLookupPhrase = innerText;
-            ContextMenuGoogleLookup.IsEnabled = !string.IsNullOrWhiteSpace(ContextMenuLookupPhrase);
-
+            bool had = false;
             for (int i = 0; i < ContextMenuItems.Count; i++)
             {
                 if (ContextMenuItems[i].Value != null)
-                    contextMenu.Menu.GetItem(i).SetVisible(ContextMenuItems[i].Value.CanExecute(url));
+                {
+                    bool vis = ContextMenuItems[i].Value.CanExecute(url);
+                    contextMenu.Menu.GetItem(i).SetVisible(vis);
+                    if (vis) had = true;
+                }
             }
 
-            contextMenuUrl = url;
+            if (!had) return;
 
             contextMenu.Show();
         }

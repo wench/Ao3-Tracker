@@ -304,73 +304,98 @@ namespace Ao3TrackReader
             public Uri Uri { get; set; }
             public string Text { get; set; }
             public string Filter { get; set; }
+
+            public bool InteriorUrl { get; set; }
+            public bool InReadingList { get; set; }
+            public bool IsFilter { get; set; }
         }
 
+        async Task<ContextMenuParam> GetContextMenuParamAsync(string url, string innerText)
+        {
+            bool hasurl = Uri.TryCreate(url, UriKind.Absolute, out Uri uri);
 
-        List<KeyValuePair<string, DisableableCommand<ContextMenuParam>>> ContextMenuItems { get; set; }
-        DisableableCommand<ContextMenuParam> ContextMenuOpen;
-        DisableableCommand<ContextMenuParam> ContextMenuOpenAdd;
-        DisableableCommand<ContextMenuParam> ContextMenuAdd;
-        DisableableCommand<ContextMenuParam> ContextMenuRemove;
-        DisableableCommand<ContextMenuParam> ContextMenuAddFilter;
-        DisableableCommand<ContextMenuParam> ContextMenuRemoveFilter;
-        DisableableCommand<ContextMenuParam> ContextMenuGoogleLookup;
-        DisableableCommand<ContextMenuParam> ContextMenuCopyLink;
-        DisableableCommand<ContextMenuParam> ContextMenuCopyText;
+            ContextMenuParam param = new ContextMenuParam { Text = innerText, Uri = uri };
+            param.InteriorUrl = hasurl && Ao3SiteDataLookup.CheckUri(uri) != null;
+            if (param.InteriorUrl)
+            {
+                param.InReadingList = param.InteriorUrl ? (await AreUrlsInReadingListAsync(new[] { url }))[url] : false;
+                param.Filter = hasurl ? Data.ListFiltering.Instance.GetFilterFromUrl(url, innerText) : null;
+                param.IsFilter = param.Filter != null ? await Data.ListFiltering.Instance.GetIsFilterAsync(param.Filter) : false;
+            }
+
+            return param;
+        }
+
+        List<KeyValuePair<string, Command<ContextMenuParam>>> ContextMenuItems { get; set; }
 
         void SetupContextMenu()
         {
-            ContextMenuItems = new List<KeyValuePair<string, DisableableCommand<ContextMenuParam>>>
+            ContextMenuItems = new List<KeyValuePair<string, Command<ContextMenuParam>>>
             {
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Open", ContextMenuOpen = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Open", new Command<ContextMenuParam>((param) =>
                 {
                     Navigate(param.Uri);
-                })),
+                },
+                (param) => param?.Uri != null)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Open and Add", ContextMenuOpenAdd = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Open and Add", new Command<ContextMenuParam>((param) =>
                 {
                     AddToReadingList(param.Uri.AbsoluteUri);
                     Navigate(param.Uri);
-                })),
+                },
+                (param) => param?.InteriorUrl == true && param?.InReadingList == false)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Add to Reading list", ContextMenuAdd = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Add to Reading list", new Command<ContextMenuParam>((param) =>
                 {
                     AddToReadingList(param.Uri.AbsoluteUri);
-                })),
+                },
+                (param) => param?.InteriorUrl == true && param?.InReadingList == false)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Remove from Reading list", ContextMenuRemove = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Remove from Reading list", new Command<ContextMenuParam>((param) =>
                 {
                     RemoveFromReadingList(param.Uri.AbsoluteUri);
-                })),
+                },
+                (param) => param?.InteriorUrl == true && param?.InReadingList == true)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Add as Listing Filter", ContextMenuAddFilter = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Set Up to Date", new Command<ContextMenuParam>((param) =>
+                {
+                    SetUpToDate(param.Uri);                    
+                },
+                (param) => param?.InteriorUrl == true && param?.Uri?.TryGetWorkId(out var workid) == true)),
+
+                new KeyValuePair<string, Command<ContextMenuParam>>("Add as Listing Filter", new Command<ContextMenuParam>((param) =>
                 {
                     Data.ListFiltering.Instance.AddFilterAsync(param.Filter);
-                })),
+                },
+                (param) => param?.Filter != null && param?.IsFilter == false)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Remove as Listing Filter", ContextMenuRemoveFilter = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Remove as Listing Filter", new Command<ContextMenuParam>((param) =>
                 {
                     Data.ListFiltering.Instance.RemoveFilterAsync(param.Filter);
-                })),
+                },
+                (param) => param?.Filter != null && param?.IsFilter == true)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Google Lookup", ContextMenuGoogleLookup = new DisableableCommand<ContextMenuParam>(async (param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("-", new Command<ContextMenuParam>((param) => { }, (param) => param?.Uri != null)),
+
+                new KeyValuePair<string, Command<ContextMenuParam>>("Google Lookup", new Command<ContextMenuParam>(async (param) =>
                 {
                     var uri = new Uri("https://google.com/search?q=" + System.Net.WebUtility.UrlEncode(param.Text.Trim()));
                     await Task.Delay(64);
                     LookupPane.View(uri);
-                })),
+                },
+                (param) => !String.IsNullOrWhiteSpace(param?.Text))),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Copy Link", ContextMenuCopyLink  = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Copy Link", new Command<ContextMenuParam>((param) =>
                 {
                     CopyToClipboard(param.Uri.AbsoluteUri, "url");
-                }) { IsEnabled = HaveClipboard }),
+                },
+                (param) => HaveClipboard && param?.Uri != null)),
 
-                new KeyValuePair<string, DisableableCommand<ContextMenuParam>>("Copy Text", ContextMenuCopyText = new DisableableCommand<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Copy Text", new Command<ContextMenuParam>((param) =>
                 {
                     CopyToClipboard(param.Text, "text");
-                }) { IsEnabled = HaveClipboard }),
-
-
+                },
+                (param) => HaveClipboard && !String.IsNullOrWhiteSpace(param?.Text))),
             };
         }
 
@@ -394,6 +419,19 @@ namespace Ao3TrackReader
         public void OnResume()
         {
             App.Database.DeleteVariable("Sleep:URI");
+        }
+
+        public async void SetUpToDate(Uri uri)
+        {
+            var chapters = await Ao3SiteDataLookup.LookupChapters(uri);
+            if (!(chapters is null))
+            {
+                uri.TryGetWorkId(out var workid);
+                var details = chapters[chapters.Count - 1];
+                SetWorkChaptersAsync(new Dictionary<long, WorkChapter> {
+                    {workid, new WorkChapter { workid= workid, chapterid = details.Id, number = details.Number, seq = null, location = null } }
+                });
+            }
         }
 
         public async void NavigateToLast(long workid, bool fullwork)
