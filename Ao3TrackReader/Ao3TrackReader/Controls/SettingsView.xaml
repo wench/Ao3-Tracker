@@ -214,26 +214,22 @@ limitations under the License.
 
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Back Button"  HorizontalOptions="Start" />
-                            <local:DropDown local:SettingsView.DatabaseVariable="ToolbarBackBehaviour" ItemsSource="{StaticResource NavigateMode}"
-                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_ToolbarBackBehaviour }" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="ToolbarBackBehaviour" ItemsSource="{StaticResource NavigateMode}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Forward Button" HorizontalOptions="Start" />
-                            <local:DropDown local:SettingsView.DatabaseVariable="ToolbarForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" 
-                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_ToolbarForwardBehaviour }" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="ToolbarForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Swipe Right"  HorizontalOptions="Start" />
-                            <local:DropDown local:SettingsView.DatabaseVariable="SwipeBackBehaviour" ItemsSource="{StaticResource NavigateMode}" 
-                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_SwipeBackBehaviour }" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="SwipeBackBehaviour" ItemsSource="{StaticResource NavigateMode}" />
                         </StackLayout>
                         
                         <StackLayout Style="{StaticResource Setting}">
                             <Label Text="Swipe Left"  HorizontalOptions="Start" />
-                            <local:DropDown local:SettingsView.DatabaseVariable="SwipeForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" 
-                                            local:SettingsView.DatabaseVariableDefault="{x:Static a:WebViewPage.str_def_SwipeForwardBehaviour }" />
+                            <local:DropDown local:SettingsView.DatabaseVariable="SwipeForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" />
                         </StackLayout>
                     </StackLayout>
 
@@ -316,8 +312,7 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Only show General and Teen rated content" HorizontalOptions="StartAndExpand" />
-                                <Switch local:SettingsView.DatabaseVariable="ListFiltering.OnlyGeneralTeen" HorizontalOptions="EndAndExpand" 
-                                        local:SettingsView.DatabaseVariableDefault="{x:Static a:ListFilteringSettings.str_def_onlyGeneralTeen }"/>
+                                <Switch local:SettingsView.DatabaseVariable="ListFiltering.OnlyGeneralTeen" HorizontalOptions="EndAndExpand" />
                             </StackLayout>
                         </StackLayout>
                         
@@ -369,8 +364,7 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingVert}">
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="Select the Application Theme" HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="Theme" ItemsSource="{StaticResource Themes}"
-                                                local:SettingsView.DatabaseVariableDefault="light" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="Theme" ItemsSource="{StaticResource Themes}" />
                             </StackLayout>
                             <Label Text="You must restart the app to apply a new theme" Style="{StaticResource Remark}" />
                         </StackLayout>

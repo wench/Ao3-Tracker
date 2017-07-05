@@ -61,8 +61,8 @@ namespace Ao3TrackReader
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
                 var path = Path.Combine(documentsPath, sqliteFilename);
 #else
-				// WinPhone
-				var path = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, sqliteFilename);;
+                // WinPhone
+                var path = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, sqliteFilename); ;
 #endif
 #endif
                 return path;
@@ -132,7 +132,7 @@ namespace Ao3TrackReader
                 return (from i in database.Table<Work>() select i);
             }
         }
-        
+
         public Work GetItem(long id)
         {
             lock (locker)
@@ -207,7 +207,7 @@ namespace Ao3TrackReader
                 return database.Delete<Work>(id);
             }
         }
-
+        #region Variables
         public class VariableEventArgs : EventArgs
         {
             public string VarName { get; set; }
@@ -252,19 +252,41 @@ namespace Ao3TrackReader
             }
         }
 
+        private Dictionary<string, object> variableDefaults = new Dictionary<string, object> {
+            { "ToolbarBackBehaviour", WebViewPage.def_ToolbarBackBehaviour },
+            { "ToolbarForwardBehaviour", WebViewPage.def_ToolbarForwardBehaviour },
+            { "SwipeBackBehaviour", WebViewPage.def_SwipeBackBehaviour },
+            { "SwipeForwardBehaviour", WebViewPage.def_SwipeForwardBehaviour },
+            { "ListFiltering.OnlyGeneralTeen", ListFilteringSettings.def_onlyGeneralTeen },
+            { "ListFiltering.HideWorks", false },
+            { "Theme", "light" },
+            { "LogFontSizeUI", 0 },
+            { "UnitConvOptions.temp", UnitConvSetting.None },
+            { "UnitConvOptions.dist", UnitConvSetting.None },
+            { "UnitConvOptions.volume", UnitConvSetting.None },
+            { "UnitConvOptions.weight", UnitConvSetting.None },
+            { "TagOptions.showCatTags", false },
+            { "TagOptions.showWIPTags", false },
+            { "TagOptions.showRatingTags", false },
+            { "ReadingList.showTagsDefault", false },
+            { "ReadingList.showCompleteDefault", false }
+
+        };
+
         public string GetVariable(string name)
         {
             lock (locker)
             {
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (!(row is null))
+                if (!(row?.value is null))
                 {
                     return row.value;
                 }
-                else
+                else if (variableDefaults.TryGetValue(name, out var def))
                 {
-                    return null;
+                    return def?.ToString();
                 }
+                return null;
             }
         }
 
@@ -292,12 +314,20 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var row = database.Table<Variable>().FirstOrDefault(x => x.name == name);
-                if (!(row is null))
+                if (!(row?.value is null))
                 {
-                    
+
                     if (tryparse(row.value, out result))
                         return true;
 
+                }
+                else if (variableDefaults.TryGetValue(name, out var def))
+                {
+                    if (def is T res)
+                    {
+                        result = res;
+                        return true;
+                    }
                 }
                 result = onFailure;
                 return false;
@@ -326,6 +356,14 @@ namespace Ao3TrackReader
                         return true;
                     }
                 }
+                if (variableDefaults.TryGetValue(name, out var def))
+                {
+                    if (def is T res)
+                    {
+                        result = res;
+                        return true;
+                    }
+                }
                 result = onFailure;
                 return false;
             }
@@ -335,9 +373,9 @@ namespace Ao3TrackReader
         {
             if (string.IsNullOrEmpty(newname)) newname = name;
 
-            if (TryGetVariable(name,tryparse, out var value))
+            if (TryGetVariable(name, tryparse, out var value))
             {
-                if (map.TryGetValue(value,out var newvalue))
+                if (map.TryGetValue(value, out var newvalue))
                 {
                     SaveVariable(newname, newvalue);
                 }
@@ -391,6 +429,8 @@ namespace Ao3TrackReader
                 if (variableEvents.TryGetValue(name, out var varEvents)) varEvents.OnDeleted(this, name);
             }
         }
+
+        #endregion
 
         public string GetTag(int id)
         {
@@ -507,7 +547,6 @@ namespace Ao3TrackReader
             }
 
         }
-
         #region ReadingList
         public CachedTimestampedTable<ReadingList, string, Ao3TrackDatabase> ReadingListCached { get; }
 

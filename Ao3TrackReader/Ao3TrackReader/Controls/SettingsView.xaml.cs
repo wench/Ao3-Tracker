@@ -42,19 +42,6 @@ namespace Ao3TrackReader.Controls
             view.SetValue(DatabaseVariableProperty, value);
         }
 
-        public static readonly BindableProperty DatabaseVariableDefaultProperty =
-          BindableProperty.CreateAttached("DatabaseVariableDefault", typeof(string), typeof(SettingsView), null);
-
-        public static string GetDatabaseVariableDefault(Element view)
-        {
-            return (string)view.GetValue(DatabaseVariableDefaultProperty);
-        }
-
-        public static void SetDatabaseVariableDefault(Element view, string value)
-        {
-            view.SetValue(DatabaseVariableDefaultProperty, value);
-        }
-
         bool isCreateUser;
 
         public SettingsView()
@@ -355,10 +342,7 @@ namespace Ao3TrackReader.Controls
 
             if (elem is Switch sw)
             {
-                if (!App.Database.TryGetVariable(varname, bool.TryParse, out bool b))
-                {
-                    bool.TryParse(GetDatabaseVariableDefault(elem), out b);
-                }
+                App.Database.TryGetVariable(varname, bool.TryParse, out bool b);
                 sw.IsToggled = b;
             }
             else if (elem is DropDown dropdown)
@@ -366,7 +350,6 @@ namespace Ao3TrackReader.Controls
                 if (dropdown.ItemsSource is IKeyedItemList itemlist)
                 {
                     string str = App.Database.GetVariable(varname);
-                    if (str == null) str = GetDatabaseVariableDefault(elem);
                     IKeyedItem item = itemlist.Lookup(str);
                     dropdown.SelectedItem = item;
                 }

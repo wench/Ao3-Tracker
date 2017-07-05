@@ -907,16 +907,16 @@ namespace Ao3TrackReader
         void InitNavBehav()
         {
             App.Database.GetVariableEvents("ToolbarBackBehaviour").Updated += NavBehavDbVar_Updated;
-            App.Database.TryGetVariable("ToolbarBackBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarBackBehaviour, def_ToolbarBackBehaviour);
+            App.Database.TryGetVariable("ToolbarBackBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarBackBehaviour);
 
             App.Database.GetVariableEvents("ToolbarForwardBehaviour").Updated += NavBehavDbVar_Updated;
-            App.Database.TryGetVariable("ToolbarForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarForwardBehaviour, def_ToolbarForwardBehaviour);
+            App.Database.TryGetVariable("ToolbarForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out ToolbarForwardBehaviour);
 
             App.Database.GetVariableEvents("SwipeBackBehaviour").Updated += NavBehavDbVar_Updated;
-            App.Database.TryGetVariable("SwipeBackBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeBackBehaviour, def_SwipeBackBehaviour);
+            App.Database.TryGetVariable("SwipeBackBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeBackBehaviour);
 
             App.Database.GetVariableEvents("SwipeForwardBehaviour").Updated += NavBehavDbVar_Updated;
-            App.Database.TryGetVariable("SwipeForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeForwardBehaviour, def_SwipeForwardBehaviour);
+            App.Database.TryGetVariable("SwipeForwardBehaviour", Enum.TryParse<NavigateBehaviour>, out SwipeForwardBehaviour);
         }
 
         private void NavBehavDbVar_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
@@ -944,8 +944,7 @@ namespace Ao3TrackReader
             }
         }
 
-        private const NavigateBehaviour def_ToolbarBackBehaviour = NavigateBehaviour.History;
-        public static string str_def_ToolbarBackBehaviour => def_ToolbarBackBehaviour.ToString();
+        public const NavigateBehaviour def_ToolbarBackBehaviour = NavigateBehaviour.History;
 
         private NavigateBehaviour ToolbarBackBehaviour = def_ToolbarBackBehaviour;
         public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
@@ -954,8 +953,7 @@ namespace Ao3TrackReader
             GoBack(ToolbarBackBehaviour);
         }
 
-        private const NavigateBehaviour def_ToolbarForwardBehaviour = NavigateBehaviour.HistoryThenPage;
-        public static string str_def_ToolbarForwardBehaviour => def_ToolbarForwardBehaviour.ToString();
+        public const NavigateBehaviour def_ToolbarForwardBehaviour = NavigateBehaviour.HistoryThenPage;
 
         private NavigateBehaviour ToolbarForwardBehaviour = def_ToolbarForwardBehaviour;
         public bool ToolbarCanGoForward => CanGoForward(ToolbarForwardBehaviour);
@@ -964,8 +962,7 @@ namespace Ao3TrackReader
             GoForward(ToolbarForwardBehaviour);
         }
 
-        private const NavigateBehaviour def_SwipeBackBehaviour = NavigateBehaviour.History;
-        public static string str_def_SwipeBackBehaviour => def_SwipeBackBehaviour.ToString();
+        public const NavigateBehaviour def_SwipeBackBehaviour = NavigateBehaviour.History;
 
         private NavigateBehaviour SwipeBackBehaviour = def_SwipeBackBehaviour;
         public bool SwipeCanGoBack => CanGoBack(SwipeBackBehaviour);
@@ -974,8 +971,7 @@ namespace Ao3TrackReader
             GoBack(SwipeBackBehaviour);
         }
 
-        private const NavigateBehaviour def_SwipeForwardBehaviour = NavigateBehaviour.HistoryThenPage;
-        public static string str_def_SwipeForwardBehaviour => def_SwipeForwardBehaviour.ToString();
+        public const NavigateBehaviour def_SwipeForwardBehaviour = NavigateBehaviour.HistoryThenPage;
 
         private NavigateBehaviour SwipeForwardBehaviour = def_SwipeForwardBehaviour;
         public bool SwipeCanGoForward => CanGoForward(SwipeForwardBehaviour);
@@ -1460,11 +1456,11 @@ namespace Ao3TrackReader
             settings.tags.showRatingTags = b;
 
             App.Database.GetVariableEvents("ListFiltering.HideWorks").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out b, false);
+            App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out b);
             settings.listFiltering.hideFilteredWorks = b;
 
             App.Database.GetVariableEvents("ListFiltering.OnlyGeneralTeen").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("ListFiltering.OnlyGeneralTeen", bool.TryParse, out b, ListFilteringSettings.def_onlyGeneralTeen);
+            App.Database.TryGetVariable("ListFiltering.OnlyGeneralTeen", bool.TryParse, out b);
             settings.listFiltering.onlyGeneralTeen = b;            
         }
 

@@ -27,7 +27,7 @@ namespace Ao3TrackReader.Resources
         public ResourceDictionary()
         {
             App.Database.GetVariableEvents("LogFontSizeUI").Updated += ResourceDictionary_Updated;
-            App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI, 0);
+            App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI);
             UpdateFontsize(LogFontSizeUI);
 
 #if !__WINDOWS__
@@ -55,12 +55,13 @@ namespace Ao3TrackReader.Resources
 #endif
 
             var sets = new Dictionary<string, BaseColorSet>();
-            foreach (var cat in typeof(Colors).GetProperties(BindingFlags.Public | BindingFlags.Static))
+            foreach (var cat in typeof(Colors).GetRuntimeProperties())
             {
-                ColorSet set = (ColorSet)cat.GetValue(null);
+                ColorSet set = cat.GetValue(null) as ColorSet;
+                if (set == null) continue;
                 sets.Add(cat.Name, set);
 
-                foreach (var prop in set.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                foreach (var prop in set.GetType().GetRuntimeProperties())
                 {
                     if (prop.GetValue(set) is BaseColorSet subset) sets.Add(cat.Name + prop.Name, subset);
                 }
@@ -74,9 +75,10 @@ namespace Ao3TrackReader.Resources
 
             foreach (var kp in sets)
             {
-                foreach (var prop in kp.Value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+                foreach (var prop in kp.Value.GetType().GetRuntimeProperties())
                 {
                     object o = prop.GetValue(kp.Value);
+                    if (o is null) continue;
                     Color color;
                     if (o.GetType() == typeof(ColorSet))
                     {
@@ -99,9 +101,10 @@ namespace Ao3TrackReader.Resources
 
             }
 
-            foreach (var prop in typeof(Icons).GetProperties(BindingFlags.Public | BindingFlags.Static))
+            foreach (var prop in typeof(Icons).GetRuntimeProperties())
             {
-                var icon = (string)prop.GetValue(null);
+                var icon = prop.GetValue(null) as string;
+                if (icon is null) continue;
                 Add(prop.Name + "Icon", icon);
 #if __WINDOWS__
                 md[prop.Name + "Icon"] = icon;

@@ -42,7 +42,6 @@ namespace Ao3TrackReader
 #else
         public const bool def_onlyGeneralTeen = true;
 #endif
-        public static string str_def_onlyGeneralTeen => def_onlyGeneralTeen.ToString();
     }
 
     public sealed class Settings : ISettings
