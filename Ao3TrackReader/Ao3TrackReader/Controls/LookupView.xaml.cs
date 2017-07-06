@@ -23,8 +23,9 @@ namespace Ao3TrackReader.Controls
             if (newValue == false) WebViewHolder.Content = null;
         }
 
-        public void View(Uri uri)
+        public void View(Uri uri, string title)
         {
+            Title.Text = title;
             IsOnScreen = true;
             WebViewHolder.Content = new WebView();
             WebViewHolder.Content.Focus();

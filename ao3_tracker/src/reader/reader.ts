@@ -89,19 +89,28 @@ namespace Ao3Track {
 
     Settings = Ao3Track.Helper.settings;
 
-    function contextMenuHandler(ev: MouseEvent) {
+    export function contextMenuForAnchor(evtarget : EventTarget, clientX: number, clientY: number)
+    {
         let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
-        for (let target = ev.target as (HTMLElement | null); target && target !== document.body; target = target.parentElement) {
+        for (let target = evtarget as (HTMLElement | null); target && target !== document.body; target = target.parentElement) {
             let a = target as HTMLAnchorElement;
             if (target.tagName === "A" && a.href && a.href !== "") {
-                ev.preventDefault();
-                ev.stopPropagation();
-                Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, a.href, a.innerText);
-                return;
+                Ao3Track.Helper.showContextMenu(clientX * clientToDev, clientY * clientToDev, a.href, a.innerText);
+                return true;
             }
         }
+    }
 
-        let target = ev.target as HTMLElement;
+    function contextMenuHandler(ev: MouseEvent) {
+        console.log(ev);
+        if (contextMenuForAnchor(ev.target, ev.clientX, ev.clientY))
+        {
+            ev.preventDefault();
+            ev.stopPropagation();
+            return;
+        }
+
+        let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
 
         let selection = window.getSelection();
         for (let i = 0; i < selection.rangeCount; i++) {
@@ -184,7 +193,7 @@ namespace Ao3Track {
 
 
     }
-    addEventListener.call(window, "contextmenu", contextMenuHandler);
+    addEventListener.window("contextmenu", contextMenuHandler);
 
     export function contextMenuForSelection()
     {

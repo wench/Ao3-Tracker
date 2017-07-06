@@ -387,7 +387,7 @@ namespace Ao3TrackReader
 
                 new KeyValuePair<string, Command<ContextMenuParam>>("-", new Command<ContextMenuParam>((param) => { }, (param) => param?.Uri != null)),
 
-                new KeyValuePair<string, Command<ContextMenuParam>>("Google Lookup", new Command<ContextMenuParam>((param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Google Search", new Command<ContextMenuParam>((param) =>
                 {
                     GoogleSearch(param.Text);
                 },
@@ -434,7 +434,7 @@ namespace Ao3TrackReader
             if (string.IsNullOrWhiteSpace(phrase)) return;
             var uri = new Uri("https://google.com/search?q=" + System.Net.WebUtility.UrlEncode(phrase.Trim()));
             await Task.Delay(64);
-            LookupPane.View(uri);
+            LookupPane.View(uri, "Google Search");
         }
 
         public async void SetUpToDate(Uri uri)

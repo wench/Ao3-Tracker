@@ -65,9 +65,18 @@ namespace Ao3TrackReader
 
                 var actionMode = base.StartActionMode(callback);
                 var menu = actionMode.Menu;
-                //var name = Resources.GetResourceName(menu.GetItem(3).ItemId);
+                /*int lastid = 0;
+                for (int i = 0; i < menu.Size(); i++)
+                {
+                    var item = menu.GetItem(i);
+                    var title = item.TitleFormatted.ToString();
+                    lastid = item.ItemId;
+                }
+                var name = Resources.GetResourceName(lastid);*/
+
                 var id = Resources.GetIdentifier("select_action_menu_web_search", "id", "com.android.webview");
                 if (id == 0) id = Resources.GetIdentifier("webviewchromium_select_action_menu_web_search", "id", "android");
+                if (id == 0) id = Resources.GetIdentifier("websearch", "id", "android");
                 if (id != 0)
                 {
                     var search = menu.FindItem(id);
@@ -79,7 +88,8 @@ namespace Ao3TrackReader
 
             bool IMenuItemOnMenuItemClickListener.OnMenuItemClick(IMenuItem item)
             {
-                EvaluateJavascript("window.getSelection().toString()", new ValueCallback((value) => {
+                wvp.DoOnMainThreadAsync(async() => {
+                    string value = await wvp.EvaluateJavascriptAsync("window.getSelection().toString()");
                     ClearFocus();
                     try
                     {
@@ -88,9 +98,8 @@ namespace Ao3TrackReader
                     }
                     catch
                     {
-                        return;
                     }
-                }));
+                });
                 return true;
             }
         }
@@ -146,7 +155,8 @@ namespace Ao3TrackReader
                 var kvp = ContextMenuItems[i];
                 if (kvp.Key == "-")
                 {
-                    menu.Add(Menu.None, i, i, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
+                    // Looks better without
+                    //menu.Add(Menu.None, i, i, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
                 }
                 else
                 {
@@ -444,6 +454,11 @@ namespace Ao3TrackReader
             public override void OnConsoleMessage(string message, int lineNumber, string sourceID)
             {
                 return;
+            }
+
+            public override void OnReceivedTitle(WebView view, string title)
+            {
+                base.OnReceivedTitle(view, title);
             }
 
             bool loaded = false;

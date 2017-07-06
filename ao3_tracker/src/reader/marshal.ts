@@ -161,11 +161,13 @@ namespace Ao3Track {
                 }
             }
 
-            window.addEventListener("error", (event) => {
-                let ev = event as ErrorEvent;
-                let error = ev.error as Error;
-                Ao3Track.Helper.logError(error.name, error.message, ev.filename, ev.lineno, ev.colno, error.stack || "");
-            });
+
+            var old_onerror = window.onerror;
+            window.onerror =(messageOrEvent, source, lineno, colno, error) => {
+                old_onerror(messageOrEvent,source,lineno,colno,error);
+                if (!error) error = { message: messageOrEvent.toString(), name: "error", }
+                Ao3Track.Helper.logError(error.name, error.message, source||"", lineno||0, colno||0, error.stack || "");
+            };
 
             Ao3Track.Helper.init();
         }

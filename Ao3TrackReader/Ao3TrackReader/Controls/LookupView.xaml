@@ -21,7 +21,7 @@ limitations under the License.
     <ContentView.Content>
         <StackLayout>
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
-                <Label Text="Lookup" Style="{StaticResource PaneName}" />
+                <Label Text="Lookup" Style="{StaticResource PaneName}" x:Name="Title" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" Style="{StaticResource ImageButton}" />
             </StackLayout>
 

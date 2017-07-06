@@ -33,6 +33,17 @@ namespace Ao3Track {
         let velocity : number = 0;
         let manualContextMenu = false;
 
+
+        namespace performance {
+            export function now() {
+                if (window.performance.now) return window.performance.now();
+                else return Date.now();
+            }
+        }
+
+        if (!window.performance.now) 
+            manualContextMenu = true;
+
         function swipeCleanup(keepOffset?: boolean) {
             Helper.stopWebViewDragAccelerate();
             if (!keepOffset) Ao3Track.Helper.leftOffset = 0.0;
@@ -99,7 +110,7 @@ namespace Ao3Track {
             return true;
         }
 
-        function swipeEnd() : boolean
+        function swipeEnd(clientX : number, clientY: number) : boolean
         {
             let offset = lastTouchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);            
@@ -109,18 +120,10 @@ namespace Ao3Track {
             let offsetCat = swipeOffsetChanged(offset, offsetY);
             if (offsetCat === 0) {
                 if (manualContextMenu && Math.abs(offset) < 8 && offsetY < 8 && (performance.now() - startTime) > 1000) {
-                    let devToClient = window.innerWidth / Ao3Track.Helper.deviceWidth;
-                    let ev = new MouseEvent("contextmenu",{
-                        clientX: (lastTouchX * devToClient) - window.screenLeft,
-                        clientY: (lastTouchY * devToClient) - window.screenTop,
-                        bubbles: true,
-                        cancelable: true,
-                        button: 0   
-                    });
-                    let el = document.elementFromPoint(ev.clientX,ev.clientY);
+                    let el = document.elementFromPoint(clientX,clientY);
                     if (el) {
-                        el.dispatchEvent(ev);
-                        if (ev.defaultPrevented) return true;
+                        if (contextMenuForAnchor(el,clientX,clientY)) 
+                            return true;
                     }
                 }
                 swipeCleanup();
@@ -249,7 +252,7 @@ namespace Ao3Track {
                 return;
             }
 
-            if (swipeEnd()) {
+            if (swipeEnd(event.clientX, event.clientY)) {
                 event.preventDefault();
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
@@ -261,7 +264,7 @@ namespace Ao3Track {
             }
         }
         function pointerCancelHandler(event: PointerEvent) {
-            if (swipeEnd()) {
+            if (swipeEnd(event.clientX, event.clientY)) {
                 event.preventDefault();
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
@@ -308,7 +311,7 @@ namespace Ao3Track {
                 swipeCleanup();
                 return;
             }
-            if (swipeEnd()) {
+            if (swipeEnd(touch.clientX, touch.clientY)) {
                 event.preventDefault();
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
@@ -320,7 +323,9 @@ namespace Ao3Track {
             }
         }
         function touchCancelHandler(event: TouchEvent) {
-            if (swipeEnd()) {
+            let touch = event.changedTouches.item(0) || {clientX: Number.NEGATIVE_INFINITY, clientY: Number.NEGATIVE_INFINITY};
+
+            if (swipeEnd(touch.clientX, touch.clientY)) {
                 event.preventDefault();
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {

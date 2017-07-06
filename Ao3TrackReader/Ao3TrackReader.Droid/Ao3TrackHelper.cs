@@ -78,7 +78,7 @@ namespace Ao3TrackReader.Helper
             var def = new Tuple<string, TaskCompletionSource<string>>(code, cs);
             evals.Add(++evalindex, def);
 
-            if (cs != null) return string.Format("javascript:Ao3TrackHelperNative.setEvalResult({0}, eval(Ao3TrackHelperNative.getEvalCode({0})))", evalindex);
+            if (cs != null) return string.Format("javascript:try{{Ao3TrackHelperNative.setEvalResult({0}, JSON.stringify(eval(Ao3TrackHelperNative.getEvalCode({0}))));}} catch(e) {{ Ao3TrackHelperNative.setEvalResult({0}, JSON.stringify({{exception:e, str:e.toString()}})); throw e;}}", evalindex);
             else return string.Format("javascript:eval(Ao3TrackHelperNative.getEvalCode({0}))", evalindex);
         }
 
