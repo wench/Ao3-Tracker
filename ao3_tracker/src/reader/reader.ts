@@ -112,7 +112,7 @@ namespace Ao3Track {
                 for (let j = 0; j < rects.length; j++) {
                     rect = rects.item(j);
                     if (rect.top <= ev.clientY && rect.bottom >= ev.clientY && rect.left <= ev.clientX && rect.right >= ev.clientX) {
-                        var str = selection.toString();
+                        let str = selection.toString();
                         ev.preventDefault();
                         ev.stopPropagation();
                         Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, "", str);
@@ -184,7 +184,28 @@ namespace Ao3Track {
 
 
     }
-    addEventListener.call(document.body, "contextmenu", contextMenuHandler);
+    addEventListener.call(window, "contextmenu", contextMenuHandler);
+
+    export function contextMenuForSelection()
+    {
+        let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
+        let selection = window.getSelection();
+        for(let r = 0; r < selection.rangeCount; r++)
+        {
+            let range = selection.getRangeAt(r);
+            let rects = range.getClientRects();
+
+            for (let cr = 0; cr < rects.length; cr++)
+            {
+                let rect = rects.item(cr);
+                var str = selection.toString();
+                Ao3Track.Helper.showContextMenu(rect.left * clientToDev, rect.top * clientToDev, "", str);
+                return true;
+            }
+        }
+        return false;
+    }
+
     Ao3Track.Helper.setCookies(document.cookie);
 
     // Page title handling

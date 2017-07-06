@@ -309,7 +309,7 @@ namespace Ao3TrackReader
             }
         }
 
-        class ContextMenuParam
+        public class ContextMenuParam
         {
             public Uri Uri { get; set; }
             public string Text { get; set; }
@@ -387,11 +387,9 @@ namespace Ao3TrackReader
 
                 new KeyValuePair<string, Command<ContextMenuParam>>("-", new Command<ContextMenuParam>((param) => { }, (param) => param?.Uri != null)),
 
-                new KeyValuePair<string, Command<ContextMenuParam>>("Google Lookup", new Command<ContextMenuParam>(async (param) =>
+                new KeyValuePair<string, Command<ContextMenuParam>>("Google Lookup", new Command<ContextMenuParam>((param) =>
                 {
-                    var uri = new Uri("https://google.com/search?q=" + System.Net.WebUtility.UrlEncode(param.Text.Trim()));
-                    await Task.Delay(64);
-                    LookupPane.View(uri);
+                    GoogleSearch(param.Text);
                 },
                 (param) => !String.IsNullOrWhiteSpace(param?.Text))),
 
@@ -429,6 +427,14 @@ namespace Ao3TrackReader
         public void OnResume()
         {
             App.Database.DeleteVariable("Sleep:URI");
+        }
+
+        public async void GoogleSearch(string phrase)
+        {
+            if (string.IsNullOrWhiteSpace(phrase)) return;
+            var uri = new Uri("https://google.com/search?q=" + System.Net.WebUtility.UrlEncode(phrase.Trim()));
+            await Task.Delay(64);
+            LookupPane.View(uri);
         }
 
         public async void SetUpToDate(Uri uri)

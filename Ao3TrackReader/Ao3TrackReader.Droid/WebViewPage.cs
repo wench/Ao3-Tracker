@@ -52,7 +52,51 @@ namespace Ao3TrackReader
             get { return Looper.MainLooper == Looper.MyLooper(); }
         }
 
-        WebView webView;
+        class MyWebView : Android.Webkit.WebView, IMenuItemOnMenuItemClickListener
+        {
+            WebViewPage wvp;
+
+            public MyWebView(Context context, WebViewPage wvp) : base(context) {
+                this.wvp = wvp;
+            }
+
+            public override ActionMode StartActionMode(ActionMode.ICallback callback)
+            {
+
+                var actionMode = base.StartActionMode(callback);
+                var menu = actionMode.Menu;
+                //var name = Resources.GetResourceName(menu.GetItem(3).ItemId);
+                var id = Resources.GetIdentifier("select_action_menu_web_search", "id", "com.android.webview");
+                if (id == 0) id = Resources.GetIdentifier("webviewchromium_select_action_menu_web_search", "id", "android");
+                if (id != 0)
+                {
+                    var search = menu.FindItem(id);
+                    search?.SetOnMenuItemClickListener(this);
+                }
+
+                return actionMode;
+            }
+
+            bool IMenuItemOnMenuItemClickListener.OnMenuItemClick(IMenuItem item)
+            {
+                EvaluateJavascript("window.getSelection().toString()", new ValueCallback((value) => {
+                    ClearFocus();
+                    try
+                    {
+                        value = Newtonsoft.Json.JsonConvert.DeserializeObject(value).ToString();
+                        wvp.GoogleSearch(value);
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                }));
+                return true;
+            }
+        }
+
+
+        MyWebView webView;
         WebClient webClient;
         Xamarin.Forms.View contextMenuPlaceholder;
 
@@ -62,7 +106,7 @@ namespace Ao3TrackReader
 
         public Xamarin.Forms.View CreateWebView()
         {
-            webView = new WebView(Forms.Context);
+            webView = new MyWebView(Forms.Context, this);
             webView.SetWebViewClient(webClient = new WebClient(this));
             webView.SetWebChromeClient(new ChromeClient(this));
             webView.Settings.AllowContentAccess = true;
@@ -95,15 +139,14 @@ namespace Ao3TrackReader
             Xamarin.Forms.AbsoluteLayout.SetLayoutFlags(contextMenuPlaceholder, AbsoluteLayoutFlags.None);
             helper = new Ao3TrackHelper(this);
 
-            contextMenu = new PopupMenu(Forms.Context, placeholder);
+            contextMenu = new ContextMenu(Forms.Context, placeholder);
             var menu = contextMenu.Menu;
-
             for (int i = 0; i < ContextMenuItems.Count; i++)
             {
                 var kvp = ContextMenuItems[i];
                 if (kvp.Key == "-")
                 {
-                    menu.Add(Menu.None, i, i, "-").SetEnabled(false);
+                    menu.Add(Menu.None, i, i, "\x23AF\x23AF\x23AF\x23AF").SetEnabled(false);
                 }
                 else
                 {
@@ -111,10 +154,9 @@ namespace Ao3TrackReader
                 }
             }
 
-            contextMenu.MenuItemClick += (s1, arg1) =>
+            contextMenu.MenuItemClick += (sender, arg) =>
             {
-                if (ContextMenuItems[arg1.Item.ItemId].Value != null)
-                    ContextMenuItems[arg1.Item.ItemId].Value.Execute(contextMenuUrl);
+                ContextMenuItems[arg.Item.ItemId].Value?.Execute(contextMenu.CommandParameter);
             };
 
             MainContent.Children.Add(contextMenuPlaceholder);
@@ -162,7 +204,7 @@ namespace Ao3TrackReader
             }
             else
             {
-                webView.LoadUrl(helper.GetEvalJavascriptUrl(code,cs));
+                webView.LoadUrl(helper.GetEvalJavascriptUrl(code, cs));
             }
             return await cs.Task;
         }
@@ -267,8 +309,16 @@ namespace Ao3TrackReader
             }
         }
 
-        Android.Widget.PopupMenu contextMenu;
-        string contextMenuUrl;
+        class ContextMenu : Android.Widget.PopupMenu
+        {
+            public ContextMenu(Context context, Android.Views.View anchor) : base(context, anchor) { }
+
+            public ContextMenuParam CommandParameter { get; set; }
+        }
+
+
+        ContextMenu contextMenu;
+
         public void HideContextMenu()
         {
             contextMenu.Dismiss();
@@ -279,15 +329,16 @@ namespace Ao3TrackReader
             HideContextMenu();
 
             Xamarin.Forms.AbsoluteLayout.SetLayoutBounds(contextMenuPlaceholder, new Rectangle(x* Width / webView.Width, y * Height / webView.Height, 0, 0));
-            var param = await GetContextMenuParamAsync(url, innerText);
+            contextMenu.CommandParameter = await GetContextMenuParamAsync(url, innerText);
 
             bool had = false;
+
             for (int i = 0; i < ContextMenuItems.Count; i++)
             {
                 if (ContextMenuItems[i].Value != null)
                 {
-                    bool vis = ContextMenuItems[i].Value.CanExecute(url);
-                    contextMenu.Menu.GetItem(i).SetVisible(vis);
+                    bool vis = ContextMenuItems[i].Value.CanExecute(contextMenu.CommandParameter);
+                    contextMenu.Menu.FindItem(i)?.SetVisible(vis);
                     if (vis) had = true;
                 }
             }
@@ -319,7 +370,7 @@ namespace Ao3TrackReader
                 }
             }
 
-            public override async void OnPageStarted(WebView view, string url, Bitmap favicon)
+            public override void OnPageStarted(WebView view, string url, Bitmap favicon)
             {
                 base.OnPageStarted(view, url, favicon);
 
@@ -328,7 +379,7 @@ namespace Ao3TrackReader
 
             }
 
-            public override async void OnPageCommitVisible(WebView view, string url)
+            public override void OnPageCommitVisible(WebView view, string url)
             {
                 base.OnPageCommitVisible(view, url);
             }
