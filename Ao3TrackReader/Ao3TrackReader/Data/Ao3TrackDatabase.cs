@@ -56,26 +56,17 @@ namespace Ao3TrackReader
 				string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
 				string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder
 				var path = Path.Combine(libraryPath, sqliteFilename);
-#else
-#if __ANDROID__
+#elif __ANDROID__
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
                 var path = Path.Combine(documentsPath, sqliteFilename);
-#else
+#elif __WINDOWS__
                 // WinPhone
                 var path = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, sqliteFilename); ;
-#endif
 #endif
                 return path;
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Tasky.DL.TaskDatabase"/> TaskDatabase. 
-        /// if the database doesn't exist, it will create the database and all the tables.
-        /// </summary>
-        /// <param name='path'>
-        /// Path.
-        /// </param>
         public Ao3TrackDatabase()
         {
             SQLitePCL.Batteries_V2.Init();

@@ -19,7 +19,7 @@ limitations under the License.
              xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
              x:Class="Ao3TrackReader.Controls.LookupView">
     <ContentView.Content>
-        <StackLayout>
+        <StackLayout Spacing="0">
             <StackLayout VerticalOptions="Start" Orientation="Horizontal">
                 <Label Text="Lookup" Style="{StaticResource PaneName}" x:Name="Title" />
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="EndAndExpand" Style="{StaticResource ImageButton}" />

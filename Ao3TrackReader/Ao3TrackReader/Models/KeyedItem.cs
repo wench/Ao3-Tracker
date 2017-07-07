@@ -113,10 +113,10 @@ namespace Ao3TrackReader.Models
                 {
                     return (TKey)(object)str;
                 }
-                methodTryParse = typeKey.GetMethod("TryParse", new[] { typeof(string), typeKey.MakeByRefType() });
+                methodTryParse = typeKey.GetRuntimeMethod("TryParse", new[] { typeof(string), typeKey.MakeByRefType() });
             }
 
-            if (str is null && typeInfoKey.IsClass || (typeInfoKey.IsGenericType && typeInfoKey.GetGenericTypeDefinition() == typeof(Nullable)))
+            if ((str is null) && typeInfoKey.IsClass || (typeInfoKey.IsGenericType && typeInfoKey.GetGenericTypeDefinition() == typeof(Nullable)))
                 return default(TKey);
 
             if (methodTryParse != null)
@@ -168,7 +168,7 @@ namespace Ao3TrackReader.Models
                 typeInfoKey = typeKey.GetTypeInfo();
             }
             if (methodTryParse == null && !typeInfoKey.IsEnum)
-                methodTryParse = typeKey.GetMethod("TryParse", new[] { typeof(string), typeKey.MakeByRefType() });
+                methodTryParse = typeKey.GetRuntimeMethod("TryParse", new[] { typeof(string), typeKey.MakeByRefType() });
 
             if (str is null) return null;
 

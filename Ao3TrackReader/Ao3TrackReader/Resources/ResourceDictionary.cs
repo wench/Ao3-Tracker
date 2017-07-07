@@ -122,17 +122,18 @@ namespace Ao3TrackReader.Resources
 
         public void UpdateFontsize(int LogFontSizeUI)
         {
-            this["HugeFontSize"] = 24.0 * Math.Pow(1.05, LogFontSizeUI);
-            this["LargeFontSize"] = 22.0 * Math.Pow(1.05, LogFontSizeUI);
-            this["MediumFontSize"] = 18.0 * Math.Pow(1.05, LogFontSizeUI);
-            this["MediumSmallFontSize"] = 16.0 * Math.Pow(1.05, LogFontSizeUI);
-            this["SmallFontSize"] = 14.0 * Math.Pow(1.05, LogFontSizeUI);
-            this["MicroFontSize"] = 11.0 * Math.Pow(1.05, LogFontSizeUI);
-            this["TinyFontSize"] = 10.0 * Math.Pow(1.05, LogFontSizeUI);
+            double multiplier = Math.Pow(1.05, LogFontSizeUI);
+            this["HugeFontSize"] = 24.0 * multiplier;
+            this["LargeFontSize"] = 22.0 * multiplier;
+            this["MediumFontSize"] = 18.0 * multiplier;
+            this["MediumSmallFontSize"] = 16.0 * multiplier;
+            this["SmallFontSize"] = 14.0 * multiplier;
+            this["MicroFontSize"] = 11.0 * multiplier;
+            this["TinyFontSize"] = 10.0 * multiplier;
 
             for (int i = 1; i <= 100; i++)
             {
-                double size = i * Math.Pow(1.05, LogFontSizeUI);
+                double size = i * multiplier;
                 this["Size_" + i] = size;
                 this["Size_" + i + "_Min"] = Math.Max(size, i);
             }

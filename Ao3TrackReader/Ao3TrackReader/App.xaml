@@ -32,9 +32,13 @@ limitations under the License.
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
             </Style>
-            <Style TargetType="Label" ApplyToDerivedTypes="True" x:Key="PaneName">
+            <Style TargetType="Label" x:Key="PaneName">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
-                <Setter Property="FontSize" Value="{DynamicResource HugeFontSize}" />
+                <Setter Property="FontSize" Value="{DynamicResource Size_24}" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
+                <Setter Property="LineBreakMode" Value="MiddleTruncation" />
+                <Setter Property="Margin" Value="4" />
             </Style>
             <Style TargetType="local:Button">
                 <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
