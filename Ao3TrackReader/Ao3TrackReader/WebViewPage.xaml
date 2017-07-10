@@ -31,7 +31,7 @@ limitations under the License.
                 <local:ToolbarItem Text="Refresh"             Icon="{StaticResource RefreshIcon}"   Command="{Binding RefreshCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>Reload the currently displayed page from the server.</local:ToolbarItem.Description>
                 </local:ToolbarItem>
-                <local:ToolbarItem Text="Jump"                Icon="{StaticResource RedoIcon}"      Command="{Binding JumpCommand,Source={x:Reference root}}" >
+                <local:ToolbarItem Text="Jump"                Icon="{StaticResource GotoIcon}"      Command="{Binding JumpCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
                         <html:Span Pad="true">Jump to the <html:Em>Read To Location</html:Em> of this work. This button is only enabled when viewing a work.</html:Span>
                     </local:ToolbarItem.Description>
@@ -58,7 +58,16 @@ limitations under the License.
                 <local:ToolbarItem Text="Force set location"  Icon="{StaticResource ForceLocIcon}"  Command="{Binding ForceSetLocationCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
                         <html:Span Pad="true">
-                            Force the <html:Em>Read To Location</html:Em> of the currently viewed work to be set to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the <html:Em>Read To Location.</html:Em>
+                            Force the
+                            <html:Em>Read To Location</html:Em> of the currently viewed work to be set to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the
+                            <html:Em>Read To Location.</html:Em>
+                        </html:Span>
+                    </local:ToolbarItem.Description>
+                </local:ToolbarItem>
+                <local:ToolbarItem Text="Set up to date"  Icon="{StaticResource SetUpToDateIcon}"  Command="{Binding SetUpToDateCommand,Source={x:Reference root}}" >
+                    <local:ToolbarItem.Description>
+                        <html:Span Pad="true">
+                            Set the <html:Em>Read To Location</html:Em> of the currently viewed work to be end of the last chapter of the work.
                         </html:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>

@@ -207,6 +207,7 @@ namespace Ao3TrackReader
         public DisableableCommand BackCommand { get; private set; }
         public DisableableCommand SyncCommand { get; private set; }
         public DisableableCommand ForceSetLocationCommand { get; private set; }
+        public DisableableCommand SetUpToDateCommand { get; private set; }        
         public DisableableCommand RefreshCommand { get; private set; }
         public DisableableCommand ReadingListCommand { get; private set; }
         public DisableableCommand AddRemoveReadingListCommand { get; private set; }
@@ -223,6 +224,7 @@ namespace Ao3TrackReader
             FontIncreaseCommand = new DisableableCommand(() => LogFontSize++);
             FontDecreaseCommand = new DisableableCommand(() => LogFontSize--);
             ForceSetLocationCommand = new DisableableCommand(ForceSetLocation);
+            SetUpToDateCommand = new DisableableCommand(() => SetUpToDate(CurrentUri));
 
             SyncCommand = new DisableableCommand(() => { App.Storage.DoSyncAsync(true); ReadingList.SyncToServerAsync(false).ConfigureAwait(false); }, !App.Storage.IsSyncing && App.Storage.CanSync);
             App.Storage.BeginSyncEvent += (sender, e) => DoOnMainThreadAsync(() => { SyncCommand.IsEnabled = false; }).ConfigureAwait(false);
@@ -1337,6 +1339,7 @@ namespace Ao3TrackReader
             currentLocation = null;
             currentSavedLocation = null;
             ForceSetLocationCommand.IsEnabled = false;
+            SetUpToDateCommand.IsEnabled = Ao3SiteDataLookup.TryGetWorkId(uri, out var workid);
             helper?.Reset();
             return false;
         }

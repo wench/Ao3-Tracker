@@ -233,6 +233,18 @@
     <Content Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Assets\forward_light.scale-200.png</Link>
     </Content>
+    <Content Include="..\Icons\goto_dark.png">
+      <Link>Assets\goto_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\goto_dark.scale-200.png">
+      <Link>Assets\goto_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\goto_light.png">
+      <Link>Assets\goto_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\goto_light.scale-200.png">
+      <Link>Assets\goto_light.scale-200.png</Link>
+    </Content>
     <Content Include="..\Icons\help_dark.png">
       <Link>Assets\help_dark.png</Link>
     </Content>
@@ -304,6 +316,18 @@
     </Content>
     <Content Include="..\Icons\200\settings_light.scale-200.png">
       <Link>Assets\settings_light.scale-200.png</Link>
+    </Content>    
+    <Content Include="..\Icons\setuptodate_dark.png">
+      <Link>Assets\setuptodate_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\setuptodate_dark.scale-200.png">
+      <Link>Assets\setuptodate_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="..\Icons\setuptodate_light.png">
+      <Link>Assets\setuptodate_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\setuptodate_light.scale-200.png">
+      <Link>Assets\setuptodate_light.scale-200.png</Link>
     </Content>
     <Content Include="..\Icons\sync_dark.png">
       <Link>Assets\sync_dark.png</Link>

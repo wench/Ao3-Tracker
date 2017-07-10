@@ -142,6 +142,12 @@
     <Content Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Assets\forward_light.png</Link>
     </Content>
+    <Content Include="..\Icons\200\goto_dark.scale-200.png">
+      <Link>Assets\goto_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\goto_light.scale-200.png">
+      <Link>Assets\goto_light.png</Link>
+    </Content>
     <Content Include="..\Icons\200\help_dark.scale-200.png">
       <Link>Assets\help_dark.png</Link>
     </Content>
@@ -171,6 +177,12 @@
     </Content>
     <Content Include="..\Icons\200\rename_light.scale-200.png">
       <Link>Assets\rename_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\setuptodate_dark.scale-200.png">
+      <Link>Assets\setuptodate_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\setuptodate_light.scale-200.png">
+      <Link>Assets\setuptodate_light.png</Link>
     </Content>
     <Content Include="..\Icons\200\settings_dark.scale-200.png">
       <Link>Assets\settings_dark.png</Link>

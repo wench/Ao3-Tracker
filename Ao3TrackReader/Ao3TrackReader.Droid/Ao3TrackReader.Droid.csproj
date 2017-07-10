@@ -336,6 +336,18 @@
     <AndroidResource Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Resources\drawable-hdpi\forward_light.png</Link>
     </AndroidResource>
+    <AndroidResource Include="..\Icons\goto_dark.png">
+      <Link>Resources\drawable\goto_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\goto_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\goto_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\goto_light.png">
+      <Link>Resources\drawable\goto_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\goto_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\goto_light.png</Link>
+    </AndroidResource>
     <AndroidResource Include="..\Icons\help_dark.png">
       <Link>Resources\drawable\help_dark.png</Link>
     </AndroidResource>
@@ -395,6 +407,18 @@
     </AndroidResource>
     <AndroidResource Include="..\Icons\200\rename_light.scale-200.png">
       <Link>Resources\drawable-hdpi\rename_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\setuptodate_dark.png">
+      <Link>Resources\drawable\setuptodate_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\setuptodate_dark.scale-200.png">
+      <Link>Resources\drawable-hdpi\setuptodate_dark.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\setuptodate_light.png">
+      <Link>Resources\drawable\setuptodate_light.png</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\Icons\200\setuptodate_light.scale-200.png">
+      <Link>Resources\drawable-hdpi\setuptodate_light.png</Link>
     </AndroidResource>
     <AndroidResource Include="..\Icons\settings_dark.png">
       <Link>Resources\drawable\settings_dark.png</Link>

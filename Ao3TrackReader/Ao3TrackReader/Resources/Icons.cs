@@ -110,5 +110,13 @@ namespace Ao3TrackReader.Resources
         {
             get { return App.PlatformIcon("taphold") + ".png"; }
         }
+        public static string Goto
+        {
+            get { return App.PlatformIcon("goto") + ".png"; }
+        }
+        public static string SetUpToDate
+        {
+            get { return App.PlatformIcon("setuptodate") + ".png"; }
+        }
     }
 }

@@ -258,6 +258,18 @@
     <BundleResource Include="..\Icons\200\forward_light.scale-200.png">
       <Link>Resources\forward_light%402x.png</Link>
     </BundleResource>
+    <BundleResource Include="..\Icons\goto_dark.png">
+      <Link>Resources\goto_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\goto_dark.scale-200.png">
+      <Link>Resources\goto_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\goto_light.png">
+      <Link>Resources\goto_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\goto_light.scale-200.png">
+      <Link>Resources\goto_light%402x.png</Link>
+    </BundleResource>
     <BundleResource Include="..\Icons\help_dark.png">
       <Link>Resources\help_dark.png</Link>
     </BundleResource>
@@ -317,6 +329,18 @@
     </BundleResource>
     <BundleResource Include="..\Icons\200\rename_light.scale-200.png">
       <Link>Resources\rename_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\setuptodate_dark.png">
+      <Link>Resources\setuptodate_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\setuptodate_dark.scale-200.png">
+      <Link>Resources\setuptodate_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\setuptodate_light.png">
+      <Link>Resources\setuptodate_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\setuptodate_light.scale-200.png">
+      <Link>Resources\setuptodate_light%402x.png</Link>
     </BundleResource>
     <BundleResource Include="..\Icons\settings_dark.png">
       <Link>Resources\settings_dark.png</Link>
