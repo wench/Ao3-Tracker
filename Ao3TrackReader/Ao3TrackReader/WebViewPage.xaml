@@ -113,9 +113,9 @@ limitations under the License.
                             Margin="10,0,0,0" HorizontalOptions="FillAndExpand" VerticalOptions="Start" HeightRequest="0" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
                 <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
-                        AbsoluteLayout.LayoutBounds=".98, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource HugeFontSize}" />
+                        AbsoluteLayout.LayoutBounds=".98, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
                 <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
-                        AbsoluteLayout.LayoutBounds=".02, .5, 200, 200" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource HugeFontSize}" />
+                        AbsoluteLayout.LayoutBounds=".02, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
                 <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
                 <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All">
                     <local:SettingsView x:Name="SettingsPane" wvp="{x:Reference root}" IsOnScreenChanged="SettingsPane_IsOnScreenChanged" />

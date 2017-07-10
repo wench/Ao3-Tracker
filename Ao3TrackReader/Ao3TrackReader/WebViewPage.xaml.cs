@@ -876,7 +876,7 @@ namespace Ao3TrackReader
 
                     }
                 }
-                ForwardCommand.IsEnabled = ToolbarCanGoForward;
+                GoForwardUpdated();
             }
         }
         private Uri prevPage;
@@ -899,7 +899,7 @@ namespace Ao3TrackReader
                     {
                     }
                 }
-                BackCommand.IsEnabled = ToolbarCanGoBack;
+                GoBackUpdated();
             }
         }
 
@@ -910,7 +910,7 @@ namespace Ao3TrackReader
                 (prevPage != null && behaviour.HasFlag(NavigateBehaviour.Page));
         }
 
-        void GoBack(NavigateBehaviour behaviour)
+        NavigateBehaviour GetGoBackType(NavigateBehaviour behaviour)
         {
             bool h1 = false;
             bool p = false;
@@ -927,9 +927,25 @@ namespace Ao3TrackReader
                 h2 = behaviour.HasFlag(NavigateBehaviour.History);
             }
 
-            if (h1 && WebViewCanGoBack) WebViewGoBack();
-            else if (p && prevPage != null) Navigate(prevPage);
-            else if (h2 && WebViewCanGoBack) WebViewGoBack();
+            if (h1 && WebViewCanGoBack) return NavigateBehaviour.History;
+            else if (p && prevPage != null) return NavigateBehaviour.Page;
+            else if (h2 && WebViewCanGoBack) return NavigateBehaviour.History;
+
+            return 0;
+        }
+
+        void GoBack(NavigateBehaviour behaviour)
+        {
+            switch (GetGoBackType(behaviour))
+            {
+                case NavigateBehaviour.Page:
+                    Navigate(prevPage);
+                    break;
+
+                case NavigateBehaviour.History:
+                    WebViewGoBack();
+                    break;
+            }
         }
 
         bool CanGoForward(NavigateBehaviour behaviour)
@@ -938,7 +954,7 @@ namespace Ao3TrackReader
                 (nextPage != null && behaviour.HasFlag(NavigateBehaviour.Page));
         }
 
-        void GoForward(NavigateBehaviour behaviour)
+        NavigateBehaviour GetGoForwardType(NavigateBehaviour behaviour)
         {
             bool h1 = false;
             bool p = false;
@@ -955,9 +971,25 @@ namespace Ao3TrackReader
                 h2 = behaviour.HasFlag(NavigateBehaviour.History);
             }
 
-            if (h1 && WebViewCanGoForward) WebViewGoForward();
-            else if (p && nextPage != null) Navigate(nextPage);
-            else if (h2 && WebViewCanGoForward) WebViewGoForward();
+            if (h1 && WebViewCanGoForward) return NavigateBehaviour.History;
+            else if (p && nextPage != null) return NavigateBehaviour.Page;
+            else if (h2 && WebViewCanGoForward) return NavigateBehaviour.History;
+
+            return 0;
+        }
+
+        void GoForward(NavigateBehaviour behaviour)
+        {
+            switch (GetGoForwardType(behaviour))
+            {
+                case NavigateBehaviour.Page:
+                    Navigate(nextPage);
+                    break;
+
+                case NavigateBehaviour.History:
+                    WebViewGoForward();
+                    break;
+            }
         }
 
         void InitNavBehav()
@@ -983,24 +1015,68 @@ namespace Ao3TrackReader
                 {
                     case "ToolbarBackBehaviour":
                         ToolbarBackBehaviour = behav;
+                        GoBackUpdated();
                         break;
 
                     case "ToolbarForwardBehaviour":
                         ToolbarForwardBehaviour = behav;
+                        GoForwardUpdated();
                         break;
 
                     case "SwipeBackBehaviour":
                         SwipeBackBehaviour = behav;
+                        GoBackUpdated();
                         break;
 
                     case "SwipeForwardBehaviour":
                         SwipeForwardBehaviour = behav;
+                        GoForwardUpdated();
                         break;
                 }
             }
         }
 
         public const NavigateBehaviour def_ToolbarBackBehaviour = NavigateBehaviour.History;
+
+        void GoBackUpdated()
+        {
+            BackCommand.IsEnabled = ToolbarCanGoBack;
+
+            switch (GetGoBackType(SwipeBackBehaviour))
+            {
+                case NavigateBehaviour.Page:
+                    if (prevPage.TryGetWorkId(out var workid))
+                        PrevPageIndicator.Text = "Previous Chapter\n\u2191";
+                    else
+                        PrevPageIndicator.Text = "Previous Page\n\u2191";
+                    break;
+
+                case NavigateBehaviour.History:
+                default:
+                    PrevPageIndicator.Text = "Go Back\n\u2191";
+                    break;
+            }
+        }
+
+        void GoForwardUpdated()
+        {
+            ForwardCommand.IsEnabled = ToolbarCanGoForward;
+
+            switch (GetGoForwardType(SwipeForwardBehaviour))
+            {
+                case NavigateBehaviour.Page:
+                    if (nextPage.TryGetWorkId(out var workid))
+                        NextPageIndicator.Text = "Next Chapter\n\u2191";
+                    else
+                        NextPageIndicator.Text = "Next Page\n\u2191";
+                    break;
+
+                case NavigateBehaviour.History:
+                default:
+                    NextPageIndicator.Text = "Go Forward\n\u2191";
+                    break;
+            }
+        }
 
         private NavigateBehaviour ToolbarBackBehaviour = def_ToolbarBackBehaviour;
         public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
@@ -1332,14 +1408,15 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            BackCommand.IsEnabled = ToolbarCanGoBack;
-            ForwardCommand.IsEnabled = ToolbarCanGoForward;
+
+            GoBackUpdated();
+            GoForwardUpdated();
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
             currentSavedLocation = null;
             ForceSetLocationCommand.IsEnabled = false;
-            SetUpToDateCommand.IsEnabled = Ao3SiteDataLookup.TryGetWorkId(uri, out var workid);
+            SetUpToDateCommand.IsEnabled = uri.TryGetWorkId(out var workid);
             helper?.Reset();
             return false;
         }
@@ -1363,8 +1440,8 @@ namespace Ao3TrackReader
 
             nextPage = null;
             prevPage = null;
-            BackCommand.IsEnabled = ToolbarCanGoBack;
-            ForwardCommand.IsEnabled = ToolbarCanGoForward;
+            GoBackUpdated();
+            GoForwardUpdated();
             ShowPrevPageIndicator = 0;
             ShowNextPageIndicator = 0;
             currentLocation = null;
