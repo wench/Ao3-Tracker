@@ -20,7 +20,7 @@ namespace Ao3Track {
             if (document.head) {
                 let style = document.createElement('style');
                 style.type = 'text/css';
-                style.innerText = '.blurb { visibility: hidden; }';
+                style.innerText = '.blurb.work[id] { visibility: hidden; }';
                 document.head.appendChild(style);
             }
             else {
