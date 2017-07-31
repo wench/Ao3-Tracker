@@ -88,12 +88,12 @@ namespace Ao3TrackReader
             // Do any database upgrades if necessaey
             TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
 
-            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5))
+            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5, -1))
             {
                 database.Execute("UPDATE Work SET seq=0 WHERE seq IS NULL");
                 database.Execute("DELETE FROM TagCache"); // Delete the entire cache cause it's behaviour has slightly changed
             }
-            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 7))
+            if (DatabaseVersion < Version.Version.AsInteger(1, 0, 7, -1))
             {
                 TryParseDelegate<bool?> tryparse = (string s, out bool? res) => { return TryParseNullable(s, out res, bool.TryParse); };
                 var map = new NullKeyDictionary<bool?, UnitConvSetting>

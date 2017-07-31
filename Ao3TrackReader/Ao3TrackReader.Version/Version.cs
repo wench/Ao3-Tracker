@@ -10,11 +10,13 @@ namespace Ao3TrackReader.Version
         public const int Major = 1;
         public const int Minor = 0;
         public const int Build = 8;
+        public const int Revision = 1;
 
-        public const string String = "1.0.8";
-        public const string LongString = "1.0.8.0";
-        public const string AltString = "1.0.0.8";
-        public const int Integer = Major * 1000000 + Minor * 1000 + Build;
+        public const string String = "1.0.8.1";
+        public const string IOS = "1.0.801";
+        public const string UWP = "1.0.801.0";
+        public const string Win81 = "1.0.0.801";
+        public const int Integer = Major * 100000000 + Minor * 100000 + Build * 100 + Revision;
 
         public const string Copyright = "Copyright © 2017 Alexis Ryan";
 
@@ -25,17 +27,20 @@ namespace Ao3TrackReader.Version
             get
             {
                 if (!string.IsNullOrWhiteSpace(GitTag))
-                    return new Uri("https://github.com/wench/Ao3-Tracker/releases/" + GitTag);
+                    return new Uri("https://github.com/wench/Ao3-Tracker/releases/tag/" + GitTag);
                 else if (!string.IsNullOrWhiteSpace(GitRevision))
-                    return new Uri("https://github.com/wench/Ao3-Tracker/tree/" + GitRevision);
+                    return new Uri("https://github.com/wench/Ao3-Tracker/commit/" + GitRevision);
                 else
                     return new Uri("https://github.com/wench/Ao3-Tracker");
             }
         }
 
-        public static int AsInteger(int major, int minor, int build)
+        public static int AsInteger(int major, int minor, int build, int revision)
         {
-            return major * 1000000 + minor * 1000 + build;
+            if (revision == -1)
+                return major * 1000000 + minor * 1000 + build;
+            else
+                return major * 100000000 + minor * 100000 + build * 100 + Revision;
         }
     }
 }

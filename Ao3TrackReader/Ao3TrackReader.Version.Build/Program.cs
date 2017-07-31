@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml;
+using System.Reflection;
 
 namespace Ao3TrackReader.Version.Build
 {
@@ -15,6 +16,7 @@ namespace Ao3TrackReader.Version.Build
             }
             try
             {
+                TypeInfo ti_version = typeof(Ao3TrackReader.Version.Version).GetTypeInfo();
                 Console.WriteLine(args[0]);
                 var doc = new XmlDocument();
                 doc.Load(args[0]);
@@ -40,28 +42,10 @@ namespace Ao3TrackReader.Version.Build
 
                     var n = doc.SelectSingleNode(args[i].Substring(0,o), nsmanager);
                     if (n == null) throw new ArgumentException("Can't find element", "args["+i+"]");
-                    string newValue;
-                    switch (args[i].Substring(o+1))
-                    {
-                        case "Integer":
-                            newValue = Ao3TrackReader.Version.Version.Integer.ToString();
-                            break;
 
-                        case "String":
-                            newValue = Ao3TrackReader.Version.Version.String;
-                            break;
-
-                        case "LongString":
-                            newValue = Ao3TrackReader.Version.Version.LongString;
-                            break;
-
-                        case "AltString":
-                            newValue = Ao3TrackReader.Version.Version.AltString;
-                            break;
-
-                        default:
-                            throw new ArgumentException("Unknown type", "args[" + i + "]");
-                    }                 
+                    var sourcefield = ti_version.GetField(args[i].Substring(o + 1));
+                    string newValue = sourcefield?.GetValue(null)?.ToString();
+                    if (newValue == null) throw new ArgumentException("Unknown field", "args[" + i + "]");
 
                     if (n.InnerText != newValue)
                     {

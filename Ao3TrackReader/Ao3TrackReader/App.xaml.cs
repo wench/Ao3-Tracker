@@ -86,7 +86,7 @@ namespace Ao3TrackReader
                     {
                         Platform = Device.RuntimePlatform,
                         Mode = InteractionMode.ToString(),
-                        Version = Ver.LongString,
+                        Version = Ver.String,
                         GitRev = Ver.GitRevision,
                         GetTag = Ver.GitTag,
                         Arch = BuildArchitechture.ToString(),
