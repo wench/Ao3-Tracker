@@ -8,7 +8,7 @@
         "declaration-colon-space-after": "always",
         "indentation": 4,
         "max-empty-lines": 2,
-        "rule-nested-empty-line-before": ["always", {
+        "rule-empty-line-before": ["always", {
             "except": ["first-nested"],
             "ignore": ["after-comment"]
         }],
