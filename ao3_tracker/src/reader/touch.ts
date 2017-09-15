@@ -25,7 +25,7 @@ namespace Ao3Track {
         let lastTime : number = 0;
         let lastTouchX: number = 0;
         let lastTouchY: number = 0;
-        let minThreshold: number = 0;
+        let startThreshold: number = 0;
         let centre: number = 0;
         let end: number = 0;
         let yLimit: number = 0;
@@ -61,7 +61,7 @@ namespace Ao3Track {
         {
             coordFixup = Ao3Track.Helper.deviceWidth / (window.innerWidth * (window.screen.deviceXDPI||192) / (window.screen.logicalXDPI||192));
             end = Ao3Track.Helper.deviceWidth;
-            minThreshold = end / 24;
+            startThreshold = Math.min(end / 12, 160);
             yLimit = window.innerHeight / 8;
             centre = end / 2;
             Helper.stopWebViewDragAccelerate();
@@ -96,6 +96,23 @@ namespace Ao3Track {
                 return false;
             }
 
+            // Touch much move at least startThreshold before swiping can occur.
+            if (startThreshold !== 0) {
+                if (offset <= -startThreshold) {
+                    startTouchX -= startThreshold;
+                    offset += startThreshold;
+                    startThreshold = 0;
+                }
+                else if (offset >= startThreshold) {
+                    startTouchX += startThreshold;
+                    offset -= startThreshold;
+                    startThreshold = 0;
+                }
+                else {
+                    offset = 0;
+                }
+            }
+            
             let now = performance.now() ;
             if (now <= lastTime) now = lastTime + 1;
             
@@ -105,7 +122,7 @@ namespace Ao3Track {
 
             let offsetCat = swipeOffsetChanged(offset, offsetY);
             
-            if (offsetCat === 0) return false;
+            if (offsetCat === 0 && startThreshold !== 0) return false;
 
             return true;
         }
@@ -114,6 +131,23 @@ namespace Ao3Track {
         {
             let offset = lastTouchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);            
+
+            // Touch much move at least startThreshold before swiping can occur.
+            if (startThreshold !== 0) {
+                if (offset <= -startThreshold) {
+                    startTouchX -= startThreshold;
+                    offset += startThreshold;
+                    startThreshold = 0;
+                }
+                else if (offset >= startThreshold) {
+                    startTouchX += startThreshold;
+                    offset -= startThreshold;
+                    startThreshold = 0;
+                }
+                else {
+                    offset = 0;
+                }
+            }
 
             swipeCleanup(true);
 
@@ -137,8 +171,7 @@ namespace Ao3Track {
 
         function swipeOffsetChanged(offset : number, offsetY : number) : number
         {
-            if ((!Ao3Track.Helper.swipeCanGoBack && offset > 0.0) || (!Ao3Track.Helper.swipeCanGoForward && offset < 0.0) || (offset > 0.0 && offset < minThreshold) || (offset < 0.0 && offset > -minThreshold) ||
-                (offsetY >= yLimit)) {
+            if ((!Ao3Track.Helper.swipeCanGoBack && offset > 0.0) || (!Ao3Track.Helper.swipeCanGoForward && offset < 0.0) || (offsetY >= yLimit)) {
                 offset = 0.0;
             }
             else if (offset < -end) 
