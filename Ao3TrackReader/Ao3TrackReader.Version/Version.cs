@@ -8,14 +8,14 @@ namespace Ao3TrackReader.Version
     static partial class Version
     {
         public const int Major = 1;
-        public const int Minor = 0;
-        public const int Build = 8;
+        public const int Minor = 1;
+        public const int Build = 0;
         public const int Revision = 1;
 
-        public const string String = "1.0.8.1";
-        public const string IOS = "1.0.801";
-        public const string UWP = "1.0.801.0";
-        public const string Win81 = "1.0.0.801";
+        public const string String = "1.1.0.1";
+        public const string IOS = "1.1.1";
+        public const string UWP = "1.1.1.0";
+        public const string Win81 = "1.1.0.1";
         public const int Integer = Major * 100000000 + Minor * 100000 + Build * 100 + Revision;
 
         public const string Copyright = "Copyright © 2017 Alexis Ryan";
