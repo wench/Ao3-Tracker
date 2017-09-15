@@ -218,8 +218,8 @@ namespace Ao3TrackReader
 
         void InitializeToolbarCommands()
         {
-            BackCommand = new DisableableCommand(ToolbarGoBack, false);
-            ForwardCommand = new DisableableCommand(ToolbarGoForward, false);
+            BackCommand = new DisableableCommand(ToolbarGoBackAnimated, false);
+            ForwardCommand = new DisableableCommand(ToolbarGoForwardAnimated, false);
             JumpCommand = new DisableableCommand(OnJumpClicked, false);
             FontIncreaseCommand = new DisableableCommand(() => LogFontSize++);
             FontDecreaseCommand = new DisableableCommand(() => LogFontSize--);
@@ -1038,11 +1038,9 @@ namespace Ao3TrackReader
 
         public const NavigateBehaviour def_ToolbarBackBehaviour = NavigateBehaviour.History;
 
-        void GoBackUpdated()
+        void UpdatePrevPageIndicator(NavigateBehaviour behaviour)
         {
-            BackCommand.IsEnabled = ToolbarCanGoBack;
-
-            switch (GetGoBackType(SwipeBackBehaviour))
+            switch (GetGoBackType(behaviour))
             {
                 case NavigateBehaviour.Page:
                     if (prevPage.TryGetWorkId(out var workid))
@@ -1058,11 +1056,16 @@ namespace Ao3TrackReader
             }
         }
 
-        void GoForwardUpdated()
+        void GoBackUpdated()
         {
-            ForwardCommand.IsEnabled = ToolbarCanGoForward;
+            BackCommand.IsEnabled = ToolbarCanGoBack;
 
-            switch (GetGoForwardType(SwipeForwardBehaviour))
+            UpdatePrevPageIndicator(SwipeBackBehaviour);
+        }
+
+        void UpdateNextPageIndicator(NavigateBehaviour behaviour)
+        {
+            switch (GetGoForwardType(behaviour))
             {
                 case NavigateBehaviour.Page:
                     if (nextPage.TryGetWorkId(out var workid))
@@ -1078,11 +1081,54 @@ namespace Ao3TrackReader
             }
         }
 
+        void GoForwardUpdated()
+        {
+            ForwardCommand.IsEnabled = ToolbarCanGoForward;
+
+            UpdateNextPageIndicator(SwipeForwardBehaviour);
+        }
+
+        private void ToolbarGoBackForwardAnimated(bool forward)
+        {
+            StopWebViewDragAccelerate();
+
+            if (forward)
+            {
+                UpdateNextPageIndicator(ToolbarForwardBehaviour);
+                ShowNextPageIndicator = 2;
+            }
+            else
+            {
+                UpdatePrevPageIndicator(ToolbarBackBehaviour);
+                ShowPrevPageIndicator = 2;
+            }
+
+            this.Animate("ToolbarGoBackForward", new Animation((f) => LeftOffset = forward ? -f : f, 0, DeviceWidth, Easing.CubicIn), 16, 100, finished: (f, cancelled) =>
+            {
+
+                if (forward)
+                {
+                    LeftOffset = -DeviceWidth;
+                    ToolbarGoForward();
+                }
+                else
+                {
+                    LeftOffset = DeviceWidth;
+                    ToolbarGoBack();
+                }
+            });
+
+        }
+
         private NavigateBehaviour ToolbarBackBehaviour = def_ToolbarBackBehaviour;
         public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
         public void ToolbarGoBack()
         {
             GoBack(ToolbarBackBehaviour);
+        }
+        public void ToolbarGoBackAnimated()
+        {
+            ToolbarGoBackForwardAnimated(false);
         }
 
         public const NavigateBehaviour def_ToolbarForwardBehaviour = NavigateBehaviour.HistoryThenPage;
@@ -1092,6 +1138,10 @@ namespace Ao3TrackReader
         public void ToolbarGoForward()
         {
             GoForward(ToolbarForwardBehaviour);
+        }
+        public void ToolbarGoForwardAnimated()
+        {
+            ToolbarGoBackForwardAnimated(true);
         }
 
         public const NavigateBehaviour def_SwipeBackBehaviour = NavigateBehaviour.History;
@@ -1223,6 +1273,7 @@ namespace Ao3TrackReader
         System.Diagnostics.Stopwatch webViewDragAccelerateStopWatch = null;
         public void StopWebViewDragAccelerate()
         {
+            this.AbortAnimation("ToolbarGoBackForward");
             if (webViewDragAccelerateStopWatch != null)
                 webViewDragAccelerateStopWatch.Reset();
         }
@@ -1289,7 +1340,7 @@ namespace Ao3TrackReader
             double offset = LeftOffset;
             var offsetCat = SwipeOffsetChanged(offset);
 
-            Device.StartTimer(TimeSpan.FromMilliseconds(15),
+            Device.StartTimer(TimeSpan.FromMilliseconds(16),
                 () =>
                 {
                     if (!webViewDragAccelerateStopWatch.IsRunning) return false;
