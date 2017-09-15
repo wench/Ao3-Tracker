@@ -1188,9 +1188,9 @@ namespace Ao3TrackReader
                     return true;
                 }
             }
-            if (SwipeCanGoBack)
+            if (ToolbarCanGoBack)
             {
-                SwipeGoBack();
+                ToolbarGoBackAnimated();
                 return true;
             }
             return false;
