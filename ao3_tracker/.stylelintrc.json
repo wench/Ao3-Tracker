@@ -3,7 +3,7 @@
         "block-no-empty": null,
         "color-no-invalid-hex": true,
         "comment-empty-line-before": ["always", {
-            "ignore": ["stylelint-commands", "between-comments"]
+            "ignore": ["stylelint-commands"]
         }],
         "declaration-colon-space-after": "always",
         "indentation": 4,
