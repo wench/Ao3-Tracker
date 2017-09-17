@@ -1,0 +1,207 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+
+namespace Ao3TrackReader.Controls
+{
+    [Xamarin.Forms.ContentProperty("Children")]
+    public class TabbedView : ContentView, IViewContainer<TabView>
+    {
+        private StackLayout Tabs;
+        private StackLayout Buttons;
+        private ScrollView Scroll;
+
+        public IList<TabView> Children => new ListConverter<TabView, View>(Tabs.Children);
+
+        int currentTabIndex = 0;
+        TabView currentTab = null;
+        double tabWidth = 400;
+
+        public TabbedView()
+        {
+            Buttons = new StackLayout { Orientation = StackOrientation.Horizontal, VerticalOptions = LayoutOptions.Start };
+            Buttons.SetDynamicResource(View.HeightRequestProperty, "Size_40_Min");
+
+            Scroll = new ScrollView
+            {
+                Orientation = ScrollOrientation.Horizontal,
+                VerticalOptions = LayoutOptions.StartAndExpand,
+                Content = Tabs = new StackLayout { Orientation = StackOrientation.Horizontal }
+            };
+
+            Tabs.ChildAdded += Tabs_ChildAdded;
+            Tabs.ChildRemoved += Tabs_ChildRemoved;
+            Tabs.ChildrenReordered += Tabs_ChildrenReordered;
+            Scroll.ScrollEnd += Scroll_ScrollEnd;
+            Scroll.Scrolled += Scroll_Scrolled;
+            Scroll.SizeChanged += Scroll_SizeChanged;
+
+            var stack = new StackLayout { Orientation = StackOrientation.Vertical };
+
+            stack.Children.Add(Buttons);
+            stack.Children.Add(Scroll);
+            Content = stack;
+        }
+
+        private void Scroll_SizeChanged(object sender, EventArgs e)
+        {
+            tabWidth = Scroll.Width;
+            foreach (TabView tab in Children)
+            {
+                tab.WidthRequest = tabWidth;
+            }
+            double desiredScroll = currentTab != null ? currentTab.X : 0;
+            Scroll.ScrollToAsync(desiredScroll, 0, false);
+        }
+
+        private int TabFromX(double x)
+        {
+            x += tabWidth / 2;
+            for (int i = 0; i < Tabs.Children.Count; i++)
+            {
+                var tab = Tabs.Children[i];
+                if ((tab.X + tab.Width) >= x)
+                    return i;
+            }
+            return 0;
+        }
+
+        public int CurrentTab
+        {
+            get => currentTabIndex;
+
+            set
+            {
+                if (value >= Tabs.Children.Count) value = Tabs.Children.Count - 1;
+                if (value < 0) value = 0;
+
+                for (int i = 0; i < Buttons.Children.Count; i++)
+                {
+                    (Buttons.Children[i] as Button).IsActive = (i == value);
+                }
+
+                currentTabIndex = value;
+                currentTab = value < Tabs.Children.Count ? Tabs.Children[value] as TabView : null;
+
+                double desiredScroll = currentTab != null? currentTab.X:0;
+                if (desiredScroll != Scroll.ScrollX) Scroll.ScrollToAsync(desiredScroll, 0, true);
+            }
+        }
+
+        private void Scroll_ScrollEnd(object sender, EventArgs e)
+        {
+            // Snap scrolling to a tab point
+            CurrentTab = TabFromX(Scroll.ScrollX);
+        }
+
+        private void Scroll_Scrolled(object sender, ScrolledEventArgs e)
+        {
+            // Change active tab as we scroll over them
+            currentTabIndex = TabFromX(Scroll.ScrollX); 
+            currentTab = currentTabIndex < Tabs.Children.Count ? Tabs.Children[currentTabIndex] as TabView : null;
+
+            for (int i = 0; i < Buttons.Children.Count; i++)
+            {
+                (Buttons.Children[i] as Button).IsActive = (i == currentTabIndex);
+            }
+        }
+
+        private void Tabs_ChildAdded(object sender, ElementEventArgs e)
+        {
+            TabView tab = e.Element as TabView;
+            tab.WidthRequest = tabWidth;
+
+            var button = CreateButton();
+            button.BindingContext = tab;
+            Buttons.Children.Add(button);
+
+            if (Tabs.Children.Count == 1)
+            {
+                currentTab = tab;
+                button.IsActive = true;
+            }
+        }
+
+        private void Tabs_ChildRemoved(object sender, ElementEventArgs e)
+        {
+            // Remove the button
+            for (int i = 0; i < Buttons.Children.Count; i++)
+            {
+                if (Buttons.Children[i] == e.Element)
+                {
+                    Buttons.Children.RemoveAt(i);
+                    break;
+                }
+            }
+
+            int newCurrent = currentTabIndex;
+            if (currentTab == e.Element)
+            {
+                if (newCurrent >= Tabs.Children.Count) newCurrent--;
+            }
+            else
+            {
+                for (int i = 0; i < Tabs.Children.Count; i++)
+                {
+                    if (Tabs.Children[i] == currentTab)
+                    {
+                        newCurrent = i;
+                        break;
+                    }
+                }
+            }
+            CurrentTab = newCurrent;
+        }
+
+        private void Tabs_ChildrenReordered(object sender, EventArgs e)
+        {
+            Buttons.Children.Clear();
+
+            int newCurrent = 0;
+            for (int i = 0; i < Tabs.Children.Count; i++)
+            {
+                var tab = Tabs.Children[i];
+
+                var button = CreateButton();
+                button.BindingContext = tab;
+                Buttons.Children.Add(button);
+                if (tab == currentTab)
+                {
+                    button.IsActive = true;
+                    newCurrent = i;
+                }
+            }
+
+            currentTabIndex = newCurrent;
+            double desiredScroll = currentTab != null ? currentTab.X : 0;
+            Scroll.ScrollToAsync(desiredScroll, 0, false);
+        }
+
+        Button CreateButton()
+        {
+            Button button = new Button();
+            button.SetBinding(Button.TextProperty, "Title");
+            button.SetBinding(Button.ImageProperty, "Icon");
+            button.Clicked += Button_Clicked;
+            return button;
+        }
+
+        private void Button_Clicked(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            for (int i = 0; i < Tabs.Children.Count; i++)
+            {
+                if (Tabs.Children[i] == button.BindingContext)
+                {
+                    CurrentTab = i;
+                    break;
+                }
+            }
+        }
+    }
+}

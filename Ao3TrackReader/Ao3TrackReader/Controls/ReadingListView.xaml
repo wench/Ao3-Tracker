@@ -57,7 +57,7 @@ limitations under the License.
             </StackLayout>
 
             <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" 
-                      x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}">
+                      x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}" CachingStrategy="RetainElement">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">

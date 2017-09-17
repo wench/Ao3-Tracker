@@ -112,6 +112,7 @@
     </Compile>
     <Compile Include="EditorRenderer.cs" />
     <Compile Include="PaneViewRenderer.cs" />
+    <Compile Include="ScrollViewRenderer.cs" />
     <Compile Include="WebViewPage.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>

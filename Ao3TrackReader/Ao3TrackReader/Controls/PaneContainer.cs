@@ -28,14 +28,7 @@ namespace Ao3TrackReader.Controls
     [Xamarin.Forms.ContentProperty("Children")]
     public class PaneContainer : AbsoluteLayout, IViewContainer<PaneView>
     {
-
-        public new IList<PaneView> Children
-        {
-            get
-            {
-                return new ListConverter<PaneView, View>(base.Children);
-            }
-        }
+        public new IList<PaneView> Children=> new ListConverter<PaneView, View>(base.Children);
 
         public PaneContainer()
 		{
