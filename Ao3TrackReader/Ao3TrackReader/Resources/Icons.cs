@@ -118,5 +118,21 @@ namespace Ao3TrackReader.Resources
         {
             get { return App.PlatformIcon("setuptodate") + ".png"; }
         }
+        public static string Navigation
+        {
+            get { return App.PlatformIcon("navigation") + ".png"; }
+        }
+        public static string Cloud
+        {
+            get { return App.PlatformIcon("cloud") + ".png"; }
+        }
+        public static string Language
+        {
+            get { return App.PlatformIcon("language") + ".png"; }
+        }
+        public static string Display
+        {
+            get { return App.PlatformIcon("display") + ".png"; }
+        }
     }
 }

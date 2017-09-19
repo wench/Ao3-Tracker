@@ -135,7 +135,7 @@ limitations under the License.
             </StackLayout>
 
             <local:TabbedLayout VerticalOptions="Fill" HorizontalOptions="Fill" Grid.Row="1">
-                <local:TabView Title="Cloud">
+                <local:TabView Title="Cloud" Icon="{StaticResource CloudIcon}">
 
                     <StackLayout Spacing="32" Padding="4,0,12,0">
                         <StackLayout x:Name="cloudSyncForm" Style="{StaticResource SettingGroup}">
@@ -217,7 +217,42 @@ limitations under the License.
                     </StackLayout>
                 </local:TabView>
 
-                <local:TabView Title="Display">
+                <local:TabView Title="Navigation" Icon="{StaticResource NavigationIcon}">
+                    <StackLayout Spacing="32" Padding="4,0,12,0">
+                        <StackLayout Style="{StaticResource SettingGroup}">
+                            <Label Text="Navigation Options" Style="{StaticResource Heading}" />
+                            <Label Text="Choose the navigation options for the toolbar buttons and swipe gestures. Choose between Browser History style navigation, or Next/Previous Page navigation, or both." Style="{StaticResource Remark}" />
+
+                            <StackLayout x:Name="backButtonSetting" Style="{StaticResource Setting}">
+                                <Label Text="Show Back Button on Toolbar" HorizontalOptions="Start" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="ShowBackButton" ItemsSource="{StaticResource BackButtonMode}" />
+                            </StackLayout>
+
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Back Button"  HorizontalOptions="Start" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="ToolbarBackBehaviour" ItemsSource="{StaticResource NavigateMode}" />
+                            </StackLayout>
+
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Forward Button" HorizontalOptions="Start" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="ToolbarForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" />
+                            </StackLayout>
+
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Swipe Right"  HorizontalOptions="Start" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="SwipeBackBehaviour" ItemsSource="{StaticResource NavigateMode}" />
+                            </StackLayout>
+
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="Swipe Left"  HorizontalOptions="Start" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="SwipeForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" />
+                            </StackLayout>
+                        </StackLayout>
+
+                    </StackLayout>
+                </local:TabView>
+
+                <local:TabView Title="Display" Icon="{StaticResource DisplayIcon}">
 
                     <StackLayout Spacing="32" Padding="4,0,12,0">                
                         <StackLayout Style="{StaticResource SettingGroup}">
@@ -291,6 +326,23 @@ limitations under the License.
 
                         </StackLayout>
 
+                        <StackLayout Style="{StaticResource SettingGroup}">
+                            <Label Text="App Display" Style="{StaticResource Heading}"/>
+
+                            <StackLayout Style="{StaticResource Setting}">
+                                <Label Text="UI Font Size" HorizontalOptions="Start" />
+                                <local:DropDown local:SettingsView.DatabaseVariable="LogFontSizeUI" ItemsSource="{StaticResource FontSizeUIList}" />
+                            </StackLayout>
+
+                            <StackLayout Style="{StaticResource SettingVert}">
+                                <StackLayout Style="{StaticResource Setting}">
+                                    <Label Text="Select the Application Theme" HorizontalOptions="Start" />
+                                    <local:DropDown local:SettingsView.DatabaseVariable="Theme" ItemsSource="{StaticResource Themes}" />
+                                </StackLayout>
+                                <Label Text="You must restart the app to apply a new theme" Style="{StaticResource Remark}" />
+                            </StackLayout>
+                        </StackLayout>
+
                     </StackLayout>
                 </local:TabView>
 
@@ -350,57 +402,6 @@ limitations under the License.
                     </StackLayout>
                 </local:TabView>
 
-                <local:TabView Title="UI">
-                    <StackLayout Spacing="32" Padding="4,0,12,0">
-                        <StackLayout Style="{StaticResource SettingGroup}">
-                            <Label Text="Navigation Options" Style="{StaticResource Heading}" />
-                            <Label Text="Choose the navigation options for the toolbar buttons and swipe gestures. Choose between Browser History style navigation, or Next/Previous Page navigation, or both." Style="{StaticResource Remark}" />
-
-                            <StackLayout x:Name="backButtonSetting" Style="{StaticResource Setting}">
-                                <Label Text="Show Back Button on Toolbar" HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="ShowBackButton" ItemsSource="{StaticResource BackButtonMode}" />
-                            </StackLayout>
-
-                            <StackLayout Style="{StaticResource Setting}">
-                                <Label Text="Back Button"  HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="ToolbarBackBehaviour" ItemsSource="{StaticResource NavigateMode}" />
-                            </StackLayout>
-
-                            <StackLayout Style="{StaticResource Setting}">
-                                <Label Text="Forward Button" HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="ToolbarForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" />
-                            </StackLayout>
-
-                            <StackLayout Style="{StaticResource Setting}">
-                                <Label Text="Swipe Right"  HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="SwipeBackBehaviour" ItemsSource="{StaticResource NavigateMode}" />
-                            </StackLayout>
-
-                            <StackLayout Style="{StaticResource Setting}">
-                                <Label Text="Swipe Left"  HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="SwipeForwardBehaviour" ItemsSource="{StaticResource NavigateMode}" />
-                            </StackLayout>
-                        </StackLayout>
-
-                        <StackLayout Style="{StaticResource SettingGroup}">
-                            <Label Text="User Interface Options" Style="{StaticResource Heading}"/>
-
-                            <StackLayout Style="{StaticResource Setting}">
-                                <Label Text="UI Font Size" HorizontalOptions="Start" />
-                                <local:DropDown local:SettingsView.DatabaseVariable="LogFontSizeUI" ItemsSource="{StaticResource FontSizeUIList}" />
-                            </StackLayout>
-
-                            <StackLayout Style="{StaticResource SettingVert}">
-                                <StackLayout Style="{StaticResource Setting}">
-                                    <Label Text="Select the Application Theme" HorizontalOptions="Start" />
-                                    <local:DropDown local:SettingsView.DatabaseVariable="Theme" ItemsSource="{StaticResource Themes}" />
-                                </StackLayout>
-                                <Label Text="You must restart the app to apply a new theme" Style="{StaticResource Remark}" />
-                            </StackLayout>
-                        </StackLayout>
-
-                    </StackLayout>
-                </local:TabView>
             </local:TabbedLayout>
         </Grid>
     </local:PaneView.Content>

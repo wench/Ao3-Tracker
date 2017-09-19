@@ -438,6 +438,54 @@
     <BundleResource Include="..\Icons\200\taphold_light.scale-200.png">
       <Link>Resources\taphold_light%402x.png</Link>
     </BundleResource>
+    <BundleResource Include="..\Icons\display_dark.png">
+      <Link>Resources\display_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\display_dark.scale-200.png">
+      <Link>Resources\display_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\display_light.png">
+      <Link>Resources\display_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\display_light.scale-200.png">
+      <Link>Resources\display_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\cloud_dark.png">
+      <Link>Resources\cloud_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\cloud_dark.scale-200.png">
+      <Link>Resources\cloud_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\cloud_light.png">
+      <Link>Resources\cloud_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\cloud_light.scale-200.png">
+      <Link>Resources\cloud_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\language_dark.png">
+      <Link>Resources\language_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\language_dark.scale-200.png">
+      <Link>Resources\language_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\language_light.png">
+      <Link>Resources\language_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\language_light.scale-200.png">
+      <Link>Resources\language_light%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\navigation_dark.png">
+      <Link>Resources\navigation_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\navigation_dark.scale-200.png">
+      <Link>Resources\navigation_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\navigation_light.png">
+      <Link>Resources\navigation_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\navigation_light.scale-200.png">
+      <Link>Resources\navigation_light%402x.png</Link>
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="..\..\ao3_tracker\build\reader\ios\jquery.js">

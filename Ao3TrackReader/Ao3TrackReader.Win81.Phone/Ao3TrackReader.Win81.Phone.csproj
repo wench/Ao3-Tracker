@@ -226,6 +226,30 @@
     <Content Include="..\Icons\200\taphold_light.scale-200.png">
       <Link>Assets\taphold_light.png</Link>
     </Content>
+    <Content Include="..\Icons\200\display_dark.scale-200.png">
+      <Link>Assets\display_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\display_light.scale-200.png">
+      <Link>Assets\display_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\cloud_dark.scale-200.png">
+      <Link>Assets\cloud_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\cloud_light.scale-200.png">
+      <Link>Assets\cloud_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\navigation_dark.scale-200.png">
+      <Link>Assets\navigation_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\navigation_light.scale-200.png">
+      <Link>Assets\navigation_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\language_dark.scale-200.png">
+      <Link>Assets\language_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\language_light.scale-200.png">
+      <Link>Assets\language_light.png</Link>
+    </Content>    
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Icons\padded\addpage_dark.scale-200.png">
@@ -372,6 +396,30 @@
     <Content Include="..\Icons\padded\taphold_light.scale-200.png">
       <Link>Appbar\Assets\taphold_light.png</Link>
     </Content>
+    <Content Include="..\Icons\padded\display_dark.scale-200.png">
+      <Link>Appbar\Assets\display_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\display_light.scale-200.png">
+      <Link>Appbar\Assets\display_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\cloud_dark.scale-200.png">
+      <Link>Appbar\Assets\cloud_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\cloud_light.scale-200.png">
+      <Link>Appbar\Assets\cloud_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\navigation_dark.scale-200.png">
+      <Link>Appbar\Assets\navigation_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\navigation_light.scale-200.png">
+      <Link>Appbar\Assets\navigation_light.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\language_dark.scale-200.png">
+      <Link>Appbar\Assets\language_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\padded\language_light.scale-200.png">
+      <Link>Appbar\Assets\language_light.png</Link>
+    </Content>    
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Logo.scale-240.png" />

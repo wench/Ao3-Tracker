@@ -22,10 +22,13 @@ namespace Ao3TrackReader.Controls
         TabView currentTab = null;
         double tabWidth = 400;
 
+        Style buttonStyle;
         public TabbedLayout()
         {
-            var template = App.Current.Resources["TabbedLayoutTemplate"] as DataTemplate;
-            var templateContent = template.CreateContent() as View;
+            buttonStyle = (Style)App.Current.Resources["TabbedLayoutButtonStyle"];
+
+            var template = (DataTemplate) App.Current.Resources["TabbedLayoutTemplate"];
+            var templateContent = (View) template.CreateContent();
 
             Buttons = templateContent.FindByName<StackLayout>("Buttons");
             Scroll = templateContent.FindByName<ScrollView>("Scroll");
@@ -177,10 +180,7 @@ namespace Ao3TrackReader.Controls
 
         Button CreateButton()
         {
-            Button button = new Button();
-            button.Style = (Style)App.Current.Resources["Style_TabbedLayout_Button"];
-            button.SetBinding(Button.TextProperty, "Title");
-            button.SetBinding(Button.ImageProperty, "Icon");
+            Button button = new Button { Style = buttonStyle };
             button.Clicked += Button_Clicked;
             return button;
         }
