@@ -152,6 +152,10 @@ namespace Ao3TrackReader
         {
             return Windows.UI.Color.FromArgb((byte)(color.A * 255), (byte)(color.R * 255), (byte)(color.G * 255), (byte)(color.B * 255));
         }
+        public static Windows.UI.Xaml.Media.SolidColorBrush ToWindowsBrush(this Xamarin.Forms.Color color)
+        {
+            return new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb((byte)(color.A * 255), (byte)(color.R * 255), (byte)(color.G * 255), (byte)(color.B * 255)));
+        }
 
         public static Xamarin.Forms.Color ToXamarin(this Windows.UI.Color color)
         {

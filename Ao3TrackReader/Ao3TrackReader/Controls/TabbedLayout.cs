@@ -10,29 +10,26 @@ using Xamarin.Forms.Xaml;
 namespace Ao3TrackReader.Controls
 {
     [Xamarin.Forms.ContentProperty("Children")]
-    public class TabbedView : ContentView, IViewContainer<TabView>
+    public class TabbedLayout : ContentView, IViewContainer<TabView>
     {
         private StackLayout Tabs;
         private StackLayout Buttons;
         private ScrollView Scroll;
 
-        public IList<TabView> Children => new ListConverter<TabView, View>(Tabs.Children);
+        public new IList<TabView> Children => new ListConverter<TabView, View>(Tabs.Children);
 
         int currentTabIndex = 0;
         TabView currentTab = null;
         double tabWidth = 400;
 
-        public TabbedView()
+        public TabbedLayout()
         {
-            Buttons = new StackLayout { Orientation = StackOrientation.Horizontal, VerticalOptions = LayoutOptions.Start };
-            Buttons.SetDynamicResource(View.HeightRequestProperty, "Size_40_Min");
+            var template = App.Current.Resources["TabbedLayoutTemplate"] as DataTemplate;
+            var templateContent = template.CreateContent() as View;
 
-            Scroll = new ScrollView
-            {
-                Orientation = ScrollOrientation.Horizontal,
-                VerticalOptions = LayoutOptions.StartAndExpand,
-                Content = Tabs = new StackLayout { Orientation = StackOrientation.Horizontal }
-            };
+            Buttons = templateContent.FindByName<StackLayout>("Buttons");
+            Scroll = templateContent.FindByName<ScrollView>("Scroll");
+            Tabs = templateContent.FindByName<StackLayout>("Tabs");
 
             Tabs.ChildAdded += Tabs_ChildAdded;
             Tabs.ChildRemoved += Tabs_ChildRemoved;
@@ -41,11 +38,7 @@ namespace Ao3TrackReader.Controls
             Scroll.Scrolled += Scroll_Scrolled;
             Scroll.SizeChanged += Scroll_SizeChanged;
 
-            var stack = new StackLayout { Orientation = StackOrientation.Vertical };
-
-            stack.Children.Add(Buttons);
-            stack.Children.Add(Scroll);
-            Content = stack;
+            Content = templateContent;
         }
 
         private void Scroll_SizeChanged(object sender, EventArgs e)
@@ -185,6 +178,7 @@ namespace Ao3TrackReader.Controls
         Button CreateButton()
         {
             Button button = new Button();
+            button.Style = (Style)App.Current.Resources["Style_TabbedLayout_Button"];
             button.SetBinding(Button.TextProperty, "Title");
             button.SetBinding(Button.ImageProperty, "Icon");
             button.Clicked += Button_Clicked;

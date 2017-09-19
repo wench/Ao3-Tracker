@@ -122,6 +122,61 @@ limitations under the License.
                     </Grid>
                 </ViewCell>
             </DataTemplate>
+           
+            <Style TargetType="local:Button" x:Key="Style_TabbedLayout_Button">
+                <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="BorderRadius" Value="0" />
+                <Setter Property="BorderColor" Value="{StaticResource BaseMediumLowColor}" />
+                <Setter Property="WidthRequest" Value="-1" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
+                <Setter Property="ImageWidth" Value="20" />
+                <Setter Property="ImageHeight" Value="20" />
+
+                <Style.Triggers>
+                    <Trigger TargetType="local:Button" Property="IsActive" Value="True">
+                        <Setter Property="BorderColor" Value="Transparent" />
+                    </Trigger>
+                    <Trigger TargetType="local:Button" Property="IsActive" Value="False">
+                        <Setter Property="BorderColor" Value="{StaticResource BaseMediumLowColor}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <DataTemplate x:Key="TabbedLayoutTemplate">
+                <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid VerticalOptions="Start" HorizontalOptions="Fill" RowSpacing="-2" ColumnSpacing="-2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="2"/>
+                            <RowDefinition Height="{DynamicResource Size_40_Min}"/>
+                            <RowDefinition Height="2"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <BoxView HeightRequest="2" WidthRequest="-1" Grid.Column="1" Grid.Row="0" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Start" HorizontalOptions="Fill"/>
+                        <BoxView HeightRequest="{DynamicResource Size_40_Min}" WidthRequest="2" Grid.Column="0" Grid.Row="1" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Fill" HorizontalOptions="End"/>
+                        <StackLayout x:Name="Buttons" Orientation="Horizontal" Spacing="-2" HeightRequest="{DynamicResource Size_40_Min}" Grid.Column="1" Grid.Row="1" />
+                        <BoxView HeightRequest="{DynamicResource Size_40_Min}" WidthRequest="2" Grid.Column="2" Grid.Row="1" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Fill" HorizontalOptions="Start"/>
+                        <BoxView HeightRequest="2" WidthRequest="-1" Grid.Column="0" Grid.Row="2" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Start" HorizontalOptions="Fill"/>
+                        <BoxView HeightRequest="2" WidthRequest="-1" Grid.Column="2" Grid.Row="2" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Start" HorizontalOptions="Fill"/>
+                    </Grid>
+
+                    <local:ScrollView x:Name="Scroll" Orientation="Horizontal" VerticalOptions="Fill" HorizontalOptions="Fill" Grid.Row="1">
+                        <StackLayout x:Name="Tabs" Orientation="Horizontal" />
+                    </local:ScrollView>
+                </Grid>
+            </DataTemplate>
+
         </res:ResourceDictionary>
     </Application.Resources>
 </Application>

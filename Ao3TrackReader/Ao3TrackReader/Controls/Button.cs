@@ -28,6 +28,8 @@ namespace Ao3TrackReader.Controls
           Xamarin.Forms.BindableProperty.Create("ImageHeight", typeof(double), typeof(Button), defaultValue: 0.0);
         public static readonly Xamarin.Forms.BindableProperty ImageWidthProperty =
           Xamarin.Forms.BindableProperty.Create("ImageWidth", typeof(double), typeof(Button), defaultValue: 0.0);
+        public static readonly Xamarin.Forms.BindableProperty IsActiveProperty =
+          Xamarin.Forms.BindableProperty.Create("IsActive", typeof(bool), typeof(Button), defaultValue: false);
 
         public double ImageHeight
         {
@@ -39,7 +41,13 @@ namespace Ao3TrackReader.Controls
             get { return (double)GetValue(ImageWidthProperty); }
             set { SetValue(ImageWidthProperty, value); }
         }
+        public bool IsActive
+        {
+            get { return (bool)GetValue(IsActiveProperty); }
+            set { SetValue(IsActiveProperty, value); }
+        }
 
+        /*
         bool isActive = false;
         public bool IsActive
         {
@@ -50,7 +58,7 @@ namespace Ao3TrackReader.Controls
                 if (value) BackgroundColor = Ao3TrackReader.Resources.Colors.Highlight.Trans.Medium;
                 else BackgroundColor = Color.Transparent;
             }
-        }
+        }*/
 
         string IHelpInfo.Text => HelpView.GetText(this);
 
