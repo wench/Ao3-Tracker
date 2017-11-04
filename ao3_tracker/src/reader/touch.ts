@@ -32,7 +32,7 @@ namespace Ao3Track {
         let coordFixup: number = 0;
         let velocity : number = 0;
         let manualContextMenu = false;
-
+        let swiping = false;
 
         namespace performance {
             export function now() {
@@ -45,6 +45,7 @@ namespace Ao3Track {
             manualContextMenu = true;
 
         function swipeCleanup(keepOffset?: boolean) {
+            swiping = false;
             Helper.stopWebViewDragAccelerate();
             if (!keepOffset) Ao3Track.Helper.leftOffset = 0.0;
             Ao3Track.Helper.showPrevPageIndicator = 0;
@@ -70,7 +71,7 @@ namespace Ao3Track {
             lastTouchX = x*coordFixup;
             startTouchX = lastTouchX - Ao3Track.Helper.leftOffset; 
             lastTouchY = startTouchY = y*coordFixup;
-
+            swiping = true;
 /*
             if (!Ao3Track.Helper.canGoBack && !Ao3Track.Helper.canGoForward) {
                 swipeCleanup();
@@ -91,7 +92,7 @@ namespace Ao3Track {
             let offsetY = Math.abs(lastTouchY - startTouchY);
 
             // Too much y movement? Disable this entirely 
-            if (offsetY >= yLimit * 2) {
+            if (!swiping || offsetY >= yLimit * 2) {
                 swipeCleanup();
                 return false;
             }
@@ -129,6 +130,11 @@ namespace Ao3Track {
 
         function swipeEnd(clientX : number, clientY: number) : boolean
         {
+            if (!swiping) {
+                swipeCleanup(false);
+                return false;
+            }
+            
             let offset = lastTouchX - startTouchX;
             let offsetY = Math.abs(lastTouchY - startTouchY);            
 
