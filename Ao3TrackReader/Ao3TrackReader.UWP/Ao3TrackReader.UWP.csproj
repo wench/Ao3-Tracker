@@ -586,13 +586,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack">
-      <Version>1.5.5</Version>
+      <Version>1.6.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Compilers">
-      <Version>2.3.2</Version>
+      <Version>2.4.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.Compiler">
-      <Version>1.7.0</Version>
+      <Version>1.7.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.SharedLibrary-arm">
       <Version>1.7.0</Version>
@@ -604,13 +604,13 @@
       <Version>1.7.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>5.4.0</Version>
+      <Version>5.4.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETNative.Analyzer">
       <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
-      <Version>2.0.0</Version>
+      <Version>2.0.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>10.0.3</Version>
@@ -631,13 +631,13 @@
       <Version>1.1.8</Version>
     </PackageReference>
     <PackageReference Include="System.Net.Http">
-      <Version>4.3.2</Version>
+      <Version>4.3.3</Version>
     </PackageReference>
     <PackageReference Include="System.ValueTuple">
       <Version>4.4.0</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
-      <Version>2.3.5.256-pre6</Version>
+      <Version>2.4.0.38779</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -676,31 +676,22 @@
   <PropertyGroup>
     <TargetPlatformVersionBuild>$([System.Version]::Parse($(TargetPlatformVersion)).Build)</TargetPlatformVersionBuild>
   </PropertyGroup>
-  <Choose>
-    <When Condition="$(TargetPlatformVersionBuild) &gt; 15063">
-      <PropertyGroup>
-        <DefineConstants>$(DefineConstants);WINDOWS_FUTURE</DefineConstants>
-      </PropertyGroup>
-    </When>
-    <When Condition="$(TargetPlatformVersionBuild) == 15063">
-      <PropertyGroup>
-        <DefineConstants>$(DefineConstants);WINDOWS_15063</DefineConstants>
-      </PropertyGroup>
-    </When>
-    <When Condition="$(TargetPlatformVersionBuild) &gt;= 14393">
-      <PropertyGroup>
-        <DefineConstants>$(DefineConstants);WINDOWS_14393</DefineConstants>
-      </PropertyGroup>
-    </When>
-    <When Condition="$(TargetPlatformVersionBuild) &gt;= 10586">
-      <PropertyGroup>
-        <DefineConstants>$(DefineConstants);WINDOWS_10586</DefineConstants>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <DefineConstants>$(DefineConstants);WINDOWS_10240</DefineConstants>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);WINDOWS_10240;WINDOWS_$(TargetPlatformVersionBuild)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetPlatformVersionBuild) &gt; 16299">
+    <DefineConstants>$(DefineConstants);WINDOWS_FUTURE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetPlatformVersionBuild) &gt;= 16299">
+    <DefineConstants>$(DefineConstants);WINDOWS_16299</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetPlatformVersionBuild) &gt;= 15063">
+    <DefineConstants>$(DefineConstants);WINDOWS_15063</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetPlatformVersionBuild) &gt;= 14393">
+    <DefineConstants>$(DefineConstants);WINDOWS_14393</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetPlatformVersionBuild) &gt;= 10586">
+    <DefineConstants>$(DefineConstants);WINDOWS_10586</DefineConstants>
+  </PropertyGroup>
 </Project>

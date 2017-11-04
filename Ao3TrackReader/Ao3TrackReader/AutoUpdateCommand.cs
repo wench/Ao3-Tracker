@@ -89,15 +89,24 @@ namespace Ao3TrackReader
             this.TriggerProperties = triggerProperties;
         }
 
-        void UpdateTarget(INotifyPropertyChanged newTarget)
+        bool canExecute = false;
+        bool UpdateTarget(INotifyPropertyChanged newTarget)
         {
             if (Target != newTarget)
             {
                 if (Target != null) Target.PropertyChanged -= Target_PropertyChanged;
                 Target = newTarget;
                 if (Target != null) Target.PropertyChanged += Target_PropertyChanged;
+            }
+
+            bool oldExecute = canExecute;
+            canExecute = CanExecute(Target);
+            if (canExecute != oldExecute)
+            {
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
             }
+
+            return canExecute;
         }
 
         private void Target_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -112,8 +121,8 @@ namespace Ao3TrackReader
 
         bool System.Windows.Input.ICommand.CanExecute(object parameter)
         {
-            UpdateTarget((INotifyPropertyChanged)parameter);
-            return CanExecute(Target);
+            
+            return UpdateTarget((INotifyPropertyChanged)parameter); 
         }
 
         void System.Windows.Input.ICommand.Execute(object parameter)

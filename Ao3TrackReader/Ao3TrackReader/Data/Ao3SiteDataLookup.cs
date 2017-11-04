@@ -138,15 +138,15 @@ namespace Ao3TrackReader.Data
                         {
                             if (e.InnerException is WebException webexp)
                             {
-                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + webexp.Status);
+                                WebViewPage.Current.ShowError("Error while getting data from Ao3: " + webexp.Status);
                             }
                             else if (e.InnerException is System.Runtime.InteropServices.COMException comexp && comexp.Data.Contains("RestrictedDescription") && !string.IsNullOrWhiteSpace(comexp.Data["RestrictedDescription"] as string))
                             {
-                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + comexp.Data["RestrictedDescription"] as string);
+                                WebViewPage.Current.ShowError("Error while getting data from Ao3: " + comexp.Data["RestrictedDescription"] as string);
                             }
                             else
                             {
-                                App.Current.WebViewPage.ShowError("Error while getting data from Ao3:" + e.Message);
+                                WebViewPage.Current.ShowError("Error while getting data from Ao3:" + e.Message);
                             }
                         }
                     }
@@ -157,7 +157,7 @@ namespace Ao3TrackReader.Data
                     {
                         if (i == 2)
                         {
-                            App.Current.WebViewPage.ShowError("Error while getting data from Ao3: " + e.Message);
+                            WebViewPage.Current.ShowError("Error while getting data from Ao3: " + e.Message);
                             App.Log(e);
                         }
                     }
@@ -319,18 +319,17 @@ namespace Ao3TrackReader.Data
                 int i = Array.IndexOf(escTagStrings, match.Value);
                 if (i != -1) return usescTagStrings[i];
                 return "";
-            });
+            }).PoolString();
         }
 
         static public string LookupTagQuick(int tagid)
         {
             string tag = App.Database.GetTag(tagid);
             if (!string.IsNullOrEmpty(tag))
-                return tag;
+                return tag.PoolString();
 
             return null;
-        }
-
+        }  
 
         static public async Task<string> LookupTagAsync(int tagid)
         {
@@ -381,7 +380,7 @@ namespace Ao3TrackReader.Data
 
                 }
             }
-
+            tag = tag.PoolString();
             if (!(tag is null)) App.Database.SetTagId(tag, tagid);
             return tag;
         }
@@ -438,7 +437,7 @@ namespace Ao3TrackReader.Data
                     return tag;
                 }
 
-                tag.actual = intag;
+                tag.actual = intag.PoolString();
 
                 var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + EscapeTag(intag));
 
@@ -475,7 +474,7 @@ namespace Ao3TrackReader.Data
                                         // Unlucky we hit a race condition where the merger was already being looked up 
                                         // and our lock on ourselves blocked it from writing this tags details to the db
                                         // Is a small performance loss having to do it here
-                                        tag.actual = merger;
+                                        tag.actual = merger.PoolString();
                                         if (mergertag != null)
                                         {
                                             tag.parentsStr = mergertag.parentsStr;
@@ -561,7 +560,7 @@ namespace Ao3TrackReader.Data
                                                         var syntag = App.Database.GetTag(ssyntag) ?? new TagCache { name = ssyntag };
                                                         if (string.IsNullOrEmpty(syntag?.actual))
                                                         {
-                                                            syntag.actual = tag.actual;
+                                                            syntag.actual = tag.actual.PoolString();
                                                             syntag.parents = tag.parents;
                                                             syntag.category = tag.category;
                                                             App.Database.SetTagDetails(syntag);

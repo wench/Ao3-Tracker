@@ -88,7 +88,7 @@ namespace Ao3TrackReader.Models
 
     public class Ao3RequredTagData
     {
-        public Ao3RequredTagData(string tag, string label) { Tag = tag; Label = label; }
+        public Ao3RequredTagData(string tag, string label) { Tag = tag.PoolString(); Label = label.PoolString(); }
         public string Tag { get; private set; }
         public string Label { get; private set; }
     }
@@ -105,6 +105,7 @@ namespace Ao3TrackReader.Models
         public SortedDictionary<Ao3TagType, List<string>> Tags { set; get; }
 
         public Dictionary<Ao3RequiredTag, Ao3RequredTagData> RequiredTags { get; set; }
+        private static Dictionary<string, Uri> requiredTagUris = new Dictionary<string, Uri>(16);
         public Uri GetRequiredTagUri(Ao3RequiredTag tag) {
             Ao3RequredTagData rt = null;
 
@@ -119,7 +120,13 @@ namespace Ao3TrackReader.Models
                 else if (tag == Ao3RequiredTag.Warnings) rt = new Ao3RequredTagData("warning-none", "None");
             }
 
-            return new Uri("http://archiveofourown.org/images/skins/iconsets/default_large/"+rt.Tag+".png");
+            lock (requiredTagUris)
+            {
+                if (requiredTagUris.TryGetValue(rt.Tag, out var result))
+                    return result;
+
+                return requiredTagUris[rt.Tag] = new Uri("http://archiveofourown.org/images/skins/iconsets/default_large/" + rt.Tag + ".png");
+            }
         }
         public string GetRequiredTagText(Ao3RequiredTag tag)
         {

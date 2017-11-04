@@ -450,7 +450,7 @@ namespace Ao3TrackReader.Models
 
             if (baseData != value) return;
 
-            await App.Current.WebViewPage.DoOnMainThreadAsync(() =>
+            await WebViewPage.Current.DoOnMainThreadAsync(() =>
             {
                 if (baseData != value) return;
 

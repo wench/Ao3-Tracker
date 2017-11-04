@@ -23,7 +23,7 @@ using Windows.UI;
 using Windows.UI.Xaml.Media;
 using System.Reflection;
 
-#if WINDOWS_FUTURE
+#if WINDOWS_16299
 namespace Ao3TrackReader.UWP
 {
     public static class Acrylic

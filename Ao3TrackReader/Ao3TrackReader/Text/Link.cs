@@ -20,7 +20,7 @@ namespace Ao3TrackReader.Text
             if (Click != null)
                 Click(this, new EventArgs<Uri>(Href));
             else if (Href != null)
-                App.Current.WebViewPage.Navigate(Href);
+                WebViewPage.Current.Navigate(Href);
         }
 
         public event EventHandler<EventArgs<Uri>> Click;

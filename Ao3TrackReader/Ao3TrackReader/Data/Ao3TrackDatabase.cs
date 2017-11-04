@@ -440,11 +440,18 @@ namespace Ao3TrackReader
                 if (!ignoreexpires)
                 {
                     var now = DateTime.UtcNow;
-                    return database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
+                    var tag = database.Table<TagCache>().FirstOrDefault(x => x.name == name && x.expires > now);
+                    if (tag?.actual != null) tag.actual = tag.actual.PoolString();
+                    if (tag?.name != null) tag.name = tag.name.PoolString();
+                    return tag;
+
                 }
                 else
                 {
-                    return database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                    var tag = database.Table<TagCache>().FirstOrDefault(x => x.name == name);
+                    if (tag?.actual != null) tag.actual = tag.actual.PoolString();
+                    if (tag?.name != null) tag.name = tag.name.PoolString();
+                    return tag;
                 }
             }
 
@@ -489,6 +496,8 @@ namespace Ao3TrackReader
             lock (locker)
             {
                 var now = DateTime.UtcNow;
+                if (tag.actual != null) tag.actual = tag.actual.PoolString();
+                if (tag.name != null) tag.name = tag.name.PoolString();
                 tag.expires = TagExpires;
                 var row = database.Table<TagCache>().FirstOrDefault(x => x.name == tag.name);
                 if (!(row is null))

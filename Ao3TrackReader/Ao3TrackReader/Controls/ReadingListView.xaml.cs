@@ -28,6 +28,7 @@ using Ao3TrackReader.Models;
 
 namespace Ao3TrackReader.Controls
 {
+    [Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
     public partial class ReadingListView : PaneView
     {
         const int MaxRefreshTasks = 20;
@@ -36,6 +37,10 @@ namespace Ao3TrackReader.Controls
         GroupList<Ao3PageViewModel> readingListBacking;
 
         public DisableableCommand AddToReadingListCommand { get; private set; }
+
+        public MenuOpenLastCommand MenuOpenLastCommand => new MenuOpenLastCommand { ReadingList = this };
+        public MenuOpenFullWorkLastCommand MenuOpenFullWorkLastCommand => new MenuOpenFullWorkLastCommand { ReadingList = this };
+        public MenuOpenFullWorkCommand MenuOpenFullWorkCommand => new MenuOpenFullWorkCommand { ReadingList = this };
 
         public ReadingListView()
         {
@@ -135,15 +140,19 @@ namespace Ao3TrackReader.Controls
 
                                     if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) is null)
                                     {
-                                        var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null, model.Value.Type == Ao3PageType.Work?tagTypeVisible:null)
+                                        var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null, model.Value.Type == Ao3PageType.Work ? tagTypeVisible : null)
                                         {
                                             TagsVisible = tags_visible
                                         };
-                                        viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                                        readingListBacking.Add(viewmodel);
+
+                                        await wvp.DoOnMainThreadAsync(() =>
+                                        {
+                                            viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                                            readingListBacking.Add(viewmodel);
+                                        });
 
                                         await tasklimit.WaitAsync();
-                                        tasks.Enqueue(Task.Run(async () =>
+                                        tasks.Enqueue(wvp.DoOnMainThreadAsync(async () =>
                                         {
                                             await viewmodel.SetBaseDataAsync(model.Value);
                                             tasklimit.Release();
@@ -263,16 +272,19 @@ namespace Ao3TrackReader.Controls
         public IEnumerable<Models.IHelpInfo> HelpItems {
             get
             {
-                return ExtraHelp.Concat(ButtonBarHelpItems);
+                var extraHelp = Resources["ExtraHelp"] as HelpInfo[];
+                return extraHelp.Concat(ButtonBarHelpItems);
             }
         }
 
         Ao3PageViewModel selectedItem;
         private void UpdateSelectedItem(Ao3PageViewModel newselected)
         {
-            if (!(selectedItem is null) && newselected != selectedItem) selectedItem.IsSelected = false;
+            var oldSelected = selectedItem;
             selectedItem = null;
             ListView.SelectedItem = null;
+
+            if (!(oldSelected is null) && newselected != oldSelected) oldSelected.IsSelected = false;
 
             if (!(newselected is null))
             {

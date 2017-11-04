@@ -45,6 +45,8 @@ namespace Ao3TrackReader.UWP
         {
             ushort limit;
 #if WINDOWS_FUTURE
+            limit = 10;
+#elif WINDOWS_16299
             limit = 5;
 #elif WINDOWS_15063
             limit = 4;

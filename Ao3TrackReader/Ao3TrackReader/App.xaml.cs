@@ -204,16 +204,13 @@ namespace Ao3TrackReader
         }
        
 
-        WebViewPage wvp;
-        public WebViewPage WebViewPage => wvp;
-
         public App(bool networkstate)
         {
             HaveNetwork = networkstate;
             InitializeComponent();
 
             // The root page of your application
-            MainPage = new NavigationPage(wvp = new WebViewPage());
+            MainPage = new NavigationPage(new WebViewPage());
         }
 
         protected override void OnStart()
@@ -224,13 +221,13 @@ namespace Ao3TrackReader
         protected override void OnSleep()
         {
             // Handle when your app sleeps
-            wvp.OnSleep();
+            WebViewPage.Current.OnSleep();
         }
 
         protected override void OnResume()
         {
             // Handle when your app resumes
-            wvp.OnResume();
+            WebViewPage.Current.OnResume();
         }
 
         protected override void OnPropertyChanged(string propertyName = null)

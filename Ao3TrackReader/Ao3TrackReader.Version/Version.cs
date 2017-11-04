@@ -12,10 +12,10 @@ namespace Ao3TrackReader.Version
         public const int Build = 0;
         public const int Revision = 1;
 
-        public const string String = "1.1.0.1";
-        public const string IOS = "1.1.1";
-        public const string UWP = "1.1.1.0";
-        public const string Win81 = "1.1.0.1";
+        public const string String = "1.1.0.2";
+        public const string IOS = "1.1.2";
+        public const string UWP = "1.1.2.0";
+        public const string Win81 = "1.1.0.2";
         public const int Integer = Major * 100000000 + Minor * 100000 + Build * 100 + Revision;
 
         public const string Copyright = "Copyright © 2017 Alexis Ryan";

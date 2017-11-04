@@ -30,7 +30,7 @@ namespace Ao3TrackReader.Text
     {
         protected Inline ApplyStyles(Inline i)
         {
-#if WINDOWS_15063 || WINDOWS_FUTURE
+#if WINDOWS_15063
             if (Ao3TrackReader.UWP.App.UniversalApi >= 4)
             {
                 i.TextDecorations = TextDecorations.None;

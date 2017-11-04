@@ -47,11 +47,11 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        static bool GetCondition(VisualElement obj) { return (bool)obj.GetValue(ConditionProperty); }
-        static void SetCondition(VisualElement obj, bool value) { obj.SetValue(ConditionProperty, value); }
-        static Color GetColorTrue(VisualElement obj) { return (Color)obj.GetValue(ColorTrueProperty); }
-        static void SetColorTrue (VisualElement obj, Color value) { obj.SetValue(ColorTrueProperty, value); }
-        static Color GetColorFalse(VisualElement obj) { return (Color)obj.GetValue(ColorFalseProperty); }
-        static void SetColorFalse(VisualElement obj, Color value) { obj.SetValue(ColorFalseProperty, value); }
+        public static bool GetCondition(VisualElement obj) { return (bool)obj.GetValue(ConditionProperty); }
+        public static void SetCondition(VisualElement obj, bool value) { obj.SetValue(ConditionProperty, value); }
+        public static Color GetColorTrue(VisualElement obj) { return (Color)obj.GetValue(ColorTrueProperty); }
+        public static void SetColorTrue (VisualElement obj, Color value) { obj.SetValue(ColorTrueProperty, value); }
+        public static Color GetColorFalse(VisualElement obj) { return (Color)obj.GetValue(ColorFalseProperty); }
+        public static void SetColorFalse(VisualElement obj, Color value) { obj.SetValue(ColorFalseProperty, value); }
     }
 }

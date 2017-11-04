@@ -66,6 +66,9 @@ namespace Ao3TrackReader
 
         public void AddSorted(T item)
         {
+            if (!WebViewPage.Current.IsMainThread)
+                throw new InvalidOperationException();
+
             var comparable = item as IComparable<T>;
             if (comparable == null)
             {
@@ -91,6 +94,9 @@ namespace Ao3TrackReader
 
         public void ResortItem(T item)
         {
+            if (!WebViewPage.Current.IsMainThread)
+                throw new InvalidOperationException();
+
             var comparable = item as IComparable<T>;
             if (comparable == null)
             {
@@ -127,11 +133,17 @@ namespace Ao3TrackReader
 
         protected override void InsertItem(int index, T item)
         {
+            if (!WebViewPage.Current.IsMainThread)
+                throw new InvalidOperationException();
+
             base.InsertItem(index, item);
         }
 
         protected override void RemoveItem(int index)
         {
+            if (!WebViewPage.Current.IsMainThread)
+                throw new InvalidOperationException();
+
             base.RemoveItem(index);
         }
     }
@@ -146,6 +158,9 @@ namespace Ao3TrackReader
 
         public void Add(T item)
         {
+            if (!WebViewPage.Current.IsMainThread)
+                throw new InvalidOperationException();
+
             lock (locker)
             {
                 // Add the item to the correct list
@@ -157,6 +172,9 @@ namespace Ao3TrackReader
 
         public void Remove(T item)
         {
+            if (!WebViewPage.Current.IsMainThread)
+                throw new InvalidOperationException();
+
             lock (locker)
             {
                 item.PropertyChanged -= Item_PropertyChanged;
@@ -280,6 +298,9 @@ namespace Ao3TrackReader
             get { return show_hidden; }
             set
             {
+                if (!WebViewPage.Current.IsMainThread)
+                    throw new InvalidOperationException();
+
                 lock (locker)
                 {
                     if (show_hidden != value)

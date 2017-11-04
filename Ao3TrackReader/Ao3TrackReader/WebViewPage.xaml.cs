@@ -66,6 +66,8 @@ namespace Ao3TrackReader
 {
     public sealed partial class WebViewPage : ContentPage, IWebViewPage, IPageEx, IWebViewPageNative
     {
+        public static WebViewPage Current { get; private set; }
+
         IAo3TrackHelper helper;
 
 
@@ -108,6 +110,8 @@ namespace Ao3TrackReader
 
         public WebViewPage()
         {
+            Current = this;
+
             InitializeToolbarCommands();
 
             TitleEx = "Loading...";

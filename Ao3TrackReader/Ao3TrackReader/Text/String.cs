@@ -21,6 +21,7 @@ using System.Text;
 
 namespace Ao3TrackReader.Text
 {
+    [Xamarin.Forms.ContentProperty("Text")]
     public partial class String : TextEx
     {
         public String()

@@ -21,7 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Media;
 
-#if WINDOWS_FUTURE
+#if WINDOWS_16299
 [assembly: Xamarin.Forms.Platform.UWP.ExportRenderer(typeof(Ao3TrackReader.Controls.PaneView), typeof(Ao3TrackReader.UWP.PaneViewRenderer))]
 namespace Ao3TrackReader.UWP
 {

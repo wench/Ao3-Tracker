@@ -15,20 +15,27 @@ See the License for the specific language governing permissions and
 limitations under the License.   
 -->
 <local:PaneView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-                xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:html="clr-namespace:Ao3TrackReader.Text" xmlns:m="clr-namespace:Ao3TrackReader.Models" 
+                xmlns:html="clr-namespace:Ao3TrackReader.Text" xmlns:m="clr-namespace:Ao3TrackReader.Models" 
                 x:Class="Ao3TrackReader.Controls.ReadingListView" x:Name="root">
     <ContentPage.Resources>
         <ResourceDictionary>
-            <c:List x:Key="ExtraHelp" x:Name="ExtraHelp" x:TypeArguments="m:HelpInfo" >
+            <x:Array x:Key="ExtraHelp" Type="{Type m:HelpInfo}"  >
                 <m:HelpInfo Text="Tap" Icon="{StaticResource TapIcon}" Group="Reading List">
                     <m:HelpInfo.Description>
-                        <html:Span Pad="True">Tap, or left mouse click, on Reading List items, to browse to the item. If the item is a work or series it will open at the<html:Em>Read To Location.</html:Em></html:Span>
+                        <html:Span Pad="True">
+                            <html:Span.Nodes>
+                                <html:String>Tap, or left mouse click, on Reading List items, to browse to the item. If the item is a work or series it will open at the</html:String>
+                                <html:Em>
+                                    <html:String>Read To Location.</html:String>
+                                </html:Em>
+                            </html:Span.Nodes>
+                        </html:Span>
                     </m:HelpInfo.Description>
                 </m:HelpInfo>
                 <m:HelpInfo Text="Tap and Hold" Icon="{StaticResource TapHoldIcon}" Group="Reading List">
                     <m:HelpInfo.Description>Tap and hold, or right mouse click, on Reading List items to bring up a context menu. In the context menu you can choose how to open the item, refresh the details of the item from the Ao3 site or delete the item from the reading list.</m:HelpInfo.Description>
                 </m:HelpInfo>
-            </c:List>
+            </x:Array>
         </ResourceDictionary>
     </ContentPage.Resources>
     
@@ -62,10 +69,10 @@ limitations under the License.
                     <DataTemplate>
                         <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
                             <ViewCell.ContextActions>
-                                <MenuItem Text="Open at Read To Location" Command="{local:MenuOpenLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open at Read To Location" Command="{Binding MenuOpenLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Open"                     Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open Full Work at Read To Location" Command="{local:MenuOpenFullWorkLastCommand ReadingList={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open Full Work"           Command="{local:MenuOpenFullWorkCommand ReadingList={x:Reference root}}"  CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open Full Work at Read To Location" Command="{Binding MenuOpenFullWorkLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
+                                <MenuItem Text="Open Full Work"           Command="{Binding MenuOpenFullWorkCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Copy Link"                Clicked="OnMenuCopyLink" CommandParameter="{Binding .}" />
                                 <MenuItem Text="Refresh"                  Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
                                 <MenuItem Text="Delete"                   Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />

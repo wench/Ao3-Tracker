@@ -56,7 +56,7 @@ namespace Ao3TrackReader.Text
             return new Span(col);
         }
 
-        public static implicit operator TextEx(List<object> col)
+        public static explicit operator TextEx(List<object> col)
         {
             var l = new List<TextEx>(col.Count);
             foreach (var o in col)
@@ -75,7 +75,7 @@ namespace Ao3TrackReader.Text
 
         public abstract bool IsEmpty { get; }
 
-        public static implicit operator Xamarin.Forms.FormattedString (TextEx t)
+        public static explicit operator Xamarin.Forms.FormattedString (TextEx t)
         {
             var xstring = new Xamarin.Forms.FormattedString();
 

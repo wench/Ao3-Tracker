@@ -232,5 +232,20 @@ namespace Ao3TrackReader
             if (obj == null) return 0;
             return obj.GetHashCode();
         }
+
+
+        static private Dictionary<string, string> pooledStrings = new Dictionary<string, string>();
+        static public string PoolString(this string tag)
+        {
+            if (tag == null) return null;
+            lock (pooledStrings)
+            {
+                if (pooledStrings.TryGetValue(tag, out var result))
+                    return result;
+
+                return pooledStrings[tag] = tag;
+            }
+        }
+
     }
 }
