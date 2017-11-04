@@ -74,7 +74,6 @@ namespace Ao3TrackReader.Controls
             if (newValue == true)
             {
                 UpdateSyncForm();
-                httpsSwitch.IsToggled = Data.Ao3SiteDataLookup.UseHttps;
                 sendErrorsSwitch.IsToggled = App.LogErrors;
                 backButtonSetting.IsVisible = App.HaveOSBackButton;
                 UpdateListFilters();
@@ -85,11 +84,6 @@ namespace Ao3TrackReader.Controls
         public void OnSendErrorsSwitch(object sender, EventArgs e)
         {
             App.LogErrors = sendErrorsSwitch.IsToggled;
-        }
-
-        public void OnHttpsSwitch(object sender, EventArgs e)
-        {
-            Data.Ao3SiteDataLookup.UseHttps = httpsSwitch.IsToggled;
         }
 
         public void OnSyncLogin(object sender, EventArgs e)

@@ -144,7 +144,7 @@ namespace Ao3TrackReader
             if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out uri))
                 uri = Data.Ao3SiteDataLookup.CheckUri(uri);
 
-            if (uri == null) uri = new Uri("http://archiveofourown.org/");
+            if (uri == null) uri = new Uri("https://archiveofourown.org/");
 
             // restore font size!
             if (App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
@@ -462,7 +462,7 @@ namespace Ao3TrackReader
 
             await DoOnMainThreadAsync(() =>
             {
-                UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
+                UriBuilder uri = new UriBuilder("https://archiveofourown.org/works/" + workid.ToString());
                 if (!fullwork && workchaps.TryGetValue(workid, out var wc) && wc.chapterid != 0)
                 {
                     uri.Path = uri.Path += "/chapters/" + wc.chapterid;
@@ -477,7 +477,7 @@ namespace Ao3TrackReader
         {
             DoOnMainThreadAsync(() =>
             {
-                UriBuilder uri = new UriBuilder("http://archiveofourown.org/works/" + workid.ToString());
+                UriBuilder uri = new UriBuilder("https://archiveofourown.org/works/" + workid.ToString());
                 if (fullwork) uri.Query = "view_full_work=true";
                 uri.Fragment = "ao3tjump";
                 Navigate(uri.Uri);
@@ -507,7 +507,7 @@ namespace Ao3TrackReader
             urlBar.Unfocus();
             try
             {
-                var uri = Ao3SiteDataLookup.CheckUri(new Uri(new Uri("http://archiveofourown.org/"), urlEntry.Text));
+                var uri = Ao3SiteDataLookup.CheckUri(new Uri(new Uri("https://archiveofourown.org/"), urlEntry.Text));
                 if (uri != null)
                 {
                     Navigate(uri);

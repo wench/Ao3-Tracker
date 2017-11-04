@@ -199,14 +199,6 @@ limitations under the License.
                                 </StackLayout>
                                 <Label Text="Ao3Track Reader is setup to automatically send error reports to the developers when the application encounters a problem. The reports may contain personal and personally identifiable data." Style="{StaticResource Remark}" />
                             </StackLayout>
-
-                            <StackLayout Style="{StaticResource SettingVert}">
-                                <StackLayout Style="{StaticResource Setting}">
-                                    <Label Text="Use secure browsing on Ao3" HorizontalOptions="StartAndExpand" />
-                                    <Switch x:Name="httpsSwitch" Toggled="OnHttpsSwitch" HorizontalOptions="EndAndExpand" />
-                                </StackLayout>
-                                <Label Text="Ao3Track Reader is setup to use HTTPS secure browsing on Archive of Our Own by default. If you experience problems you can turn off this feature." Style="{StaticResource Remark}" />
-                            </StackLayout>
                         </StackLayout>
 
                         <StackLayout Spacing="4">

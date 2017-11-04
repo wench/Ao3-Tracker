@@ -102,12 +102,7 @@ namespace Ao3TrackReader.Data
                 MaxRequestContentBufferSize = 1 << 20
             };
             HttpClient = new HttpClient(httpClientHandler);
-#if __IOS__
-            use_https = true;
-#else
-            if (!App.Database.TryGetVariable("UseHttps", bool.TryParse, out use_https, true))
-                App.Database.SaveVariable("UseHttps", use_https.ToString());
-#endif
+
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dd"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dt"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
@@ -223,7 +218,7 @@ namespace Ao3TrackReader.Data
                                 workLookupWorkers.Remove(this);
                             }
 
-                            var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A%28" + string.Join("+OR+", works) + "%29");
+                            var wsuri = new Uri(@"https://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A%28" + string.Join("+OR+", works) + "%29");
                             var response = await HttpRequestAsync(wsuri);
 
                             if (response.IsSuccessStatusCode)
@@ -276,30 +271,6 @@ namespace Ao3TrackReader.Data
             }
         }
 
-        static bool use_https = false;
-        public static bool UseHttps
-        {
-            get
-            {
-                return use_https;
-            }
-            set
-            {
-                if (use_https != value)
-                {
-                    use_https = value;
-                    App.Database.SaveVariable("UseHttps", use_https);
-                }
-            }
-        }
-
-        public static string Scheme
-        {
-            get { return UseHttps ? "https" : "http"; }
-        }
-
-
-
         static string EscapeTag(string tag)
         {
             if (tag is null) return null;
@@ -338,7 +309,7 @@ namespace Ao3TrackReader.Data
                 return tag;
 
             tag = null;
-            var uri = new Uri(Scheme + @"://archiveofourown.org/tags/feed/" + tagid.ToString());
+            var uri = new Uri(@"https://archiveofourown.org/tags/feed/" + tagid.ToString());
 
             var response = await HttpRequestAsync(uri, mediaType: "application/atom+xml", completionOption: HttpCompletionOption.ResponseHeadersRead);
 
@@ -439,7 +410,7 @@ namespace Ao3TrackReader.Data
 
                 tag.actual = intag.PoolString();
 
-                var uri = new Uri(Scheme + @"://archiveofourown.org/tags/" + EscapeTag(intag));
+                var uri = new Uri(@"https://archiveofourown.org/tags/" + EscapeTag(intag));
 
                 var response = await HttpRequestAsync(uri);
 
@@ -673,7 +644,7 @@ namespace Ao3TrackReader.Data
         {
             string name = null;
 
-            var uri = new Uri(Scheme + @"://archiveofourown.org/works/search");
+            var uri = new Uri(@"https://archiveofourown.org/works/search");
 
             var response = await HttpRequestAsync(uri);
 
@@ -721,12 +692,12 @@ namespace Ao3TrackReader.Data
         {
             if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
             {
-                if (uri.Scheme != Scheme || uri.Port != -1 || uri.Host == "www.archiveofourown.org")
+                if (uri.Scheme == "http" || uri.Port != -1 || uri.Host == "www.archiveofourown.org")
                 {
                     var uribuilder = new UriBuilder(uri)
                     {
                         Host = "archiveofourown.org",
-                        Scheme = Scheme,
+                        Scheme = "https",
                         Port = -1
                     };
                     uri = uribuilder.Uri;
@@ -1032,7 +1003,7 @@ namespace Ao3TrackReader.Data
                 {
                     WorkId = long.Parse(sWORKID)
                 };
-                var wsuri = new Uri(Scheme + @"://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
+                var wsuri = new Uri(@"https://archiveofourown.org/works/search?utf8=%E2%9C%93&work_search%5Bquery%5D=id%3A" + sWORKID);
 
                 var worknode = await WorkWorker.LookupSummaryAsync(model.Details.WorkId);
 
@@ -2077,7 +2048,7 @@ namespace Ao3TrackReader.Data
 
             if (model?.Type != Ao3PageType.Work) return null;
 
-            uri = new Uri(Scheme + @"://archiveofourown.org/works/" + model.Details.WorkId + "/navigate");
+            uri = new Uri(@"https://archiveofourown.org/works/" + model.Details.WorkId + "/navigate");
             var response = await HttpRequestAsync(uri);
 
             if (!response.IsSuccessStatusCode) return null;

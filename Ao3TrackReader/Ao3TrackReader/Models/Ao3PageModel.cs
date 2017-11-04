@@ -125,7 +125,7 @@ namespace Ao3TrackReader.Models
                 if (requiredTagUris.TryGetValue(rt.Tag, out var result))
                     return result;
 
-                return requiredTagUris[rt.Tag] = new Uri("http://archiveofourown.org/images/skins/iconsets/default_large/" + rt.Tag + ".png");
+                return requiredTagUris[rt.Tag] = new Uri("https://archiveofourown.org/images/skins/iconsets/default_large/" + rt.Tag + ".png");
             }
         }
         public string GetRequiredTagText(Ao3RequiredTag tag)
