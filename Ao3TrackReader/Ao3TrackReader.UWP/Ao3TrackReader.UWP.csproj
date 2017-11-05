@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props') AND '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone'" />
+  <PropertyGroup Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone' ">
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{7999D149-34F8-45C9-9281-9E5564D1AD8B}</ProjectGuid>
@@ -11,7 +11,7 @@
     <AssemblyName>Ao3TrackReader.UWP</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.15063.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.16299.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -99,10 +99,11 @@
     <Prefer32Bit>true</Prefer32Bit>
     <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone' ">
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <None Include="Ao3TrackReader.UWP_StoreKey.pfx" />
     <None Include="Ao3TrackReader.UWP_TemporaryKey.pfx" />
+    <None Include="Package.StoreAssociation.xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Acrylic.cs" />
@@ -119,7 +120,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone' ">
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
@@ -504,7 +505,6 @@
     <Content Include="Assets\Wide310x150Logo.scale-125.png" />
     <Content Include="Assets\Wide310x150Logo.scale-150.png" />
     <Content Include="Assets\Wide310x150Logo.scale-400.png" />
-    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -578,7 +578,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone' ">
     <ProjectReference Include="..\Ao3TrackReader.Helper.UWP\Ao3TrackReader.Helper.UWP.csproj">
       <Project>{d937e5eb-e65c-4397-80af-502c439d0470}</Project>
       <Name>Ao3TrackReader.Helper.UWP</Name>
@@ -595,16 +595,16 @@
       <Version>1.7.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.SharedLibrary-arm">
-      <Version>1.7.0</Version>
+      <Version>2.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.SharedLibrary-x64">
-      <Version>1.7.0</Version>
+      <Version>2.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Native.SharedLibrary-x86">
-      <Version>1.7.0</Version>
+      <Version>2.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>5.4.1</Version>
+      <Version>6.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETNative.Analyzer">
       <Version>1.0.0</Version>
@@ -654,10 +654,10 @@
   <PropertyGroup>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition="Exists('..\Ao3TrackReader\Ao3TrackReader.projitems')" />
-  <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" />
-  <Import Project="..\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems" Label="Shared" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <Import Project="..\Ao3TrackReader\Ao3TrackReader.projitems" Label="Shared" Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone'" />
+  <Import Project="..\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems" Label="Shared" Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone'" />
+  <Import Project="..\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems" Label="Shared" Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone'" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" Condition=" '$(AssemblyName)' != 'Ao3TrackReader.UWP.Phone'" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>

@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:mobile="http://schemas.microsoft.com/appx/manifest/mobile/windows10" IgnorableNamespaces="uap mp mobile">
-  <Identity Name="34642MonochromeWench.Ao3TrackReader" Publisher="CN=57467E77-D7D9-466E-BDFA-FA86A2AD5DA9" Version="1.1.4.0" />
-  <mp:PhoneIdentity PhoneProductId="960477de-590c-42b4-aa98-80bc87d8efa2" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
+  <Identity Name="34642MonochromeWench.Ao3TrackReader" Publisher="CN=57467E77-D7D9-466E-BDFA-FA86A2AD5DA9" Version="1.1.5.0" />
+  <mp:PhoneIdentity PhoneProductId="31275e90-4a86-40dd-b296-bebd618fa436" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Ao3Track Reader</DisplayName>
     <PublisherDisplayName>Alexis Ryan</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+    <TargetDeviceFamily Name="Windows.Mobile" MinVersion="10.0.10240.0" MaxVersionTested="10.0.15063.0" />
   </Dependencies>
   <Resources>
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Ao3TrackReader.UWP.App">
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Ao3TrackReader.UWP.Phone.App">
       <uap:VisualElements DisplayName="Ao3Track Reader" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Ao3Track Reader for Windows Universal Platform" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Ao3Track Reader" Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
           <uap:ShowNameOnTiles>

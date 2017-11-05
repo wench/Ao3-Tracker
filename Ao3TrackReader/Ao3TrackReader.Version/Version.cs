@@ -10,13 +10,18 @@ namespace Ao3TrackReader.Version
         public const int Major = 1;
         public const int Minor = 1;
         public const int Build = 0;
-        public const int Revision = 1;
+        public const int Revision = 2;
 
         public const string String = "1.1.0.2";
-        public const string IOS = "1.1.2";
-        public const string UWP = "1.1.2.0";
-        public const string Win81 = "1.1.0.2";
         public const int Integer = Major * 100000000 + Minor * 100000 + Build * 100 + Revision;
+
+        public static string Full => $"{Major}.{Minor}.{Build}.{Revision}";
+        public static string Droid => $"{Integer}";
+        public static string IOS => $"{Major}.{Minor}.{Build * 100 + Revision * 2}";
+        public static string UWP => $"{Major}.{Minor}.{Build * 100 + Revision * 2}.0";
+        public static string UWP_Phone => $"{Major}.{Minor}.{Build * 100 + Revision * 2 + 1}.0";
+        public static string Win81 => $"{Major}.{Minor}.0.{Build * 100 + Revision}";
+
 
         public const string Copyright = "Copyright © 2017 Alexis Ryan";
 

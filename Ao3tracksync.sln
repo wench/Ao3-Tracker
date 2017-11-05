@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3tracksync", "Ao3tracksync\Ao3tracksync.csproj", "{0BD8C8F9-C0E4-4841-8A2B-CA8BC2AA8BC6}"
 EndProject
@@ -34,6 +34,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.WinRT", "Ao3
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Helper.Messaging", "Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.shproj", "{29356923-19E8-4AE3-B98F-F828F5033317}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.UWP.Phone", "Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Phone.csproj", "{976C2593-9C14-4289-AE54-F2BB2020BA84}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{02c7179c-1598-47a9-b351-d71649ab7994}*SharedItemsImports = 4
@@ -45,6 +47,9 @@ Global
 		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{7b291718-eb18-4e7a-b547-1fe74df1e279}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4
+		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.projitems*{b08a8cc6-dfc7-45c9-bb76-7cac03075005}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{b08a8cc6-dfc7-45c9-bb76-7cac03075005}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{b08a8cc6-dfc7-45c9-bb76-7cac03075005}*SharedItemsImports = 4
@@ -229,8 +234,55 @@ Global
 		{02C7179C-1598-47A9-B351-D71649AB7994}.Release|x64.Build.0 = Release|Any CPU
 		{02C7179C-1598-47A9-B351-D71649AB7994}.Release|x86.ActiveCfg = Release|Any CPU
 		{02C7179C-1598-47A9-B351-D71649AB7994}.Release|x86.Build.0 = Release|Any CPU
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|Any CPU.ActiveCfg = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|Any CPU.Build.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|Any CPU.Deploy.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|ARM.ActiveCfg = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|ARM.Build.0 = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|ARM.Deploy.0 = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|x64.ActiveCfg = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|x64.Build.0 = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|x64.Deploy.0 = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|x86.ActiveCfg = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|x86.Build.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Ad-Hoc|x86.Deploy.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|Any CPU.ActiveCfg = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|Any CPU.Build.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|Any CPU.Deploy.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|ARM.ActiveCfg = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|ARM.Build.0 = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|ARM.Deploy.0 = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|x64.ActiveCfg = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|x64.Build.0 = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|x64.Deploy.0 = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|x86.ActiveCfg = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|x86.Build.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.AppStore|x86.Deploy.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|ARM.ActiveCfg = Debug|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|ARM.Build.0 = Debug|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|ARM.Deploy.0 = Debug|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|x64.ActiveCfg = Debug|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|x64.Build.0 = Debug|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|x64.Deploy.0 = Debug|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|x86.ActiveCfg = Debug|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|x86.Build.0 = Debug|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Debug|x86.Deploy.0 = Debug|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|Any CPU.ActiveCfg = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|ARM.ActiveCfg = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|ARM.Build.0 = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|ARM.Deploy.0 = Release|ARM
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|x64.ActiveCfg = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|x64.Build.0 = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|x64.Deploy.0 = Release|x64
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|x86.ActiveCfg = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|x86.Build.0 = Release|x86
+		{976C2593-9C14-4289-AE54-F2BB2020BA84}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F37A3C83-0A22-4EA1-B325-D24583CDDB6A}
 	EndGlobalSection
 EndGlobal

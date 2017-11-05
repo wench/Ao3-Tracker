@@ -43,9 +43,12 @@ namespace Ao3TrackReader.Version.Build
                     var n = doc.SelectSingleNode(args[i].Substring(0,o), nsmanager);
                     if (n == null) throw new ArgumentException("Can't find element", "args["+i+"]");
 
-                    var sourcefield = ti_version.GetField(args[i].Substring(o + 1));
-                    string newValue = sourcefield?.GetValue(null)?.ToString();
-                    if (newValue == null) throw new ArgumentException("Unknown field", "args[" + i + "]");
+                    string newValue = null;
+
+                    var sourceprop = ti_version.GetProperty(args[i].Substring(o + 1));
+                    newValue = sourceprop?.GetValue(null)?.ToString();
+
+                    if (newValue == null) throw new ArgumentException("Unknown property", "args[" + i + "]");
 
                     if (n.InnerText != newValue)
                     {

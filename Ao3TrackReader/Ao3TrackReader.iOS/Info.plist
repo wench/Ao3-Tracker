@@ -46,7 +46,7 @@
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen.storyboard</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1.2</string>
+    <string>1.1.0.2</string>
     <key>UIMainStoryboardFile~ipad</key>
     <string>LaunchScreen</string>
     <key>UIMainStoryboardFile</key>
