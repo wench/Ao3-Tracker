@@ -22,61 +22,157 @@ using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 using System.Reflection;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Hosting;
+using Microsoft.Graphics.Canvas.Effects;
+using Windows.UI.Composition;
+using Windows.UI.Xaml.Controls;
 
-#if WINDOWS_16299
+#if WINDOWS_15063
 namespace Ao3TrackReader.UWP
 {
-    public static class Acrylic
+    public class Acrylic
     {
-        static void LoadAcrylicBrush(Xamarin.Forms.Color color, double opacity, ref XamlCompositionBrushBase brush)
+        Brush brush;
+        Color color;
+        float opacity;
+
+        public Acrylic(Color color, double opacity = 0.6f)
         {
-            if (Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.UI.Xaml.Media.AcrylicBrush"))
+            this.color = color;
+            this.opacity = (float) opacity;
+
+#if WINDOWS_16299
+            if (App.UniversalApi >= 5 && Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.UI.Xaml.Media.AcrylicBrush"))
             {
-                var acrylicBrush = new Windows.UI.Xaml.Media.AcrylicBrush();
-                Color tint = color.ToWindows();
+                var acrylicBrush = new AcrylicBrush();
+                Color tint = color;
                 tint.A = 0xFF;
                 acrylicBrush.TintColor = tint;
                 acrylicBrush.TintOpacity = opacity;
-                acrylicBrush.FallbackColor = color.ToWindows();
+                acrylicBrush.FallbackColor = color;
                 acrylicBrush.BackgroundSource = AcrylicBackgroundSource.Backdrop;
                 brush = acrylicBrush;
             }
+#endif
         }
 
-        static XamlCompositionBrushBase veryHigh;
-        static public XamlCompositionBrushBase VeryHigh
+        class GlassCanvas : Canvas
+        {
+            public GlassCanvas() : base()
+            {
+
+            }
+        }
+
+        bool TrySetCompositorAcrylic(Panel elem)
+        {
+            if (App.UniversalApi >= 3 && Windows.Foundation.Metadata.ApiInformation.IsMethodPresent("Windows.UI.Composition.Compositor", "CreateBackdropBrush"))
+            {
+                GlassCanvas glassHost = elem.Children.FirstOrDefault((c) => c is GlassCanvas) as GlassCanvas;
+                if (glassHost != null) elem.Children.Remove(glassHost);
+                else glassHost = new GlassCanvas();
+                glassHost.Width = elem.ActualWidth;
+                glassHost.Height = elem.ActualHeight;
+                glassHost.HorizontalAlignment = HorizontalAlignment.Stretch;
+                glassHost.VerticalAlignment = VerticalAlignment.Stretch;
+
+                elem.Children.Insert(0, glassHost);
+
+                var hostVisual = ElementCompositionPreview.GetElementVisual(elem);
+                var compositor = hostVisual.Compositor;
+
+                Color tint = color;
+                tint.A = 0xFF;
+
+                var glassEffect = new GaussianBlurEffect
+                {
+                    BlurAmount = 30.0f,
+                    BorderMode = EffectBorderMode.Hard,
+                    Source = new ArithmeticCompositeEffect
+                    {
+                        MultiplyAmount = 0,
+                        Source1Amount = 1f - opacity,
+                        Source2Amount = opacity,
+                        Source1 = new CompositionEffectSourceParameter("backdropBrush"),
+                        Source2 = new ColorSourceEffect
+                        {
+                            Color = tint
+                        }
+                    }
+                };
+
+                var effectFactory = compositor.CreateEffectFactory(glassEffect);
+                var effectBrush = effectFactory.CreateBrush();
+                effectBrush.SetSourceParameter("backdropBrush", compositor.CreateBackdropBrush());
+
+                // Create a Visual to contain the frosted glass effect
+                var glassVisual = compositor.CreateSpriteVisual();
+                glassVisual.Brush = effectBrush;
+
+                // Make sure size of glass host and glass visual always stay in sync
+                var bindSizeAnimation = compositor.CreateExpressionAnimation("hostVisual.Size");
+                bindSizeAnimation.SetReferenceParameter("hostVisual", hostVisual);
+
+                glassVisual.StartAnimation("Size", bindSizeAnimation);
+
+                ElementCompositionPreview.SetElementChildVisual(glassHost, glassVisual);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TrySet(Panel elem)
+        {
+            if (brush != null)
+            {
+                elem.Background = brush;
+                return true;
+            }
+            if (TrySetCompositorAcrylic(elem))
+            {
+                return true;
+            }
+            return false;
+
+        }
+
+        static Acrylic veryHigh;
+        public static Acrylic VeryHigh
         {
             get
             {
-                if (App.UniversalApi >= 5 && veryHigh is null)
+                if (veryHigh is null)
                 {
-                    LoadAcrylicBrush(Resources.Colors.Alt.Trans.VeryHigh, 0.6, ref veryHigh);
+                    veryHigh = new Acrylic(Resources.Colors.Alt.Trans.VeryHigh.ToWindows(), 0.6);
                 }
                 return veryHigh;
             }
         }
 
-        static XamlCompositionBrushBase high;
-        static public XamlCompositionBrushBase High
+        static Acrylic high;
+        static public Acrylic High
         {
             get
             {
                 if (App.UniversalApi >= 5 && high is null)
                 {
-                    LoadAcrylicBrush(Resources.Colors.Alt.Trans.High, 0.6, ref high);
+                    high = new Acrylic(Resources.Colors.Alt.Trans.High.ToWindows(), 0.6);
                 }
                 return high;
             }
         }
 
-        static XamlCompositionBrushBase mediumHigh;
-        static public XamlCompositionBrushBase MediumHigh
+        static Acrylic mediumHigh;
+        static public Acrylic MediumHigh
         {
             get
             {
                 if (App.UniversalApi >= 5 && mediumHigh is null)
                 {
-                    LoadAcrylicBrush(Resources.Colors.Alt.Trans.MediumHigh, 0.6, ref mediumHigh);
+                    mediumHigh = new Acrylic(Resources.Colors.Alt.Trans.MediumHigh.ToWindows(), 0.6);
                 }
                 return mediumHigh;
             }

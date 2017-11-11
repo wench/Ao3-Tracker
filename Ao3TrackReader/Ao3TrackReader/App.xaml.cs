@@ -46,6 +46,7 @@ namespace Ao3TrackReader
         ARM64 = 4
     }
 
+    [Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
     public partial class App : Application
     {
         public new static App Current => (App)Application.Current;

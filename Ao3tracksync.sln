@@ -36,17 +36,22 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Helper.Messa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.UWP.Phone", "Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Phone.csproj", "{976C2593-9C14-4289-AE54-F2BB2020BA84}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.UWP.Shared", "Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Shared.shproj", "{151EA4AB-5247-4008-9A4E-DFD2E294000F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{02c7179c-1598-47a9-b351-d71649ab7994}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{09ddaed0-c67d-4fb9-9b1f-1aadb8f0c064}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Shared.projitems*{151ea4ab-5247-4008-9a4e-dfd2e294000f}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.projitems*{29356923-19e8-4ae3-b98f-f828f5033317}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader.Helper\Ao3TrackReader.Helper.projitems*{3ebadc8e-8858-4033-9066-0a14d574cfb3}*SharedItemsImports = 13
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{3febecc8-967d-4a3c-a25a-e653e734e779}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Shared.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{7999d149-34f8-45c9-9281-9e5564d1ad8b}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{7b291718-eb18-4e7a-b547-1fe74df1e279}*SharedItemsImports = 13
+		Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Shared.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.Version\Ao3TrackReader.Version.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader.WinRT\Ao3TrackReader.WinRT.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4
 		Ao3TrackReader\Ao3TrackReader\Ao3TrackReader.projitems*{976c2593-9c14-4289-ae54-f2bb2020ba84}*SharedItemsImports = 4

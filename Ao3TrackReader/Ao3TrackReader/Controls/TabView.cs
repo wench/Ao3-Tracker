@@ -37,7 +37,8 @@ namespace Ao3TrackReader.Controls
 
         public TabView() 
         {
-            Orientation = ScrollOrientation.Vertical; 
+            Orientation = ScrollOrientation.Vertical;
+            Padding = new Thickness(0,0,0,16.0);
         }
     }
 }

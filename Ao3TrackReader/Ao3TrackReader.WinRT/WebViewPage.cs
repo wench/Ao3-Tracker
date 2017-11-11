@@ -40,7 +40,7 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        private CoreDispatcher Dispatcher { get; } = CoreWindow.GetForCurrentThread().Dispatcher;
+        private CoreDispatcher Dispatcher { get; } = Window.Current.Dispatcher;
 
         public bool IsMainThread => Dispatcher.HasThreadAccess;
 
