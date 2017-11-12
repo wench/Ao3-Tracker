@@ -146,7 +146,7 @@ namespace Ao3TrackReader.UWP
             {
                 if (veryHigh is null)
                 {
-                    veryHigh = new Acrylic(Resources.Colors.Alt.Trans.VeryHigh.ToWindows(), 0.6);
+                    veryHigh = new Acrylic(Resources.Colors.Alt.Trans.VeryHigh.ToWindows(), 0.5);
                 }
                 return veryHigh;
             }
@@ -159,7 +159,7 @@ namespace Ao3TrackReader.UWP
             {
                 if (App.UniversalApi >= 5 && high is null)
                 {
-                    high = new Acrylic(Resources.Colors.Alt.Trans.High.ToWindows(), 0.6);
+                    high = new Acrylic(Resources.Colors.Alt.Trans.High.ToWindows(), 0.5);
                 }
                 return high;
             }
@@ -172,7 +172,7 @@ namespace Ao3TrackReader.UWP
             {
                 if (App.UniversalApi >= 5 && mediumHigh is null)
                 {
-                    mediumHigh = new Acrylic(Resources.Colors.Alt.Trans.MediumHigh.ToWindows(), 0.6);
+                    mediumHigh = new Acrylic(Resources.Colors.Alt.Trans.MediumHigh.ToWindows(), 0.5);
                 }
                 return mediumHigh;
             }
