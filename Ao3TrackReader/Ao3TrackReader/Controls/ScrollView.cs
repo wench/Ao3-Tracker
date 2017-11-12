@@ -9,7 +9,7 @@ namespace Ao3TrackReader.Controls
 {
 	public class ScrollView : Xamarin.Forms.ScrollView
     {
-        public static readonly BindableProperty LeaveSpaceProperty = BindableProperty.Create("LeaveSpace", typeof(double), typeof(ScrollView), 0.0);
+        public static readonly BindableProperty HideScrollbarsProperty = BindableProperty.Create("HideScrollbars", typeof(bool), typeof(ScrollView), false);
 
         public event EventHandler ScrollEnd;
 
@@ -18,29 +18,16 @@ namespace Ao3TrackReader.Controls
             ScrollEnd?.Invoke(this, EventArgs.Empty);
         }
 
-        public double LeaveSpace
+        public bool HideScrollbars
         {
             get
             {
-                return (double)GetValue(LeaveSpaceProperty);
+                return (bool)GetValue(HideScrollbarsProperty);
             }
             set
             {
-                SetValue(LeaveSpaceProperty, value);
+                SetValue(HideScrollbarsProperty, value);
             }
-        }
-
-        protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
-        {
-            if (LeaveSpace != 0.0)
-            {
-                if (!double.IsPositiveInfinity(widthConstraint))
-                {
-                    widthConstraint -= LeaveSpace;
-                }
-            }
-
-            return base.OnMeasure(widthConstraint, heightConstraint);
-        }
+        }        
     }
 }

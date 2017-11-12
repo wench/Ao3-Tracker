@@ -16,6 +16,8 @@ namespace Ao3TrackReader.Controls
         private StackLayout Buttons;
         private ScrollView Scroll;
         private ScrollView ButtonsScroll;
+        private Button ButtonsLeft;
+        private Button ButtonsRight;
 
         public new IList<TabView> Children => new ListConverter<TabView, View>(Tabs.Children);
 
@@ -35,6 +37,8 @@ namespace Ao3TrackReader.Controls
             Buttons = templateContent.FindByName<StackLayout>("Buttons");
             Scroll = templateContent.FindByName<ScrollView>("Scroll");
             Tabs = templateContent.FindByName<StackLayout>("Tabs");
+            ButtonsLeft = templateContent.FindByName<Button>("ButtonsLeft");
+            ButtonsRight = templateContent.FindByName<Button>("ButtonsRight");
 
             Tabs.ChildAdded += Tabs_ChildAdded;
             Tabs.ChildRemoved += Tabs_ChildRemoved;
@@ -43,7 +47,38 @@ namespace Ao3TrackReader.Controls
             Scroll.Scrolled += Scroll_Scrolled;
             Scroll.SizeChanged += Scroll_SizeChanged;
 
+            ButtonsScroll.Scrolled += ButtonsScroll_Scrolled;
+            ButtonsScroll.SizeChanged += ButtonsScroll_SizeChanged;
+            ButtonsLeft.Pressed += ButtonsLeft_Pressed;
+            ButtonsRight.Pressed += ButtonsRight_Pressed;
+
             Content = templateContent;
+        }
+
+        private void ButtonsScroll_Scrolled(object sender, ScrolledEventArgs e)
+        {
+            ButtonsLeft.IsEnabled = e.ScrollX > 0;
+            ButtonsRight.IsEnabled = e.ScrollX < (ButtonsScroll.ContentSize.Width - ButtonsScroll.Width);
+        }
+
+        private void ButtonsScroll_SizeChanged(object sender, EventArgs e)
+        {
+            bool show = ButtonsScroll.Width < ButtonsScroll.ContentSize.Width;
+            ButtonsRight.IsVisible = show;
+            ButtonsLeft.IsVisible = show;
+
+            ButtonsLeft.IsEnabled = ButtonsScroll.ScrollX > 0;
+            ButtonsRight.IsEnabled = ButtonsScroll.ScrollX < (ButtonsScroll.ContentSize.Width - ButtonsScroll.Width);
+        }
+
+        private void ButtonsRight_Pressed(object sender, EventArgs e)
+        {
+            ButtonsScroll.ScrollToAsync(ButtonsScroll.ScrollX + 120, 0, true).ConfigureAwait(false);
+        }
+
+        private void ButtonsLeft_Pressed(object sender, EventArgs e)
+        {
+            ButtonsScroll.ScrollToAsync(ButtonsScroll.ScrollX - 120, 0, true).ConfigureAwait(false);
         }
 
         private void Scroll_SizeChanged(object sender, EventArgs e)
@@ -80,14 +115,24 @@ namespace Ao3TrackReader.Controls
 
                 for (int i = 0; i < Buttons.Children.Count; i++)
                 {
-                    (Buttons.Children[i] as Button).IsActive = (i == value);
+                    if (i == value)
+                    {
+                        (Buttons.Children[i] as Button).IsActive = true;
+                        ButtonsScroll.ScrollToAsync(Buttons.Children[i], ScrollToPosition.MakeVisible, true).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        (Buttons.Children[i] as Button).IsActive = false;
+
+                    }
                 }
 
                 currentTabIndex = value;
                 currentTab = value < Tabs.Children.Count ? Tabs.Children[value] as TabView : null;
 
                 double desiredScroll = currentTab != null? currentTab.X:0;
-                if (desiredScroll != Scroll.ScrollX) Scroll.ScrollToAsync(desiredScroll, 0, true);
+                if (desiredScroll != Scroll.ScrollX) Scroll.ScrollToAsync(desiredScroll, 0, true).ConfigureAwait(false);
+
             }
         }
 

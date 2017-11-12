@@ -61,6 +61,7 @@ namespace Ao3TrackReader
                     var button = new FormsButton();
                     button.Click += OnButtonClick;
                     button.AddHandler(PointerPressedEvent, new PointerEventHandler(OnPointerPressed), true);
+                    button.Padding = new WThickness(2);
                     SetNativeControl(button);
                 }
 
