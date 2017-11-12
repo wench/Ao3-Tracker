@@ -394,6 +394,9 @@ limitations under the License.
                     </StackLayout>
                 </local:TabView>
 
+                <local:TabView Title="A really long tab name" Icon="{StaticResource FilterIcon}">
+                    
+                </local:TabView>
             </local:TabbedLayout>
         </Grid>
     </local:PaneView.Content>

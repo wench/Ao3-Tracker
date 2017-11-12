@@ -15,6 +15,7 @@ namespace Ao3TrackReader.Controls
         private StackLayout Tabs;
         private StackLayout Buttons;
         private ScrollView Scroll;
+        private ScrollView ButtonsScroll;
 
         public new IList<TabView> Children => new ListConverter<TabView, View>(Tabs.Children);
 
@@ -30,6 +31,7 @@ namespace Ao3TrackReader.Controls
             var template = (DataTemplate) App.Current.Resources["TabbedLayoutTemplate"];
             var templateContent = (View) template.CreateContent();
 
+            ButtonsScroll = templateContent.FindByName<ScrollView>("ButtonsScroll");
             Buttons = templateContent.FindByName<StackLayout>("Buttons");
             Scroll = templateContent.FindByName<ScrollView>("Scroll");
             Tabs = templateContent.FindByName<StackLayout>("Tabs");
