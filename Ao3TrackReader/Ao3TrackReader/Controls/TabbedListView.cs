@@ -207,6 +207,8 @@ namespace Ao3TrackReader.Controls
 
             ClearTabs();
 
+            if (newValue is null) return;
+
             // Create tabs
             if (newValue is INotifyCollectionChanged n)
             {
