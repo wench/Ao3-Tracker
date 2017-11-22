@@ -61,9 +61,11 @@ namespace Ao3TrackReader
                     var button = new FormsButton();
                     button.Click += OnButtonClick;
                     button.AddHandler(PointerPressedEvent, new PointerEventHandler(OnPointerPressed), true);
-                    button.Padding = new WThickness(2);
                     SetNativeControl(button);
                 }
+
+                var padding = (Element as Ao3TrackReader.Controls.Button).Padding;
+                Control.Padding = new WThickness(padding.Left, padding.Top, padding.Right, padding.Bottom);
 
                 UpdateContent();
 
@@ -122,6 +124,11 @@ namespace Ao3TrackReader
             {
                 UpdateTextColor();
                 UpdateIconColor();
+            }
+            else if (e.PropertyName == Controls.Button.PaddingProperty.PropertyName)
+            {
+                var padding = (Element as Ao3TrackReader.Controls.Button).Padding;
+                Control.Padding = new WThickness(padding.Left, padding.Top, padding.Right, padding.Bottom);
             }
         }
 

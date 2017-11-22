@@ -53,10 +53,13 @@ namespace Ao3TrackReader
             {
                 if (grouptype == value) return;
                 OnPropertyChanging(new PropertyChangingEventArgs("GroupType"));
+                OnPropertyChanging(new PropertyChangingEventArgs("HasGroupType"));
                 grouptype = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HasGroupType"));
                 OnPropertyChanged(new PropertyChangedEventArgs("GroupType"));
             }
         }
+        public bool HasGroupType => !String.IsNullOrWhiteSpace(GroupType);
 
         public event PropertyChangingEventHandler PropertyChanging;
         void OnPropertyChanging(PropertyChangingEventArgs args)

@@ -10,7 +10,12 @@ namespace Ao3TrackReader.Controls
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value?.GetType() == typeof(bool)) return value;
+            return Convert(value, parameter);
+        }
+
+        public static bool Convert(object value, object parameter)
+        {
+            if (value?.GetType() == typeof(bool)) return (bool)value;
 
             var ifempty = false;
 

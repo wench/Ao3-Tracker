@@ -41,7 +41,7 @@ namespace Ao3TrackReader
     {
         new protected T Target
         {
-            get { return (T)base.Target; }
+            get { return base.Target is T ? (T)base.Target : default(T); }
             set { base.Target = value; }
         }
 

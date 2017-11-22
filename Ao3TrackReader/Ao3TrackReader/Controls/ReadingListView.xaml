@@ -36,6 +36,75 @@ limitations under the License.
                     <m:HelpInfo.Description>Tap and hold, or right mouse click, on Reading List items to bring up a context menu. In the context menu you can choose how to open the item, refresh the details of the item from the Ao3 site or delete the item from the reading list.</m:HelpInfo.Description>
                 </m:HelpInfo>
             </x:Array>
+
+            <DataTemplate x:Key="CellTemplate">
+                <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
+                    <ViewCell.ContextActions>
+                        <MenuItem Text="Open at Read To Location" Command="{Binding MenuOpenLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
+                        <MenuItem Text="Open"                     Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
+                        <MenuItem Text="Open Full Work at Read To Location" Command="{Binding MenuOpenFullWorkLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
+                        <MenuItem Text="Open Full Work"           Command="{Binding MenuOpenFullWorkCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
+                        <MenuItem Text="Copy Link"                Clicked="OnMenuCopyLink" CommandParameter="{Binding .}" />
+                        <MenuItem Text="Refresh"                  Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
+                        <MenuItem Text="Delete"                   Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
+                    </ViewCell.ContextActions>
+                    <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="4" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8"
+                                        local:BackgroundSwitch.Condition="{Binding IsSelected}" 
+                                        local:BackgroundSwitch.ColorFalse="{StaticResource BaseTransVeryLowColor}" 
+                                        local:BackgroundSwitch.ColorTrue="{StaticResource BaseSolidVeryVeryLowColor}" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="25" />
+                                    <ColumnDefinition Width="25" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" VerticalOptions="Start" />
+                                <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" VerticalOptions="Start" />
+                                <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" VerticalOptions="Start" />
+                                <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" VerticalOptions="Start" />
+                                <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0" Grid.Column="2" Grid.RowSpan="2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="70" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackLayout Spacing="3">
+                                        <local:TextView TextEx="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="{DynamicResource SmallFontSize}" MinimumHeightRequest="17" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
+                                        <local:TextView TextEx="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" MinimumHeightRequest="15" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalTextAlignment="Start" />
+                                    </StackLayout>
+
+                                    <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="{DynamicResource MicroFontSize}" HorizontalTextAlignment="End" Margin="0" Grid.Row="0" Grid.Column="1" />
+                                </Grid>
+                            </Grid>
+                            <local:TextView TextEx="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
+                            <local:TextView TextEx="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
+                            <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
+                        </Grid>
+
+                        <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+
         </ResourceDictionary>
     </ContentPage.Resources>
     
@@ -63,78 +132,14 @@ limitations under the License.
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End"  Style="{StaticResource ImageButton}" />
             </StackLayout>
 
-            <ListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}" Margin="4,0,0,0" 
-                      x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}" CachingStrategy="RetainElement">
-                <ListView.ItemTemplate>
+            <local:TabbedListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="false" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}"  TabTitleBinding="{Binding Group}" Margin="4,0,0,0" 
+                      x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}" Spacing="0"  ItemTemplate="{StaticResource CellTemplate}" >
+                <local:TabbedListView.HeaderTemplate>
                     <DataTemplate>
-                        <ViewCell Tapped="OnCellTapped" Appearing="OnCellAppearing">
-                            <ViewCell.ContextActions>
-                                <MenuItem Text="Open at Read To Location" Command="{Binding MenuOpenLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open"                     Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open Full Work at Read To Location" Command="{Binding MenuOpenFullWorkLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Open Full Work"           Command="{Binding MenuOpenFullWorkCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Copy Link"                Clicked="OnMenuCopyLink" CommandParameter="{Binding .}" />
-                                <MenuItem Text="Refresh"                  Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
-                                <MenuItem Text="Delete"                   Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
-                            </ViewCell.ContextActions>
-                            <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="4" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8"
-                                        local:BackgroundSwitch.Condition="{Binding Path=IsSelected}" 
-                                        local:BackgroundSwitch.ColorFalse="{StaticResource BaseTransVeryLowColor}" 
-                                        local:BackgroundSwitch.ColorTrue="{StaticResource BaseSolidVeryVeryLowColor}" >
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="25" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="25" />
-                                            <ColumnDefinition Width="25" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" VerticalOptions="Start" />
-                                        <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" VerticalOptions="Start" />
-                                        <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" VerticalOptions="Start" />
-                                        <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" VerticalOptions="Start" />
-                                        <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0" Grid.Column="2" Grid.RowSpan="2">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="70" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <StackLayout Spacing="3">
-                                                <local:TextView TextEx="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="{DynamicResource SmallFontSize}" MinimumHeightRequest="17" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
-                                                <local:TextView TextEx="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" MinimumHeightRequest="15" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalTextAlignment="Start" />
-                                            </StackLayout>
-
-                                            <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="{DynamicResource MicroFontSize}" HorizontalTextAlignment="End" Margin="0" Grid.Row="0" Grid.Column="1" />
-                                        </Grid>
-                                    </Grid>
-                                    <local:TextView TextEx="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
-                                    <local:TextView TextEx="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
-                                    <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
-                                </Grid>
-                                
-                                <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
-                            </Grid>
-                        </ViewCell>
+                        <Label Text="{Binding GroupType,StringFormat='Category: {0}'}" IsVisible="{Binding HasGroupType}" Margin="0,0,0,8" TextColor="{StaticResource BaseMediumColor}" FontSize="{DynamicResource MicroFontSize}" />
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </local:TabbedListView.HeaderTemplate>
+            </local:TabbedListView>
         </StackLayout>
     </local:PaneView.Content>
 </local:PaneView>

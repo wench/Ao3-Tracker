@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Ao3TrackReader.Controls"
+             x:Class="Ao3TrackReader.Controls.TabbedLayout">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style TargetType="local:Button" x:Key="TabbedLayoutButtonStyle" x:Name="TabbedLayoutButtonStyle">
+                <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="BorderRadius" Value="0" />
+                <Setter Property="BorderColor" Value="{StaticResource BaseMediumLowColor}" />
+                <Setter Property="WidthRequest" Value="-1" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
+                <Setter Property="ImageWidth" Value="20" />
+                <Setter Property="ImageHeight" Value="20" />
+                <Setter Property="Text" Value="{Binding Title}" />
+                <Setter Property="Image" Value="{Binding Icon}" />
+
+                <Style.Triggers>
+                    <Trigger TargetType="local:Button" Property="IsActive" Value="True">
+                        <Setter Property="BorderColor" Value="Transparent" />
+                    </Trigger>
+                    <Trigger TargetType="local:Button" Property="IsActive" Value="False">
+                        <Setter Property="BorderColor" Value="{StaticResource BaseMediumLowColor}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="local:Button" x:Key="TabbedLayoutLeftRightButtonStyle">
+                <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
+                <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="BorderRadius" Value="0" />
+                <Setter Property="BorderColor" Value="Transparent" />
+                <Setter Property="Padding" Value="2" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+    
+    <ContentView.Content>
+        <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackLayout x:Name="OuterLayout" VerticalOptions="Start" HorizontalOptions="Fill" Orientation="Horizontal" Spacing="0" >
+                <AbsoluteLayout VerticalOptions="End" HorizontalOptions="Start" WidthRequest="{DynamicResource Size_24_Min}" HeightRequest="{DynamicResource Size_40_Min}">
+                    <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,1,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
+                    <local:Button Text="&lt;" x:Name="ButtonsLeft" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="1,1,20,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional " 
+                                  Pressed="ButtonsLeft_Pressed"/>
+                </AbsoluteLayout>
+                <Grid VerticalOptions="Start" HorizontalOptions="Start" RowSpacing="-2" ColumnSpacing="-2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2" />
+                    </Grid.ColumnDefinitions>
+                    <BoxView HeightRequest="2" WidthRequest="-1" Grid.Column="1" Grid.Row="0" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Start" HorizontalOptions="Fill"/>
+                    <BoxView HeightRequest="-1" WidthRequest="2" Grid.Column="0" Grid.Row="1" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Fill" HorizontalOptions="End"/>
+                    <local:ScrollView x:Name="ButtonsScroll" Orientation="Horizontal" Grid.Column="1" Grid.Row="1" HorizontalOptions="Start" HideScrollbars="True"
+                                      Scrolled="ButtonsScroll_Scrolled" SizeChanged="ButtonsScroll_SizeChanged">
+                        <StackLayout x:Name="ButtonsContainer" Orientation="Horizontal" Spacing="-2" HeightRequest="{DynamicResource Size_40_Min}" />
+                    </local:ScrollView>
+                    <BoxView HeightRequest="-1" WidthRequest="2" Grid.Column="2" Grid.Row="1" Color="{StaticResource BaseMediumLowColor}" VerticalOptions="Fill" HorizontalOptions="Start"/>
+                </Grid>
+                <AbsoluteLayout VerticalOptions="End" HorizontalOptions="FillAndExpand" WidthRequest="{DynamicResource Size_24_Min}" HeightRequest="{DynamicResource Size_40_Min}" Margin="-2,0,0,0">
+                    <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,1,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
+                    <local:Button Text="&gt;" x:Name="ButtonsRight" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="0,1,20,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional "
+                                  Pressed="ButtonsRight_Pressed"/>
+                </AbsoluteLayout>
+            </StackLayout>
+
+            <local:ScrollView x:Name="TabsScroll" Orientation="Horizontal" VerticalOptions="Fill" HorizontalOptions="Fill" Grid.Row="1" 
+                              ScrollEnd="Scroll_ScrollEnd" Scrolled="Scroll_Scrolled" SizeChanged="Scroll_SizeChanged">
+                <StackLayout x:Name="TabsContainer" Orientation="Horizontal" 
+                             ChildAdded="Tabs_ChildAdded" ChildRemoved="Tabs_ChildRemoved" ChildrenReordered="Tabs_ChildrenReordered" />
+            </local:ScrollView>
+        </Grid>
+    </ContentView.Content>
+</ContentView>

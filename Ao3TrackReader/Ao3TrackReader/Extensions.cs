@@ -47,7 +47,7 @@ namespace Ao3TrackReader
             return WebUtility.HtmlEncode(str);
         }
 
-
+        /*
         public static string[] GetClasses(this HtmlNode node)
         {
             var attrClass = node.Attributes["class"];
@@ -59,7 +59,7 @@ namespace Ao3TrackReader
         public static bool HasClass(this HtmlNode node, string classname)
         {
             return Array.IndexOf(node.GetClasses(), classname) != -1;
-        }
+        }*/
 
         public static HtmlNode ElementByClass(this HtmlNode node, string classname)
         {

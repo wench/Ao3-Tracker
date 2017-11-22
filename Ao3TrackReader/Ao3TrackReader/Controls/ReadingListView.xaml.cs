@@ -314,6 +314,7 @@ namespace Ao3TrackReader.Controls
             {
                 UpdateSelectedItem(item);
             }
+            mi.ForceUpdateSize();
         }
 
         private void OnCellTapped(object sender, EventArgs e)

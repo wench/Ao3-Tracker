@@ -1229,10 +1229,10 @@ namespace Ao3TrackReader.Data
 
                 var classes = n.Value.GetClasses();
                 var search = n.Key.ToString();
-                var tag = Array.Find(classes, (val) =>
+                var tag = classes.Where((val) =>
                 {
                     return val.StartsWith(search + "-", StringComparison.OrdinalIgnoreCase) || val.StartsWith(search.TrimEnd('s') + "-", StringComparison.OrdinalIgnoreCase);
-                });
+                }).FirstOrDefault();
 
                 if (tag is null)
                     model.RequiredTags[n.Key] = null;

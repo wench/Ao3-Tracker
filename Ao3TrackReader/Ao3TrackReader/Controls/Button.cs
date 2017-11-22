@@ -25,11 +25,13 @@ namespace Ao3TrackReader.Controls
     class Button : Xamarin.Forms.Button, Models.IHelpInfo
     {
         public static readonly Xamarin.Forms.BindableProperty ImageHeightProperty =
-          Xamarin.Forms.BindableProperty.Create("ImageHeight", typeof(double), typeof(Button), defaultValue: 0.0);
+            BindableProperty.Create("ImageHeight", typeof(double), typeof(Button), defaultValue: 0.0);
         public static readonly Xamarin.Forms.BindableProperty ImageWidthProperty =
-          Xamarin.Forms.BindableProperty.Create("ImageWidth", typeof(double), typeof(Button), defaultValue: 0.0);
+            BindableProperty.Create("ImageWidth", typeof(double), typeof(Button), defaultValue: 0.0);
         public static readonly Xamarin.Forms.BindableProperty IsActiveProperty =
-          Xamarin.Forms.BindableProperty.Create("IsActive", typeof(bool), typeof(Button), defaultValue: false);
+            BindableProperty.Create("IsActive", typeof(bool), typeof(Button), defaultValue: false);
+        public static readonly BindableProperty PaddingProperty =
+            BindableProperty.Create("Padding", typeof(Thickness), typeof(Button), defaultValue: new Thickness(4.0) );
 
         public double ImageHeight
         {
@@ -45,6 +47,11 @@ namespace Ao3TrackReader.Controls
         {
             get { return (bool)GetValue(IsActiveProperty); }
             set { SetValue(IsActiveProperty, value); }
+        }
+        public Thickness Padding
+        {
+            get { return (Thickness)GetValue(PaddingProperty); }
+            set { SetValue(PaddingProperty, value); }
         }
 
         /*

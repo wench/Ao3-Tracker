@@ -27,7 +27,11 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ScrollView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\TabbedLayout.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\TabbedLayout.xaml.cs">
+      <DependentUpon>TabbedLayout.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\TabbedListView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TabView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ToolbarItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\Button.cs" />
@@ -130,6 +134,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Controls\LookupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Controls\TabbedLayout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
