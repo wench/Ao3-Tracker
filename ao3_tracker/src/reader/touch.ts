@@ -62,7 +62,7 @@ namespace Ao3Track {
         {
             coordFixup = Ao3Track.Helper.deviceWidth / (window.innerWidth * (window.screen.deviceXDPI||192) / (window.screen.logicalXDPI||192));
             end = Ao3Track.Helper.deviceWidth;
-            startThreshold = Math.min(end / 12, 160);
+            startThreshold = Math.min(end / 6, 160);
             yLimit = window.innerHeight / 8;
             centre = end / 2;
             Helper.stopWebViewDragAccelerate();
