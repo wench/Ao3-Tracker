@@ -28,25 +28,39 @@ namespace Ao3TrackReader.Models
         public Dictionary<string, long> paths { get; set; }
     }
 
+    class ReadingListV1
+    {
+        public string Uri { get; set; }
+        public long Timestamp { get; set; }
+        public string PrimaryTag { get; set; }
+        public string Title { get; set; }
+        public string Summary { get; set; }
+        public int? Unread { get; set; }
+    }
+
     public class ReadingList : ICachedTimestampedTableRow<string>, IEquatable<ReadingList>
     {
         public ReadingList() { }
+        public ReadingList(ReadingList copy)
+        {
+            Uri = copy.Uri;
+            Timestamp = copy.Timestamp;
+            Unread = copy.Unread;
+            Model = copy.Model;
+        }
         public ReadingList(Ao3PageModel model, long timestamp, int? unread)
         {
             Uri = model.Uri.AbsoluteUri;
-            PrimaryTag = model.PrimaryTag;
-            Title = model.Title;
             Timestamp = timestamp;
             Unread = unread;
+            Model = Ao3PageModel.Serialize(model);
         }
 
         [PrimaryKey]
         public string Uri { get; set; }
-        public string PrimaryTag { get; set; }
-        public string Title { get; set; }
         public long Timestamp { get; set; }
         public int? Unread { get; set; }
-        public string Summary { get; set; }
+        public string Model { get; set; }
 
         string ICachedTableRow<string>.Primarykey => Uri; 
 
@@ -55,11 +69,9 @@ namespace Ao3TrackReader.Models
         {
             if (ReferenceEquals(this, other)) return true;
             return !(other is null) && Uri == other.Uri &&
-                PrimaryTag == other.PrimaryTag &&
-                Title == other.Title &&
                 Timestamp == other.Timestamp &&
                 Unread == other.Unread &&
-                Summary == other.Summary;
+                Model == other.Model;
         }
 
         public override bool Equals(object obj)
@@ -86,11 +98,9 @@ namespace Ao3TrackReader.Models
         public override int GetHashCode()
         {
             return Uri.GetHashCodeSafe() ^
-                PrimaryTag.GetHashCodeSafe() ^
-                Title.GetHashCodeSafe() ^
                 Timestamp.GetHashCode() ^
                 Unread.GetHashCode() ^
-                Summary.GetHashCodeSafe();
+                Model.GetHashCodeSafe();
         }
         #endregion
     }

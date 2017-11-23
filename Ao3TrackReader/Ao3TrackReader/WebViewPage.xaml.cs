@@ -1415,6 +1415,7 @@ namespace Ao3TrackReader
             TogglePane(null);
         }
 
+        bool isErrorPage = false;
         private CancellationTokenSource cancelInject;
         private bool OnNavigationStarting(Uri uri)
         {
@@ -1471,7 +1472,8 @@ namespace Ao3TrackReader
             currentLocation = null;
             currentSavedLocation = null;
             ForceSetLocationCommand.IsEnabled = false;
-            SetUpToDateCommand.IsEnabled = uri.TryGetWorkId(out var workid);
+            SetUpToDateCommand.IsEnabled = uri == null?false:uri.TryGetWorkId(out var workid);
+            isErrorPage = uri == null;
             helper?.Reset();
             return false;
         }
@@ -1504,7 +1506,7 @@ namespace Ao3TrackReader
             ForceSetLocationCommand.IsEnabled = false;
             helper?.Reset();
 
-            InjectScripts();
+            if (!isErrorPage) InjectScripts();
         }
 
         public class Injection

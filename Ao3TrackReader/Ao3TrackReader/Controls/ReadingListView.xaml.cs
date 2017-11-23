@@ -114,50 +114,36 @@ namespace Ao3TrackReader.Controls
                         else
                         {
                             var timestamp = DateTime.UtcNow.ToUnixTime();
-                            var models = Ao3SiteDataLookup.LookupQuick(items.Keys);
-                            foreach (var model in models)
+                            foreach (var item in items.Values)
                             {
-                                if (!(model.Value is null))
+                                var model = Ao3PageModel.Deserialize(item.Model) ?? Ao3SiteDataLookup.LookupQuick(item.Uri);
+                                if (model == null) continue;
+
+                                if (model.Uri.AbsoluteUri != item.Uri)
                                 {
-                                    var item = items[model.Key];
-                                    if (string.IsNullOrWhiteSpace(model.Value.Title) || model.Value.Type == Models.Ao3PageType.Work)
-                                        model.Value.Title = item.Title;
-                                    if (string.IsNullOrWhiteSpace(model.Value.PrimaryTag) || model.Value.PrimaryTag.StartsWith("<"))
+                                    await App.Database.ReadingListCached.DeleteAsync(item.Uri);
+                                    await App.Database.ReadingListCached.InsertOrUpdateAsync(new ReadingList(model, timestamp, item.Unread));
+                                }
+
+                                if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Uri.AbsoluteUri) is null)
+                                {
+                                    var viewmodel = new Ao3PageViewModel(model.Uri, model.HasChapters ? item.Unread : (int?)null, model.Type == Ao3PageType.Work ? tagTypeVisible : null)
                                     {
-                                        model.Value.PrimaryTag = item.PrimaryTag;
-                                        var tagdata = Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                                        if (tagdata is null) model.Value.PrimaryTagType = Models.Ao3TagType.Other;
-                                        else model.Value.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
-                                    }
-                                    if (!(model.Value.Details is null) && (model.Value.Details.Summary is null) && !string.IsNullOrEmpty(item.Summary))
-                                        model.Value.Details.Summary = item.Summary;
+                                        TagsVisible = tags_visible
+                                    };
 
-                                    if (model.Value.Uri.AbsoluteUri != model.Key)
+                                    await wvp.DoOnMainThreadAsync(() =>
                                     {
-                                        await App.Database.ReadingListCached.DeleteAsync(model.Key);
-                                        await App.Database.ReadingListCached.InsertOrUpdateAsync(new ReadingList(model.Value, timestamp, item.Unread));
-                                    }
+                                        viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                                        readingListBacking.Add(viewmodel);
+                                    });
 
-                                    if (readingListBacking.FindInAll((m) => m.Uri.AbsoluteUri == model.Value.Uri.AbsoluteUri) is null)
+                                    await tasklimit.WaitAsync();
+                                    tasks.Enqueue(wvp.DoOnMainThreadAsync(async () =>
                                     {
-                                        var viewmodel = new Ao3PageViewModel(model.Value.Uri, model.Value.HasChapters ? item.Unread : (int?)null, model.Value.Type == Ao3PageType.Work ? tagTypeVisible : null)
-                                        {
-                                            TagsVisible = tags_visible
-                                        };
-
-                                        await wvp.DoOnMainThreadAsync(() =>
-                                        {
-                                            viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                                            readingListBacking.Add(viewmodel);
-                                        });
-
-                                        await tasklimit.WaitAsync();
-                                        tasks.Enqueue(wvp.DoOnMainThreadAsync(async () =>
-                                        {
-                                            await viewmodel.SetBaseDataAsync(model.Value);
-                                            tasklimit.Release();
-                                        }));
-                                    }
+                                        await viewmodel.SetBaseDataAsync(model,false);
+                                        tasklimit.Release();
+                                    }));
                                 }
 
 #pragma warning disable 4014
@@ -630,7 +616,7 @@ namespace Ao3TrackReader.Controls
                     TagsVisible = tags_visible
                 };
                 viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                await viewmodel.SetBaseDataAsync(model);
+                await viewmodel.SetBaseDataAsync(model, false);
 
                 readingListBacking.Add(viewmodel);
 
@@ -719,11 +705,11 @@ namespace Ao3TrackReader.Controls
                 dbentry.Unread = viewmodel.Unread;
             }
 
-            string summary = viewmodel.Summary?.ToString();
-            if (!(summary is null) && dbentry.Summary != summary)
+            string model = Ao3PageModel.Serialize(viewmodel.BaseData);
+            if (!(model is null) && dbentry.Model != model)
             {
                 changed = true;
-                dbentry.Summary = summary;
+                dbentry.Model = model;
             }
 
             if (changed)
@@ -736,7 +722,7 @@ namespace Ao3TrackReader.Controls
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "Unread" || e.PropertyName == "Summary")
             {
                 var dbentry = await App.Database.ReadingListCached.SelectAsync(viewmodel.Uri.AbsoluteUri);
-                if (!(dbentry is null)) await WriteViewModelToDbAsync(viewmodel, dbentry).ConfigureAwait(false);
+                if (!(dbentry is null)) await WriteViewModelToDbAsync(viewmodel, new ReadingList(dbentry)).ConfigureAwait(false);
             }
         }
 
@@ -760,9 +746,12 @@ namespace Ao3TrackReader.Controls
                     }
                 }
 
+                // If missing title in update, get it from old
+                if (string.IsNullOrEmpty(model.Title)) model.Title = viewmodel.BaseData?.Title;
+
                 await wvp.DoOnMainThreadAsync(async () =>
                 {
-                    await viewmodel.SetBaseDataAsync(model);
+                    await viewmodel.SetBaseDataAsync(model, true);
                 });
 
                 await WriteViewModelToDbAsync(viewmodel, new ReadingList(model, 0, viewmodel.Unread));

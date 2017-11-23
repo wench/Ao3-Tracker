@@ -295,7 +295,7 @@ namespace Ao3TrackReader.Data
 
         static public string LookupTagQuick(int tagid)
         {
-            string tag = App.Database.GetTag(tagid);
+            string tag = App.Database?.GetTag(tagid);
             if (!string.IsNullOrEmpty(tag))
                 return tag.PoolString();
 
@@ -359,7 +359,7 @@ namespace Ao3TrackReader.Data
         static public TagCache LookupTagQuick(string intag, bool ignoreexpires = false)
         {
             intag = UnescapeTag(intag);
-            var tag = App.Database.GetTag(intag, ignoreexpires) ?? new TagCache { name = intag };
+            var tag = App.Database?.GetTag(intag, ignoreexpires) ?? new TagCache { name = intag };
             if (!string.IsNullOrEmpty(tag.actual))
             {
                 return tag;
@@ -591,11 +591,11 @@ namespace Ao3TrackReader.Data
                     return type;
             }
 
-            return Ao3TagType.Other;
+            return Ao3TagType.Unknown;
         }
         static public string LookupLanguageQuick(int langid)
         {
-            string name = App.Database.GetLanguage(langid);
+            string name = App.Database?.GetLanguage(langid);
             if (!string.IsNullOrEmpty(name))
             {
                 return name;
@@ -618,7 +618,7 @@ namespace Ao3TrackReader.Data
         }
         static public string LookupSortColumnQuick(string sortcolumn)
         {
-            string name = App.Database.GetSortColumn(sortcolumn);
+            string name = App.Database?.GetSortColumn(sortcolumn);
             if (!string.IsNullOrEmpty(name))
             {
                 return name;
@@ -745,9 +745,9 @@ namespace Ao3TrackReader.Data
 
             return uri;
         }
-        public static IDictionary<string, Ao3PageModel> LookupQuick(ICollection<string> urls)
+        public static IDictionary<string, Ao3PageModel> LookupQuick(IEnumerable<string> urls)
         {
-            var dict = new Dictionary<string, Ao3PageModel>(urls.Count);
+            var dict = new Dictionary<string, Ao3PageModel>();
 
             foreach (string url in urls)
             {
@@ -849,7 +849,7 @@ namespace Ao3TrackReader.Data
             {
                 model.Type = Ao3PageType.Work;
                 model.PrimaryTag = "<Work>";
-                model.PrimaryTagType = Ao3TagType.Other;
+                model.PrimaryTagType = Ao3TagType.Unknown;
 
                 var sWORKID = match.Groups["WORKID"].Value;
                 model.Uri = uri = new Uri(uri, "/works/" + sWORKID);
@@ -871,7 +871,7 @@ namespace Ao3TrackReader.Data
             {
                 model.Type = Ao3PageType.Series;
                 model.PrimaryTag = "<Series>";
-                model.PrimaryTagType = Ao3TagType.Other;
+                model.PrimaryTagType = Ao3TagType.Unknown;
 
             }
             else if ((match = regexCollection.Match(uri.LocalPath)).Success)
@@ -881,7 +881,7 @@ namespace Ao3TrackReader.Data
                 model.Type = Ao3PageType.Collection;
                 model.Title = sCOLID;
                 model.PrimaryTag = "<Collection>";
-                model.PrimaryTagType = Ao3TagType.Other;
+                model.PrimaryTagType = Ao3TagType.Unknown;
             }
             else
             {
@@ -1024,10 +1024,17 @@ namespace Ao3TrackReader.Data
                 }
 
                 if (!(worknode is null)) await FillModelFromWorkSummaryAsync(wsuri, worknode, model);
+                else
+                {
+                    model.PrimaryTag = "*Lost*";
+                    model.PrimaryTagType = Ao3TagType.Unknown;
+                }
             }
             else if ((match = regexSeries.Match(uri.LocalPath)).Success)
             {
                 model.Type = Ao3PageType.Series;
+                model.PrimaryTag = "*Lost*";
+                model.PrimaryTagType = Ao3TagType.Unknown;
 
                 // Only way to get data is from the page itself
                 var response = await HttpRequestAsync(uri);
@@ -1054,6 +1061,8 @@ namespace Ao3TrackReader.Data
                 model.Uri = new Uri(uri, "/collections/" + sCOLID);
                 uri = new Uri(uri, "/collections/" + sCOLID + "/");
                 model.Type = Ao3PageType.Collection;
+                model.PrimaryTag = "*Lost*";
+                model.PrimaryTagType = Ao3TagType.Unknown;
 
                 // Only way to get data is from the page itself
                 var response = await HttpRequestAsync(new Uri(uri, "profile"));

@@ -28,6 +28,7 @@ namespace Ao3TrackReader.Text
             return new String[] { };
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public override bool IsEmpty
         {
             get { return true; }

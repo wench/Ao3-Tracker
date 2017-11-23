@@ -73,6 +73,7 @@ namespace Ao3TrackReader.Text
             return new Span(flat.TrimNewLines());
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public abstract bool IsEmpty { get; }
 
         public static explicit operator Xamarin.Forms.FormattedString (TextEx t)

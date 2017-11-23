@@ -398,7 +398,7 @@ namespace Ao3TrackReader.Models
             get { return baseData; }
         }
 
-        public async Task SetBaseDataAsync(Ao3PageModel value)
+        public async Task SetBaseDataAsync(Ao3PageModel value, bool clearUnread)
         {
             if (value == null) throw new ArgumentNullException("value", "BaseData can not be set to null.");
 
@@ -417,7 +417,14 @@ namespace Ao3TrackReader.Models
                 Group = newGroup;
             }
 
-            if (!string.IsNullOrWhiteSpace(newGroup))
+            if (baseData.PrimaryTagType == Ao3TagType.Unknown)
+            {
+                if (GroupType != null)
+                {
+                    GroupType = null;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(newGroup))
             {
                 string newgrouptype = baseData.PrimaryTagType.ToString().TrimEnd('s');
                 if (newgrouptype != GroupType)
@@ -461,13 +468,15 @@ namespace Ao3TrackReader.Models
                 OnPropertyChanging("ChaptersRead");
 
                 ChaptersRead = chapsread;
+
+                if (!HasChapters || clearUnread)
+                {
+                    Unread = null;
+                }
+
                 if (ChaptersRead != null && baseData?.Details?.Chapters?.Available != null)
                 {
                     Unread = baseData.Details.Chapters.Available - ChaptersRead;
-                }
-                else if (!HasChapters)
-                {
-                    Unread = null;
                 }
 
                 OnPropertyChanging("Title");
@@ -553,7 +562,14 @@ namespace Ao3TrackReader.Models
             if (baseData.Type == Ao3PageType.Series) ts.Nodes.Add(new Text.String { Text = "Series ", Foreground = Colors.Base });
             else if (baseData.Type == Ao3PageType.Collection) ts.Nodes.Add(new Text.String { Text = "Collection ", Foreground = Colors.Base });
 
-            if (!string.IsNullOrWhiteSpace(baseData.Title)) ts.Nodes.Add(baseData.Title);
+            if (!string.IsNullOrWhiteSpace(baseData.Title))
+            {
+                ts.Nodes.Add(baseData.Title);
+            }
+            else if (baseData.Type == Ao3PageType.Series || baseData.Type == Ao3PageType.Collection)
+            {
+                ts.Nodes.Add(Uri.PathAndQuery);
+            }
 
             if (baseData.Type == Ao3PageType.Collection && Unread != null && Unread > 0)
             {

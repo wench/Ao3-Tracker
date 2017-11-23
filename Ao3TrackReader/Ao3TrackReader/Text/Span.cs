@@ -96,6 +96,7 @@ namespace Ao3TrackReader.Text
             return Nodes.GetEnumerator();
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public override bool IsEmpty
         {
             get
@@ -107,8 +108,10 @@ namespace Ao3TrackReader.Text
             }
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public int Count => Nodes.Count;
 
+        [Newtonsoft.Json.JsonIgnore]
         public bool IsReadOnly => Nodes.IsReadOnly;
     }
 }

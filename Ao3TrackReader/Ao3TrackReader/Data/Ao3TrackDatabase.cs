@@ -108,6 +108,45 @@ namespace Ao3TrackReader
                 ConvertVariable("UnitConvOptions.volumeToM", map, tryparse, "UnitConvOptions.volume");
                 ConvertVariable("UnitConvOptions.weightToM", map, tryparse, "UnitConvOptions.weight");
             }
+            if (DatabaseVersion < Version.Version.AsInteger(1,1,0,4))
+            {
+                var oldValues = database.Query<ReadingListV1>("SELECT Uri, Timestamp, PrimaryTag, Title, Summary, Unread FROM ReadingList");
+                var newValues = new List<ReadingList>(oldValues.Count);
+                if (oldValues.Count > 0)
+                {
+                    var models = Ao3SiteDataLookup.LookupQuick(oldValues.Select((row) => row.Uri));
+                    foreach (var item in oldValues)
+                    {
+                        if (models.TryGetValue(item.Uri, out var model))
+                        {
+                            if (string.IsNullOrWhiteSpace(model.Title) || model.Type == Models.Ao3PageType.Work)
+                                model.Title = item.Title;
+                            if (string.IsNullOrWhiteSpace(model.PrimaryTag) || model.PrimaryTag.StartsWith("<"))
+                            {
+                                model.PrimaryTag = item.PrimaryTag;
+                                var tagdata = Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
+                                if (tagdata is null) model.PrimaryTagType = Models.Ao3TagType.Other;
+                                else model.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                            }
+                            if (!(model.Details is null) && (model.Details.Summary is null) && !string.IsNullOrEmpty(item.Summary))
+                                model.Details.Summary = item.Summary;
+
+                            newValues.Add(new ReadingList(model, item.Timestamp, item.Unread));
+                        }
+                        else
+                        {
+                            newValues.Add(new ReadingList { Uri = item.Uri, Timestamp = item.Timestamp, Unread = item.Unread });
+                        }
+
+                    }
+
+                }
+                database.BeginTransaction();
+                    database.DropTable<ReadingList>();
+                    database.CreateTable<ReadingList>();
+                    database.InsertAll(newValues, false);
+                database.Commit();
+            }
 
             if (DatabaseVersion != Version.Version.Integer) SaveVariable("DatabaseVersion", Version.Version.Integer);
 
