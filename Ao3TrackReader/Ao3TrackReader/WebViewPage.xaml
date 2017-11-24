@@ -109,8 +109,8 @@ limitations under the License.
                             FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" 
                             Margin="10,5,0,5" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
             <Label x:Name="ErrorBar" TextColor="{StaticResource RedColor}" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False"
-                            FontAttributes="Bold" FontSize="{DynamicResource MediumSmallFontSize}" LineBreakMode="NoWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Start" 
-                            Margin="10,0,0,0" HorizontalOptions="FillAndExpand" VerticalOptions="Start" HeightRequest="0" />
+                            FontAttributes="Bold" FontSize="{DynamicResource MediumSmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Start" 
+                            Margin="10,0,10,5" HorizontalOptions="FillAndExpand" VerticalOptions="Start" HeightRequest="0" />
             <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
                 <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
                         AbsoluteLayout.LayoutBounds=".98, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />

@@ -687,5 +687,12 @@ namespace Ao3TrackReader.Data
                 return responseTask.Result.IsSuccessStatusCode;
             });
         }
+
+        public async Task<string> FetchAsync(string path)
+        {
+            var request = await HttpClient.GetAsync(new Uri(url_base, "/ao3track/" + path));
+            if (!request.IsSuccessStatusCode) return null;
+            return await request.Content.ReadAsStringAsync();
+        }
     }
 }

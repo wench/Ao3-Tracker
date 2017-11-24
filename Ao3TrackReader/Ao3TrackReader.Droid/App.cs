@@ -53,6 +53,8 @@ namespace Ao3TrackReader
 
         public static string OSVersion => Build.VERSION.Release;
 
+        public static double OSBuild => Build.VERSION.SdkInt;
+
         public static string OSName => Build.VERSION.BaseOs;
 
         public static string HardwareName => Build.Brand + " " + Build.Device + " " + Build.Model;

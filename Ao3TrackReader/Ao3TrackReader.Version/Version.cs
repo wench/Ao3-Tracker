@@ -45,7 +45,7 @@ namespace Ao3TrackReader.Version
             if (revision == -1)
                 return major * 1000000 + minor * 1000 + build;
             else
-                return major * 100000000 + minor * 100000 + build * 100 + Revision;
+                return major * 100000000 + minor * 100000 + build * 100 + revision;
         }
     }
 }

@@ -1,0 +1,25 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "JSON Schema for my JSON file format",
+
+  "type": "object",
+
+  "patternProperties": {
+    "^[_A-Za-z][_0-9A-Za-z]*$": {
+      "type": "object",
+      "patternProperties": {
+        "^[_0-9]+(\\.[_0-9]+)?$": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

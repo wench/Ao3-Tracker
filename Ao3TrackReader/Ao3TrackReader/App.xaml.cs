@@ -203,7 +203,6 @@ namespace Ao3TrackReader
         {
             task.Wait();
         }
-       
 
         public App(bool networkstate)
         {
@@ -212,6 +211,46 @@ namespace Ao3TrackReader
 
             // The root page of your application
             MainPage = new NavigationPage(new WebViewPage());
+
+            if (HaveNetwork)
+            {
+                CheckVersion(this, new EventArgs<bool>(true));
+            }
+            else
+            {
+                HaveNetworkChanged += CheckVersion;
+            }
+        }
+
+        private async void CheckVersion(object sender, EventArgs<bool> e)
+        {
+            if (e.Value)
+            {
+                HaveNetworkChanged -= CheckVersion;
+
+                try
+                {
+                    var sversions = await Storage.FetchAsync("version.json");
+
+                    if (string.IsNullOrEmpty(sversions))
+                        return;
+
+                    var versions = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, SortedList<double, int[]>>>(sversions);
+
+                    if (versions.TryGetValue(Device.RuntimePlatform,out var pversions))
+                    {
+                        var latest = pversions.Where((kp) => kp.Key <= OSBuild).Last().Value;
+                        if (Version.Version.Integer < Version.Version.AsInteger(latest[0], latest[1], latest[2], latest[3]))
+                        {
+                            WebViewPage.Current.ShowError("An update to Archive Track Reader available. Check in the Store to download.");
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+            }
         }
 
         protected override void OnStart()

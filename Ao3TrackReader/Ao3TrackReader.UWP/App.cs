@@ -66,6 +66,15 @@ namespace Ao3TrackReader
             }
         }
 
+        public static double OSBuild
+        {
+            get
+            {
+                ulong v = ulong.Parse(AnalyticsInfo.VersionInfo.DeviceFamilyVersion);
+                return (v & 0x00000000FFFF0000L) >> 16;
+            }
+        }
+
         public static string OSName => AnalyticsInfo.VersionInfo.DeviceFamily;
 
         public static string HardwareType => AnalyticsInfo.DeviceForm;

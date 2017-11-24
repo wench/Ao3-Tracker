@@ -1740,11 +1740,13 @@ namespace Ao3TrackReader
                 try
                 {
                     ErrorBar.Text = message;
-                    ErrorBar.HeightRequest = (double)App.Current.Resources["MediumSmallFontSize"] + 10.0;
+                    ErrorBar.HeightRequest = -1;
                     ErrorBar.IsVisible = true;
 
                     var token = cancel.Token;
                     await Task.Delay(8000, token);
+
+                    double height = ErrorBar.Height;
 
                     var awaiter = new TaskCompletionSource<bool>();
 
@@ -1757,7 +1759,7 @@ namespace Ao3TrackReader
                             }
                             else
                             {
-                                ErrorBar.HeightRequest = ((double)App.Current.Resources["MediumSmallFontSize"] + 10.0) * f;
+                                ErrorBar.HeightRequest = height * f;
                             }
                         },
                         finished: (f, cancelled) =>
