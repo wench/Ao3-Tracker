@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FormsCommandBar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MenuFlyoutItemEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MenuFlyoutSeparatorEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScrollViewRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TextViewRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.cs" />
