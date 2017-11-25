@@ -133,7 +133,7 @@ namespace Ao3TrackReader.Droid
         {
             if (e.PropertyName == Button.TextProperty.PropertyName)
                 UpdateText();
-            else if (e.PropertyName == Button.TextColorProperty.PropertyName)
+            else if (e.PropertyName == Button.TextColorProperty.PropertyName || e.PropertyName == Controls.Button.IsActiveProperty.PropertyName)
                 UpdateTextColor();
             else if (e.PropertyName == VisualElement.IsEnabledProperty.PropertyName)
                 UpdateEnabled();
@@ -303,7 +303,7 @@ namespace Ao3TrackReader.Droid
 
         void UpdateTextColor()
         {
-            _textColorSwitcher?.UpdateTextColor(Control, Element.TextColor);
+            _textColorSwitcher?.UpdateTextColor(Control, Element.TextColor, Element.IsActive);
         }
 
         class ButtonClickListener : Object, IOnClickListener
@@ -314,7 +314,9 @@ namespace Ao3TrackReader.Droid
             {
                 var renderer = v.Tag as ButtonRenderer;
                 if (renderer != null)
-                    ((IButtonController)renderer.Element).SendClicked();
+                {
+                    Device.BeginInvokeOnMainThread(() => ((IButtonController)renderer.Element).SendClicked());
+                }
             }
         }
 
@@ -330,11 +332,11 @@ namespace Ao3TrackReader.Droid
                     var buttonController = renderer.Element as IButtonController;
                     if (e.Action == AMotionEventActions.Down)
                     {
-                        buttonController?.SendPressed();
+                        Device.BeginInvokeOnMainThread(() => buttonController?.SendPressed());
                     }
                     else if (e.Action == AMotionEventActions.Up)
                     {
-                        buttonController?.SendReleased();
+                        Device.BeginInvokeOnMainThread(() => buttonController?.SendReleased());
                     }
                 }
                 return false;

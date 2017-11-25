@@ -131,7 +131,9 @@ namespace Ao3TrackReader.Droid
         void DrawOutline(Canvas canvas, int width, int height)
         {
             if (Button.BorderWidth <= 0)
+            {
                 return;
+            }
 
             using (var paint = new Paint { AntiAlias = true })
             using (var path = new Path())

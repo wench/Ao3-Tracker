@@ -52,12 +52,12 @@ namespace Ao3TrackReader.Controls
 
         private void ButtonsRight_Pressed(object sender, EventArgs e)
         {
-            ButtonsScroll.ScrollToAsync(Math.Min(ButtonsScroll.ScrollX + 120, ButtonsScroll.ContentSize.Width-ButtonsScroll.Width), 0, true).ConfigureAwait(false);
+            ButtonsScroll.ScrollToAsync(Math.Min(ButtonsScroll.ScrollX + 120, ButtonsScroll.ContentSize.Width-ButtonsScroll.Width), 0, true);
         }
 
         private void ButtonsLeft_Pressed(object sender, EventArgs e)
         {
-            ButtonsScroll.ScrollToAsync(Math.Max(ButtonsScroll.ScrollX - 120, 0), 0, true).ConfigureAwait(false);
+            ButtonsScroll.ScrollToAsync(Math.Max(ButtonsScroll.ScrollX - 120, 0), 0, true);
         }
 
         private void Scroll_SizeChanged(object sender, EventArgs e)
@@ -94,14 +94,17 @@ namespace Ao3TrackReader.Controls
 
                 for (int i = 0; i < ButtonsContainer.Children.Count; i++)
                 {
+                    var button = ButtonsContainer.Children[i] as Button;
                     if (i == value)
                     {
-                        (ButtonsContainer.Children[i] as Button).IsActive = true;
-                        ButtonsScroll.ScrollToAsync(ButtonsContainer.Children[i], ScrollToPosition.Center, true).ConfigureAwait(false);
+                        button.IsActive = true;
+                        button.IsEnabled = false;
+                        ButtonsScroll.ScrollToAsync(button, ScrollToPosition.Center, true);
                     }
                     else
                     {
-                        (ButtonsContainer.Children[i] as Button).IsActive = false;
+                        button.IsActive = false;
+                        button.IsEnabled = true;
 
                     }
                 }
@@ -110,19 +113,21 @@ namespace Ao3TrackReader.Controls
                 currentTab = value < TabsContainer.Children.Count ? TabsContainer.Children[value] as TabView : null;
 
                 double desiredScroll = currentTab != null ? currentTab.X : 0;
-                if (desiredScroll != TabsScroll.ScrollX)
+                if (desiredScroll != Math.Floor(TabsScroll.ScrollX) && desiredScroll != Math.Round(TabsScroll.ScrollX, MidpointRounding.AwayFromZero))
                 {
                     autoScrolling++;
-                    TabsScroll.ScrollToAsync(desiredScroll, 0, true).ConfigureAwait(false);
+                    TabsScroll.ScrollToAsync(desiredScroll, 0, true).ContinueWith((task) =>
+                    {
+                        autoScrolling--;    
+                    });
                 }
 
             }
         }
 
+        bool wasAuto = false;
         private void Scroll_ScrollEnd(object sender, EventArgs e)
         {
-            if (autoScrolling > 0) autoScrolling--;
-
             // Snap scrolling to a tab point
             CurrentTab = TabFromX(TabsScroll.ScrollX);
         }
@@ -143,12 +148,14 @@ namespace Ao3TrackReader.Controls
                 if (i == currentTabIndex)
                 {
                     button.IsActive = true;
-                    if (oldCurrent != currentTab) ButtonsScroll.ScrollToAsync(button, ScrollToPosition.Center, true).ConfigureAwait(false);
+                    button.IsEnabled = false;
+                    if (oldCurrent != currentTab) ButtonsScroll.ScrollToAsync(button, ScrollToPosition.Center, true);
                 }
                 else
                 {
 
                     button.IsActive = false;
+                    button.IsEnabled = true;
                 }
             }
         }
@@ -168,6 +175,7 @@ namespace Ao3TrackReader.Controls
                 currentTabIndex = 0;
                 currentTab = tab;
                 button.IsActive = true;
+                button.IsEnabled = false;
             }
             else
             {
@@ -189,7 +197,7 @@ namespace Ao3TrackReader.Controls
                         TabsScroll.ForceLayout();
                         Device.BeginInvokeOnMainThread(async () => {
                             await Task.Delay(1);
-                            await TabsScroll.ScrollToAsync(currentTab, ScrollToPosition.Start, false).ConfigureAwait(false);
+                            await TabsScroll.ScrollToAsync(currentTab, ScrollToPosition.Start, false);
                         });
                     }
                 }
@@ -238,6 +246,7 @@ namespace Ao3TrackReader.Controls
                 if (tab == currentTab)
                 {
                     button.IsActive = true;
+                    button.IsEnabled = false;
                     newCurrent = i;
                 }
             }

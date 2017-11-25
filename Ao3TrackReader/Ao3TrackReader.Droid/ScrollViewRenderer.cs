@@ -130,6 +130,9 @@ namespace Ao3TrackReader.Droid
                     int distX = GetDistance(currentX, x, v);
                     int distY = GetDistance(currentY, y, v);
 
+                    distY = Math.Max(0,Math.Min(distY, (int)context.ToPixels(_view.ContentSize.Height) - Height));
+                    distX = Math.Max(0, Math.Min(distX, (int)context.ToPixels(_view.ContentSize.Width) - Width));
+                    
                     if (_view == null || e.Task?.IsCanceled == true)
                     {
                         // This is probably happening because the page with this Scroll View
@@ -154,15 +157,17 @@ namespace Ao3TrackReader.Droid
                 };
                 animator.AnimationEnd += delegate
                 {
-                    if (Controller == null)
-                        return;
-                    Controller.SendScrollFinished();
+                    if (_view == null) return;
+                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() => _view.SendScrollFinished());
                 };
 
                 animator.Start();
             }
             else
             {
+                y = Math.Max(0, Math.Min(y, (int)context.ToPixels(_view.ContentSize.Height) - Height));
+                x = Math.Max(0, Math.Min(x, (int)context.ToPixels(_view.ContentSize.Width) - Width));
+
                 switch (_view.Orientation)
                 {
                     case ScrollOrientation.Horizontal:
@@ -176,7 +181,7 @@ namespace Ao3TrackReader.Droid
                         ScrollTo(x, y);
                         break;
                 }
-                Controller.SendScrollFinished();
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => _view.SendScrollFinished());
             }
         }
 
@@ -196,7 +201,7 @@ namespace Ao3TrackReader.Droid
             {
                 if (Element is Controls.ScrollView sv)
                 {
-                    sv.SetScrollEnd();
+                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() => sv.SetScrollEnd());
                 }
             }
         }

@@ -194,6 +194,8 @@
   <ItemGroup>
     <Compile Include="Ao3TrackHelper.cs" />
     <Compile Include="App.cs" />
+    <Compile Include="ButtonDrawable.cs" />
+    <Compile Include="ButtonRenderer.cs" />
     <Compile Include="DropDownRenderer.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="MultiSelectSpinner.cs" />
@@ -203,6 +205,7 @@
     <Compile Include="ScrollView.cs" />
     <Compile Include="ScrollViewRenderer.cs" />
     <Compile Include="Text.cs" />
+    <Compile Include="TextColorSwitcher.cs" />
     <Compile Include="TextViewRenderer.cs" />
     <Compile Include="WebViewPage.cs" />
   </ItemGroup>

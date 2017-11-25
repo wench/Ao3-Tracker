@@ -38,6 +38,16 @@ namespace Ao3TrackReader.Droid
 {
     class TextViewRenderer : LabelRenderer
     {
+        public TextViewRenderer(Android.Content.Context context) : base(context)
+        {
+
+        }
+        [Obsolete]
+        public TextViewRenderer() : base()
+        {
+
+        }
+
         protected override void OnElementChanged(ElementChangedEventArgs<Label> e)
         {
             base.OnElementChanged(e);
