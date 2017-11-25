@@ -22,11 +22,11 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Resources
 {
-    public class ResourceDictionary : Xamarin.Forms.ResourceDictionary
+    public class Values : Xamarin.Forms.ResourceDictionary
     {
-        public ResourceDictionary()
+        public Values()
         {
-            App.Database.GetVariableEvents("LogFontSizeUI").Updated += ResourceDictionary_Updated;
+            App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
             App.Database.TryGetVariable("LogFontSizeUI", int.TryParse, out int LogFontSizeUI);
             UpdateFontsize(LogFontSizeUI);
 
@@ -114,7 +114,7 @@ namespace Ao3TrackReader.Resources
 
         }
 
-        private void ResourceDictionary_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        private void LogFontSizeUI_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
         {
             if (!int.TryParse(e.NewValue, out int LogFontSizeUI)) LogFontSizeUI = 0;
             UpdateFontsize(LogFontSizeUI);

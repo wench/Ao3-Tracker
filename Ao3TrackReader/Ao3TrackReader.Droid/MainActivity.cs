@@ -33,7 +33,7 @@ using Android.Content;
 
 namespace Ao3TrackReader.Droid
 {
-    [Activity(Label = "Ao3Track Reader", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "Archive Track Reader", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity, Java.Lang.Thread.IUncaughtExceptionHandler
     {
         public class NetworkReceiver : BroadcastReceiver

@@ -53,7 +53,7 @@ namespace Ao3TrackReader
 
         public static string OSVersion => Build.VERSION.Release;
 
-        public static double OSBuild => Build.VERSION.SdkInt;
+        public static double OSBuild => (int)Build.VERSION.SdkInt;
 
         public static string OSName => Build.VERSION.BaseOs;
 

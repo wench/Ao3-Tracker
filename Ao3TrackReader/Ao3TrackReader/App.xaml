@@ -17,7 +17,11 @@ limitations under the License.
 <Application xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
              xmlns:res="clr-namespace:Ao3TrackReader.Resources" x:Class="Ao3TrackReader.App">
     <Application.Resources>
-        <res:ResourceDictionary>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <res:Values />
+            </ResourceDictionary.MergedDictionaries>
+
             <Style TargetType="Entry">
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="BackgroundColor" Value="{StaticResource AltHighColor}" />
@@ -122,7 +126,7 @@ limitations under the License.
                     </Grid>
                 </ViewCell>
             </DataTemplate>
-            
-        </res:ResourceDictionary>
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

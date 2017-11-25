@@ -93,7 +93,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PageEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Colors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\Icons.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Resources\ResourceDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources\Values.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NavigateBehaviour.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Text\Underline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebViewPage.xaml.cs">
