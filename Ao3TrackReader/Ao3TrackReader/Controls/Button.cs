@@ -22,7 +22,7 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-    class Button : Xamarin.Forms.Button, Models.IHelpInfo
+    public class Button : Xamarin.Forms.Button, Models.IHelpInfo
     {
         public static readonly Xamarin.Forms.BindableProperty ImageHeightProperty =
             BindableProperty.Create("ImageHeight", typeof(double), typeof(Button), defaultValue: 0.0);

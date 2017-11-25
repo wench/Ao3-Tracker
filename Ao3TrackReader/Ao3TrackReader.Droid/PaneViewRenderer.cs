@@ -31,6 +31,11 @@ namespace Ao3TrackReader.Droid
 {
     public class PaneViewRenderer : Xamarin.Forms.Platform.Android.ViewRenderer<Ao3TrackReader.Controls.PaneView, View>
     {
+        public PaneViewRenderer(Context context) : base(context)
+		{
+
+        }
+
         [Obsolete]
         public PaneViewRenderer() : base()
         {

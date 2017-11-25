@@ -52,12 +52,12 @@ namespace Ao3TrackReader.Controls
 
         private void ButtonsRight_Pressed(object sender, EventArgs e)
         {
-            ButtonsScroll.ScrollToAsync(ButtonsScroll.ScrollX + 120, 0, true).ConfigureAwait(false);
+            ButtonsScroll.ScrollToAsync(Math.Min(ButtonsScroll.ScrollX + 120, ButtonsScroll.ContentSize.Width-ButtonsScroll.Width), 0, true).ConfigureAwait(false);
         }
 
         private void ButtonsLeft_Pressed(object sender, EventArgs e)
         {
-            ButtonsScroll.ScrollToAsync(ButtonsScroll.ScrollX - 120, 0, true).ConfigureAwait(false);
+            ButtonsScroll.ScrollToAsync(Math.Max(ButtonsScroll.ScrollX - 120, 0), 0, true).ConfigureAwait(false);
         }
 
         private void Scroll_SizeChanged(object sender, EventArgs e)

@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace Ao3TrackReader.Controls
 {
-	public class ScrollView : Xamarin.Forms.ScrollView
+	public partial class ScrollView : Xamarin.Forms.ScrollView
     {
         public static readonly BindableProperty HideScrollbarsProperty = BindableProperty.Create("HideScrollbars", typeof(bool), typeof(ScrollView), false);
 
