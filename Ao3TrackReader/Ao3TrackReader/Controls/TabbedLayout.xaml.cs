@@ -92,34 +92,12 @@ namespace Ao3TrackReader.Controls
                 if (value >= TabsContainer.Children.Count) value = TabsContainer.Children.Count - 1;
                 if (value < 0) value = 0;
 
-                for (int i = 0; i < ButtonsContainer.Children.Count; i++)
-                {
-                    var button = ButtonsContainer.Children[i] as Button;
-                    if (i == value)
-                    {
-                        button.IsActive = true;
-                        button.IsEnabled = false;
-                        ButtonsScroll.ScrollToAsync(button, ScrollToPosition.Center, true);
-                    }
-                    else
-                    {
-                        button.IsActive = false;
-                        button.IsEnabled = true;
+                var newTab = value < TabsContainer.Children.Count ? TabsContainer.Children[value] as TabView : null;
 
-                    }
-                }
-
-                currentTabIndex = value;
-                currentTab = value < TabsContainer.Children.Count ? TabsContainer.Children[value] as TabView : null;
-
-                double desiredScroll = currentTab != null ? currentTab.X : 0;
+                double desiredScroll = newTab?.X ?? 0.0;
                 if (desiredScroll != Math.Floor(TabsScroll.ScrollX) && desiredScroll != Math.Round(TabsScroll.ScrollX, MidpointRounding.AwayFromZero))
                 {
-                    autoScrolling++;
-                    TabsScroll.ScrollToAsync(desiredScroll, 0, true).ContinueWith((task) =>
-                    {
-                        autoScrolling--;    
-                    });
+                    TabsScroll.ScrollToAsync(desiredScroll, 0, true);
                 }
 
             }
@@ -134,7 +112,6 @@ namespace Ao3TrackReader.Controls
         int autoScrolling = 0;
         private void Scroll_Scrolled(object sender, ScrolledEventArgs e)
         {
-            if (autoScrolling > 0) return;
 
             // Change active tab as we scroll over them
             currentTabIndex = TabFromX(TabsScroll.ScrollX);
