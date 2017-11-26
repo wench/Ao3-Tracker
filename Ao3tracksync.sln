@@ -29,7 +29,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.WinRT", "Ao3
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.Helper.Messaging", "Ao3TrackReader\Ao3TrackReader.Helper.Messaging\Ao3TrackReader.Helper.Messaging.shproj", "{29356923-19E8-4AE3-B98F-F828F5033317}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.UWP.Phone", "Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Phone.csproj", "{976C2593-9C14-4289-AE54-F2BB2020BA84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ao3TrackReader.UWP.Phone", "Ao3TrackReader\Ao3TrackReader.UWP.Phone\Ao3TrackReader.UWP.Phone.csproj", "{976C2593-9C14-4289-AE54-F2BB2020BA84}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ao3TrackReader.UWP.Shared", "Ao3TrackReader\Ao3TrackReader.UWP\Ao3TrackReader.UWP.Shared.shproj", "{151EA4AB-5247-4008-9A4E-DFD2E294000F}"
 EndProject
