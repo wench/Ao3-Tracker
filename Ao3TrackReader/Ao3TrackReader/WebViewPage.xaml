@@ -104,19 +104,41 @@ limitations under the License.
     </ContentPage.Resources>
     
     <ContentPage.Content>
-        <StackLayout x:Name="MainLayout" Spacing="0">
-            <local:TextView TextEx="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
-                            FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" 
-                            Margin="10,5,0,5" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" />
+        <StackLayout Spacing="0">
             <Label x:Name="ErrorBar" TextColor="{StaticResource RedColor}" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False"
                             FontAttributes="Bold" FontSize="{DynamicResource MediumSmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Start" 
                             Margin="10,0,10,5" HorizontalOptions="FillAndExpand" VerticalOptions="Start" HeightRequest="0" />
-            <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
-                <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+
+            <AbsoluteLayout HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+                <StackLayout x:Name="MainLayout" Spacing="0" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" >
+                    <local:TextView TextEx="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
+                            FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" 
+                            Margin="10,5,0,5" HorizontalOptions="FillAndExpand" VerticalOptions="Start" />
+
+                    <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+                        <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
                         AbsoluteLayout.LayoutBounds=".98, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
-                <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                        <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
                         AbsoluteLayout.LayoutBounds=".02, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
-                <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
+                        <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
+                    </AbsoluteLayout>
+                    <Grid x:Name="urlBar" ColumnSpacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
+                         VerticalOptions="End" HorizontalOptions="Fill" PropertyChanged="UrlBar_PropertyChanged">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" Grid.Column="0" />
+                        <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="{DynamicResource Size_57}" VerticalOptions="Center" Grid.Column="1"/>
+                        <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" Grid.Column="2"  Style="{StaticResource ImageButton}" />
+                    </Grid>
+                </StackLayout>
+
                 <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All">
                     <local:SettingsView x:Name="SettingsPane" wvp="{x:Reference root}" IsOnScreenChanged="SettingsPane_IsOnScreenChanged" />
                     <local:ReadingListView x:Name="ReadingListPane" wvp="{x:Reference root}" IsOnScreenChanged="ReadingList_IsOnScreenChanged" />
@@ -124,21 +146,6 @@ limitations under the License.
                     <local:LookupView x:Name="LookupPane" wvp="{x:Reference root}" />
                 </local:PaneContainer>
             </AbsoluteLayout>
-            <Grid x:Name="urlBar" ColumnSpacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
-                         VerticalOptions="End" HorizontalOptions="Fill" PropertyChanged="UrlBar_PropertyChanged">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" Grid.Column="0" />
-                <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="{DynamicResource Size_57}" VerticalOptions="Center" Grid.Column="1"/>
-                <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" Grid.Column="2"  Style="{StaticResource ImageButton}" />
-            </Grid>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
