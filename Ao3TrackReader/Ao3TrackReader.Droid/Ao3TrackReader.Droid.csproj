@@ -192,21 +192,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AHorizontalScrollView.cs" />
     <Compile Include="Ao3TrackHelper.cs" />
     <Compile Include="App.cs" />
     <Compile Include="ButtonDrawable.cs" />
     <Compile Include="ButtonRenderer.cs" />
     <Compile Include="DropDownRenderer.cs" />
+    <Compile Include="ListViewRenderer.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="MultiSelectSpinner.cs" />
     <Compile Include="PaneViewRenderer.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScrollView.cs" />
+    <Compile Include="ScrollViewContainer.cs" />
     <Compile Include="ScrollViewRenderer.cs" />
     <Compile Include="Text.cs" />
     <Compile Include="TextColorSwitcher.cs" />
     <Compile Include="TextViewRenderer.cs" />
+    <Compile Include="ViewGroupExtensions.cs" />
     <Compile Include="WebViewPage.cs" />
   </ItemGroup>
   <ItemGroup>
