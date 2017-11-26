@@ -20,6 +20,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
+using System.Reflection;
 
 namespace Ao3TrackReader.Models
 {
@@ -174,6 +175,18 @@ namespace Ao3TrackReader.Models
         [JsonIgnore]
         public bool HasChapters => Type == Ao3PageType.Series || Type == Ao3PageType.Work || Type == Ao3PageType.Collection;
 
+        private class SerializationBinder : Newtonsoft.Json.Serialization.DefaultSerializationBinder
+        {
+            public override Type BindToType(string assemblyName, string typeName)
+            {
+                if (assemblyName.StartsWith("Ao3TrackReader", StringComparison.OrdinalIgnoreCase))
+                    assemblyName = GetType().GetTypeInfo().Assembly.FullName;
+
+                return base.BindToType(assemblyName, typeName);
+            }
+        }
+
+
         static Newtonsoft.Json.JsonSerializerSettings JsonSettings { get; } = new Newtonsoft.Json.JsonSerializerSettings()
         {
             ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Serialize,
@@ -187,6 +200,7 @@ namespace Ao3TrackReader.Models
             Culture = System.Globalization.CultureInfo.InvariantCulture,
             StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.Default,
             Formatting = Newtonsoft.Json.Formatting.None,
+            SerializationBinder = new SerializationBinder(),
         };
 
         string serialized = null;

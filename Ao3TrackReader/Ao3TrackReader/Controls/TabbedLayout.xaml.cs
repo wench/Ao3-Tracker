@@ -125,7 +125,6 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-        bool wasAuto = false;
         private void Scroll_ScrollEnd(object sender, EventArgs e)
         {
             // Snap scrolling to a tab point

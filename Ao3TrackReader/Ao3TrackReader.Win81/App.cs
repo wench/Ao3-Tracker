@@ -37,6 +37,15 @@ namespace Ao3TrackReader
             }
         }
 
+        public static double OSBuild
+        {
+            get
+            {
+                return 8.1;
+            }
+        }
+
+
         public static string HardwareType => null;
     }
 }

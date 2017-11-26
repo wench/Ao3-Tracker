@@ -235,7 +235,7 @@ namespace Ao3TrackReader
                     if (string.IsNullOrEmpty(sversions))
                         return;
 
-                    var versions = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, SortedList<double, int[]>>>(sversions);
+                    var versions = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, SortedDictionary<double, int[]>>>(sversions);
 
                     if (versions.TryGetValue(Device.RuntimePlatform,out var pversions))
                     {

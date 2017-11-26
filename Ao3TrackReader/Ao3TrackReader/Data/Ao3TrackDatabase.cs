@@ -73,6 +73,7 @@ namespace Ao3TrackReader
             SQLitePCL.raw.FreezeProvider();
             SQLitePCL.raw.sqlite3_shutdown();
             int result = SQLitePCL.raw.sqlite3_config(SQLitePCL.raw.SQLITE_CONFIG_SERIALIZED);
+
             database = new SQLiteConnection(DatabasePath);
 
             // create the tables
@@ -110,48 +111,53 @@ namespace Ao3TrackReader
             }
             if (DatabaseVersion < Version.Version.AsInteger(1,1,0,4))
             {
-                try
+                var columns = database.GetTableInfo("ReadingList");
+                if (columns.Exists((col) => col.Name == "Uri") && columns.Exists((col) => col.Name == "Timestamp") && columns.Exists((col) => col.Name == "PrimaryTag") &&
+                    columns.Exists((col) => col.Name == "Title") && columns.Exists((col) => col.Name == "Summary") && columns.Exists((col) => col.Name == "Unread"))
                 {
-                    var oldValues = database.Query<ReadingListV1>("SELECT Uri, Timestamp, PrimaryTag, Title, Summary, Unread FROM ReadingList");
-                    var newValues = new List<ReadingList>(oldValues.Count);
-                    if (oldValues.Count > 0)
+                    try
                     {
-                        var models = Ao3SiteDataLookup.LookupQuick(oldValues.Select((row) => row.Uri));
-                        foreach (var item in oldValues)
+                        var oldValues = database.Query<ReadingListV1>("SELECT Uri, Timestamp, PrimaryTag, Title, Summary, Unread FROM ReadingList");
+                        var newValues = new List<ReadingList>(oldValues.Count);
+                        if (oldValues.Count > 0)
                         {
-                            if (models.TryGetValue(item.Uri, out var model))
+                            var models = Ao3SiteDataLookup.LookupQuick(oldValues.Select((row) => row.Uri));
+                            foreach (var item in oldValues)
                             {
-                                if (string.IsNullOrWhiteSpace(model.Title) || model.Type == Models.Ao3PageType.Work)
-                                    model.Title = item.Title;
-                                if (string.IsNullOrWhiteSpace(model.PrimaryTag) || model.PrimaryTag.StartsWith("<"))
+                                if (models.TryGetValue(item.Uri, out var model))
                                 {
-                                    model.PrimaryTag = item.PrimaryTag;
-                                    var tagdata = Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
-                                    if (tagdata is null) model.PrimaryTagType = Models.Ao3TagType.Other;
-                                    else model.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
-                                }
-                                if (!(model.Details is null) && (model.Details.Summary is null) && !string.IsNullOrEmpty(item.Summary))
-                                    model.Details.Summary = item.Summary;
+                                    if (string.IsNullOrWhiteSpace(model.Title) || model.Type == Models.Ao3PageType.Work)
+                                        model.Title = item.Title;
+                                    if (string.IsNullOrWhiteSpace(model.PrimaryTag) || model.PrimaryTag.StartsWith("<"))
+                                    {
+                                        model.PrimaryTag = item.PrimaryTag;
+                                        var tagdata = Ao3SiteDataLookup.LookupTagQuick(item.PrimaryTag);
+                                        if (tagdata is null) model.PrimaryTagType = Models.Ao3TagType.Other;
+                                        else model.PrimaryTagType = Ao3SiteDataLookup.GetTypeForCategory(tagdata.category);
+                                    }
+                                    if (!(model.Details is null) && (model.Details.Summary is null) && !string.IsNullOrEmpty(item.Summary))
+                                        model.Details.Summary = item.Summary;
 
-                                newValues.Add(new ReadingList(model, item.Timestamp, item.Unread));
-                            }
-                            else
-                            {
-                                newValues.Add(new ReadingList { Uri = item.Uri, Timestamp = item.Timestamp, Unread = item.Unread });
+                                    newValues.Add(new ReadingList(model, item.Timestamp, item.Unread));
+                                }
+                                else
+                                {
+                                    newValues.Add(new ReadingList { Uri = item.Uri, Timestamp = item.Timestamp, Unread = item.Unread });
+                                }
+
                             }
 
                         }
+                        database.BeginTransaction();
+                        database.DropTable<ReadingList>();
+                        database.CreateTable<ReadingList>();
+                        database.InsertAll(newValues, false);
+                        database.Commit();
+                    }
+                    catch (Exception)
+                    {
 
                     }
-                    database.BeginTransaction();
-                    database.DropTable<ReadingList>();
-                    database.CreateTable<ReadingList>();
-                    database.InsertAll(newValues, false);
-                    database.Commit();
-                }
-                catch(Exception e)
-                {
-
                 }
             }
 
