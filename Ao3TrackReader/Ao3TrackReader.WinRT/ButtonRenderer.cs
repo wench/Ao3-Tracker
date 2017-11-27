@@ -43,10 +43,73 @@ using WButton = Windows.UI.Xaml.Controls.Button;
 using WImage = Windows.UI.Xaml.Controls.Image;
 
 
-[assembly: ExportRenderer(typeof(Ao3TrackReader.Controls.Button), typeof(Ao3TrackReader.ButtonRenderer))]
-namespace Ao3TrackReader
+[assembly: ExportRenderer(typeof(Ao3TrackReader.Controls.Button), typeof(Ao3TrackReader.WinRT.ButtonRenderer))]
+namespace Ao3TrackReader.WinRT
 {
-    class ButtonRenderer : ViewRenderer<Button, FormsButton>
+
+    public class ActivatableButton : FormsButton
+    {
+        public static readonly DependencyProperty IsActiveProperty =
+            DependencyProperty.Register(
+            nameof(IsActive), typeof(Boolean),
+            typeof(ActivatableButton),
+            new PropertyMetadata(false,(d,o)=>((ActivatableButton)d).PropertyChanged())
+            );
+
+        public bool IsActive
+        {
+            get { return (bool)GetValue(IsActiveProperty); }
+            set { SetValue(IsActiveProperty, value); }
+        }
+
+
+        public ActivatableButton()
+        {
+            IsEnabledChanged += (sender, args) => PropertyChanged();
+            Loaded += (sender, args) => PropertyChanged();
+        }
+
+        private void PropertyChanged()
+        {
+            string state = "Ao3TNormal";
+
+            if (IsActive)
+                state = "Ao3TActive";
+            else if (!IsEnabled)
+                state = "Ao3TDisabled";
+            else if (IsPressed)
+                state = "Ao3TPressed";
+            else if (IsPointerOver)
+                state = "Ao3TPointerOver";
+
+            VisualStateManager.GoToState(this, state, false);
+        }
+
+        protected override void OnPointerEntered(PointerRoutedEventArgs e)
+        {
+            base.OnPointerEntered(e);
+            PropertyChanged();
+        }
+
+        protected override void OnPointerExited(PointerRoutedEventArgs e)
+        {
+            base.OnPointerExited(e);
+            PropertyChanged();
+        }
+        protected override void OnPointerPressed(PointerRoutedEventArgs e)
+        {
+            base.OnPointerPressed(e);
+            PropertyChanged();
+        }
+        protected override void OnPointerReleased(PointerRoutedEventArgs e)
+        {
+            base.OnPointerReleased(e);
+            PropertyChanged();
+        }
+    }
+
+
+    class ButtonRenderer : ViewRenderer<Button, ActivatableButton>
     {
         bool _fontApplied;
 
@@ -58,7 +121,7 @@ namespace Ao3TrackReader
             {
                 if (Control == null)
                 {
-                    var button = new FormsButton();
+                    var button = new ActivatableButton();
                     button.Click += OnButtonClick;
                     button.AddHandler(PointerPressedEvent, new PointerEventHandler(OnPointerPressed), true);
                     SetNativeControl(button);
@@ -85,6 +148,8 @@ namespace Ao3TrackReader
                     UpdateBorderRadius();
 
                 UpdateFont();
+
+                UpdateActive();
             }
         }
 
@@ -122,8 +187,7 @@ namespace Ao3TrackReader
             }
             else if (e.PropertyName == Controls.Button.IsActiveProperty.PropertyName)
             {
-                UpdateTextColor();
-                UpdateIconColor();
+                UpdateActive();
             }
             else if (e.PropertyName == Controls.Button.PaddingProperty.PropertyName)
             {
@@ -207,7 +271,7 @@ namespace Ao3TrackReader
             {
             }
 
-#if WINDOWS_UWP
+#if True
             var bmpicon = new BitmapIcon
             {
                 UriSource = new Uri("ms-appx:///" + elementImage.File)
@@ -321,9 +385,9 @@ namespace Ao3TrackReader
         void UpdateTextColor()
         {
             var element = Element as Ao3TrackReader.Controls.Button;
-            if (element.IsActive)
-                Control.Foreground = Ao3TrackReader.Resources.Colors.Highlight.High.ToWindowsBrush();
-            else
+            //if (element.IsActive)
+            //    Control.Foreground = Ao3TrackReader.Resources.Colors.Highlight.High.ToWindowsBrush();
+            //else
                 Control.Foreground = Element.TextColor != Color.Default ? Element.TextColor.ToWindowsBrush() : (Brush)Windows.UI.Xaml.Application.Current.Resources["DefaultTextForegroundThemeBrush"];
         }
 
@@ -343,11 +407,17 @@ namespace Ao3TrackReader
             if (image != null)
             {
                 var element = Element as Ao3TrackReader.Controls.Button;
-                    if (element.IsActive)
+                if (element.IsActive)
                     image.Foreground = Ao3TrackReader.Resources.Colors.Highlight.High.ToWindowsBrush();
                 else
                     image.Foreground = null;
             }
+        }
+
+        void UpdateActive()
+        {
+            Control.IsActive = (Element as Controls.Button).IsActive;
+            UpdateIconColor();
         }
     }
 }

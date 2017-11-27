@@ -13,6 +13,9 @@
                     <SolidColorBrush x:Key="BaseMediumLowColor" />
                     <SolidColorBrush x:Key="BaseLowColor" />
                     <SolidColorBrush x:Key="HighlightColor" />
+                    <SolidColorBrush x:Key="BaseTransVeryLowColor" />
+                    <SolidColorBrush x:Key="BaseTransLowColor" />
+                    <SolidColorBrush x:Key="BaseTransMediumLowColor" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
