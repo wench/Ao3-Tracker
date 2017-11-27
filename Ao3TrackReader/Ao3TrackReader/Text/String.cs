@@ -50,5 +50,15 @@ namespace Ao3TrackReader.Text
         {
             get { return string.IsNullOrEmpty(Text); }
         }
-    }    
+    }
+
+    public class _ : String
+    {
+        public _() : base()
+        {
+        }
+        public _(string text) : base(text)
+        {
+        }
+    }
 }

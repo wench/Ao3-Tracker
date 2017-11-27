@@ -89,9 +89,9 @@ limitations under the License.
             </m:KeyedItemList>
 
             <m:NullableKeyedItemList x:TypeArguments="x:Boolean" x:Key="BackButtonMode">
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="{x:Null}" Value="Auto"/>
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="True" Value="Shown Always"/>
-                <m:NullableKeyedItem x:TypeArguments="x:Boolean" Key="False" Value="Never Shown"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" KeyXaml="{x:Null}" ValueXaml="Auto" />
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" KeyXaml="True"     ValueXaml="Shown Always"/>
+                <m:NullableKeyedItem x:TypeArguments="x:Boolean" KeyXaml="False"    ValueXaml="Never Shown"/>-->                
             </m:NullableKeyedItemList>
 
             <m:KeyedItemList x:TypeArguments="a:UnitConvSetting" x:Key="UnitConvMode">

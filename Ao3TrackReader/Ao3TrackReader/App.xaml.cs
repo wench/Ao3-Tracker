@@ -27,6 +27,8 @@ using Button = Ao3TrackReader.Controls.Button;
 using System.Threading.Tasks;
 using Ver = Ao3TrackReader.Version.Version;
 
+[assembly:Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
+
 namespace Ao3TrackReader
 {
     public enum InteractionMode
@@ -46,7 +48,6 @@ namespace Ao3TrackReader
         ARM64 = 4
     }
 
-    [Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
     public partial class App : Application
     {
         public new static App Current => (App)Application.Current;

@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.   
 -->
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Ao3TrackReader.Controls" 
-             xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:html="clr-namespace:Ao3TrackReader.Text" xmlns:m="clr-namespace:Ao3TrackReader.Models" 
+             xmlns:c="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:text="clr-namespace:Ao3TrackReader.Text" xmlns:m="clr-namespace:Ao3TrackReader.Models" 
              x:Class="Ao3TrackReader.WebViewPage" BackgroundColor="{StaticResource AltMediumHighColor}" x:Name="root">
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -33,7 +33,11 @@ limitations under the License.
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Jump"                Icon="{StaticResource GotoIcon}"      Command="{Binding JumpCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">Jump to the <html:Em>Read To Location</html:Em> of this work. This button is only enabled when viewing a work.</html:Span>
+                        <text:Span>
+                            <text:_ Text="Jump to the "/>
+                            <text:_ Text="Read To Location" Italic="true"/>
+                            <text:_ Text=" of this work. This button is only enabled when viewing a work."/>
+                        </text:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Reading List"        Icon="{StaticResource BookmarksIcon}" Command="{Binding ReadingListCommand,Source={x:Reference root}}" 
@@ -52,23 +56,31 @@ limitations under the License.
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Sync"                Icon="{StaticResource SyncIcon}"      Command="{Binding SyncCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">Syncronise <html:Em>Read To Location</html:Em> data with the Ao3Track Cloud Server. This button will be disabled while a sync is occuring, or if cloud sync is not available.</html:Span>
+                        <text:Span>
+                            <text:_ Text="Syncronise "/>
+                            <text:_ Text="Read To Location" Italic="true"/>
+                            <text:_ Text=" data with the Ao3Track Cloud Server. This button will be disabled while a sync is occuring, or if cloud sync is not available."/>
+                        </text:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Force set location"  Icon="{StaticResource ForceLocIcon}"  Command="{Binding ForceSetLocationCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">
-                            Force the
-                            <html:Em>Read To Location</html:Em> of the currently viewed work to be set to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the
-                            <html:Em>Read To Location.</html:Em>
-                        </html:Span>
+                        <text:Span>
+                            <text:_ Text="Force the "/>
+                            <text:_ Text="Read To Location" Italic="true"/>
+                            <text:_ Text=" of the currently viewed work to the current displayed location. This button is only enabled when viewing works and the current displayed location is at a location earlier in the work than the"/>
+                            <text:_ Text="Read To Location" Italic="true"/>
+                            <text:_ Text="."/>
+                        </text:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Set up to date"  Icon="{StaticResource SetUpToDateIcon}"  Command="{Binding SetUpToDateCommand,Source={x:Reference root}}" >
                     <local:ToolbarItem.Description>
-                        <html:Span Pad="true">
-                            Set the <html:Em>Read To Location</html:Em> of the currently viewed work to be end of the last chapter of the work.
-                        </html:Span>
+                        <text:Span>
+                            <text:_ Text="Set the "/>
+                            <text:_ Text="Read To Location" Italic="true"/>
+                            <text:_ Text=" of the currently viewed work to be end of the last chapter of the work."/>
+                        </text:Span>
                     </local:ToolbarItem.Description>
                 </local:ToolbarItem>
                 <local:ToolbarItem Text="Url Bar"             Icon="{StaticResource RenameIcon}"    Command="{Binding UrlBarCommand,Source={x:Reference root}}" 

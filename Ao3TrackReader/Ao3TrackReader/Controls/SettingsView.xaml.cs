@@ -27,6 +27,7 @@ using Ver = Ao3TrackReader.Version.Version;
 
 namespace Ao3TrackReader.Controls
 {
+    [Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Skip)]
     public partial class SettingsView : PaneView
     {
         public static readonly BindableProperty DatabaseVariableProperty =
@@ -52,7 +53,7 @@ namespace Ao3TrackReader.Controls
             aboutText.TextEx = new Text.Span
             {
                 Nodes = {
-                    new Text.String { Text = "Ao3Track Reader Version " + Ver.Major + "." + Ver.Minor + "." + Ver.Build },
+                    new Text.String { Text = "Archive Track Reader Version " + Ver.Major + "." + Ver.Minor + "." + Ver.Build },
                     new Text.Br(),
                     new Text.String { Text = Ver.Copyright },
                     new Text.Br(),

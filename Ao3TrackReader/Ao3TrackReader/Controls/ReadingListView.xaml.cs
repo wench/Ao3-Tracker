@@ -28,7 +28,6 @@ using Ao3TrackReader.Models;
 
 namespace Ao3TrackReader.Controls
 {
-    [Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
     public partial class ReadingListView : PaneView
     {
         const int MaxRefreshTasks = 20;

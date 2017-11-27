@@ -10,7 +10,7 @@ using Xamarin.Forms.Xaml;
 
 namespace Ao3TrackReader.Controls
 {
-	[XamlCompilation(XamlCompilationOptions.Compile), Xamarin.Forms.ContentProperty(nameof(Tabs))]
+	[Xamarin.Forms.ContentProperty(nameof(Tabs))]
 	public partial class TabbedLayout : ContentView, IViewContainer<TabView>
     {
         public static readonly BindableProperty SpacingProperty = BindableProperty.Create(nameof(Spacing), typeof(double), typeof(TabbedLayout), defaultValue: -1.0,
@@ -109,7 +109,6 @@ namespace Ao3TrackReader.Controls
             CurrentTab = TabFromX(TabsScroll.ScrollX);
         }
 
-        int autoScrolling = 0;
         private void Scroll_Scrolled(object sender, ScrolledEventArgs e)
         {
 
@@ -123,8 +122,8 @@ namespace Ao3TrackReader.Controls
                 var button = ButtonsContainer.Children[i] as Button;
                 if (i == currentTabIndex)
                 {
-                    button.IsActive = true;
                     button.IsEnabled = false;
+                    button.IsActive = true;
                     if (oldCurrent != currentTab) ButtonsScroll.ScrollToAsync(button, ScrollToPosition.Center, true);
                 }
                 else
@@ -150,8 +149,8 @@ namespace Ao3TrackReader.Controls
             {
                 currentTabIndex = 0;
                 currentTab = tab;
-                button.IsActive = true;
                 button.IsEnabled = false;
+                button.IsActive = true;
             }
             else
             {
@@ -221,8 +220,8 @@ namespace Ao3TrackReader.Controls
                 ButtonsContainer.Children.Add(button);
                 if (tab == currentTab)
                 {
-                    button.IsActive = true;
                     button.IsEnabled = false;
+                    button.IsActive = true;
                     newCurrent = i;
                 }
             }

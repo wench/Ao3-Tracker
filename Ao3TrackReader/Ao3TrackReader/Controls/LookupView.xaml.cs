@@ -17,7 +17,6 @@ using XPlatform = Xamarin.Forms.Platform.WinRT.Platform;
 
 namespace Ao3TrackReader.Controls
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class LookupView : PaneView
 	{
 		public LookupView ()

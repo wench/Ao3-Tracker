@@ -20,6 +20,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using System.Linq;
 using System.Reflection;
+using System.Collections;
 
 namespace Ao3TrackReader.Models
 {
@@ -33,7 +34,7 @@ namespace Ao3TrackReader.Models
     public class KeyedItem<TKey> : IKeyedItem
     {
         public TKey Key { get; set; }
-        object IKeyedItem.Key { get => Key; set => Key = (TKey)value; }
+        object IKeyedItem.Key { get => Key; set => Key = value is TKey ? (TKey)value : default(TKey); }
 
         public string Value { get; set; }
 
@@ -60,15 +61,32 @@ namespace Ao3TrackReader.Models
             return object.Equals(Key, o.Key) && object.Equals(Value, o.Value);
         }
 
+        public static explicit operator KeyValuePair<TKey, string>(KeyedItem<TKey> item)
+        {
+            return new KeyValuePair<TKey, string>(item.Key, item.Value);
+        }
     }
 
     public class NullableKeyedItem<TKey> : KeyedItem<TKey?>
         where TKey: struct
     {
         public NullableKeyedItem() { }
-        public NullableKeyedItem(TKey key, string value) : base(key, value)
+        public NullableKeyedItem(TKey? key, string value)  : base(key,value)
         {
         }
+
+        public TKey? KeyXaml
+        {
+            set => Key = value;
+        }
+
+        public string ValueXaml
+        {
+            set => Value = value;
+        }
+
+        public static NullableKeyedItem<TKey> Construct(TKey key, string value) { return new NullableKeyedItem<TKey>(key, value); }
+        public static NullableKeyedItem<TKey> ConstructNull(string value) { return new NullableKeyedItem<TKey>(null, value); }
     }
 
     public interface IKeyedItemList
@@ -76,8 +94,10 @@ namespace Ao3TrackReader.Models
         IKeyedItem Lookup(string str);
     }
 
-    public abstract class BaseKeyedItemList<TKey> : List<KeyedItem<TKey>>, IKeyedItemList
+    public abstract class BaseKeyedItemList<TKey> : List<KeyedItem<TKey>>, IKeyedItemList, IDictionary<TKey,string>
     {
+        public IDictionary<TKey, string> Items => this;
+
         public BaseKeyedItemList() : base()
         {
         }
@@ -86,20 +106,202 @@ namespace Ao3TrackReader.Models
         {
         }
 
+
+        string IDictionary<TKey, string>.this[TKey key] {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException(); }
+
+        int ICollection<KeyValuePair<TKey, string>>.Count => Count;
+
+        bool ICollection<KeyValuePair<TKey, string>>.IsReadOnly => false;
+
         public void Add(TKey key, string value)
         {
-            Add(new KeyedItem<TKey>(key, value));
+            base.Add(new KeyedItem<TKey>(key, value));
+        }
+
+        public new void Add(KeyedItem<TKey> item)
+        {
+            base.Add(item);
         }
 
         public abstract IKeyedItem Lookup(string str);
+
+
+        #region IDictionary Stuff
+
+        abstract class EnumeratorWrapper<T> : IEnumerator<T>
+        {
+            protected IEnumerator<KeyedItem<TKey>> enumerator { get; }
+            public abstract T Current { get; }
+
+            object IEnumerator.Current => Current;
+            protected EnumeratorWrapper(IEnumerator<KeyedItem<TKey>> enumerator) { this.enumerator = enumerator; }
+
+            public bool MoveNext()
+            {
+                return enumerator.MoveNext();
+            }
+
+            public void Reset()
+            {
+                enumerator.Reset();
+            }
+
+            public void Dispose()
+            {
+                enumerator.Dispose();
+            }
+        }
+
+        abstract class CollectionWrapper<T> : ICollection<T>
+        {
+            protected BaseKeyedItemList<TKey> self { get; }
+
+            protected CollectionWrapper(BaseKeyedItemList<TKey> self) { this.self = self; }
+
+            public bool IsReadOnly => true;
+
+            public int Count => ((ICollection)self).Count;
+
+            public void Clear()
+            {
+                throw new NotSupportedException();
+            }
+
+            public void Add(T item)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void CopyTo(T[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public abstract IEnumerator<T> GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public bool Remove(T item)
+            {
+                throw new NotSupportedException();
+            }
+
+            public abstract bool Contains(T item);
+        }
+
+        void ICollection<KeyValuePair<TKey, string>>.Add(KeyValuePair<TKey, string> item)
+        {
+            base.Add(new KeyedItem<TKey>(item.Key, item.Value));
+        }
+
+        void ICollection<KeyValuePair<TKey, string>>.Clear()
+        {
+            Clear();
+        }
+
+        bool ICollection<KeyValuePair<TKey, string>>.Contains(KeyValuePair<TKey, string> item)
+        {
+            return Exists((i) => object.Equals(i.Key, item.Key) && i.Value == item.Value);
+        }
+
+        bool IDictionary<TKey, string>.ContainsKey(TKey key)
+        {
+            return Exists((i) => object.Equals(i.Key, key));
+        }
+
+        void ICollection<KeyValuePair<TKey, string>>.CopyTo(KeyValuePair<TKey, string>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        class KVPEnumeratorWrapper : EnumeratorWrapper<KeyValuePair<TKey, string>>, IEnumerator<KeyValuePair<TKey, string>>
+        {
+            public KVPEnumeratorWrapper(IEnumerator<KeyedItem<TKey>> enumerator) : base(enumerator) { }
+
+            public override KeyValuePair<TKey, string> Current => (KeyValuePair<TKey, string>)enumerator.Current;
+        }
+
+        IEnumerator<KeyValuePair<TKey, string>> IEnumerable<KeyValuePair<TKey, string>>.GetEnumerator()
+        {
+            return new KVPEnumeratorWrapper(this.GetEnumerator());
+        }
+
+        bool IDictionary<TKey, string>.Remove(TKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool ICollection<KeyValuePair<TKey, string>>.Remove(KeyValuePair<TKey, string> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IDictionary<TKey, string>.TryGetValue(TKey key, out string value)
+        {
+            throw new NotImplementedException();
+        }
+
+        class KeyEnumeratorWrapper : EnumeratorWrapper<TKey>
+        {
+            public KeyEnumeratorWrapper(IEnumerator<KeyedItem<TKey>> enumerator) : base(enumerator) { }
+
+            public override TKey Current => enumerator.Current.Key;
+        }
+
+        class KeyCollectionWrapper : CollectionWrapper<TKey>
+        {
+            public KeyCollectionWrapper(BaseKeyedItemList<TKey> self) : base(self) { }
+
+            public override bool Contains(TKey item)
+            {
+                return self.Exists((i) => object.Equals(i.Key, item));
+            }
+
+            public override IEnumerator<TKey> GetEnumerator()
+            {
+                return new KeyEnumeratorWrapper(self.GetEnumerator());
+            }
+        }
+
+        ICollection<TKey> IDictionary<TKey, string>.Keys => new KeyCollectionWrapper(this);
+
+        class ValueEnumeratorWrapper : EnumeratorWrapper<string>
+        {
+            public ValueEnumeratorWrapper(IEnumerator<KeyedItem<TKey>> enumerator) : base(enumerator) { }
+
+            public override string Current => enumerator.Current.Value;
+        }
+
+        class ValueCollectionWrapper : CollectionWrapper<string>
+        {
+            public ValueCollectionWrapper(BaseKeyedItemList<TKey> self) : base(self) { }
+
+            public override bool Contains(string item)
+            {
+                return self.Exists((i) => object.Equals(i.Value, item));
+            }
+
+            public override IEnumerator<string> GetEnumerator()
+            {
+                return new ValueEnumeratorWrapper(self.GetEnumerator());
+            }
+        }
+        ICollection<string> IDictionary<TKey, string>.Values => new ValueCollectionWrapper(this);
+        #endregion
     }
+
 
     public class KeyedItemList<TKey> : BaseKeyedItemList<TKey>
     {
         static Type typeKey;
         static TypeInfo typeInfoKey;
         static MethodInfo methodTryParse;
-
+        
         static TKey ResolveKey(string str)
         {
             if (typeKey == null)
@@ -198,6 +400,12 @@ namespace Ao3TrackReader.Models
                 return null;
             }
         }
+
+        public void Add(TKey key, string value)
+        {
+            base.Add(new KeyedItem<TKey?>(key, value));
+        }
+
     }
 
     public static class KeyedItemExtensions
