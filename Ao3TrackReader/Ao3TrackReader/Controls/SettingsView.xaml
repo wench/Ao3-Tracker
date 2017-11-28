@@ -326,7 +326,7 @@ limitations under the License.
                                     <Label Text="Use Blurred Backgrounds" HorizontalOptions="StartAndExpand" />
                                     <Switch local:SettingsView.DatabaseVariable="PaneViewRenderer.useBlur" HorizontalOptions="EndAndExpand" />
                                 </StackLayout>
-                                <Label Text="Turning this off may improve performances" Style="{StaticResource Remark}" />
+                                <Label Text="Enabling this may impact performance" Style="{StaticResource Remark}" />
                             </StackLayout>
                             
                             <StackLayout Style="{StaticResource Setting}">

@@ -313,7 +313,7 @@ namespace Ao3TrackReader
             { "TagOptions.showRatingTags", false },
             { "ReadingList.showTagsDefault", false },
             { "ReadingList.showCompleteDefault", false },
-            { "PaneViewRenderer.useBlur", true },
+            { "PaneViewRenderer.useBlur", false },
         };
 
         public string GetVariable(string name)
