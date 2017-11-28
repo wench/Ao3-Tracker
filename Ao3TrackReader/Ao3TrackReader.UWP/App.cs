@@ -78,5 +78,7 @@ namespace Ao3TrackReader
         public static string OSName => AnalyticsInfo.VersionInfo.DeviceFamily;
 
         public static string HardwareType => AnalyticsInfo.DeviceForm;
+
+        public static bool IsBlurSupported => UWP.App.UniversalApi >= 3;
     }
 }

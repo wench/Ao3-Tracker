@@ -27,9 +27,33 @@ namespace Ao3TrackReader.UWP
 {
     class PaneViewRenderer : Xamarin.Forms.Platform.UWP.LayoutRenderer
     {
+        bool useBlur;
+        public PaneViewRenderer() : base()
+        {
+            if (App.UniversalApi >= 3)
+            {
+                Ao3TrackReader.App.Database.TryGetVariable("PaneViewRenderer.useBlur", bool.TryParse, out useBlur);
+                Ao3TrackReader.App.Database.GetVariableEvents("PaneViewRenderer.useBlur").Updated += DatabaseVariable_Updated;
+            }
+            else
+            {
+                useBlur = false;
+            }
+        }
+
+        private void DatabaseVariable_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
+        {
+
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                bool.TryParse(e.NewValue, out useBlur);
+                if (Element != null) UpdateBackgroundColor();
+            });
+        }
+
         protected override void UpdateBackgroundColor()
         {
-            if (Acrylic.VeryHigh.TrySet(this))
+            if (useBlur && Acrylic.VeryHigh.TrySet(this))
             {
                 return;
             }

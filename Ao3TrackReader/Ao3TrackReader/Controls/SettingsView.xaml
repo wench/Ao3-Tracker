@@ -321,6 +321,14 @@ limitations under the License.
                         <StackLayout Style="{StaticResource SettingGroup}">
                             <Label Text="App Display" Style="{StaticResource Heading}"/>
 
+                            <StackLayout Style="{StaticResource SettingVert}" x:Name="useBlurSetting">
+                                <StackLayout Style="{StaticResource Setting}">
+                                    <Label Text="Use Blurred Backgrounds" HorizontalOptions="StartAndExpand" />
+                                    <Switch local:SettingsView.DatabaseVariable="PaneViewRenderer.useBlur" HorizontalOptions="EndAndExpand" />
+                                </StackLayout>
+                                <Label Text="Turning this off may improve performances" Style="{StaticResource Remark}" />
+                            </StackLayout>
+                            
                             <StackLayout Style="{StaticResource Setting}">
                                 <Label Text="UI Font Size" HorizontalOptions="Start" />
                                 <local:DropDown local:SettingsView.DatabaseVariable="LogFontSizeUI" ItemsSource="{StaticResource FontSizeUIList}" />

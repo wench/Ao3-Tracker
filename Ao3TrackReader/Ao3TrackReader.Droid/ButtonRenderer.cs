@@ -112,6 +112,8 @@ namespace Ao3TrackReader.Droid
                     button.SetOnTouchListener(ButtonTouchListener.Instance.Value);
                     button.Tag = this;
                     SetNativeControl(button);
+                    button.Focusable = false;
+                    button.FocusableInTouchMode = false;
                     _textColorSwitcher = new TextColorSwitcher(button.TextColors);
                     button.AddOnAttachStateChangeListener(this);
                 }
@@ -262,6 +264,7 @@ namespace Ao3TrackReader.Droid
 
         void UpdateEnabled()
         {
+            Control.ClearAnimation();
             Control.Enabled = Element.IsEnabled;
         }
 

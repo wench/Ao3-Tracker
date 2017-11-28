@@ -102,6 +102,22 @@ limitations under the License.
             </c:List>
 
             <c:List x:Key="ExtraHelp" x:Name="ExtraHelp" x:TypeArguments="m:HelpInfo" >
+                <m:HelpInfo Text="About Archive Track Reader" Icon="{StaticResource LogoIcon}" Group="About">
+                    <m:HelpInfo.Description>
+                        <text:Span>
+                            <text:_ Text="Archive Track Reader is an " />
+                            <text:_ Text="Unofficial" Italic="True" />
+                            <text:_ Text=" third party app to make it easier to use "/>
+                            <text:_ Text="Archive of Our Own" Italic="True" />
+                            <text:_ Text=".&#x0A;&#x0A;" />
+                            <text:_ Text="Do not contact "/>
+                            <text:_ Text="Archive of Our Own" Italic="True" />
+                            <text:_ Text=", or "/>
+                            <text:_ Text="The Organization for Transformative Works" Italic="True" />
+                            <text:_ Text=" (OTW) for support with using this app." />
+                        </text:Span>
+                    </m:HelpInfo.Description>
+                </m:HelpInfo>
                 <m:HelpInfo Text="Swipe Right" Icon="{StaticResource SwipeRightIcon}" Group="Gestures">
                     <m:HelpInfo.Description>Browse to the previous page in the browser history. Swipe right behavior can be changed in Settings.</m:HelpInfo.Description>
                 </m:HelpInfo>
@@ -110,54 +126,57 @@ limitations under the License.
                 </m:HelpInfo>
                 <m:HelpInfo Text="Tap and Hold on Links" Icon="{StaticResource TapHoldIcon}" Group="Gestures">
                     <m:HelpInfo.Description>Tap and hold, or right mouse click, on a link to bring up a context menu. In the context menu you can open the link, add it to the reading list, or copy it to the system clipboard.</m:HelpInfo.Description>
-                </m:HelpInfo>            
+                </m:HelpInfo>
             </c:List>
         </ResourceDictionary>
     </ContentPage.Resources>
-    
+
     <ContentPage.Content>
-        <StackLayout Spacing="0">
-            <Label x:Name="ErrorBar" TextColor="{StaticResource RedColor}" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False"
+        <AbsoluteLayout HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+            <StackLayout x:Name="MainLayout" Spacing="0" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" >
+                <local:TextView TextEx="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
+                        FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" 
+                        Margin="10,5,0,5" HorizontalOptions="FillAndExpand" VerticalOptions="Start" />
+
+                <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
+                    <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                    AbsoluteLayout.LayoutBounds=".98, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
+                    <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
+                    AbsoluteLayout.LayoutBounds=".02, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
+                    <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
+                </AbsoluteLayout>
+                <Grid x:Name="urlBar" ColumnSpacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
+                        VerticalOptions="End" HorizontalOptions="Fill" PropertyChanged="UrlBar_PropertyChanged">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" Grid.Column="0" />
+                    <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="{DynamicResource Size_57}" VerticalOptions="Center" Grid.Column="1"/>
+                    <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" Grid.Column="2"  Style="{StaticResource ImageButton}" />
+                </Grid>
+            </StackLayout>
+
+            <local:PaneContainer x:Name="Panes">
+                <local:SettingsView x:Name="SettingsPane" wvp="{x:Reference root}" IsOnScreenChanged="SettingsPane_IsOnScreenChanged" />
+                <local:ReadingListView x:Name="ReadingListPane" wvp="{x:Reference root}" IsOnScreenChanged="ReadingList_IsOnScreenChanged" />
+                <local:HelpView x:Name="HelpPane" wvp="{x:Reference root}" IsOnScreenChanged="HelpPane_IsOnScreenChanged" />
+                <local:LookupView x:Name="LookupPane" wvp="{x:Reference root}" />
+            </local:PaneContainer>
+
+            <StackLayout x:Name="ErrorBar" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" IsVisible="False" InputTransparent="True" Spacing="0" Orientation="Vertical">
+                <ContentView BackgroundColor="{StaticResource AltHighColor}" HorizontalOptions="FillAndExpand" VerticalOptions="Start">
+                    <Label x:Name="ErrorBarLabel" TextColor="{StaticResource HighlightMediumHighColor}" 
                             FontAttributes="Bold" FontSize="{DynamicResource MediumSmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Start" 
-                            Margin="10,0,10,5" HorizontalOptions="FillAndExpand" VerticalOptions="Start" HeightRequest="0" />
-
-            <AbsoluteLayout HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
-                <StackLayout x:Name="MainLayout" Spacing="0" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All" >
-                    <local:TextView TextEx="{Binding TitleEx}" BindingContext="{x:Reference root}" TextColor="{StaticResource HighlightColor}" BackgroundColor="{StaticResource AltMediumHighColor}"
-                            FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" 
-                            Margin="10,5,0,5" HorizontalOptions="FillAndExpand" VerticalOptions="Start" />
-
-                    <AbsoluteLayout x:Name="MainContent" HorizontalOptions="Fill" VerticalOptions="FillAndExpand">
-                        <Label x:Name="NextPageIndicator" Text="Next Page&#x0A;&#x2191;" Rotation="90" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
-                        AbsoluteLayout.LayoutBounds=".98, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
-                        <Label x:Name="PrevPageIndicator" Text="Previous Page&#x0A;&#x2191;" Rotation="270" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" TextColor="{StaticResource AltMediumHighColor}"
-                        AbsoluteLayout.LayoutBounds=".02, .5, 240, 240" AbsoluteLayout.LayoutFlags="PositionProportional" FontSize="{DynamicResource Size_24}" />
-                        <ContentView x:Name="WebViewHolder" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All"  />
-                    </AbsoluteLayout>
-                    <Grid x:Name="urlBar" ColumnSpacing="4" BackgroundColor="{StaticResource AltMediumHighColor}" IsVisible="False" 
-                         VerticalOptions="End" HorizontalOptions="Fill" PropertyChanged="UrlBar_PropertyChanged">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <Entry x:Name="urlEntry" Keyboard="Url" Completed="UrlButton_Clicked" VerticalOptions="Center" Grid.Column="0" />
-                        <local:Button Text="Go" Clicked="UrlButton_Clicked" WidthRequest="{DynamicResource Size_57}" VerticalOptions="Center" Grid.Column="1"/>
-                        <local:Button Image="{StaticResource CloseIcon}" Clicked="UrlCancel_Clicked" VerticalOptions="Center" Grid.Column="2"  Style="{StaticResource ImageButton}" />
-                    </Grid>
-                </StackLayout>
-
-                <local:PaneContainer x:Name="Panes" AbsoluteLayout.LayoutBounds="0, 0, 1, 1" AbsoluteLayout.LayoutFlags="All">
-                    <local:SettingsView x:Name="SettingsPane" wvp="{x:Reference root}" IsOnScreenChanged="SettingsPane_IsOnScreenChanged" />
-                    <local:ReadingListView x:Name="ReadingListPane" wvp="{x:Reference root}" IsOnScreenChanged="ReadingList_IsOnScreenChanged" />
-                    <local:HelpView x:Name="HelpPane" wvp="{x:Reference root}" IsOnScreenChanged="HelpPane_IsOnScreenChanged" />
-                    <local:LookupView x:Name="LookupPane" wvp="{x:Reference root}" />
-                </local:PaneContainer>
-            </AbsoluteLayout>
-        </StackLayout>
+                            Margin="10,3,10,5" />
+                </ContentView>
+                <BoxView BackgroundColor="{StaticResource BaseHighColor}" HeightRequest="2" Margin="0,-2,0,0" HorizontalOptions="FillAndExpand" VerticalOptions="Start"/>
+            </StackLayout>
+        </AbsoluteLayout>
     </ContentPage.Content>
 </ContentPage>

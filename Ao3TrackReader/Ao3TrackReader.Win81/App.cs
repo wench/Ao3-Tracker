@@ -47,5 +47,8 @@ namespace Ao3TrackReader
 
 
         public static string HardwareType => null;
+
+        public static bool IsBlurSupported => false;
+
     }
 }

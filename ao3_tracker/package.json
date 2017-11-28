@@ -19,5 +19,8 @@
     "jquery": "^3.2.1",
     "merge-stream": "^1.0.1",
     "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "http-server": "^0.10.0"
   }
 }

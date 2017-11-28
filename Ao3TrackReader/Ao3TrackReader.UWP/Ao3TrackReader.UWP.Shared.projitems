@@ -359,6 +359,18 @@
     <Content Include="$(MSBuildThisFileDirectory)..\Icons\200\language_light.scale-200.png">
       <Link>Assets\language_light.scale-200.png</Link>
     </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\Icons\logo_dark.png">
+      <Link>Assets\logo_dark.png</Link>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\Icons\200\logo_dark.scale-200.png">
+      <Link>Assets\logo_dark.scale-200.png</Link>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\Icons\logo_light.png">
+      <Link>Assets\logo_light.png</Link>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\Icons\200\logo_light.scale-200.png">
+      <Link>Assets\logo_light.scale-200.png</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)Assets\LargeTile.scale-100.png" />

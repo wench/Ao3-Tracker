@@ -27,19 +27,24 @@ namespace Ao3TrackReader.Droid
             _currentTextColor = color;
             wasActive = active;
 
+            ColorStateList colors;
             if (active)
             {
-                control.SetTextColor(new ColorStateList(s_colorStates, new int[] { Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid(), Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid() }));
+                colors = new ColorStateList(s_colorStates, new int[] { Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid(), Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid() });
             }
             else if (color.IsDefault)
             {
-                control.SetTextColor(new ColorStateList(s_colorStates, _defaultTextColors));
+                colors = new ColorStateList(s_colorStates, _defaultTextColors);
             }
             else
             {
                 // Set the new enabled state color, preserving the default disabled state color
-                control.SetTextColor(new ColorStateList(s_colorStates, new int[] { color.ToAndroid().ToArgb(), _defaultTextColors[1], Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid(), Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid() }));
+                colors = new ColorStateList(s_colorStates, new int[] { color.ToAndroid().ToArgb(), _defaultTextColors[1], Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid(), Ao3TrackReader.Resources.Colors.Highlight.High.ToAndroid() });
             }
+
+            control.SetTextColor(colors);
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M)
+                control.CompoundDrawableTintList = colors;
         }
 
     }

@@ -43,11 +43,13 @@ namespace Ao3TrackReader.Droid
 
         public ScrollViewRenderer(Context context) : base(context)
         {
+            SmoothScrollingEnabled = false;
         }
 
         [Obsolete()]
         public ScrollViewRenderer() : base(Forms.Context)
         {
+            SmoothScrollingEnabled = false;
         }
 
 
@@ -387,25 +389,24 @@ namespace Ao3TrackReader.Droid
             {
                 ScrollState = ScrollState.Fling;
 
-                ValueAnimator animator = ValueAnimator.OfFloat(0f, 1f);
-                animator.SetDuration(250);
-                animator.Update += (o, animatorUpdateEventArgs) =>
+                var sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+                Device.StartTimer(TimeSpan.FromMilliseconds(16), () =>
                 {
-                    var v = (double)animatorUpdateEventArgs.Animation.AnimatedValue;
+                    if (_view == null || e.Notifier.Task.IsCanceled == true)
+                    {
+                        sw.Stop();
+                        return false;
+                    }
+
+                    var v = Math.Min(sw.ElapsedMilliseconds / 250.0, 1.0);
+
                     int distX = GetDistance(currentX, x, v);
                     int distY = GetDistance(currentY, y, v);
 
                     distY = Math.Max(0,Math.Min(distY, (int)context.ToPixels(_view.ContentSize.Height) - Height));
                     distX = Math.Max(0, Math.Min(distX, (int)context.ToPixels(_view.ContentSize.Width) - Width));
                     
-                    if (_view == null || e.Task?.IsCanceled == true)
-                    {
-                        // This is probably happening because the page with this Scroll View
-                        // was popped off the stack during animation
-                        animator.Cancel();
-                        return;
-                    }
-
                     switch (_view.Orientation)
                     {
                         case ScrollOrientation.Horizontal:
@@ -419,15 +420,15 @@ namespace Ao3TrackReader.Droid
                             ScrollTo(distX, distY);
                             break;
                     }
-                };
-                animator.AnimationEnd += delegate
-                {
-                    ScrollState = ScrollState.Idle;
-                    if (_view == null) return;
-                    Xamarin.Forms.Device.BeginInvokeOnMainThread(() => _view.SendScrollFinished());
-                };
 
-                animator.Start();
+                    if (v == 1.0)
+                    {
+                        ScrollState = ScrollState.Idle;
+                        e.Notifier.TrySetResult(true);
+                        return false;
+                    }
+                    return true;
+                });
             }
             else
             {
@@ -447,7 +448,7 @@ namespace Ao3TrackReader.Droid
                         ScrollTo(x, y);
                         break;
                 }
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => _view.SendScrollFinished());
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => e.Notifier.TrySetResult(true));
             }
         }
 
@@ -492,7 +493,10 @@ namespace Ao3TrackReader.Droid
             if (_view.Orientation == ScrollOrientation.Horizontal || _view.Orientation == ScrollOrientation.Both)
             {
                 if (_hScrollView == null)
+                {
                     _hScrollView = new AHorizontalScrollView(Context, this);
+                    _hScrollView.SmoothScrollingEnabled = false;
+                }
 
                 (_hScrollView).IsBidirectional = _isBidirectional = _view.Orientation == ScrollOrientation.Both;
 

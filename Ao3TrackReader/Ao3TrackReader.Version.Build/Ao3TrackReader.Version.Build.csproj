@@ -142,7 +142,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.UWP/Package.appxmanifest /_:Package/_:Identity/@Version=UWP
-$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.UWP/Phone.appxmanifest /_:Package/_:Identity/@Version=UWP_Phone    
+$(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.UWP.Phone/Phone.appxmanifest /_:Package/_:Identity/@Version=UWP_Phone    
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.iOS/Info.plist /plist/dict/key[text()='CFBundleVersion']/following-sibling::node()=Full /plist/dict/key[text()='CFBundleShortVersionString']/following-sibling::node()=IOS
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Droid/Properties/AndroidManifest.xml /manifest/@android:versionName=Full /manifest/@android:versionCode=Droid
 $(TargetPath) $(SolutionDir)Ao3TrackReader/Ao3TrackReader.Win81.Desktop/Package.appxmanifest /_:Package/_:Identity/@Version=Win81

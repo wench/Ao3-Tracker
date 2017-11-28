@@ -42,6 +42,7 @@ using Ao3TrackReader.Data;
 using Java.Lang;
 using System.IO;
 using System.Threading;
+using Android.Net.Http;
 
 namespace Ao3TrackReader
 {
@@ -51,6 +52,8 @@ namespace Ao3TrackReader
         {
             get { return Looper.MainLooper == Looper.MyLooper(); }
         }
+
+        internal IVisualElementRenderer MainLayoutRenderer => MainLayout.GetRenderer();
 
         class MyWebView : Android.Webkit.WebView, IMenuItemOnMenuItemClickListener
         {
@@ -259,7 +262,7 @@ namespace Ao3TrackReader
             }
 
             helper?.Reset();
-            if (OnNavigationStarting(newuri) == false)
+            if (webClient.ShouldOverrideUrlLoading(webView,newuri.ToString()) == false)
                 webView.LoadUrl(newuri.AbsoluteUri);
         }
 
@@ -274,11 +277,31 @@ namespace Ao3TrackReader
 
         void WebViewGoBack()
         {
-            webView.GoBack();
+            if (webView.CanGoBack())
+            {
+                var history = webView.CopyBackForwardList();
+                var url = history.GetItemAtIndex(history.CurrentIndex - 1);                
+                if (webClient.ShouldOverrideUrlLoading(webView, url.Url) == false)
+                    webView.GoBack();
+            }
+            else
+            {
+                LeftOffset = 0.0;
+            }
         }
         void WebViewGoForward()
         {
-            webView.GoForward();
+            if (webView.CanGoForward())
+            {
+                var history = webView.CopyBackForwardList();
+                var url = history.GetItemAtIndex(history.CurrentIndex + 1);
+                if (webClient.ShouldOverrideUrlLoading(webView, url.Url) == false)
+                    webView.GoForward();
+            }
+            else
+            {
+                LeftOffset = 0.0;
+            }
         }
 
         public double DeviceWidth
@@ -367,13 +390,14 @@ namespace Ao3TrackReader
                 this.wvp = wvp;
             }
 
+            string allowedUrl;
             bool canDoOnContentLoaded = false;
             public override void OnPageFinished(WebView view, string url)
             {
                 var uri = new Uri(url);
 
                 base.OnPageFinished(view, url);
-                if (canDoOnContentLoaded)
+                if (canDoOnContentLoaded && allowedUrl == url)
                 {
                     wvp.OnContentLoaded();
                     canDoOnContentLoaded = false;
@@ -402,12 +426,19 @@ namespace Ao3TrackReader
             [Obsolete]
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
-                return wvp.OnNavigationStarting(new Uri(url));
+                if (wvp.OnNavigationStarting(new Uri(url)))
+                    return true;
+
+                allowedUrl = url;
+                return base.ShouldOverrideUrlLoading(view, url);
             }
 
             public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
             {
-                return wvp.OnNavigationStarting(new Uri(request.Url.ToString()));
+                if (wvp.OnNavigationStarting(new Uri(request.Url.ToString())))
+                    return true;
+                allowedUrl = request.Url.ToString();
+                return base.ShouldOverrideUrlLoading(view, request);
             }
 
             public override async void OnScaleChanged(WebView view, float oldScale, float newScale)
@@ -427,6 +458,14 @@ namespace Ao3TrackReader
                 if (request.IsForMainFrame)
                 {
                     wvp.ShowErrorPage(error.Description.ToString(), new Uri(request.Url.ToString()));
+                }
+            }
+
+            public override void OnReceivedHttpError(WebView view, IWebResourceRequest request, WebResourceResponse errorResponse)
+            {
+                if (request.IsForMainFrame)
+                {
+                    wvp.ShowErrorPage(errorResponse.ReasonPhrase, new Uri(request.Url.ToString()));
                 }
             }
         }

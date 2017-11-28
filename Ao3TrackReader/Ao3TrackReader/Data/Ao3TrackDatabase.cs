@@ -312,8 +312,8 @@ namespace Ao3TrackReader
             { "TagOptions.showWIPTags", false },
             { "TagOptions.showRatingTags", false },
             { "ReadingList.showTagsDefault", false },
-            { "ReadingList.showCompleteDefault", false }
-
+            { "ReadingList.showCompleteDefault", false },
+            { "PaneViewRenderer.useBlur", true },
         };
 
         public string GetVariable(string name)

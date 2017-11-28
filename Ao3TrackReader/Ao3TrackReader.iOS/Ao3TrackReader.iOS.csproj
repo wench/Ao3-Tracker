@@ -487,6 +487,18 @@
     <BundleResource Include="..\Icons\200\navigation_light.scale-200.png">
       <Link>Resources\navigation_light%402x.png</Link>
     </BundleResource>
+    <BundleResource Include="..\Icons\logo_dark.png">
+      <Link>Resources\logo_dark.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\logo_dark.scale-200.png">
+      <Link>Resources\logo_dark%402x.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\logo_light.png">
+      <Link>Resources\logo_light.png</Link>
+    </BundleResource>
+    <BundleResource Include="..\Icons\200\logo_light.scale-200.png">
+      <Link>Resources\logo_light%402x.png</Link>
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="..\..\ao3_tracker\build\reader\ios\jquery.js">

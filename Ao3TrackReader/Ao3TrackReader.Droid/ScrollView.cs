@@ -39,7 +39,8 @@ namespace Ao3TrackReader.Controls
 
         public bool ShouldAnimate { get; private set; }
 
-        public Task Task { get; set; }
+        public TaskCompletionSource<bool> Notifier { get; set; }
+
     }
 
     public partial class ScrollView : Xamarin.Forms.ScrollView
@@ -69,13 +70,6 @@ namespace Ao3TrackReader.Controls
             return _scrollCompletionSource.Task;
         }
 
-        public new void SendScrollFinished()
-        {
-            if (_scrollCompletionSource != null)
-                _scrollCompletionSource.TrySetResult(true);
-        }
-
-
         bool CheckElementBelongsToScrollViewer(Element element)
         {
             return Equals(element, this) || element.RealParent != null && CheckElementBelongsToScrollViewer(element.RealParent);
@@ -93,7 +87,8 @@ namespace Ao3TrackReader.Controls
         void OnScrollToRequested(ScrollToRequestedEventArgs e)
         {
             CheckTaskCompletionSource();
-            e.Task = _scrollCompletionSource.Task;
+
+            e.Notifier = _scrollCompletionSource;
             ScrollToRequested?.Invoke(this, e);
         }
 

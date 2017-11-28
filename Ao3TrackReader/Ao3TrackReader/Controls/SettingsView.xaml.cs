@@ -77,6 +77,8 @@ namespace Ao3TrackReader.Controls
                 UpdateSyncForm();
                 sendErrorsSwitch.IsToggled = App.LogErrors;
                 backButtonSetting.IsVisible = App.HaveOSBackButton;
+                useBlurSetting.IsVisible = App.IsBlurSupported;
+    
                 UpdateListFilters();
                 RefreshDatabaseVariableElems();
             }

@@ -1739,18 +1739,17 @@ namespace Ao3TrackReader
 
                 try
                 {
-                    ErrorBar.Text = message;
-                    ErrorBar.HeightRequest = -1;
+                    ErrorBarLabel.Text = message;
+                    ErrorBar.TranslationY = 0;
                     ErrorBar.IsVisible = true;
 
                     var token = cancel.Token;
                     await Task.Delay(8000, token);
 
-                    double height = ErrorBar.Height;
 
                     var awaiter = new TaskCompletionSource<bool>();
 
-                    ErrorBar.Animate("slideout", easing: Easing.CubicIn, length: 1000, start: 1.0, end: 0.0,
+                    ErrorBar.Animate("slideout", easing: Easing.CubicIn, length: 1000, start: 0.0, end: -ErrorBarLabel.Height,
                         callback: (f) =>
                         {
                             if (token.IsCancellationRequested)
@@ -1759,7 +1758,7 @@ namespace Ao3TrackReader
                             }
                             else
                             {
-                                ErrorBar.HeightRequest = height * f;
+                                ErrorBar.TranslationY = f;
                             }
                         },
                         finished: (f, cancelled) =>
@@ -1773,7 +1772,7 @@ namespace Ao3TrackReader
                             else
                             {
                                 ErrorBar.IsVisible = false;
-                                ErrorBar.HeightRequest = 0;
+                                ErrorBar.TranslationY = 0;
                             }
                         }
                     );
@@ -1782,7 +1781,7 @@ namespace Ao3TrackReader
                 }
                 catch (TaskCanceledException)
                 {
-                    ErrorBar.AbortAnimation("slideout");
+                    ErrorBarLabel.AbortAnimation("slideout");
                 }
                 finally
                 {

@@ -82,5 +82,8 @@ namespace Ao3TrackReader
             var filePath = Path.Combine(documentsPath, filename);
             File.Delete(filePath);
         }
+
+        public static bool IsBlurSupported => Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat;
+
     }
 }

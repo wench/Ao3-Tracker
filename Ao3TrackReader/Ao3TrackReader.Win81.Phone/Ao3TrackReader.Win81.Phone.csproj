@@ -251,6 +251,12 @@
     <Content Include="..\Icons\200\language_light.scale-200.png">
       <Link>Assets\language_light.png</Link>
     </Content>
+    <Content Include="..\Icons\200\logo_dark.scale-200.png">
+      <Link>Assets\logo_dark.png</Link>
+    </Content>
+    <Content Include="..\Icons\200\logo_light.scale-200.png">
+      <Link>Assets\logo_light.png</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Icons\padded\addpage_dark.scale-200.png">
