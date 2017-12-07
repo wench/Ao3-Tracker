@@ -14,6 +14,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)AutoUpdateCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\AddRemoveConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\DropDown.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\EmptyStringBool.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data\CachedTable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\ListFiltering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GroupList2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JavascriptException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ListFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\NullKeyDictionary.cs" />

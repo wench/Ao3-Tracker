@@ -52,7 +52,7 @@ namespace Ao3TrackReader.Controls
         protected override void Execute()
         {
             Ao3PageViewModel item = Target as Ao3PageViewModel;
-            ReadingList?.Goto(item,true,false);
+            ReadingList?.Goto(item, true, false);
         }
     }
 
@@ -89,6 +89,4 @@ namespace Ao3TrackReader.Controls
             ReadingList?.Goto(Target, true, true);
         }
     }
-
-
 }

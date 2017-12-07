@@ -43,7 +43,7 @@ namespace Ao3TrackReader.Models
     // <ICON>  
 
 
-    public sealed class Ao3PageViewModel : IGroupable, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
+    public sealed class Ao3PageViewModel : IGroupable2, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IComparable<Ao3PageViewModel>
     {
         public Ao3PageViewModel(Uri uri, int? unread, IDictionary<Ao3TagType,bool> tagvis)
         {
@@ -154,6 +154,21 @@ namespace Ao3TrackReader.Models
         public int? ChaptersRead { get; private set; }
         public int? Unread { get; private set; }
 
+        public bool favourite;
+        public bool Favourite {
+            get => favourite;
+            set
+            {
+                if (value == favourite) return;
+                OnPropertyChanging("Favourite");
+                OnPropertyChanging("ShouldHide");
+                favourite = value;
+                OnPropertyChanged("ShouldHide");
+                OnPropertyChanged("Favourite");
+            }
+        }
+
+
         private Uri imageRatingUri;
         public ImageSource ImageRating {
             get {
@@ -259,7 +274,7 @@ namespace Ao3TrackReader.Models
             }
         }
 
-        public bool ShouldHide { get { return Unread == 0 && BaseData?.Details?.IsComplete != true && !isSelected; } }
+        public bool ShouldHide { get { return Unread == 0 && BaseData?.Details?.IsComplete != true && !isSelected && !favourite; } }
 
 
         bool tags_visible = true;

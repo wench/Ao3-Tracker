@@ -28,6 +28,7 @@ namespace Ao3TrackReader.Data
         void InsertOrUpdate(TRow item);
         void Delete(TKey key);
         AutoCommitTransaction DoTransaction();
+        void SaveVariable(string name, string value);
     }
 
 
@@ -65,7 +66,7 @@ namespace Ao3TrackReader.Data
                 {
                     throw new Exception();
                 }
-                else if (deferring == 0 && modified.Count != 0)
+                else if (deferring == 0 && (modified.Count != 0 || variables.Count != 0))
                 {
                     var deleted = modified.Where(kvp => kvp.Value == null).Select(kvp => kvp.Key);
                     var changed = modified.Where(kvp => kvp.Value != null);
@@ -80,8 +81,13 @@ namespace Ao3TrackReader.Data
                         {
                             provider.InsertOrUpdate(kvp.Value);
                         }
+                        foreach (var kvp in variables)
+                        {
+                            provider.SaveVariable(kvp.Key, kvp.Value);
+                        }
                     }
 
+                    variables.Clear();
                     modified.Clear();
                 }
             }
@@ -102,7 +108,7 @@ namespace Ao3TrackReader.Data
                     gotall = true;
                 }
                 return values.Values.Where(
-                    (row) => 
+                    (row) =>
                         row != null
                 ).ToList();
             }
@@ -134,7 +140,7 @@ namespace Ao3TrackReader.Data
                 else
                     modified[item.Primarykey] = item;
 
-                values[item.Primarykey] = item;                
+                values[item.Primarykey] = item;
             }
         }
 
@@ -153,6 +159,34 @@ namespace Ao3TrackReader.Data
 
                 values[key] = null;
             }
+        }
+
+        Dictionary<string, string> variables = new Dictionary<string, string>();
+        public async Task SaveVariableAsync(string name, string value)
+        {
+            using (await locker.LockAsync())
+            {
+                if (deferring == 0)
+                    provider.SaveVariable(name, value);
+                else
+                    variables[name] = value;
+            }
+        }
+
+        public Task SaveVariableAsync(string name, object value)
+        {
+            return SaveVariableAsync(name, value?.ToString());
+        }
+
+        public Task SaveVariableAsync<T>(string name, T value)
+        {
+            return SaveVariableAsync(name, value?.ToString());
+        }
+
+        public Task SaveVariableAsync<T>(string name, T? value)
+            where T : struct
+        {
+            return SaveVariableAsync(name, value?.ToString());
         }
     }
 

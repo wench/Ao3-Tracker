@@ -33,5 +33,7 @@ namespace Ao3TrackReader.Controls
         {
             throw new NotImplementedException();
         }
+
+        static public EmptyStringBool Instance { get; } = new EmptyStringBool();
     }
 }

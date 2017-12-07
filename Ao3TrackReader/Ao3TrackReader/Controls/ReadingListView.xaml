@@ -44,6 +44,7 @@ limitations under the License.
                         <MenuItem Text="Open"                     Clicked="OnMenuOpen" CommandParameter="{Binding .}" />
                         <MenuItem Text="Open Full Work at Read To Location" Command="{Binding MenuOpenFullWorkLastCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
                         <MenuItem Text="Open Full Work"           Command="{Binding MenuOpenFullWorkCommand,Source={x:Reference root}}" CommandParameter="{Binding .}" />
+                        <MenuItem Text="{Binding Favourite,Converter={Static local:AddRemoveConverter.Instance},ConverterParameter='Favorites'}"        Clicked="OnMenuFavourite" CommandParameter="{Binding .}" />
                         <MenuItem Text="Copy Link"                Clicked="OnMenuCopyLink" CommandParameter="{Binding .}" />
                         <MenuItem Text="Refresh"                  Clicked="OnMenuRefresh" CommandParameter="{Binding .}" IsDestructive="True" />
                         <MenuItem Text="Delete"                   Clicked="OnMenuDelete" CommandParameter="{Binding .}" IsDestructive="True" />
@@ -132,8 +133,8 @@ limitations under the License.
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End"  Style="{StaticResource ImageButton}" />
             </StackLayout>
 
-            <local:TabbedListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="false" SeparatorVisibility="None"  GroupDisplayBinding="{Binding Group}"  TabTitleBinding="{Binding Group}" Margin="4,0,0,0" 
-                      x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderTemplate}" Spacing="0"  ItemTemplate="{StaticResource CellTemplate}" >
+            <local:TabbedListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None" TabTitleBinding="{Binding Group}" Margin="4,0,0,0" 
+                      x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderNoTypeTemplate}" Spacing="0"  ItemTemplate="{StaticResource CellTemplate}" >
                 <local:TabbedListView.HeaderTemplate>
                     <DataTemplate>
                         <Label Text="{Binding GroupType,StringFormat='Category: {0}'}" IsVisible="{Binding HasGroupType}" Margin="0,0,0,8" TextColor="{StaticResource BaseMediumColor}" FontSize="{DynamicResource MicroFontSize}" />

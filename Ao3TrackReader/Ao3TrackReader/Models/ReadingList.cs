@@ -60,6 +60,7 @@ namespace Ao3TrackReader.Models
         public string Uri { get; set; }
         public long Timestamp { get; set; }
         public int? Unread { get; set; }
+        public bool Favourite { get; set; }
         public string Model { get; set; }
 
         string ICachedTableRow<string>.Primarykey => Uri; 

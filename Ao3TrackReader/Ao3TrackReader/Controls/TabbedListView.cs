@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -90,6 +91,26 @@ namespace Ao3TrackReader.Controls
             set { SetValue(GroupHeaderTemplateProperty, value); }
         }
 
+        BindingBase _groupShortNameBinding;
+        public BindingBase GroupShortNameBinding
+        {
+            get { return _groupShortNameBinding; }
+            set
+            {
+                if (_groupShortNameBinding == value)
+                    return;
+
+                OnPropertyChanging();
+                _groupShortNameBinding = value;
+                foreach (var tab in Tabs)
+                {
+                    var listview = tab.Content as ListView;
+                    listview.GroupShortNameBinding = value;
+                }
+                OnPropertyChanged();
+            }
+        }
+
         public bool HasUnevenRows
         {
             get { return (bool)GetValue(HasUnevenRowsProperty); }
@@ -133,9 +154,15 @@ namespace Ao3TrackReader.Controls
             set { SetValue(SeparatorVisibilityProperty, value); }
         }
 
-        Binding CloneBinding(Binding binding)
+
+        BindingBase CloneBinding(BindingBase bindingbase)
         {
-            return new Binding(binding.Path, binding.Mode) { Converter = binding.Converter, ConverterParameter = binding.ConverterParameter, StringFormat = binding.StringFormat, Source = binding.Source, UpdateSourceEventName = binding.UpdateSourceEventName };
+            if (bindingbase is Binding binding)
+                 return new Binding(binding.Path, binding.Mode) { Converter = binding.Converter, ConverterParameter = binding.ConverterParameter, StringFormat = binding.StringFormat, Source = binding.Source, UpdateSourceEventName = binding.UpdateSourceEventName };
+
+            var type = bindingbase.GetType();
+            var method = type.GetMethod("Clone", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            return (BindingBase)method.Invoke(bindingbase, Type.EmptyTypes);
         }
 
 
@@ -278,8 +305,12 @@ namespace Ao3TrackReader.Controls
             if (TabTitleBinding != null) tab.SetBinding(TabView.TitleProperty, CloneBinding(_tabTitleBinding));
             if (TabIconBinding != null) tab.SetBinding(TabView.IconProperty, CloneBinding(_tabIconBinding));
 
-            var list = new ListView() { GroupDisplayBinding = _groupDisplayBinding };
+            var list = new ListView();
             tab.Content = list;
+            tab.SizeChanged += Tab_SizeChanged;
+
+            if (GroupShortNameBinding != null) list.GroupShortNameBinding = CloneBinding(GroupShortNameBinding);
+            if (GroupDisplayBinding != null) list.GroupDisplayBinding = CloneBinding(GroupDisplayBinding);
 
             SetAllListProperties(list);
 
@@ -289,9 +320,41 @@ namespace Ao3TrackReader.Controls
             list.ItemTapped += ListView_ItemTapped;
 
             list.Header = source;
+            list.ItemsSource = source;
+
+            if (source is INotifyCollectionChanged ncc)
+            {
+                var col = source as ICollection;
+                list.IsVisible = false;
+
+                ncc.CollectionChanged += Ncc_CollectionChanged;
+            }
 
             Tabs.Insert(index, tab);
-            list.ItemsSource = source;
+
+        }
+
+        private void Tab_SizeChanged(object sender, EventArgs e)
+        {
+            var tab = (TabView)sender;
+            var listview = tab.Content as ListView;
+            var col = listview.ItemsSource as ICollection;
+            listview.IsVisible = tab.Width > 0 && col?.Count > 0;
+        }
+
+        private void Ncc_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            for (int t = 0; t < Tabs.Count; t++)
+            {
+                var tab = Tabs[t];
+                var listview = tab.Content as ListView;
+                if (listview?.ItemsSource == sender)
+                {
+                    var col = sender as ICollection;
+                    listview.IsVisible = tab.Width > 0 && col?.Count > 0;
+                    return;
+                }
+            }
         }
 
         void RemoveTab(IEnumerable source)
@@ -302,10 +365,16 @@ namespace Ao3TrackReader.Controls
                 var listview = tab.Content as ListView;
                 if (listview?.ItemsSource == source)
                 {
+                    if (source is INotifyCollectionChanged ncc)
+                    {
+                        ncc.CollectionChanged -= Ncc_CollectionChanged;
+                    }
+
                     listview.ItemAppearing -= ListView_ItemAppearing;
                     listview.ItemDisappearing -= ListView_ItemDisappearing;
                     listview.ItemSelected -= ListView_ItemSelected;
                     listview.ItemTapped -= ListView_ItemTapped;
+                    tab.SizeChanged -= Tab_SizeChanged;
                     Tabs.RemoveAt(t);
                     return;
                 }
@@ -357,15 +426,18 @@ namespace Ao3TrackReader.Controls
             {
                 var tab = Tabs[t];
                 var listview = tab.Content as ListView;
-                var enumerable = listview.ItemsSource.OfType<object>();
+                if (listview.ItemsSource != null)
+                {
+                    var enumerable = listview.ItemsSource.OfType<object>();
 
-                if (enumerable.Contains(newValue))
-                {
-                    listview.SelectedItem = newValue;
-                }
-                else 
-                {
-                    listview.SelectedItem = null;
+                    if (enumerable.Contains(newValue))
+                    {
+                        listview.SelectedItem = newValue;
+                    }
+                    else
+                    {
+                        listview.SelectedItem = null;
+                    }
                 }
             }
 

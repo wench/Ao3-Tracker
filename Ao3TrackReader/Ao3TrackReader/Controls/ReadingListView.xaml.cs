@@ -33,7 +33,7 @@ namespace Ao3TrackReader.Controls
         const int MaxRefreshTasks = 20;
         const int RefreshDelay = 64;
 
-        GroupList<Ao3PageViewModel> readingListBacking;
+        GroupList2<Ao3PageViewModel> readingListBacking;
 
         public DisableableCommand AddToReadingListCommand { get; private set; }
 
@@ -52,7 +52,7 @@ namespace Ao3TrackReader.Controls
 
             InitializeComponent();
 
-            readingListBacking = new GroupList<Ao3PageViewModel>();
+            readingListBacking = new GroupList2<Ao3PageViewModel>();
 
             bool b;
 
@@ -128,7 +128,8 @@ namespace Ao3TrackReader.Controls
                                 {
                                     var viewmodel = new Ao3PageViewModel(model.Uri, model.HasChapters ? item.Unread : (int?)null, model.Type == Ao3PageType.Work ? tagTypeVisible : null)
                                     {
-                                        TagsVisible = tags_visible
+                                        TagsVisible = tags_visible,
+                                        Favourite = item.Favourite
                                     };
 
                                     await wvp.DoOnMainThreadAsync(() =>
@@ -308,6 +309,15 @@ namespace Ao3TrackReader.Controls
             if (mi.BindingContext is Ao3PageViewModel item)
             {
                 Goto(item,true,false);
+            }
+        }     
+
+        private void OnMenuFavourite(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            if (mi.CommandParameter is Ao3PageViewModel item)
+            {
+                item.Favourite = !item.Favourite;
             }
         }
 
@@ -554,7 +564,7 @@ namespace Ao3TrackReader.Controls
                         await Task.WhenAll(tasks);
                         tasks.Clear();
                     }
-                    App.Database.SaveVariable("ReadingList.last_sync", srl.last_sync.ToString());
+                    await App.Database.ReadingListCached.SaveVariableAsync("ReadingList.last_sync", srl.last_sync.ToString());
                 }
             }
             finally
