@@ -155,14 +155,18 @@ namespace Ao3TrackReader.Controls
         }
 
 
+        MethodInfo clone = null;
         BindingBase CloneBinding(BindingBase bindingbase)
         {
             if (bindingbase is Binding binding)
-                 return new Binding(binding.Path, binding.Mode) { Converter = binding.Converter, ConverterParameter = binding.ConverterParameter, StringFormat = binding.StringFormat, Source = binding.Source, UpdateSourceEventName = binding.UpdateSourceEventName };
+                  return new Binding(binding.Path, binding.Mode) { Converter = binding.Converter, ConverterParameter = binding.ConverterParameter, StringFormat = binding.StringFormat, Source = binding.Source, UpdateSourceEventName = binding.UpdateSourceEventName };
 
-            var type = bindingbase.GetType();
-            var method = type.GetMethod("Clone", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            return (BindingBase)method.Invoke(bindingbase, Type.EmptyTypes);
+            if (clone == null)
+            {
+                var typeinfo = typeof(BindingBase).GetTypeInfo();
+                clone = typeinfo.GetDeclaredMethod("Clone");
+            }
+            return (BindingBase)clone.Invoke(bindingbase, Type.EmptyTypes);
         }
 
 
