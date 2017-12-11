@@ -133,7 +133,7 @@ limitations under the License.
                 <local:Button Image="{StaticResource CloseIcon}" Clicked="OnClose" HorizontalOptions="End"  Style="{StaticResource ImageButton}" />
             </StackLayout>
 
-            <local:TabbedListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None" TabTitleBinding="{Binding Group}" Margin="4,0,0,0" 
+            <local:TabbedListView VerticalOptions="FillAndExpand" HasUnevenRows="true" IsGroupingEnabled="true" SeparatorVisibility="None" TabTitleBinding="{Binding Group}" GroupShortNameBinding="{Binding Group}" Margin="4,0,0,0" 
                       x:Name="ListView" GroupHeaderTemplate="{StaticResource CellGroupHeaderNoTypeTemplate}" Spacing="0"  ItemTemplate="{StaticResource CellTemplate}" >
                 <local:TabbedListView.HeaderTemplate>
                     <DataTemplate>

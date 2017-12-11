@@ -1,0 +1,141 @@
+﻿<!--
+Copyright 2017 Alexis Ryan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.   
+-->
+<!-- Styles for API 5 and Above -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Ao3TrackReader.UWP"
+    xmlns:wrt="using:Ao3TrackReader.WinRT" 
+	xmlns:xamarin="using:Xamarin.Forms.Platform.UWP"
+    >
+
+    <Style TargetType="wrt:ActivatableButton">
+        <Setter Property="Background" Value="{ThemeResource ButtonRevealBackground}" />
+        <Setter Property="Foreground" Value="{ThemeResource ButtonForeground}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ButtonRevealBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{ThemeResource ButtonRevealBorderThemeThickness}" />
+        <Setter Property="Padding" Value="8,4,8,4" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
+        <Setter Property="FocusVisualMargin" Value="-3" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <PointerUpThemeAnimation Storyboard.TargetName="RootGrid" />
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <PointerUpThemeAnimation Storyboard.TargetName="RootGrid" />
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <PointerDownThemeAnimation Storyboard.TargetName="RootGrid" />
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Disabled">
+
+                                </VisualState>
+                                
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="Ao3TActiveStates">
+                                <VisualState x:Name="Ao3TNormal">
+                                    <Storyboard/>
+                                </VisualState>
+
+                                <VisualState x:Name="Ao3TPointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(RevealBrush.State)" Value="PointerOver" />
+                                        <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPointerOver}" />
+                                        <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPointerOver}" />
+                                        <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundPointerOver}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Ao3TPressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(RevealBrush.State)" Value="Pressed" />
+                                        <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPressed}" />
+                                        <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPressed}" />
+                                        <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundPressed}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Ao3TDisabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundDisabled}" />
+                                        <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushDisabled}" />
+                                        <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundDisabled}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Ao3TActive">
+                                    <VisualState.Setters>
+                                        <Setter Target="ContentPresenter.Foreground" Value="{StaticResource HighlightColor}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Ao3TAPointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(RevealBrush.State)" Value="PointerOver" />
+                                        <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPointerOver}" />
+                                        <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPointerOver}" />
+                                        <Setter Target="ContentPresenter.Foreground" Value="{StaticResource HighlightColor}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            
+                                <VisualState x:Name="Ao3TAPressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(RevealBrush.State)" Value="Pressed" />
+                                        <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPressed}" />
+                                        <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPressed}" />
+                                        <Setter Target="ContentPresenter.Foreground" Value="{StaticResource HighlightColor}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter x:Name="ContentPresenter"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            AutomationProperties.AccessibilityView="Raw" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+</ResourceDictionary>

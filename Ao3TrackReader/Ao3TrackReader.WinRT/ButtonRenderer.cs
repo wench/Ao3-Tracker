@@ -62,7 +62,6 @@ namespace Ao3TrackReader.WinRT
             set { SetValue(IsActiveProperty, value); }
         }
 
-
         public ActivatableButton()
         {
             IsEnabledChanged += (sender, args) => PropertyChanged();
@@ -73,7 +72,13 @@ namespace Ao3TrackReader.WinRT
         {
             string state = "Ao3TNormal";
 
-            if (IsActive)
+            if (Parent is ButtonRenderer br) Canvas.SetZIndex(br, IsPressed ? 300 : IsPointerOver ? 100 : 0);
+
+            if (IsActive && IsPressed)
+                state = "Ao3TAPressed";
+            else if (IsActive && IsPointerOver)
+                state = "Ao3TAPointerOver";
+            else if (IsActive)
                 state = "Ao3TActive";
             else if (!IsEnabled)
                 state = "Ao3TDisabled";
@@ -109,7 +114,7 @@ namespace Ao3TrackReader.WinRT
     }
 
 
-    class ButtonRenderer : ViewRenderer<Button, ActivatableButton>
+    public class ButtonRenderer : ViewRenderer<Button, ActivatableButton>
     {
         bool _fontApplied;
 

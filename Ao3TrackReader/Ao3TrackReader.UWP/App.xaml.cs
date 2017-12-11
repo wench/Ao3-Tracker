@@ -134,10 +134,17 @@ namespace Ao3TrackReader.UWP
                 Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles.xaml") });
 
                 if (UniversalApi <= 3)
-                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles-Api-3.xaml") });
+                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStylesLeq3.xaml") });
 
                 if (UniversalApi <= 2)
-                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStyles-Api-2.xaml") });
+                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStylesLeq2.xaml") });
+
+#if WINDOWS_16299
+                if (UniversalApi >= 5)
+                {
+                    Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("ms-appx:///MergeStylesGeq5.xaml") });
+                }
+#endif
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

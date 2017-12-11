@@ -470,12 +470,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)MergeStyles-Api-2.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)MergeStylesGeq5.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)MergeStylesLeq2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)MergeStyles-Api-3.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)MergeStylesLeq3.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
