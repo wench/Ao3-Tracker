@@ -16,6 +16,18 @@ limitations under the License.
 
 namespace Ao3Track {
 
+    SetNextPage = (uri: string) => {
+        Ao3Track.Helper.nextPage = uri;
+    };
+    let $next = jQuery('head link[rel=next]');
+    if ($next.length > 0) { SetNextPage(($next[0] as HTMLAnchorElement).href); }
+
+    SetPrevPage = (uri: string) => {
+        Ao3Track.Helper.prevPage = uri;
+    };
+    let $prev = jQuery('head link[rel=prev]');
+    if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
+    
     // Page title handling
     let pageTitle: IPageTitle = { title: jQuery("h2.heading").first().text().trim() };
     if (pageTitle.title === null || pageTitle.title === "" || pageTitle.title === undefined) {

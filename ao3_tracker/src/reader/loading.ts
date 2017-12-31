@@ -36,18 +36,6 @@ namespace Ao3Track {
         Ao3Track.Helper.shouldFilterWork(workid, authors || [], tags || [], series || [], callback);
     };
 
-    SetNextPage = (uri: string) => {
-        Ao3Track.Helper.nextPage = uri;
-    };
-    let $next = jQuery('head link[rel=next]');
-    if ($next.length > 0) { SetNextPage(($next[0] as HTMLAnchorElement).href); }
-
-    SetPrevPage = (uri: string) => {
-        Ao3Track.Helper.prevPage = uri;
-    };
-    let $prev = jQuery('head link[rel=prev]');
-    if ($prev.length > 0) { SetPrevPage(($prev[0] as HTMLAnchorElement).href); }
-
     DisableLastLocationJump = () => {
         Ao3Track.Helper.onjumptolastlocationevent = null;
     };
@@ -72,10 +60,10 @@ namespace Ao3Track {
     // Font size up/down support 
     Ao3Track.Helper.onalterfontsizeevent = (ev) => {
         let fontsize = Number(ev);
-        let inner = document.getElementById("inner");
-        if (inner) {
-            inner.style.fontSize = fontsize.toString() + "%";
-        }
+        //let inner = document.h("inner");
+        //if (inner) {
+            document.documentElement.style.fontSize = fontsize.toString() + "%";
+        //}
     };
 
     SetCurrentLocation = (current: IWorkChapterEx) => {

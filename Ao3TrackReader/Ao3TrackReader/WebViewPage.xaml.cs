@@ -77,7 +77,6 @@ namespace Ao3TrackReader
                 "tracker.css",
                 "init.js",
                 "marshal.js",
-                new Injection("jquery.js", "Ao3Track.Marshal.InjectJQuery"),
 #if NEED_INJECT_POLYFILLS
                 "polyfills.js",
 #endif
@@ -90,6 +89,7 @@ namespace Ao3TrackReader
                 "messaging.js",
 #endif
                 "loading.js",
+                new Injection("jquery.js", "Ao3Track.Marshal.InjectJQuery"),
             };
 
         public Injection[] Injections { get; } =
