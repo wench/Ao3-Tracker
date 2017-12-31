@@ -543,8 +543,11 @@
     <BundleResource Include="..\..\ao3_tracker\build\reader\ios\speech.js">
       <Link>Resources\Content\speech.js</Link>
     </BundleResource>
-    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\hider.js">
-      <Link>Resources\Content\hider.js</Link>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\css.js">
+      <Link>Resources\Content\css.js</Link>
+    </BundleResource>
+    <BundleResource Include="..\..\ao3_tracker\build\reader\ios\loading.js">
+      <Link>Resources\Content\loading.js</Link>
     </BundleResource>
   </ItemGroup>
   <ItemGroup>

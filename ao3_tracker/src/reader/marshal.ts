@@ -172,21 +172,6 @@ namespace Ao3Track {
             Ao3Track.Helper.init();
         }
 
-        export function InjectCSS(styles: string) {
-            /*
-            let blob = new Blob([styles], { type: 'text/css', endings: "transparent" });
-            let link = document.createElement('link');
-            link.type = 'text/css';
-            link.rel = 'stylesheet';
-            link.href = URL.createObjectURL(blob);
-            document.head.appendChild(link);
-            */
-            let elem = document.createElement('style');
-            elem.type = 'text/css';
-            elem.textContent = styles;
-            document.head.appendChild(elem);
-        };
-
         export function InjectJQuery(code: string) {
             eval(code);
             Ao3Track.jQuery = (window.jQuery as JQueryStatic).noConflict(true);

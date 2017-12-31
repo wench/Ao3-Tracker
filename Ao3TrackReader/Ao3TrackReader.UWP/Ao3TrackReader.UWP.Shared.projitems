@@ -457,8 +457,11 @@
     <Content Include="$(MSBuildThisFileDirectory)..\..\ao3_tracker\build\reader\uwp\speech.js">
       <Link>Content\speech.js</Link>
     </Content>
-    <Content Include="$(MSBuildThisFileDirectory)..\..\ao3_tracker\build\reader\uwp\hider.js">
-      <Link>Content\hider.js</Link>
+    <Content Include="$(MSBuildThisFileDirectory)..\..\ao3_tracker\build\reader\uwp\css.js">
+      <Link>Content\css.js</Link>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\..\ao3_tracker\build\reader\uwp\loading.js">
+      <Link>Content\loading.js</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>

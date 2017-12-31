@@ -64,6 +64,7 @@ namespace Ao3TrackReader
             webView.NavigationCompleted += WebView_NavigationCompleted;
             webView.GotFocus += WebView_GotFocus;
             webView.DefaultBackgroundColor = Ao3TrackReader.Resources.Colors.Alt.MediumHigh.ToWindows();
+            webView.RegisterPropertyChangedCallback(WebView.DocumentTitleProperty, webViewDocumentTitleChanged);
 
             CreateWebViewAdditional();
 
@@ -85,6 +86,7 @@ namespace Ao3TrackReader
             return webView.ToView();
         }
 
+
         public void ShowErrorPage(string message, Uri uri)
         {
             var html = GetErrorPageHtml(message, uri);
@@ -105,16 +107,33 @@ namespace Ao3TrackReader
             OnWebViewGotFocus();
         }
 
+        bool doLoading = false;
         private void WebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
         {
             args.Cancel = OnNavigationStarting(args.Uri);
             if (!args.Cancel)
+            {
                 AddJavascriptObject("Ao3TrackHelperNative", helper);
+                doLoading = true;
+            }
+        }
+
+        private void webViewDocumentTitleChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            if (doLoading && !string.IsNullOrWhiteSpace(webView.DocumentTitle))
+            {
+                doLoading = false;
+                DoOnMainThreadAsync(() => OnContentLoading()).ConfigureAwait(false);
+            }
         }
 
         private void WebView_ContentLoading(WebView sender, WebViewContentLoadingEventArgs args)
         {
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() => OnContentLoading());
+            if (doLoading)
+            {
+                doLoading = false;
+                DoOnMainThreadAsync(() => OnContentLoading()).ConfigureAwait(false);
+            }
         }
 
         private void WebView_DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)

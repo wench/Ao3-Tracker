@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -247,5 +248,27 @@ namespace Ao3TrackReader
             }
         }
 
+#if __WINDOWS__
+        static public string GetDependencyPropertyName(this Windows.UI.Xaml.DependencyObject obj, Windows.UI.Xaml.DependencyProperty depprop)
+        {
+            foreach (var field in obj.GetType().GetFields(BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public))
+            {
+                if (field.FieldType == typeof(Windows.UI.Xaml.DependencyProperty) && field.GetValue(null) == depprop)
+                {
+                    return field.Name;
+                }
+            }
+
+            foreach (var prop in obj.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public))
+            {
+                if (prop.PropertyType == typeof(Windows.UI.Xaml.DependencyProperty) && prop.GetValue(null) == depprop)
+                {
+                    return prop.Name;
+                }
+            }
+
+            return null;
+        }
+#endif
     }
 }

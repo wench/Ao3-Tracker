@@ -617,8 +617,11 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\speech.js">
       <Link>Assets\speech.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\hider.js">
-      <Link>Assets\hider.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\css.js">
+      <Link>Assets\css.js</Link>
+    </AndroidAsset>    
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\loading.js">
+      <Link>Assets\loading.js</Link>
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>

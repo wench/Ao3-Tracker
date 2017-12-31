@@ -72,17 +72,12 @@ namespace Ao3TrackReader
 
 
         public Injection[] InjectionsLoading { get; } =
-            new[]
-            {
-                new Injection("hider.js")
-            };
-
-        public Injection[] Injections { get; } =
-            new[] {
+            new Injection[] {
+                "css.js",
+                "tracker.css",
                 "init.js",
                 "marshal.js",
                 new Injection("jquery.js", "Ao3Track.Marshal.InjectJQuery"),
-                "tracker.css",
 #if NEED_INJECT_POLYFILLS
                 "polyfills.js",
 #endif
@@ -94,6 +89,11 @@ namespace Ao3TrackReader
 #if NEED_INJECT_MESSAGING
                 "messaging.js",
 #endif
+                "loading.js",
+            };
+
+        public Injection[] Injections { get; } =
+            new Injection[] {
                 "reader.js",
                 "tracker.js",
                 "unitconv.js",
@@ -1419,6 +1419,8 @@ namespace Ao3TrackReader
         private CancellationTokenSource cancelInject;
         private bool OnNavigationStarting(Uri uri)
         {
+            System.Diagnostics.Debug.WriteLine("{0}: OnNavigationStarting", System.Diagnostics.Stopwatch.GetTimestamp());
+
             if (uri != null)
             {
                 var check = Ao3SiteDataLookup.CheckUri(uri);
@@ -1480,15 +1482,22 @@ namespace Ao3TrackReader
 
         async void OnContentLoading()
         {
+            System.Diagnostics.Debug.WriteLine("{0}: OnContentLoading", System.Diagnostics.Stopwatch.GetTimestamp());
+            helper?.Reset();
+
             CancellationToken ct = new CancellationToken(false);
-            foreach (var injection in InjectionsLoading)
+            if (!isErrorPage)
             {
-                await InjectScript(injection, ct);
+                foreach (var injection in InjectionsLoading)
+                {
+                    await InjectScript(injection, ct);
+                }
             }
         }
 
         private void OnContentLoaded()
         {
+            System.Diagnostics.Debug.WriteLine("{0}: OnContentLoaded", System.Diagnostics.Stopwatch.GetTimestamp());
             JumpToLastLocationEnabled = false;
             HideContextMenu();
 
@@ -1504,7 +1513,6 @@ namespace Ao3TrackReader
             currentLocation = null;
             currentSavedLocation = null;
             ForceSetLocationCommand.IsEnabled = false;
-            helper?.Reset();
 
             if (!isErrorPage) InjectScripts();
         }
@@ -1529,6 +1537,7 @@ namespace Ao3TrackReader
             public string Filename { get; set; }
             public string Type { get; set; }
             public string Function { get; set; }
+            public string Content { get; set; } = null;
 
             public static implicit operator Injection(string filename)
             {
@@ -1539,23 +1548,25 @@ namespace Ao3TrackReader
         async Task InjectScript(Injection injection, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
-            var content = await ReadFile(injection.Filename, ct);
+
+            if (injection.Content == null) 
+                injection.Content = await ReadFile(injection.Filename, ct);
 
             ct.ThrowIfCancellationRequested();
             if (!string.IsNullOrWhiteSpace(injection.Function))
             {
-                await CallJavascriptAsync(injection.Function, content);
+                await CallJavascriptAsync(injection.Function, injection.Content).ConfigureAwait(false);
             }
             else
             {
                 switch (injection.Type)
                 {
                     case ".js":
-                        await EvaluateJavascriptAsync(content + "\n//# sourceURL=" + injection.Filename);
+                        await EvaluateJavascriptAsync(injection.Content + "\n//# sourceURL=" + injection.Filename).ConfigureAwait(false);
                         break;
 
                     case ".css":
-                        await CallJavascriptAsync("Ao3Track.Marshal.InjectCSS", content);
+                        await CallJavascriptAsync("Ao3Track.CSS.Inject", injection.Content).ConfigureAwait(false);
                         break;
                 }
             }
