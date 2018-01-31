@@ -177,12 +177,15 @@ namespace Ao3TrackReader
             }
         }
 
-        public void Navigate(Uri uri)
+        public void Navigate(Uri uri, bool allowext = true)
         {
+            if (uri == null)
+                return;
+
             var newuri = Ao3SiteDataLookup.CheckUri(uri);
             if (newuri == null)
             {
-                OpenExternal(uri);
+                if (allowext) OpenExternal(uri);
                 return;
             }
 

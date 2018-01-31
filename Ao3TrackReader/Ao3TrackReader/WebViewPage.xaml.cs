@@ -70,10 +70,23 @@ namespace Ao3TrackReader
 
         IAo3TrackHelper helper;
 
+        public Injection[] InjectionsLoading { get; } 
+        public Injection[] Injections { get; }
 
-        public Injection[] InjectionsLoading { get; } =
-            new Injection[] {
-                "css.js",
+        public IEnumerable<Models.IHelpInfo> HelpItems
+        {
+            get { return ExtraHelp.Concat((IEnumerable<Models.IHelpInfo>)AllToolbarItems); }
+        }
+
+        public ReadingListView ReadingList { get { return ReadingListPane; } }
+
+        private Uri startPage = null;
+        public WebViewPage(Uri startPage)
+        {
+            Current = this;
+
+            InjectionsLoading = new Injection[] {
+                new Injection($"(function(code){{\nvar defaultFontSize = { new LazyEvaluator<int>(() => FontSize) };\neval(code);\ndelete defaultFontSize;\nwindow.Ao3Track = Ao3Track;}})","css.js"),
                 "tracker.css",
                 "init.js",
                 "marshal.js",
@@ -89,28 +102,16 @@ namespace Ao3TrackReader
                 "messaging.js",
 #endif
                 "loading.js",
-                new Injection("jquery.js", "Ao3Track.Marshal.InjectJQuery"),
+                new Injection("Ao3Track.Marshal.InjectJQuery", "jquery.js")
             };
 
-        public Injection[] Injections { get; } =
-            new Injection[] {
+            Injections = new Injection[] {
                 "reader.js",
                 "tracker.js",
                 "unitconv.js",
                 "touch.js",
                 "speech.js"
             };
-
-        public IEnumerable<Models.IHelpInfo> HelpItems
-        {
-            get { return ExtraHelp.Concat((IEnumerable<Models.IHelpInfo>)AllToolbarItems); }
-        }
-
-        public ReadingListView ReadingList { get { return ReadingListPane; } }
-
-        public WebViewPage()
-        {
-            Current = this;
 
             InitializeToolbarCommands();
 
@@ -137,15 +138,18 @@ namespace Ao3TrackReader
 
             ListFiltering.Create();
 
+            this.startPage = Data.Ao3SiteDataLookup.CheckUri(startPage);
+
+            Uri uri = null;
+
             string url = App.Database.GetVariable("Sleep:URI");
             App.Database.DeleteVariable("Sleep:URI");
 
-            Uri uri = null;
             if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out uri))
                 uri = Data.Ao3SiteDataLookup.CheckUri(uri);
 
             if (uri == null) uri = new Uri("https://archiveofourown.org/");
-
+          
             // restore font size!
             if (App.Database.TryGetVariable("LogFontSize", int.TryParse, out int lfs)) LogFontSize = lfs;
             else LogFontSize = 0;
@@ -649,11 +653,8 @@ namespace Ao3TrackReader
                 }).ConfigureAwait(false);
             }
         }
-        public int FontSize
-        {
-            get { return (int)Math.Round(100.0 * Math.Pow(1.05, LogFontSize), MidpointRounding.AwayFromZero); }
-        }
 
+        public int FontSize => (int)Math.Round(100.0 * Math.Pow(1.05, LogFontSize), MidpointRounding.AwayFromZero); 
 
         static object locker = new object();
 
@@ -1482,6 +1483,13 @@ namespace Ao3TrackReader
 
         async void OnContentLoading()
         {
+            if (startPage != null)
+            {
+                Navigate(startPage);
+                startPage = null;
+                return;
+            }
+
             System.Diagnostics.Debug.WriteLine("{0}: OnContentLoading", System.Diagnostics.Stopwatch.GetTimestamp());
             helper?.Reset();
 
@@ -1517,52 +1525,29 @@ namespace Ao3TrackReader
             if (!isErrorPage) InjectScripts();
         }
 
-        public class Injection
-        {
-            public Injection()
-            {
-
-            }
-            public Injection(string filename)
-            {
-                Filename = filename;
-                Type = System.IO.Path.GetExtension(filename);
-            }
-            public Injection(string filename, string function)
-            {
-                Filename = filename;
-                Type = System.IO.Path.GetExtension(filename);
-                Function = function;
-            }
-            public string Filename { get; set; }
-            public string Type { get; set; }
-            public string Function { get; set; }
-            public string Content { get; set; } = null;
-
-            public static implicit operator Injection(string filename)
-            {
-                return new Injection(filename);
-            }
-        }
-
         async Task InjectScript(Injection injection, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
 
-            if (injection.Content == null) 
+            if (injection.Content == null)
+            {
                 injection.Content = await ReadFile(injection.Filename, ct);
+                if (injection.Type == ".js")
+                    injection.Content = injection.Content + "\n//# sourceURL=" + injection.Filename;
+            }
 
             ct.ThrowIfCancellationRequested();
-            if (!string.IsNullOrWhiteSpace(injection.Function))
+            string function = injection.Function;
+            if (!string.IsNullOrWhiteSpace(function))
             {
-                await CallJavascriptAsync(injection.Function, injection.Content).ConfigureAwait(false);
+                await CallJavascriptAsync(function, injection.Content).ConfigureAwait(false);
             }
             else
             {
                 switch (injection.Type)
                 {
                     case ".js":
-                        await EvaluateJavascriptAsync(injection.Content + "\n//# sourceURL=" + injection.Filename).ConfigureAwait(false);
+                        await EvaluateJavascriptAsync(injection.Content).ConfigureAwait(false);
                         break;
 
                     case ".css":

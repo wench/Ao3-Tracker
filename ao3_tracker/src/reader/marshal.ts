@@ -172,7 +172,7 @@ namespace Ao3Track {
             Ao3Track.Helper.init();
         }
 
-        export function InjectJQuery(code: string) {
+        export function InjectJQuery(code: string) {Ao3Track
             eval(code);
             Ao3Track.jQuery = (window.jQuery as JQueryStatic).noConflict(true);
             Ao3Track.$ = Ao3Track.jQuery;            

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+declare var defaultFontSize : number;
+
 namespace Ao3Track {
     export namespace CSS {
         export function Inject(styles: string) {
@@ -31,9 +33,14 @@ namespace Ao3Track {
             document.head.appendChild(elem);
         };
         
+        export function SetFontSize(fontsize: number) {
+            document.documentElement.style.fontSize = fontsize.toString() + "%";
+        }
+
         let init = () => {
             if (document.head) {
                 Inject('.blurb.work[id] { visibility: hidden; }');
+                if (defaultFontSize) SetFontSize(defaultFontSize);
             }
             else {
                 setImmediate(init);

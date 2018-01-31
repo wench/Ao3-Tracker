@@ -96,23 +96,18 @@ namespace Ao3TrackReader.UWP
             }
         }
 
-        public Ao3TrackReader.App XApp { get; private set; }
+        internal Ao3TrackReader.App XApp { get; private set; }
 
-        /// <summary>
-        /// Invoked when the application is launched normally by the end user.  Other entry points
-        /// will be used such as when the application is launched to open a specific file.
-        /// </summary>
-        /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        Frame CreateRootFrame(IActivatedEventArgs args)
         {
-#if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                this.DebugSettings.EnableFrameRateCounter = true;
-            }
-#endif
-
             Frame rootFrame = Window.Current.Content as Frame;
+
+            Uri uri = null;
+            if (args.Kind == ActivationKind.Protocol)
+            {
+                var protocolArgs = (ProtocolActivatedEventArgs) args;
+                uri = protocolArgs.Uri;                
+            }
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
@@ -123,11 +118,11 @@ namespace Ao3TrackReader.UWP
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
-                Xamarin.Forms.Forms.Init(e);
+                Xamarin.Forms.Forms.Init(args);
 
                 ConnectionProfile connections = NetworkInformation.GetInternetConnectionProfile();
 
-                XApp = new Ao3TrackReader.App(connections != null && connections.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
+                XApp = new Ao3TrackReader.App(uri, connections != null && connections.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
 
                 NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 
@@ -146,7 +141,7 @@ namespace Ao3TrackReader.UWP
                 }
 #endif
 
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
                 }
@@ -154,16 +149,12 @@ namespace Ao3TrackReader.UWP
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
-
-            if (rootFrame.Content == null)
+            else
             {
-                // When the navigation stack isn't restored navigate to the first page,
-                // configuring the new page by passing required information as a navigation
-                // parameter
-                rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                WebViewPage.Current.Navigate(uri, false);
             }
-            // Ensure the current window is active
-            Window.Current.Activate();
+
+            return rootFrame;
         }
 
         private void NetworkInformation_NetworkStatusChanged(object sender)
@@ -176,11 +167,59 @@ namespace Ao3TrackReader.UWP
         }
 
         /// <summary>
+        /// Invoked when the application is launched normally by the end user.  Other entry points
+        /// will be used such as when the application is launched to open a specific file.
+        /// </summary>
+        /// <param name="e">Details about the launch request and process.</param>
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        {
+#if DEBUG
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                this.DebugSettings.EnableFrameRateCounter = true;
+            }
+#endif
+            var rootFrame = CreateRootFrame(args);
+
+            if (rootFrame.Content == null)
+            {
+                // When the navigation stack isn't restored navigate to the first page,
+                // configuring the new page by passing required information as a navigation
+                // parameter
+                rootFrame.Navigate(typeof(MainPage), args);
+            }
+            // Ensure the current window is active
+            Window.Current.Activate();
+        }
+
+
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+#if DEBUG
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                this.DebugSettings.EnableFrameRateCounter = true;
+            }
+#endif
+            var rootFrame = CreateRootFrame(args);
+
+            if (rootFrame.Content == null)
+            {
+                // When the navigation stack isn't restored navigate to the first page,
+                // configuring the new page by passing required information as a navigation
+                // parameter
+                rootFrame.Navigate(typeof(MainPage), args);
+            }
+            // Ensure the current window is active
+            Window.Current.Activate();
+        }
+
+        /// <summary>
         /// Invoked when Navigation to a certain page fails
         /// </summary>
         /// <param name="sender">The Frame which failed navigation</param>
         /// <param name="e">Details about the navigation failure</param>
-            void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }

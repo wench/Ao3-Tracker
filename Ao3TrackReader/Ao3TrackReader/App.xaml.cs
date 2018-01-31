@@ -189,7 +189,7 @@ namespace Ao3TrackReader
         {
             get
             {
-                var mode = InteractionMode;
+                var mode = App.InteractionMode;
                 return mode == InteractionMode.Phone || mode == InteractionMode.Tablet;
             }
         }
@@ -205,13 +205,13 @@ namespace Ao3TrackReader
             task.Wait();
         }
 
-        public App(bool networkstate)
+        public App(Uri startPage, bool networkstate)
         {
             HaveNetwork = networkstate;
             InitializeComponent();
 
             // The root page of your application
-            MainPage = new NavigationPage(new WebViewPage());
+            MainPage = new NavigationPage(new WebViewPage(startPage));
 
             if (HaveNetwork)
             {

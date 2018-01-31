@@ -690,6 +690,8 @@ namespace Ao3TrackReader.Data
 
         public static Uri CheckUri(Uri uri)
         {
+            if (uri == null) return null;
+
             if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
             {
                 if (uri.Scheme == "http" || uri.Port != -1 || uri.Host == "www.archiveofourown.org")

@@ -59,11 +59,7 @@ namespace Ao3Track {
 
     // Font size up/down support 
     Ao3Track.Helper.onalterfontsizeevent = (ev) => {
-        let fontsize = Number(ev);
-        //let inner = document.h("inner");
-        //if (inner) {
-            document.documentElement.style.fontSize = fontsize.toString() + "%";
-        //}
+        Ao3Track.CSS.SetFontSize(Number(ev));
     };
 
     SetCurrentLocation = (current: IWorkChapterEx) => {

@@ -28,7 +28,7 @@ namespace Ao3TrackReader
 
         Xamarin.Forms.View CreateWebView();
         Uri CurrentUri { get; }
-        void Navigate(Uri uri);
+        void Navigate(Uri uri, bool allowext = true);
         void Refresh();
         bool SwipeCanGoBack { get; }
         bool SwipeCanGoForward { get; }
