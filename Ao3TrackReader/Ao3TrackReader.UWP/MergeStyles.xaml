@@ -21,7 +21,6 @@ limitations under the License.
     xmlns:wrt="using:Ao3TrackReader.WinRT"
 	xmlns:xamarin="using:Xamarin.Forms.Platform.UWP"
     >
-
     <GroupStyle x:Key="ListViewGroup" HidesIfEmpty="False">
         <GroupStyle.HeaderContainerStyle>
             <Style TargetType="ListViewHeaderItem">

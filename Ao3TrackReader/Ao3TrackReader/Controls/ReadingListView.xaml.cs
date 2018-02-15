@@ -303,10 +303,9 @@ namespace Ao3TrackReader.Controls
             mi.ForceUpdateSize();
         }
 
-        private void OnCellTapped(object sender, EventArgs e)
-        {
-            var mi = ((Cell)sender);
-            if (mi.BindingContext is Ao3PageViewModel item)
+        private void OnItemTapped(object sender, ItemTappedEventArgs e)
+        {           
+            if (e.Item is Ao3PageViewModel item)
             {
                 Goto(item,true,false);
             }
