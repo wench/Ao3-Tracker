@@ -906,7 +906,7 @@ namespace Ao3TrackReader.Data
             if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
             {
                 uribuilder.Host = "archiveofourown.org";
-                uribuilder.Scheme = "http";
+                uribuilder.Scheme = "https";
                 uribuilder.Port = -1;
             }
             else
