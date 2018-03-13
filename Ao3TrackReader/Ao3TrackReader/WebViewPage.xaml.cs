@@ -423,7 +423,7 @@ namespace Ao3TrackReader
             UpdateBackButton();
         }
 
-        public void OnSleep()
+        public void SaveCurrentLocation()
         {
             var loc = CurrentLocation;
             var uri = CurrentUri;
@@ -434,9 +434,14 @@ namespace Ao3TrackReader
             App.Database.SaveVariable("Sleep:URI", uri.AbsoluteUri);
         }
 
+        public void OnSleep()
+        {
+            SaveCurrentLocation();
+        }
+
         public void OnResume()
         {
-            App.Database.DeleteVariable("Sleep:URI");
+            //App.Database.DeleteVariable("Sleep:URI");
         }
 
         public async void GoogleSearch(string phrase)
@@ -1212,6 +1217,7 @@ namespace Ao3TrackReader
                 lock (currentLocationLock)
                 {
                     currentLocation = value;
+                    SaveCurrentLocation();
                     if (currentLocation != null && currentLocation.workid == currentSavedLocation?.workid)
                     {
                         ForceSetLocationCommand.IsEnabled = currentLocation.LessThan(currentSavedLocation);
@@ -1270,6 +1276,7 @@ namespace Ao3TrackReader
             {
                 var db_workchap = (await App.Storage.GetWorkChaptersAsync(new[] { currentLocation.workid })).Select((kp) => kp.Value).FirstOrDefault();
                 currentLocation = currentSavedLocation = new WorkChapter(currentLocation) { seq = (db_workchap?.seq ?? 0) + 1 };
+                SaveCurrentLocation();
                 await App.Storage.SetWorkChaptersAsync(new Dictionary<long, WorkChapter> { [currentLocation.workid] = currentSavedLocation }).ConfigureAwait(false);
             }
         }
