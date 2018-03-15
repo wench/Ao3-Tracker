@@ -113,6 +113,16 @@ namespace Ao3TrackReader.Data
 
         static Task<HttpResponseMessage> HttpRequestAsync(Uri uri, HttpMethod method = null, string mediaType = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, string cookies = null)
         {
+            if (uri.Scheme == "http")
+            {
+                var uribuilder = new UriBuilder(uri)
+                {
+                    Scheme = "https",
+                    Port = -1
+                };
+                uri = uribuilder.Uri;
+            }
+
             return Task.Run(async () =>
             {
                 for (int i = 0; i < 3; i++)
@@ -906,7 +916,7 @@ namespace Ao3TrackReader.Data
             if (uribuilder.Host == "archiveofourown.org" || uribuilder.Host == "www.archiveofourown.org")
             {
                 uribuilder.Host = "archiveofourown.org";
-                uribuilder.Scheme = "https";
+                uribuilder.Scheme = "http";
                 uribuilder.Port = -1;
             }
             else
@@ -1039,7 +1049,7 @@ namespace Ao3TrackReader.Data
                 model.PrimaryTagType = Ao3TagType.Unknown;
 
                 // Only way to get data is from the page itself
-                var response = await HttpRequestAsync(uri);
+                var response = await HttpRequestAsync(uri, cookies: App.Database.GetVariable("siteCookies"));
 
                 if (response.IsSuccessStatusCode)
                 {
