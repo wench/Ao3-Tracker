@@ -85,6 +85,8 @@ namespace Ao3TrackReader.Controls
             Device.BeginInvokeOnMainThread(() => RestoreReadingList());
         }
 
+        TaskCompletionSource<bool> restored = new TaskCompletionSource<bool>();
+
         void RestoreReadingList()
         {
             SyncIndicator.Content = new ActivityIndicator();
@@ -159,6 +161,7 @@ namespace Ao3TrackReader.Controls
                     await wvp.DoOnMainThreadAsync(() =>
                     {
                         ListView.ItemsSource = readingListBacking;
+                        restored.SetResult(true);
                         App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
                     });
 
@@ -521,6 +524,9 @@ namespace Ao3TrackReader.Controls
 
         public async Task SyncToServerAsync(bool newuser, bool dontrefresh=false)
         {
+            if (!restored.Task.IsCompleted)
+                await restored.Task;
+
             await App.Database.ReadingListCached.BeginDeferralAsync();
             try
             {
@@ -577,6 +583,9 @@ namespace Ao3TrackReader.Controls
 
         public async void RemoveAsync(string href)
         {
+            if (!restored.Task.IsCompleted)
+                await restored.Task;
+
             await RemoveAsyncImpl(href);
             await Task.Factory.StartNew(() => SyncToServerAsync(false), TaskCreationOptions.LongRunning | TaskCreationOptions.PreferFairness).ConfigureAwait(false);
         }
@@ -600,6 +609,9 @@ namespace Ao3TrackReader.Controls
 
         public async void AddAsync(string href)
         {
+            if (!restored.Task.IsCompleted)
+                await restored.Task;
+
             var viewmodel = await AddAsyncImpl(href, DateTime.UtcNow.ToUnixTime());
             if (viewmodel != null) await RefreshAsync(viewmodel);
             await Task.Factory.StartNew(() => SyncToServerAsync(false), TaskCreationOptions.LongRunning | TaskCreationOptions.PreferFairness).ConfigureAwait(false);
@@ -639,6 +651,9 @@ namespace Ao3TrackReader.Controls
 
         public async Task<IDictionary<string, bool>> AreUrlsInListAsync(string[] urls)
         {
+            if (!restored.Task.IsCompleted)
+                await restored.Task;
+
             return await Task.Run(() =>
             {
                 var urlmap = new List<KeyValuePair<string, Uri>>();
@@ -673,6 +688,9 @@ namespace Ao3TrackReader.Controls
 
         public async Task<IDictionary<long, bool>> AreWorksInListAsync(long[] workids)
         {
+            if (!restored.Task.IsCompleted)
+                await restored.Task;
+
             return await Task.Run(() =>
             {
                 var workmap = new List<KeyValuePair<long, Uri>>();
