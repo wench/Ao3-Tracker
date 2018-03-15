@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="34642MonochromeWench.Ao3TrackReader" Publisher="CN=57467E77-D7D9-466E-BDFA-FA86A2AD5DA9" Version="1.1.0.103" />
+  <Identity Name="34642MonochromeWench.Ao3TrackReader" Publisher="CN=57467E77-D7D9-466E-BDFA-FA86A2AD5DA9" Version="1.1.0.104" />
   <mp:PhoneIdentity PhoneProductId="9f1d65b6-b753-4748-b24a-4c29e965c914" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Ao3Track Reader</DisplayName>

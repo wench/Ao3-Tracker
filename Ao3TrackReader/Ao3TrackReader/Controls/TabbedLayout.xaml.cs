@@ -92,6 +92,8 @@ namespace Ao3TrackReader.Controls
                 if (value >= TabsContainer.Children.Count) value = TabsContainer.Children.Count - 1;
                 if (value < 0) value = 0;
 
+                PickerTabs.SelectedIndex = value;
+
                 var newTab = value < TabsContainer.Children.Count ? TabsContainer.Children[value] as TabView : null;
 
                 double desiredScroll = newTab?.X ?? 0.0;
@@ -99,7 +101,6 @@ namespace Ao3TrackReader.Controls
                 {
                     TabsScroll.ScrollToAsync(desiredScroll, 0, true);
                 }
-
             }
         }
 
@@ -111,9 +112,8 @@ namespace Ao3TrackReader.Controls
 
         private void Scroll_Scrolled(object sender, ScrolledEventArgs e)
         {
-
             // Change active tab as we scroll over them
-            currentTabIndex = TabFromX(TabsScroll.ScrollX);
+            PickerTabs.SelectedIndex = currentTabIndex = TabFromX(TabsScroll.ScrollX);
             var oldCurrent = currentTab;
             currentTab = currentTabIndex < TabsContainer.Children.Count ? TabsContainer.Children[currentTabIndex] as TabView : null;
 
@@ -143,18 +143,20 @@ namespace Ao3TrackReader.Controls
 
             var button = CreateButton();
             button.BindingContext = tab;
-            ButtonsContainer.Children.Insert(TabsContainer.Children.IndexOf(tab), button);
+            var index = TabsContainer.Children.IndexOf(tab);
+            ButtonsContainer.Children.Insert(index, button);
+            PickerTabs.Items.Insert(index, tab.Title);
 
             if (TabsContainer.Children.Count == 1)
             {
-                currentTabIndex = 0;
+                PickerTabs.SelectedIndex = currentTabIndex = 0;
                 currentTab = tab;
                 button.IsEnabled = false;
                 button.IsActive = true;
             }
             else
             {
-                currentTabIndex = TabsContainer.Children.IndexOf(currentTab);
+                PickerTabs.SelectedIndex = currentTabIndex = TabsContainer.Children.IndexOf(currentTab);
             }
         }
 
@@ -165,7 +167,7 @@ namespace Ao3TrackReader.Controls
                 TabView tab = sender as TabView;
                 if (tab == currentTab)
                 {
-                    currentTabIndex = TabsContainer.Children.IndexOf(tab);
+                    PickerTabs.SelectedIndex = currentTabIndex = TabsContainer.Children.IndexOf(tab);
                     double desiredScroll = currentTab.X;
                     if (desiredScroll != TabsScroll.ScrollX)
                     {
@@ -190,6 +192,7 @@ namespace Ao3TrackReader.Controls
                 if (ButtonsContainer.Children[i].BindingContext == e.Element)
                 {
                     ButtonsContainer.Children.RemoveAt(i);
+                    PickerTabs.Items.RemoveAt(i);
                     break;
                 }
             }
@@ -209,15 +212,17 @@ namespace Ao3TrackReader.Controls
         private void Tabs_ChildrenReordered(object sender, EventArgs e)
         {
             ButtonsContainer.Children.Clear();
+            PickerTabs.Items.Clear();
 
             int newCurrent = 0;
             for (int i = 0; i < TabsContainer.Children.Count; i++)
             {
-                var tab = TabsContainer.Children[i];
+                var tab = TabsContainer.Children[i] as TabView;
 
                 var button = CreateButton();
                 button.BindingContext = tab;
                 ButtonsContainer.Children.Add(button);
+                PickerTabs.Items.Add(tab.Title);
                 if (tab == currentTab)
                 {
                     button.IsEnabled = false;
@@ -226,7 +231,7 @@ namespace Ao3TrackReader.Controls
                 }
             }
 
-            currentTabIndex = newCurrent;
+            PickerTabs.SelectedIndex = currentTabIndex = newCurrent;
             if (currentTab != null) 
                 TabsScroll.ScrollToAsync(currentTab, ScrollToPosition.Start, false);
         }
@@ -291,6 +296,14 @@ namespace Ao3TrackReader.Controls
         {
             if (newValue == -1) OuterLayout.ClearValue(StackLayout.SpacingProperty);
             else OuterLayout.Spacing = newValue;
+        }
+
+        private void PickerTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (PickerTabs.SelectedIndex != CurrentTab)
+            {
+                CurrentTab = PickerTabs.SelectedIndex;
+            }
         }
     }
 }

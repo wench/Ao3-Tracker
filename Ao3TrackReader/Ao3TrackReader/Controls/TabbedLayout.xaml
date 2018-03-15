@@ -38,6 +38,13 @@
                 <Setter Property="BorderColor" Value="Transparent" />
                 <Setter Property="Padding" Value="2" />
             </Style>
+            
+            <Style TargetType="Picker" x:Key="TabbedLayoutPickerButtonStyle">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor" Value="Transparent" />
+                <Setter Property="WidthRequest" Value="{DynamicResource Size_40_Min}" />
+                <Setter Property="HeightRequest" Value="{DynamicResource Size_40_Min}" />
+            </Style>
         </ResourceDictionary>
     </ContentView.Resources>
     
@@ -76,6 +83,11 @@
                     <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,1,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
                     <local:Button Text="&gt;" x:Name="ButtonsRight" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="0,1,20,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional "
                                   Pressed="ButtonsRight_Pressed"/>
+                </AbsoluteLayout>
+                <AbsoluteLayout VerticalOptions="End" HorizontalOptions="End" WidthRequest="{DynamicResource Size_40_Min}" HeightRequest="{DynamicResource Size_40_Min}">
+                    <Image Source="{StaticResource MoreIcon}" AbsoluteLayout.LayoutBounds="0.5,0.5,20,20" AbsoluteLayout.LayoutFlags="PositionProportional" />
+                    <Picker x:Name="PickerTabs" Style="{StaticResource TabbedLayoutPickerButtonStyle}"  AbsoluteLayout.LayoutBounds="0,1,40,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional"
+                            SelectedIndexChanged="PickerTabs_SelectedIndexChanged"/>
                 </AbsoluteLayout>
             </StackLayout>
 

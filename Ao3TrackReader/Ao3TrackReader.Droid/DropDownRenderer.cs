@@ -74,6 +74,11 @@ namespace Ao3TrackReader.Droid
 
     class DropDownRenderer : ViewRenderer<DropDown, Spinner>
     {
+        public DropDownRenderer(Context context) : base(context)
+        {
+
+        }
+
         protected override void OnElementChanged(ElementChangedEventArgs<DropDown> e)
         {
             base.OnElementChanged(e);
