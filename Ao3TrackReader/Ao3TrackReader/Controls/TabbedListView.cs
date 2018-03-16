@@ -483,7 +483,6 @@ namespace Ao3TrackReader.Controls
             }
         }
 
-
         void ListView_ItemAppearing(object sender, ItemVisibilityEventArgs args)
         {
             ItemAppearing?.Invoke(this, args);
@@ -501,50 +500,6 @@ namespace Ao3TrackReader.Controls
 
         void ListView_ItemTapped (object sender, ItemTappedEventArgs args)
         {
-            // This event is seriously broken in UWP right now so we have to fix it up
-#if WINDOWS_UWP            
-            if (IsGroupingEnabled)
-            {
-                int index = -1;
-                var list = sender as ListView;
-                var topcol = list.ItemsSource;
-
-                // Workout the index of the item that was actually tapped
-                foreach (IList col in topcol)
-                {
-                    if (col != args.Group)
-                    {
-                        index += 1 + col.Count;
-                    }
-                    else
-                    {
-                        index++;
-                        if (args.Item != null)
-                        {
-                            index += 1 + col.IndexOf(args.Item);
-                        }
-                        break;
-                    }
-                }
-
-                // And get the actual item at that index
-                foreach (IList col in topcol)
-                {
-                    if (index >= col.Count)
-                    {
-                        index -= col.Count;
-                        continue;
-                    }
-
-                    foreach (object o in col)
-                    {
-                        args = new ItemTappedEventArgs(col, col[index]);
-                    }
-
-                    break;
-                }
-            }
-#endif
             ItemTapped?.Invoke(this, args);
         }
 
