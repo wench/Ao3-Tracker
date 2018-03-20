@@ -415,7 +415,7 @@ namespace Ao3TrackReader.WinRT
                 if (element.IsActive)
                     image.Foreground = Ao3TrackReader.Resources.Colors.Highlight.High.ToWindowsBrush();
                 else
-                    image.Foreground = null;
+                    image.Foreground = Ao3TrackReader.Resources.Colors.Base.High.ToWindowsBrush();
             }
         }
 

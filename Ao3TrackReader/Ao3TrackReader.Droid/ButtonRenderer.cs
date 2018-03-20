@@ -68,7 +68,11 @@ namespace Ao3TrackReader.Droid
                 // we just need to adjust the padding so it centers vertically
                 var diff = (b - t - _imageHeight) / 2;
                 diff = Math.Max(diff, 0);
-                Control?.SetPadding(0, diff, 0, -diff);
+                Control?.SetPadding((int)Context.ToPixels(Element.Padding.Left), diff, (int)Context.ToPixels(Element.Padding.Right), -diff);
+            }
+            else
+            {
+                Control?.SetPadding((int)Context.ToPixels(Element.Padding.Left), (int)Context.ToPixels(Element.Padding.Top), (int)Context.ToPixels(Element.Padding.Right), (int)Context.ToPixels(Element.Padding.Bottom));
             }
 
             base.OnLayout(changed, l, t, r, b);
@@ -196,7 +200,8 @@ namespace Ao3TrackReader.Droid
                 // to handle the vertical centering 
 
                 // Clear any previous padding and set the image as top/center
-                Control.SetPadding(0, 0, 0, 0);
+                Control?.SetPadding((int)Context.ToPixels(Element.Padding.Left), (int)Context.ToPixels(Element.Padding.Top), (int)Context.ToPixels(Element.Padding.Right), (int)Context.ToPixels(Element.Padding.Bottom));
+
                 Control.SetCompoundDrawablesWithIntrinsicBounds(null, image, null, null);
 
                 // Keep track of the image height so we can use it in OnLayout

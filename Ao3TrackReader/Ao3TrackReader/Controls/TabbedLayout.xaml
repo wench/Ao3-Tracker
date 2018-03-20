@@ -18,6 +18,7 @@
                 <Setter Property="ImageHeight" Value="20" />
                 <Setter Property="Text" Value="{Binding Title}" />
                 <Setter Property="Image" Value="{Binding Icon}" />
+                <Setter Property="Padding" Value="8,2,8,2" />
 
                 <Style.Triggers>
                     <Trigger TargetType="local:Button" Property="IsActive" Value="True">
@@ -33,7 +34,7 @@
                 <Setter Property="FontSize" Value="{DynamicResource Size_15}" />
                 <Setter Property="TextColor" Value="{StaticResource BaseMediumHighColor}" />
                 <Setter Property="BackgroundColor" Value="Transparent" />
-                <Setter Property="BorderWidth" Value="2" />
+                <Setter Property="BorderWidth" Value="0" />
                 <Setter Property="BorderRadius" Value="0" />
                 <Setter Property="BorderColor" Value="Transparent" />
                 <Setter Property="Padding" Value="2" />
@@ -58,13 +59,16 @@
             <StackLayout x:Name="OuterLayout" VerticalOptions="Start" HorizontalOptions="Fill" Orientation="Horizontal" Spacing="0" >
                 <AbsoluteLayout VerticalOptions="End" HorizontalOptions="Start" WidthRequest="{DynamicResource Size_24_Min}" HeightRequest="{DynamicResource Size_40_Min}">
                     <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,1,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
-                    <local:Button Text="&lt;" x:Name="ButtonsLeft" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="1,1,20,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional " 
+                    <local:Button Text="&lt;" x:Name="ButtonsLeft" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="1,1,24,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional " 
                                   Pressed="ButtonsLeft_Pressed"/>
                 </AbsoluteLayout>
                 <AbsoluteLayout VerticalOptions="End" HorizontalOptions="Start" WidthRequest="{DynamicResource Size_40_Min}" HeightRequest="{DynamicResource Size_40_Min}">
+                    <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,0,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
+                    <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,1,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
+                    <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,0,2,1" AbsoluteLayout.LayoutFlags="XProportional,HeightProportional" />
                     <Image Source="{StaticResource MoreIcon}" AbsoluteLayout.LayoutBounds="0.5,0.5,20,20" AbsoluteLayout.LayoutFlags="PositionProportional" />
                     <Picker x:Name="PickerTabs" Style="{StaticResource TabbedLayoutPickerButtonStyle}"  AbsoluteLayout.LayoutBounds="0,1,40,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional"
-                            SelectedIndexChanged="PickerTabs_SelectedIndexChanged"/>
+                            SelectedIndexChanged="PickerTabs_SelectedIndexChanged" Opacity="0"/>
                 </AbsoluteLayout>
                 <Grid VerticalOptions="Start" HorizontalOptions="Start" RowSpacing="-2" ColumnSpacing="-2">
                     <Grid.RowDefinitions>
@@ -86,7 +90,7 @@
                 </Grid>
                 <AbsoluteLayout VerticalOptions="End" HorizontalOptions="FillAndExpand" WidthRequest="{DynamicResource Size_24_Min}" HeightRequest="{DynamicResource Size_40_Min}" Margin="-2,0,0,0">
                     <BoxView Color="{StaticResource BaseMediumLowColor}" AbsoluteLayout.LayoutBounds="0,1,1,2" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional" />
-                    <local:Button Text="&gt;" x:Name="ButtonsRight" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="0,1,20,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional "
+                    <local:Button Text="&gt;" x:Name="ButtonsRight" Style="{StaticResource TabbedLayoutLeftRightButtonStyle}" AbsoluteLayout.LayoutBounds="0,1,24,1" AbsoluteLayout.LayoutFlags="PositionProportional,HeightProportional "
                                   Pressed="ButtonsRight_Pressed"/>
                 </AbsoluteLayout>
             </StackLayout>
