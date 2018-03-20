@@ -70,7 +70,7 @@ namespace Ao3TrackReader.Droid
             var cm = (ConnectivityManager) GetSystemService(ConnectivityService);
             var netInfo = cm.ActiveNetworkInfo;
 
-            var app = new App(netInfo?.IsConnectedOrConnecting == true);
+            var app = new App(null, netInfo?.IsConnectedOrConnecting == true);
 
             IntentFilter filter = new IntentFilter(ConnectivityManager.ConnectivityAction);
             receiver = new NetworkReceiver();

@@ -252,12 +252,15 @@ namespace Ao3TrackReader
             }
         }
 
-        public void Navigate(Uri uri)
+        public void Navigate(Uri uri, bool allowext = true)
         {
+            if (uri == null)
+                return;
+
             var newuri = Ao3SiteDataLookup.CheckUri(uri);
             if (newuri == null)
             {
-                OpenExternal(uri);
+                if (allowext) OpenExternal(uri);
                 return;
             }
 
@@ -381,6 +384,8 @@ namespace Ao3TrackReader
             contextMenu.Show();
         }
 
+        bool doLoading = false;
+
         class WebClient : WebViewClient
         {
             WebViewPage wvp;
@@ -391,16 +396,17 @@ namespace Ao3TrackReader
             }
 
             string allowedUrl;
-            bool canDoOnContentLoaded = false;
+            bool doLoaded = false;
             public override void OnPageFinished(WebView view, string url)
             {
                 var uri = new Uri(url);
 
                 base.OnPageFinished(view, url);
-                if (canDoOnContentLoaded && allowedUrl == url)
+                System.Diagnostics.Debug.WriteLine($"OnPageFinished: {url}");
+                if (doLoaded && allowedUrl == url)
                 {
                     wvp.OnContentLoaded();
-                    canDoOnContentLoaded = false;
+                    doLoaded = false;
                 }
             }
 
@@ -408,9 +414,10 @@ namespace Ao3TrackReader
             {
                 base.OnPageStarted(view, url, favicon);
 
-                canDoOnContentLoaded = true;
+                doLoaded = true;
+                System.Diagnostics.Debug.WriteLine($"OnPageStarted: {url}");
                 wvp.AddJavascriptObject("Ao3TrackHelperNative", wvp.helper);
-
+                wvp.doLoading = true;
             }
 
             public override void OnPageCommitVisible(WebView view, string url)
@@ -444,7 +451,7 @@ namespace Ao3TrackReader
             public override async void OnScaleChanged(WebView view, float oldScale, float newScale)
             {
                 base.OnScaleChanged(view, oldScale, newScale);
-                await wvp.CallJavascriptAsync("Ao3Track.Touch.updateTouchState",Array.Empty<object>());
+                await wvp.EvaluateJavascriptAsync("try { Ao3Track.Touch.updateTouchState(); } catch(exp) { }");
             }
 
             [Obsolete]
@@ -489,6 +496,7 @@ namespace Ao3TrackReader
                 System.Diagnostics.Debug.WriteLine(string.Format(" {0}({1}): {2}: {3}",sourceId,lineNumber,messageLevel.Name(),message));
                 return true;
             }
+
             [Obsolete]
             public override void OnConsoleMessage(string message, int lineNumber, string sourceID)
             {
@@ -497,21 +505,27 @@ namespace Ao3TrackReader
 
             public override void OnReceivedTitle(WebView view, string title)
             {
+                System.Diagnostics.Debug.WriteLine($"Title: {title}");
+
+                if (wvp.doLoading)
+                {
+                    wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
+                    wvp.doLoading = false;
+                }
+
                 base.OnReceivedTitle(view, title);
             }
 
-            bool loaded = false;
             public override void OnProgressChanged(WebView view, int newProgress)
             {
                 base.OnProgressChanged(view, newProgress);
+                System.Diagnostics.Debug.WriteLine($"Load Progress: {newProgress}");
 
-                if (!loaded && newProgress >= 50)
+                if (wvp.doLoading && newProgress >= 50)
                 {
                     wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
-                    loaded = true;
+                    wvp.doLoading = false;
                 }
-
-                if (newProgress == 100) loaded = false;
             }
         }
 
