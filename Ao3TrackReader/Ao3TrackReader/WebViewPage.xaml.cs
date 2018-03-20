@@ -1488,7 +1488,9 @@ namespace Ao3TrackReader
             return false;
         }
 
-        async void OnContentLoading()
+        Task loadingTask = null;
+
+        void OnContentLoading()
         {
             if (startPage != null)
             {
@@ -1500,13 +1502,16 @@ namespace Ao3TrackReader
             System.Diagnostics.Debug.WriteLine("{0}: OnContentLoading", System.Diagnostics.Stopwatch.GetTimestamp());
             helper?.Reset();
 
-            CancellationToken ct = new CancellationToken(false);
             if (!isErrorPage)
             {
-                foreach (var injection in InjectionsLoading)
+                loadingTask = DoOnMainThreadAsync(async () =>
                 {
-                    await InjectScript(injection, ct);
-                }
+                    CancellationToken ct = new CancellationToken(false);
+                    foreach (var injection in InjectionsLoading)
+                    {
+                        await InjectScript(injection, ct);
+                    }
+                });
             }
         }
 
@@ -1566,6 +1571,8 @@ namespace Ao3TrackReader
 
         async void InjectScripts()
         {
+            if (loadingTask != null) await loadingTask;
+
             try
             {
                 cancelInject?.Cancel();
