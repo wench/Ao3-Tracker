@@ -385,6 +385,7 @@ namespace Ao3TrackReader
         }
 
         bool doLoading = false;
+        bool doLoaded = false;
 
         class WebClient : WebViewClient
         {
@@ -396,27 +397,21 @@ namespace Ao3TrackReader
             }
 
             string allowedUrl;
-            bool doLoaded = false;
             public override void OnPageFinished(WebView view, string url)
             {
                 var uri = new Uri(url);
 
                 base.OnPageFinished(view, url);
                 System.Diagnostics.Debug.WriteLine($"OnPageFinished: {url}");
-                if (doLoaded && allowedUrl == url)
-                {
-                    wvp.OnContentLoaded();
-                    doLoaded = false;
-                }
             }
 
             public override void OnPageStarted(WebView view, string url, Bitmap favicon)
             {
                 base.OnPageStarted(view, url, favicon);
 
-                doLoaded = true;
                 System.Diagnostics.Debug.WriteLine($"OnPageStarted: {url}");
                 wvp.AddJavascriptObject("Ao3TrackHelperNative", wvp.helper);
+                wvp.doLoaded = true;
                 wvp.doLoading = true;
             }
 
@@ -525,6 +520,11 @@ namespace Ao3TrackReader
                 {
                     wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
                     wvp.doLoading = false;
+                }
+                if (wvp.doLoaded && newProgress >= 100)
+                {
+                    wvp.DoOnMainThreadAsync(() => wvp.OnContentLoaded());
+                    wvp.doLoaded = false;
                 }
             }
         }
