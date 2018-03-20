@@ -23,7 +23,7 @@ namespace Ao3TrackReader.Version
         public static string Win81 => $"{Major}.{Minor}.0.{Build * 100 + Revision}";
 
 
-        public const string Copyright = "Copyright © 2017 Alexis Ryan";
+        public const string Copyright = "Copyright © 2018 Alexis Ryan";
 
         public static (string Name, Uri uri) License => ("Apache License, Version 2.0", new Uri("https://www.apache.org/licenses/LICENSE-2.0"));
 
