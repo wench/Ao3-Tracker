@@ -69,6 +69,7 @@ namespace Ao3TrackReader
         }
 
         static bool _LoggedError = false;
+
         public static void Log(Exception e)
         {
             // Anything we do here must be wrapped, cause the app might be in an impossible state
@@ -82,9 +83,11 @@ namespace Ao3TrackReader
                         NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
                         ObjectCreationHandling = Newtonsoft.Json.ObjectCreationHandling.Auto,
                         TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All,
-                        Formatting = Newtonsoft.Json.Formatting.Indented
+                        Formatting = Newtonsoft.Json.Formatting.Indented,   
+                        MetadataPropertyHandling = Newtonsoft.Json.MetadataPropertyHandling.ReadAhead,
+                        ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver() { IgnoreSerializableAttribute = true, IgnoreSerializableInterface = true }
                     };
-                    string report = Newtonsoft.Json.JsonConvert.SerializeObject(new
+                    var toSerialize = new
                     {
                         Platform = Device.RuntimePlatform,
                         Mode = InteractionMode.ToString(),
@@ -99,7 +102,9 @@ namespace Ao3TrackReader
                         HWName = HardwareName,
                         Date = DateTime.UtcNow,
                         Exception = e
-                    }, settings);
+                    };
+
+                    string report = Newtonsoft.Json.JsonConvert.SerializeObject(toSerialize, settings);
 
                     if (_LoggedError) report = ",\n" + report;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Ao3TrackReader
 {
@@ -20,6 +21,7 @@ namespace Ao3TrackReader
         public int Column { get; set; }
 
         string stackTrace = null;
+
         public override string StackTrace => stackTrace;
     }
 }

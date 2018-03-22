@@ -74,7 +74,7 @@ namespace Ao3TrackReader.Helper
 
         double DeviceWidth { get; }
 
-        void JavascriptError(string name, string message, string url, int lineNo, int coloumNo, string stack);
+        void JavascriptError(string name, string message, string url, string file, int lineNo, int coloumNo, string stack);
 
         IAsyncOp_WorkWorkDetailsMap GetWorkDetailsAsync([ReadOnlyArray] long[] works, WorkDetailsFlags flags);
         void SetWorkChaptersAsync(IDictionary<long, WorkChapter> works);

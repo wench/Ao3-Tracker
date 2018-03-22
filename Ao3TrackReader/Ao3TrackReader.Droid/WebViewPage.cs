@@ -311,7 +311,9 @@ namespace Ao3TrackReader
         {
             get
             {
-                return webView.MeasuredWidth;
+                double w = webView.MeasuredWidth;
+                if (w == 0) w = webView.Width;
+                return w;
             }
         }
 
@@ -440,7 +442,8 @@ namespace Ao3TrackReader
                 if (wvp.OnNavigationStarting(new Uri(request.Url.ToString())))
                     return true;
                 allowedUrl = request.Url.ToString();
-                return base.ShouldOverrideUrlLoading(view, request);
+
+                return false;
             }
 
             public override async void OnScaleChanged(WebView view, float oldScale, float newScale)

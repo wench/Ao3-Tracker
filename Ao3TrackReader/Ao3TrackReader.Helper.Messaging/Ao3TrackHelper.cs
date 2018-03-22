@@ -137,9 +137,9 @@ namespace Ao3TrackReader.Helper
                 wvp.DoOnMainThreadAsync(() => { wvp.CallJavascriptAsync("Ao3Track.Callbacks.call", _onrequestspeechtext, true); }).ConfigureAwait(false);
         }
 
-        public void LogError(string name, string message, string url, int lineNo, int coloumNo, string stack)
+        public void LogError(string name, string message, string url, string file, int lineNo, int coloumNo, string stack)
         {
-            wvp.JavascriptError(name, message, url, lineNo, coloumNo, stack);
+            wvp.JavascriptError(name, message, url, file, lineNo, coloumNo, stack);
         }
 
         public async void GetWorkDetailsAsync(long[] works, int flags, [Converter("Callback")] int hCallback)

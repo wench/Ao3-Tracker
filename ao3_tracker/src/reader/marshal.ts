@@ -166,7 +166,7 @@ namespace Ao3Track {
             window.onerror =(messageOrEvent, source, lineno, colno, error) => {
                 old_onerror(messageOrEvent,source,lineno,colno,error);
                 if (!error) error = { message: messageOrEvent.toString(), name: "error", }
-                Ao3Track.Helper.logError(error.name, error.message, source||"", lineno||0, colno||0, error.stack || "");
+                Ao3Track.Helper.logError(error.name, error.message, window.location.href, source||"", lineno||0, colno||0, error.stack || "");
             };
 
             Ao3Track.Helper.init();

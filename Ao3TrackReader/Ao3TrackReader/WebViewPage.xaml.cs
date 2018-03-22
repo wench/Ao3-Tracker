@@ -71,7 +71,7 @@ namespace Ao3TrackReader
         IAo3TrackHelper helper;
 
         public Injection[] InjectionsLoading { get; } 
-        public Injection[] Injections { get; }
+        public Injection[] InjectionsLoaded { get; }
 
         public IEnumerable<Models.IHelpInfo> HelpItems
         {
@@ -105,7 +105,7 @@ namespace Ao3TrackReader
                 new Injection("Ao3Track.Marshal.InjectJQuery", "jquery.js")
             };
 
-            Injections = new Injection[] {
+            InjectionsLoaded = new Injection[] {
                 "reader.js",
                 "tracker.js",
                 "unitconv.js",
@@ -1424,7 +1424,8 @@ namespace Ao3TrackReader
         }
 
         bool isErrorPage = false;
-        private CancellationTokenSource cancelInject;
+        private InjectionSequencer injectionSeq;
+
         private bool OnNavigationStarting(Uri uri)
         {
             System.Diagnostics.Debug.WriteLine("{0}: OnNavigationStarting", System.Diagnostics.Stopwatch.GetTimestamp());
@@ -1457,15 +1458,10 @@ namespace Ao3TrackReader
                 }
             }
 
-            try
-            {
-                cancelInject?.Cancel();
-                cancelInject = null;
-            }
-            catch (ObjectDisposedException)
-            {
 
-            }
+            injectionSeq?.Cancel();
+            injectionSeq = new InjectionSequencer(InjectScriptsAsync);
+
 
             TitleEx = "Loading...";
 
@@ -1483,7 +1479,12 @@ namespace Ao3TrackReader
             currentSavedLocation = null;
             ForceSetLocationCommand.IsEnabled = false;
             SetUpToDateCommand.IsEnabled = uri == null?false:uri.TryGetWorkId(out var workid);
-            isErrorPage = uri == null;
+
+            if (uri == null) {
+                isErrorPage = true;
+                injectionSeq.Cancel();
+            }
+
             helper?.Reset();
             return false;
         }
@@ -1502,17 +1503,7 @@ namespace Ao3TrackReader
             System.Diagnostics.Debug.WriteLine("{0}: OnContentLoading", System.Diagnostics.Stopwatch.GetTimestamp());
             helper?.Reset();
 
-            if (!isErrorPage)
-            {
-                loadingTask = DoOnMainThreadAsync(async () =>
-                {
-                    CancellationToken ct = new CancellationToken(false);
-                    foreach (var injection in InjectionsLoading)
-                    {
-                        await InjectScript(injection, ct);
-                    }
-                });
-            }
+            if (!isErrorPage) injectionSeq.StartPhase1();
         }
 
         private void OnContentLoaded()
@@ -1534,7 +1525,7 @@ namespace Ao3TrackReader
             currentSavedLocation = null;
             ForceSetLocationCommand.IsEnabled = false;
 
-            if (!isErrorPage) InjectScripts();
+            if (!isErrorPage) injectionSeq.StartPhase2();
         }
 
         async Task InjectScript(Injection injection, CancellationToken ct)
@@ -1569,34 +1560,31 @@ namespace Ao3TrackReader
             }
         }
 
-        async void InjectScripts()
+        async Task InjectScriptsAsync(InjectionSequencer seq)
         {
-            if (loadingTask != null) await loadingTask;
-
             try
             {
-                cancelInject?.Cancel();
-                cancelInject = null;
-            }
-            catch (ObjectDisposedException)
-            {
+                // Phase 1 -> OnLoading
+                await seq.Phase1;
 
-            }
-
-            var cts = cancelInject = new CancellationTokenSource();
-
-            try
-            {
-                var ct = cts.Token;
-                ct.ThrowIfCancellationRequested();
-                await OnInjectingScripts(ct);
-
-                foreach (var injection in Injections)
+                foreach (var injection in InjectionsLoading)
                 {
-                    await InjectScript(injection, ct);
+                    await InjectScript(injection, seq.Token);
                 }
+                seq.Token.ThrowIfCancellationRequested();
 
-                ct.ThrowIfCancellationRequested();
+                
+                // Phase 2 -> OnLoaded
+                await seq.Phase2;
+
+                seq.Token.ThrowIfCancellationRequested();
+
+                await OnInjectingScripts(seq.Token);
+
+                foreach (var injection in InjectionsLoaded)
+                {
+                    await InjectScript(injection, seq.Token);
+                }
             }
             catch (AggregateException ae)
             {
@@ -1618,10 +1606,9 @@ namespace Ao3TrackReader
             }
             finally
             {
-                cts.Dispose();
+                seq.Dispose();
             }
         }
-
 
         void InitSettings()
         {
@@ -1728,14 +1715,15 @@ namespace Ao3TrackReader
             if (result) Device.OpenUri(uri);
         }
 
-        public void JavascriptError(string name, string message, string url, int lineNo, int coloumNo, string stack)
+        public void JavascriptError(string name, string message, string url, string file, int lineNo, int coloumNo, string stack)
         {
             App.Log(new JavascriptException(message, stack)
             {
                 Name = name,
                 Url = url,
+                Source = file,
                 Line = lineNo,
-                Column = coloumNo
+                Column = coloumNo,
             });
         }
 

@@ -55,6 +55,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupList2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Injection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InjectionSequencer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JavascriptException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LazyEvaluate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ListFilter.cs" />
