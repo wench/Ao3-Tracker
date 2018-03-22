@@ -1540,24 +1540,30 @@ namespace Ao3TrackReader
             }
 
             ct.ThrowIfCancellationRequested();
-            string function = injection.Function;
-            if (!string.IsNullOrWhiteSpace(function))
-            {
-                await CallJavascriptAsync(function, injection.Content).ConfigureAwait(false);
-            }
-            else
-            {
-                switch (injection.Type)
-                {
-                    case ".js":
-                        await EvaluateJavascriptAsync(injection.Content).ConfigureAwait(false);
-                        break;
 
-                    case ".css":
-                        await CallJavascriptAsync("Ao3Track.CSS.Inject", injection.Content).ConfigureAwait(false);
-                        break;
+            await DoOnMainThreadAsync(async () =>
+            {
+                ct.ThrowIfCancellationRequested();
+
+                string function = injection.Function;
+                if (!string.IsNullOrWhiteSpace(function))
+                {
+                    await CallJavascriptAsync(function, injection.Content).ConfigureAwait(false);
                 }
-            }
+                else
+                {
+                    switch (injection.Type)
+                    {
+                        case ".js":
+                            await EvaluateJavascriptAsync(injection.Content).ConfigureAwait(false);
+                            break;
+
+                        case ".css":
+                            await CallJavascriptAsync("Ao3Track.CSS.Inject", injection.Content).ConfigureAwait(false);
+                            break;
+                    }
+                }
+            });
         }
 
         async Task InjectScriptsAsync(InjectionSequencer seq)
