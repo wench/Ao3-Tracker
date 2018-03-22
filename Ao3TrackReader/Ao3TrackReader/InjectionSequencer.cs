@@ -17,7 +17,7 @@ namespace Ao3TrackReader
             cts = new CancellationTokenSource();
             phase1 = new SemaphoreSlim(0, 1);
             phase2 = new SemaphoreSlim(0, 1);
-            Task.Run(() => action(this), cts.Token).ConfigureAwait(false);
+            Task.Run(async () => { await action(this); Dispose(); }, cts.Token).ConfigureAwait(false);
         }
 
         #region IDisposable Support

@@ -1604,10 +1604,6 @@ namespace Ao3TrackReader
             {
                 App.Log(e);
             }
-            finally
-            {
-                seq.Dispose();
-            }
         }
 
         void InitSettings()
