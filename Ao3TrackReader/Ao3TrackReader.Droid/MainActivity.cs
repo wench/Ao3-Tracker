@@ -51,6 +51,8 @@ namespace Ao3TrackReader.Droid
 
         NetworkReceiver receiver;
 
+        public static MainActivity Instance { get; private set; } = null;
+
         protected override void OnCreate(Bundle bundle)
         {
             switch (Ao3TrackReader.App.Theme)
@@ -66,6 +68,7 @@ namespace Ao3TrackReader.Droid
             Java.Lang.Thread.DefaultUncaughtExceptionHandler = this;
             base.OnCreate(bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
+            Instance = this;
 
             var cm = (ConnectivityManager) GetSystemService(ConnectivityService);
             var netInfo = cm.ActiveNetworkInfo;
@@ -117,7 +120,7 @@ namespace Ao3TrackReader.Droid
                     ), Android.Graphics.PorterDuff.Mode.SrcIn);
                 var tt = new Text.String { Text = item.TitleFormatted.ToString() };
                 var renderer = Xamarin.Forms.Platform.Android.Platform.GetRenderer(App.Current.MainPage);                
-                var spannable = tt.ConvertToSpannable(new Text.StateNode { Foreground = color }, renderer.ViewGroup.Resources.DisplayMetrics);
+                var spannable = tt.ConvertToSpannable(new Text.StateNode { Foreground = color }, renderer.View.Resources.DisplayMetrics);
                 item.SetTitle(spannable);
             }
             else

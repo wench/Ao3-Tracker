@@ -31,7 +31,7 @@ namespace Ao3TrackReader.Droid
 
 				IVisualElementRenderer renderer;
 				if ((renderer = Platform.GetRenderer(_childView)) == null)
-					Platform.SetRenderer(_childView, renderer = Platform.CreateRenderer(_childView/*, Context*/));
+					Platform.SetRenderer(_childView, renderer = Platform.CreateRendererWithContext(_childView, Context));
 
 				if (renderer.View.Parent != null)
 					renderer.View.RemoveFromParent();

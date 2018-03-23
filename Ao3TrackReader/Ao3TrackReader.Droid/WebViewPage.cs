@@ -118,7 +118,7 @@ namespace Ao3TrackReader
 
         public Xamarin.Forms.View CreateWebView()
         {
-            webView = new MyWebView(Forms.Context, this);
+            webView = new MyWebView(MainActivity.Instance, this);
             webView.SetWebViewClient(webClient = new WebClient(this));
             webView.SetWebChromeClient(new ChromeClient(this));
             webView.Settings.AllowContentAccess = true;
@@ -265,13 +265,16 @@ namespace Ao3TrackReader
             }
 
             helper?.Reset();
-            if (webClient.ShouldOverrideUrlLoading(webView,newuri.ToString()) == false)
+            if (OnNavigationStarting(newuri) == false)
                 webView.LoadUrl(newuri.AbsoluteUri);
         }
 
         public void Refresh()
         {
-            webView.Reload();
+            if (!string.IsNullOrWhiteSpace(webView.Url) && OnNavigationStarting(new Uri(webView.Url)) == false)
+            {
+                webView.Reload();
+            }
         }
 
         bool WebViewCanGoBack => webView.CanGoBack();
@@ -284,7 +287,7 @@ namespace Ao3TrackReader
             {
                 var history = webView.CopyBackForwardList();
                 var url = history.GetItemAtIndex(history.CurrentIndex - 1);                
-                if (webClient.ShouldOverrideUrlLoading(webView, url.Url) == false)
+                if (OnNavigationStarting(new Uri(url.Url)) == false)
                     webView.GoBack();
             }
             else
@@ -298,7 +301,7 @@ namespace Ao3TrackReader
             {
                 var history = webView.CopyBackForwardList();
                 var url = history.GetItemAtIndex(history.CurrentIndex + 1);
-                if (webClient.ShouldOverrideUrlLoading(webView, url.Url) == false)
+                if (OnNavigationStarting(new Uri(url.Url)) == false)
                     webView.GoForward();
             }
             else
@@ -334,7 +337,7 @@ namespace Ao3TrackReader
 
         public void CopyToClipboard(string str, string type)
         {
-            var clipboard = Xamarin.Forms.Forms.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
+            var clipboard = webView.Context.GetSystemService(Context.ClipboardService) as ClipboardManager;
             if (type == "text")
             {
                 ClipData clip = ClipData.NewPlainText("Text from Ao3", str);
@@ -419,6 +422,7 @@ namespace Ao3TrackReader
 
             public override void OnPageCommitVisible(WebView view, string url)
             {
+                System.Diagnostics.Debug.WriteLine($"OnPageCommitVisible: {url}");
                 base.OnPageCommitVisible(view, url);
             }
 
@@ -432,8 +436,8 @@ namespace Ao3TrackReader
             {
                 if (wvp.OnNavigationStarting(new Uri(url)))
                     return true;
-
                 allowedUrl = url;
+                System.Diagnostics.Debug.WriteLine($"ShouldOverrideUrlLoading: {allowedUrl}");
                 return base.ShouldOverrideUrlLoading(view, url);
             }
 
@@ -442,6 +446,7 @@ namespace Ao3TrackReader
                 if (wvp.OnNavigationStarting(new Uri(request.Url.ToString())))
                     return true;
                 allowedUrl = request.Url.ToString();
+                System.Diagnostics.Debug.WriteLine($"ShouldOverrideUrlLoading: {allowedUrl}");
 
                 return false;
             }
@@ -517,6 +522,7 @@ namespace Ao3TrackReader
             public override void OnProgressChanged(WebView view, int newProgress)
             {
                 base.OnProgressChanged(view, newProgress);
+                if (view != wvp.webView) return;
                 System.Diagnostics.Debug.WriteLine($"Load Progress: {newProgress}");
 
                 if (wvp.doLoading && newProgress >= 50)
