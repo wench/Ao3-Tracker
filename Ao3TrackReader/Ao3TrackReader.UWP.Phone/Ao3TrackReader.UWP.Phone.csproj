@@ -20,7 +20,7 @@
     <PackageCertificateKeyFile>Ao3TrackReader.UWP.Phone_StoreKey.pfx</PackageCertificateKeyFile>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PackageCertificateThumbprint>DD867DF50EAD954BEAC5A13F0D82F8E44C7E1EA0</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>A5B36B72AC565956B5BEB64BF7FAEE5728D18AED</PackageCertificateThumbprint>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>arm</AppxBundlePlatforms>

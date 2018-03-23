@@ -8,6 +8,7 @@ namespace Ao3TrackReader
 {
     public class InjectionSequencer : IDisposable
     {
+        object locker = new object();
         CancellationTokenSource cts;
         SemaphoreSlim phase2;
         Func<InjectionSequencer, Task> action;
@@ -59,6 +60,7 @@ namespace Ao3TrackReader
         public CancellationToken Token => cts.Token;
         public Task Phase1 => Task.CompletedTask;
         public Task Phase2 => phase2.WaitAsync(cts.Token);
+        int running = 0;
 
         public void Cancel()
         {
@@ -68,13 +70,23 @@ namespace Ao3TrackReader
         {
             if (!disposedValue && !IsCancellationRequested)
             {
-                await action(this);
-                Dispose();
+                if (Interlocked.Increment(ref running) == 1)
+                {
+                    await action(this);
+                    Dispose();
+                }
             }
         }
         public void StartPhase2()
         {
-            if (!disposedValue && !IsCancellationRequested) phase2.Release();
+            if (!disposedValue && !IsCancellationRequested)
+            {
+                lock (locker)
+                {
+                    if (phase2.CurrentCount == 0)
+                        phase2.Release();
+                }
+            }
         }
     }
 }

@@ -510,11 +510,14 @@ namespace Ao3TrackReader
             {
                 System.Diagnostics.Debug.WriteLine($"Title: {title}");
 
-                if (wvp.doLoading)
+                wvp.DoOnMainThreadAsync(() =>
                 {
-                    wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
-                    wvp.doLoading = false;
-                }
+                    if (wvp.doLoading)
+                    {
+                        wvp.OnContentLoading();
+                        wvp.doLoading = false;
+                    }
+                });
 
                 base.OnReceivedTitle(view, title);
             }
@@ -525,16 +528,19 @@ namespace Ao3TrackReader
                 if (view != wvp.webView) return;
                 System.Diagnostics.Debug.WriteLine($"Load Progress: {newProgress}");
 
-                if (wvp.doLoading && newProgress >= 50)
+                wvp.DoOnMainThreadAsync(() =>
                 {
-                    wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
-                    wvp.doLoading = false;
-                }
-                if (wvp.doLoaded && newProgress >= 100)
-                {
-                    wvp.DoOnMainThreadAsync(() => wvp.OnContentLoaded());
-                    wvp.doLoaded = false;
-                }
+                    if (wvp.doLoading && newProgress >= 50)
+                    {
+                        wvp.doLoading = false;
+                        wvp.DoOnMainThreadAsync(() => wvp.OnContentLoading());
+                    }
+                    if (wvp.doLoaded && newProgress >= 100)
+                    {
+                        wvp.doLoaded = false;
+                        wvp.OnContentLoaded();
+                    }
+                });
             }
         }
 
