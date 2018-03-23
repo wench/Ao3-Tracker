@@ -1489,8 +1489,6 @@ namespace Ao3TrackReader
             return false;
         }
 
-        Task loadingTask = null;
-
         void OnContentLoading()
         {
             if (startPage != null)
@@ -1548,18 +1546,18 @@ namespace Ao3TrackReader
                 string function = injection.Function;
                 if (!string.IsNullOrWhiteSpace(function))
                 {
-                    await CallJavascriptAsync(function, injection.Content).ConfigureAwait(false);
+                    await CallJavascriptAsync(function, injection.Content);
                 }
                 else
                 {
                     switch (injection.Type)
                     {
                         case ".js":
-                            await EvaluateJavascriptAsync(injection.Content).ConfigureAwait(false);
+                            await EvaluateJavascriptAsync(injection.Content);
                             break;
 
                         case ".css":
-                            await CallJavascriptAsync("Ao3Track.CSS.Inject", injection.Content).ConfigureAwait(false);
+                            await CallJavascriptAsync("Ao3Track.CSS.Inject", injection.Content);
                             break;
                     }
                 }
@@ -1572,6 +1570,7 @@ namespace Ao3TrackReader
             {
                 // Phase 1 -> OnLoading
                 await seq.Phase1;
+                System.Diagnostics.Debug.WriteLine($"Script Injection: Phase 1");
 
                 foreach (var injection in InjectionsLoading)
                 {
@@ -1582,6 +1581,7 @@ namespace Ao3TrackReader
                 
                 // Phase 2 -> OnLoaded
                 await seq.Phase2;
+                System.Diagnostics.Debug.WriteLine($"Script Injection: Phase 2");
 
                 seq.Token.ThrowIfCancellationRequested();
 
