@@ -9,15 +9,14 @@ namespace Ao3TrackReader
     public class InjectionSequencer : IDisposable
     {
         CancellationTokenSource cts;
-        SemaphoreSlim phase1;
         SemaphoreSlim phase2;
+        Func<InjectionSequencer, Task> action;
 
         public InjectionSequencer(Func<InjectionSequencer, Task> action)
         {
             cts = new CancellationTokenSource();
-            phase1 = new SemaphoreSlim(0, 1);
             phase2 = new SemaphoreSlim(0, 1);
-            Task.Run(async () => { await action(this); Dispose(); }, cts.Token).ConfigureAwait(false);
+            this.action = action;
         }
 
         #region IDisposable Support
@@ -29,7 +28,6 @@ namespace Ao3TrackReader
             {
                 if (disposing)
                 {
-                    phase1.Dispose();
                     phase2.Dispose();
                     cts.Dispose();
                 }
@@ -59,16 +57,20 @@ namespace Ao3TrackReader
 
         public bool IsCancellationRequested => cts.IsCancellationRequested;
         public CancellationToken Token => cts.Token;
-        public Task Phase1 => phase1.WaitAsync(cts.Token);
+        public Task Phase1 => Task.CompletedTask;
         public Task Phase2 => phase2.WaitAsync(cts.Token);
 
         public void Cancel()
         {
             if (!disposedValue && !IsCancellationRequested) cts.Cancel();
         }
-        public void StartPhase1()
+        public async void StartPhase1()
         {
-            if (!disposedValue && !IsCancellationRequested) phase1.Release();
+            if (!disposedValue && !IsCancellationRequested)
+            {
+                await action(this);
+                Dispose();
+            }
         }
         public void StartPhase2()
         {
