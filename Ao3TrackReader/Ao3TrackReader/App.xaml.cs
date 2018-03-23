@@ -216,8 +216,9 @@ namespace Ao3TrackReader
             InitializeComponent();
 
             // The root page of your application
-            MainPage = new NavigationPage(new WebViewPage(startPage));
-
+            MainPage = new NavigationPage();
+            MainPage.PushAsync(new WebViewPage(startPage), false);
+            
             if (HaveNetwork)
             {
                 CheckVersion(this, new EventArgs<bool>(true));
