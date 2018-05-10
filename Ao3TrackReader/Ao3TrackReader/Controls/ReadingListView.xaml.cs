@@ -89,8 +89,6 @@ namespace Ao3TrackReader.Controls
 
         void RestoreReadingList()
         {
-            SyncIndicator.Content = new ActivityIndicator();
-            SyncIndicator.Content.IsRunning = true;
             Task.Factory.StartNew(async () =>
             {
                 await App.Database.ReadingListCached.BeginDeferralAsync();
@@ -162,6 +160,7 @@ namespace Ao3TrackReader.Controls
                     {
                         ListView.ItemsSource = readingListBacking;
                         restored.SetResult(true);
+                        SyncIndicator.Content = new ActivityIndicator() { IsVisible = IsOnScreen, IsRunning = IsOnScreen, IsEnabled = IsOnScreen };
                         App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
                     });
 
@@ -236,10 +235,22 @@ namespace Ao3TrackReader.Controls
             if (newValue == true)
             {
                 ListView.Focus();
+                if (SyncIndicator.Content != null)
+                {
+                    SyncIndicator.Content.IsEnabled = true;
+                    SyncIndicator.Content.IsVisible = true;
+                    SyncIndicator.Content.IsRunning = true;
+                }
             }
             else
             {
                 ListView.Unfocus();
+                if (SyncIndicator.Content != null)
+                {
+                    SyncIndicator.Content.IsEnabled = false;
+                    SyncIndicator.Content.IsVisible = false;
+                    SyncIndicator.Content.IsRunning = false;
+                }
             }
         }
 
@@ -366,8 +377,8 @@ namespace Ao3TrackReader.Controls
         {
             ListView.Focus();
             RefreshButton.IsEnabled = false;
-            SyncIndicator.Content = new ActivityIndicator();
-            SyncIndicator.Content.IsRunning = true;
+            SyncIndicator.Content = new ActivityIndicator() { IsVisible = IsOnScreen, IsRunning = IsOnScreen, IsEnabled = IsOnScreen };
+
             Task.Factory.StartNew(async () =>
             {
                 await App.Database.ReadingListCached.BeginDeferralAsync();
