@@ -72,7 +72,7 @@ namespace Ao3Track {
 
     Settings = Ao3Track.Helper.settings;
 
-    export function contextMenuForAnchor(evtarget : EventTarget, clientX: number, clientY: number)
+    export function contextMenuForAnchor(evtarget : EventTarget| null, clientX: number, clientY: number)
     {
         let clientToDev = Ao3Track.Helper.deviceWidth / window.innerWidth;
         for (let target = evtarget as (HTMLElement | null); target && target !== document.body; target = target.parentElement) {
@@ -102,13 +102,16 @@ namespace Ao3Track {
             if (rect.top <= ev.clientY && rect.bottom >= ev.clientY && rect.left <= ev.clientX && rect.right >= ev.clientX) {
                 let rects = range.getClientRects();
                 for (let j = 0; j < rects.length; j++) {
-                    rect = rects.item(j);
-                    if (rect.top <= ev.clientY && rect.bottom >= ev.clientY && rect.left <= ev.clientX && rect.right >= ev.clientX) {
-                        let str = selection.toString();
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, "", str);
-                        return;
+                    let r = rects.item(j);
+                    if (r) {
+                        rect = r;
+                        if (rect.top <= ev.clientY && rect.bottom >= ev.clientY && rect.left <= ev.clientX && rect.right >= ev.clientX) {
+                            let str = selection.toString();
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            Ao3Track.Helper.showContextMenu(ev.clientX * clientToDev, ev.clientY * clientToDev, "", str);
+                            return;
+                        }
                     }
                 }
             }
@@ -142,7 +145,7 @@ namespace Ao3Track {
                     let rects = range.cloneRange().getClientRects();
                     for (let j = 0; j < rects.length; j++) {
                         let rect = rects.item(j);
-                        if (rect.top <= ev.clientY && rect.bottom >= ev.clientY && rect.left <= ev.clientX && rect.right >= ev.clientX) {
+                        if (rect && rect.top <= ev.clientY && rect.bottom >= ev.clientY && rect.left <= ev.clientX && rect.right >= ev.clientX) {
                             offset = currentPos;
                             node = elem.childNodes[i];
                             break;
@@ -190,9 +193,12 @@ namespace Ao3Track {
             for (let cr = 0; cr < rects.length; cr++)
             {
                 let rect = rects.item(cr);
-                var str = selection.toString();
-                Ao3Track.Helper.showContextMenu(rect.left * clientToDev, rect.top * clientToDev, "", str);
-                return true;
+                if (rect) 
+                {
+                    var str = selection.toString();
+                    Ao3Track.Helper.showContextMenu(rect.left * clientToDev, rect.top * clientToDev, "", str);
+                    return true;
+                }
             }
         }
         return false;
