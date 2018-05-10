@@ -73,7 +73,26 @@ namespace Ao3tracksync.Controllers
                 NullValueHandling = NullValueHandling.Ignore
             });
 
-            message.Headers["References"] = "<" + meta[0].Platform + "-" + meta[0].Version + "-" + meta[0].Date.ToShortDateString() + "@wenchy.net>";
+            try
+            {
+                string idbase = meta[0].Platform + "-" + meta[0].Version;
+                long previous;
+
+                using (var ctx = new Models.Ao3TrackEntities())
+                {
+                    previous = ctx.IncrementVariable("ErrorCounter-" + idbase).SingleOrDefault() ?? 0;
+                }
+
+                message.Headers["Message-Id"] = "<" + (previous + 1).ToString() + "-" + idbase + "@wenchy.net>";
+                if ((previous % 50) != 0)
+                {
+                    message.Headers["In-Reply-To"] = message.Headers["References"] = "<" + previous + "-" + idbase + "@wenchy.net>";
+                }
+            }
+            catch(Exception e)
+            {
+                message.Body = message.Body + "\n\nException during send:\n" + e.ToString();
+            }
 
             var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(report));
             message.Attachments.Add(new Attachment(stream, "ErrorReport.json", "application/json"));

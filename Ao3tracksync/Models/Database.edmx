@@ -88,6 +88,9 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="IncrementVariable" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="name" Type="nvarchar" Mode="In" />
+        </Function>
         <EntityContainer Name="Ao3TrackModelStoreContainer">
           <EntitySet Name="ListFilters" EntityType="Self.ListFilters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ReadingList" EntityType="Self.ReadingList" Schema="dbo" store:Type="Tables" />
@@ -164,6 +167,9 @@
             <End Role="User" EntitySet="Users" />
             <End Role="ListFilter" EntitySet="ListFilters" />
           </AssociationSet>
+          <FunctionImport Name="IncrementVariable" ReturnType="Collection(Int64)">
+            <Parameter Name="name" Mode="In" Type="String" />
+          </FunctionImport>
         </EntityContainer>
         <EntityType Name="ReadingList">
           <Key>
@@ -261,6 +267,7 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="IncrementVariable" FunctionName="Ao3TrackModel.Store.IncrementVariable" />
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
