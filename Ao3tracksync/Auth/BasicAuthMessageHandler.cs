@@ -31,6 +31,8 @@ namespace Ao3tracksync.Auth
         private const string AuthenticateHeader = "WWW-Authenticate";
         private const string AuthenticateScheme = "Ao3track";
 
+        bool failedAuth = false;
+
         protected override HttpRequestMessage ProcessRequest(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             try
@@ -43,12 +45,14 @@ namespace Ao3tracksync.Auth
                     if (credentials.Length == 2 && !string.IsNullOrWhiteSpace(credentials[0]) && !string.IsNullOrWhiteSpace(credentials[1]))
                     {
                         User user = User.GetUserWithHash(credentials[0], credentials[1]);
-                        if (user == null)
+                        if (user != null)
                         {
-                            return null;
+                            Thread.CurrentPrincipal = HttpContext.Current.User = new UserPrincipal(new UserIdentity(user));
+                        }                       
+                        else
+                        {
+                            failedAuth = true;
                         }
-
-                        Thread.CurrentPrincipal = HttpContext.Current.User = new UserPrincipal(new UserIdentity(user));
                     }
                 }
             }
@@ -65,6 +69,13 @@ namespace Ao3tracksync.Auth
                 response.Headers.Add(AuthenticateHeader, AuthenticateScheme);
                 response.Headers.Add("Access-Control-Allow-Origin", "*");
             }
+
+            // Oops this is to work around a bug in the client
+            if (response.StatusCode == HttpStatusCode.Unauthorized && failedAuth)
+            {
+                response.StatusCode = HttpStatusCode.Forbidden;
+            }
+
             return response;
         }
 

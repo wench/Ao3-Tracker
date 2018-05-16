@@ -14,6 +14,16 @@
           <Property Name="data" Type="varchar(max)" Nullable="false" />
           <Property Name="timestamp" Type="bigint" Nullable="false" />
         </EntityType>
+        <EntityType Name="PWReset">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="user" Type="bigint" Nullable="false" />
+          <Property Name="oldhash" Type="varbinary(max)" Nullable="false" />
+          <Property Name="expires" Type="smalldatetime" Nullable="false" />
+          <Property Name="complete" Type="bit" Nullable="false" />
+        </EntityType>
         <EntityType Name="ReadingList">
           <Key>
             <PropertyRef Name="id" />
@@ -60,6 +70,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_PWReset_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="PWReset" Type="Self.PWReset" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="PWReset">
+              <PropertyRef Name="user" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_ReadingList_Users">
           <End Role="Users" Type="Self.Users" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -93,12 +115,17 @@
         </Function>
         <EntityContainer Name="Ao3TrackModelStoreContainer">
           <EntitySet Name="ListFilters" EntityType="Self.ListFilters" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PWReset" EntityType="Self.PWReset" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ReadingList" EntityType="Self.ReadingList" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Works" EntityType="Self.Works" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_ListFilters_Users" Association="Self.FK_ListFilters_Users">
             <End Role="Users" EntitySet="Users" />
             <End Role="ListFilters" EntitySet="ListFilters" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PWReset_Users" Association="Self.FK_PWReset_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="PWReset" EntitySet="PWReset" />
           </AssociationSet>
           <AssociationSet Name="FK_ReadingList_Users" Association="Self.FK_ReadingList_Users">
             <End Role="Users" EntitySet="Users" />
@@ -168,8 +195,13 @@
             <End Role="ListFilter" EntitySet="ListFilters" />
           </AssociationSet>
           <FunctionImport Name="IncrementVariable" ReturnType="Collection(Int64)">
-            <Parameter Name="name" Mode="In" Type="String" />
+          <Parameter Name="name" Mode="In" Type="String" />
           </FunctionImport>
+          <EntitySet Name="PWResets" EntityType="Ao3TrackModel.PWReset" />
+          <AssociationSet Name="FK_PWReset_Users" Association="Ao3TrackModel.FK_PWReset_Users">
+            <End Role="User" EntitySet="Users" />
+            <End Role="PWReset" EntitySet="PWResets" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="ReadingList">
           <Key>
@@ -214,6 +246,28 @@
             </Principal>
             <Dependent Role="ListFilter">
               <PropertyRef Name="userid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="PWReset">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="user" Type="Int64" Nullable="false" />
+          <Property Name="oldhash" Type="Binary" Nullable="false" MaxLength="Max" FixedLength="false" />
+          <Property Name="expires" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="complete" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_PWReset_Users">
+          <End Type="Ao3TrackModel.User" Role="User" Multiplicity="1" />
+          <End Type="Ao3TrackModel.PWReset" Role="PWReset" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="PWReset">
+              <PropertyRef Name="user" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -268,6 +322,17 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="IncrementVariable" FunctionName="Ao3TrackModel.Store.IncrementVariable" />
+          <EntitySetMapping Name="PWResets">
+            <EntityTypeMapping TypeName="Ao3TrackModel.PWReset">
+              <MappingFragment StoreEntitySet="PWReset">
+                <ScalarProperty Name="complete" ColumnName="complete" />
+                <ScalarProperty Name="expires" ColumnName="expires" />
+                <ScalarProperty Name="oldhash" ColumnName="oldhash" />
+                <ScalarProperty Name="user" ColumnName="user" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

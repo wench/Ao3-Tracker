@@ -12,6 +12,8 @@
         <AssociationConnector Association="Ao3TrackModel.FK_ReadingList_Users" />
         <EntityTypeShape EntityType="Ao3TrackModel.ListFilter" Width="1.5" PointX="2.875" PointY="5.875" />
         <AssociationConnector Association="Ao3TrackModel.FK_ListFilters_Users" />
+        <EntityTypeShape EntityType="Ao3TrackModel.PWReset" Width="1.5" PointX="2.875" PointY="8.5" />
+        <AssociationConnector Association="Ao3TrackModel.FK_PWReset_Users" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -31,6 +31,7 @@ namespace Ao3tracksync.Models
         public virtual DbSet<Work> Works { get; set; }
         public virtual DbSet<ReadingList> ReadingLists { get; set; }
         public virtual DbSet<ListFilter> ListFilters { get; set; }
+        public virtual DbSet<PWReset> PWResets { get; set; }
     
         public virtual ObjectResult<Nullable<long>> IncrementVariable(string name)
         {

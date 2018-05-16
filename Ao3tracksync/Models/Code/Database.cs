@@ -23,5 +23,8 @@ namespace Ao3tracksync.Models
 
     public partial class Ao3TrackEntities
     {
+        public System.Data.Entity.DbSet<Ao3tracksync.Models.Passwords.Forgot> Forgots { get; set; }
+
+        public System.Data.Entity.DbSet<Ao3tracksync.Models.Passwords.Reset> Resets { get; set; }
     }
 }

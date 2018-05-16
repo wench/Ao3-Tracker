@@ -31,13 +31,21 @@ namespace Ao3tracksync.Auth
         public UserIdentity(User user)
         {
             this.User = user;
+            Name = user.username;
+        }
+
+        public UserIdentity(string username)
+        {
+            Name = username;
         }
 
         string IIdentity.AuthenticationType { get { return "Ao3Track"; } }
 
-        bool IIdentity.IsAuthenticated { get { return true; } }
+        bool IIdentity.IsAuthenticated { get { return User != null; } }
 
-        string IIdentity.Name { get { return User.username; } }
+        public string Name { get; private set; }
+
+        public string Roles => User?.roles?.ToLowerInvariant() ?? "";
     }
 }
 

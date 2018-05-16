@@ -33,7 +33,7 @@ namespace Ao3tracksync.Auth
         public UserPrincipal(UserIdentity ident)
         {
             this.Identity = ident;
-            this.Roles = Identity.User.roles.ToLowerInvariant().Split(',');
+            this.Roles = Identity.Roles.Split(',');
         }
 
         IIdentity IPrincipal.Identity

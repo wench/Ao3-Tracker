@@ -25,8 +25,10 @@ namespace Ao3tracksync.Models
             this.username = username;
             this.email = email;
             this.roles = roles;
-            this.hash = Auth.HashHandler.GetHash(password);
+            this.password = password;
         }
+
+        internal string password { set => this.hash = Auth.HashHandler.GetHash(value); }
 
         internal static User GetUserWithPassword(string username, string password)
         {

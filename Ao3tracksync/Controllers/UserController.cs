@@ -32,7 +32,8 @@ namespace Ao3tracksync.Controllers
     [RoutePrefix("api/User"), Authorize(Roles = "users"), AllowCrossSite, System.Web.Mvc.OutputCache(Location = OutputCacheLocation.None)]
     public class UserController : ApiController
     {
-        const int MIN_PW_SIZE = 6;
+        public const int MIN_PW_SIZE = 6;
+        public const string PW_SIZE_MSG = "Password must be at least 6 characters long";
 
         static bool IsValidEmail(string email)
         {
@@ -120,7 +121,7 @@ namespace Ao3tracksync.Controllers
 
                 // Verify password
                 if (string.IsNullOrWhiteSpace(newuser.password)) errors.Add("password", "password must not be empty");
-                else if (newuser.password.Length < MIN_PW_SIZE) errors.Add("password", string.Format("password must be at least {0} characters", MIN_PW_SIZE));
+                else if (newuser.password.Length < MIN_PW_SIZE) errors.Add("password", PW_SIZE_MSG);
 
                 // Verify email address
                 if (string.IsNullOrWhiteSpace(newuser.email)) newuser.email = null;

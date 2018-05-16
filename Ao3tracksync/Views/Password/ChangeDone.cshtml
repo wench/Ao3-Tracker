@@ -1,0 +1,9 @@
+﻿@model Ao3tracksync.Models.User
+
+@{
+    ViewBag.Title = "Password Changed";
+}
+
+<h2>Password Changed</h2>
+
+<div>Password for account @Html.ValueFor(model => model.username) has been successfully updated. You will need to logout and re-login in all your Archive Track Reader instances.</div>
