@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ViewCell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Ao3TrackReader.Controls.ReadingListViewCellNew"
+             xmlns:local="clr-namespace:Ao3TrackReader.Controls">
+
+    <FlexLayout Direction="Row" AlignItems="Start" JustifyContent="Start" Wrap="Wrap">
+        <FlexLayout Direction="Row" JustifyContent="SpaceBetween" AlignItems="Start" AlignContent="SpaceBetween" Margin="0" Padding="0" FlexLayout.Shrink="0" FlexLayout.Basis="53" HeightRequest="53" Wrap="Wrap" >
+            <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" VerticalOptions="Start" />
+            <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" VerticalOptions="Start" />
+            <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" VerticalOptions="Start" />
+            <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" VerticalOptions="Start" />
+        </FlexLayout>
+
+        <ContentView FlexLayout.Grow="1"  FlexLayout.Basis="1%" FlexLayout.AlignSelf="Stretch">
+            <StackLayout Spacing="3">
+                <local:TextView TextEx="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="{DynamicResource SmallFontSize}" LineBreakMode="WordWrap" Margin="0,0,8,0" />
+                <local:TextView TextEx="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0,0,8,0" VerticalTextAlignment="Start" />
+            </StackLayout>
+        </ContentView>
+
+        <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="{DynamicResource MicroFontSize}" HorizontalTextAlignment="End" Margin="0" FlexLayout.Shrink="0" />
+
+        <local:TextView TextEx="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" FlexLayout.Basis="100%" />
+        <local:TextView TextEx="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" FlexLayout.Basis="100%" />
+        <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" FlexLayout.Basis="100%" />
+
+    </FlexLayout>
+</ViewCell>

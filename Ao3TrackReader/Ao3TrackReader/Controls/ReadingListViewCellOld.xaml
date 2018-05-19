@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ViewCell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Ao3TrackReader.Controls.ReadingListViewCellOld"
+             xmlns:local="clr-namespace:Ao3TrackReader.Controls">
+
+    <Grid ColumnSpacing="0" RowSpacing="0" Margin="0" Padding="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="4" />
+        </Grid.ColumnDefinitions>
+
+        <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8"
+                                            local:BackgroundSwitch.Condition="{Binding IsSelected}" 
+                                            local:BackgroundSwitch.ColorFalse="{StaticResource BaseTransVeryLowColor}" 
+                                            local:BackgroundSwitch.ColorTrue="{StaticResource BaseSolidVeryVeryLowColor}" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="25" />
+                    <ColumnDefinition Width="25" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image Source="{Binding ImageRating}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="0" VerticalOptions="Start" />
+                <Image Source="{Binding ImageWarnings}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="0" VerticalOptions="Start" />
+                <Image Source="{Binding ImageCategory}" HeightRequest="25" WidthRequest="25" Grid.Row="0" Grid.Column="1" VerticalOptions="Start" />
+                <Image Source="{Binding ImageComplete}" HeightRequest="25" WidthRequest="25" Grid.Row="1" Grid.Column="1" VerticalOptions="Start" />
+                <Grid ColumnSpacing="3" RowSpacing="3" Margin="0" Padding="0" Grid.Column="2" Grid.RowSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="70" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackLayout Spacing="3">
+                        <local:TextView TextEx="{Binding Title}" TextColor="{StaticResource HighlightColor}" FontSize="{DynamicResource SmallFontSize}" MinimumHeightRequest="17" LineBreakMode="WordWrap" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="0"/>
+                        <local:TextView TextEx="{Binding Subtitle}" TextColor="{StaticResource BaseMediumColor}" MinimumHeightRequest="15" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" HorizontalOptions="Fill" Margin="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalTextAlignment="Start" />
+                    </StackLayout>
+
+                    <Label Text="{Binding Date, StringFormat='{0:d MMM yyyy}'}" FontSize="{DynamicResource MicroFontSize}" HorizontalTextAlignment="End" Margin="0" Grid.Row="0" Grid.Column="1" />
+                </Grid>
+            </Grid>
+            <local:TextView TextEx="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
+            <local:TextView TextEx="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
+            <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
+        </Grid>
+
+        <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>
+    </Grid>
+</ViewCell>

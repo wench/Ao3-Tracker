@@ -27,6 +27,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCellNew.xaml.cs">
+      <DependentUpon>ReadingListViewCellNew.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCellOld.xaml.cs">
+      <DependentUpon>ReadingListViewCellOld.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ScrollView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TabbedLayout.xaml.cs">
       <DependentUpon>TabbedLayout.xaml</DependentUpon>
@@ -52,6 +60,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data\Ao3TrackDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\CachedTable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\ListFiltering.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data\ReadingListLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupList2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Injection.cs" />
@@ -147,6 +156,18 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Controls\TabbedLayout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCellOld.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Controls\ReadingListViewCellNew.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
   </ItemGroup>
 </Project>

@@ -87,7 +87,7 @@ namespace Ao3TrackReader.WinRT
             else if (IsPointerOver)
                 state = "Ao3TPointerOver";
 
-            VisualStateManager.GoToState(this, state, false);
+            Windows.UI.Xaml.VisualStateManager.GoToState(this, state, false);
         }
 
         protected override void OnPointerEntered(PointerRoutedEventArgs e)
