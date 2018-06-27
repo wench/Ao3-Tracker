@@ -1484,6 +1484,9 @@ namespace Ao3TrackReader
                 isErrorPage = true;
                 injectionSeq.Cancel();
             }
+            else {
+                isErrorPage = false;
+            }
 
             helper?.Reset();
             return false;
