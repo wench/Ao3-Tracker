@@ -18,8 +18,8 @@ namespace Ao3TrackReader.Controls
 		}
 	}
 
-#if WINDOWS_UWP_OLD
-   public class ReadingListViewCell : ReadingListViewCellOld
+#if !usenewreadinglistcell||WINDOWS_UWP_OLD
+    public class ReadingListViewCell : ReadingListViewCellOld
     {
     }
 #endif

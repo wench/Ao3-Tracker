@@ -9,7 +9,7 @@ using Xamarin.Forms.Xaml;
 
 namespace Ao3TrackReader.Controls
 {
-#if !WINDOWS_UWP_OLD
+#if usenewreadinglistcell&&!WINDOWS_UWP_OLD
     [XamlCompilation(XamlCompilationOptions.Compile)]
 #else
     [XamlCompilation(XamlCompilationOptions.Skip)]
@@ -22,7 +22,7 @@ namespace Ao3TrackReader.Controls
 		}
 	}
 
-#if !WINDOWS_UWP_OLD
+#if usenewreadinglistcell&&!WINDOWS_UWP_OLD
    public class ReadingListViewCell : ReadingListViewCellNew
     {
     }
