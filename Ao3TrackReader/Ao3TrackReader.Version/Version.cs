@@ -12,7 +12,7 @@ namespace Ao3TrackReader.Version
         public const int Build = 2;
         public const int Revision = 0;
 
-        public const string String = "1.1.2.0";
+        public const string String = "1.1.2.1";
         public const int Integer = Major * 100000000 + Minor * 100000 + Build * 100 + Revision;
 
         public static string Full => $"{Major}.{Minor}.{Build}.{Revision}";

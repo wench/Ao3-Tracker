@@ -1,0 +1,37 @@
+{
+  "name": "ao3-tracker",
+  "version": "1.0.0",
+  "description": "Archive Track Reader Sourrce",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wench/Ao3-Tracker.git"
+  },
+  "author": "AlexisRyan",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/wench/Ao3-Tracker/issues"
+  },
+  "homepage": "https://github.com/wench/Ao3-Tracker#readme",
+  "devDependencies": {
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-append-prepend": "^1.0.4",
+    "gulp-cache": "^0.4.5",
+    "gulp-imagemin": "^3.3.0",
+    "gulp-less": "^3.3.2",
+    "gulp-preprocess": "^2.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-shell": "^0.6.3",
+    "gulp-sourcemaps": "^2.6.1",
+    "gulp-typescript": "^3.2.2",
+    "jquery": "^3.2.1",
+    "merge-stream": "^1.0.1",
+    "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "http-server": "^0.10.0"
+  }
+}

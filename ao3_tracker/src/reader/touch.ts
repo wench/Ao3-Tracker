@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-namespace Ao3Track {
+export namespace Ao3Track {
     export namespace Touch {
        
         // Nonsense to allow for swiping back and foward between pages 
@@ -44,7 +44,7 @@ namespace Ao3Track {
         if (!window.performance.now) 
             manualContextMenu = true;
 
-        function swipeCleanup(keepOffset?: boolean) {
+        export function swipeCleanup(keepOffset?: boolean) {
             swiping = false;
             Helper.stopWebViewDragAccelerate();
             if (!keepOffset) Ao3Track.Helper.leftOffset = 0.0;
@@ -58,9 +58,13 @@ namespace Ao3Track {
             removeEventListener.window("pointercancel", pointerCancelHandler);
         }
 
-        function swipeStart(x : number, y : number) : boolean
+        export function swipeStart(
+            x : number, 
+            y : number) : any
         {
-            coordFixup = Ao3Track.Helper.deviceWidth / (window.innerWidth * (window.screen.deviceXDPI||192) / (window.screen.logicalXDPI||192));
+            let coordFixup =0;
+            coordFixup = (Ao3Track.Helper.deviceWidth / window.innerWidth * (((<{logicalXDpi:number}><any>window.screen).logicalXDP)||192)/<{deviceXDpi:number>}><any>((window.screen)[device.XDPI
+            "})||192));
             end = Ao3Track.Helper.deviceWidth;
             startThreshold = Math.min(end / 6, 160);
             yLimit = window.innerHeight / 8;
@@ -296,10 +300,10 @@ namespace Ao3Track {
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
                     if (Date.now() <= limit)  ev.preventDefault();
-                    removeEventListener.call(event.target,"click",handle);
+                    if (event.target)removeEventListener.call((event.target,"click",handle);
                 };
 
-                addEventListener.call(event.target,"click",handle);
+                if (event.target)addEventListener.call(event.target,"click",handle);
             }
         }
         function pointerCancelHandler(event: PointerEvent) {
@@ -308,10 +312,10 @@ namespace Ao3Track {
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
                     if (Date.now() <= limit)  ev.preventDefault();
-                    removeEventListener.call(event.target,"click",handle);
+                    if (event.target)removeEventListener.call(event.target,"click",handle);
                 };
 
-                addEventListener.call(event.target,"click",handle);
+                if (event.target)addEventListener.call(event.target,"click",handle);
             }
         }
 
@@ -355,10 +359,10 @@ namespace Ao3Track {
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
                     if (Date.now() <= limit)  ev.preventDefault();
-                    removeEventListener.call(event.target,"click",handle);
+                    if (event.target)removeEventListener.call(event.target,"click",handle);
                 };
 
-                addEventListener.call(event.target,"click",handle);
+                if (event.target)addEventListener.call(event.target,"click",handle);
             }
         }
         function touchCancelHandler(event: TouchEvent) {
@@ -369,18 +373,18 @@ namespace Ao3Track {
                 let limit = Date.now() + 100;
                 let handle = (ev: MouseEvent) => {
                     if (Date.now() <= limit)  ev.preventDefault();
-                    removeEventListener.call(event.target,"click",handle);
+                    if (event.target)removeEventListener.call(event.target,"click",handle);
                 };
 
-                addEventListener.call(event.target,"click",handle);
+                if (event.target) addEventListener.call(event.target,"click",handle);
             }
         }
 
         export function updateTouchState() {
-            let styles = getComputedStyle(document.documentElement, '');
+            let styles = getComputedStyle(<Element>document.documentElement, '');
 
             // If we can scroll horizontally, we disable swiping
-            if (styles.msScrollLimitXMax !== styles.msScrollLimitXMin || document.documentElement.clientWidth !== window.innerWidth) {
+            if (if (document.documentElement) if (styles.msScrollLimitXMax !== styles.msScrollLimitXMin || document.documentElement.clientWidth !== window.innerWidth) {
                 document.documentElement.classList.remove("mw_ao3track_unzoomed");
                 document.documentElement.classList.add("mw_ao3track_zoomed");
                 swipeCleanup();

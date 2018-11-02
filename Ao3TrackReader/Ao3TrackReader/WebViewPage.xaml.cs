@@ -64,6 +64,7 @@ using OperationCanceledException = System.OperationCanceledException;
 
 namespace Ao3TrackReader
 {
+    [Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Skip)]
     public sealed partial class WebViewPage : ContentPage, IWebViewPage, IPageEx, IWebViewPageNative
     {
         public static WebViewPage Current { get; private set; }
@@ -1119,17 +1120,19 @@ namespace Ao3TrackReader
                 if (forward)
                 {
                     LeftOffset = -DeviceWidth;
+                    animatednavigation = true;
                     ToolbarGoForward();
                 }
                 else
                 {
                     LeftOffset = DeviceWidth;
+                    animatednavigation = true;
                     ToolbarGoBack();
                 }
             });
 
         }
-
+        private bool animatednavigation=false;
         private NavigateBehaviour ToolbarBackBehaviour = def_ToolbarBackBehaviour;
         public bool ToolbarCanGoBack => CanGoBack(ToolbarBackBehaviour);
         public void ToolbarGoBack()
@@ -1160,7 +1163,9 @@ namespace Ao3TrackReader
         public bool SwipeCanGoBack => CanGoBack(SwipeBackBehaviour);
         public void SwipeGoBack()
         {
+            animatednavigation = true;
             GoBack(SwipeBackBehaviour);
+        
         }
 
         public const NavigateBehaviour def_SwipeForwardBehaviour = NavigateBehaviour.HistoryThenPage;
@@ -1169,6 +1174,7 @@ namespace Ao3TrackReader
         public bool SwipeCanGoForward => CanGoForward(SwipeForwardBehaviour);
         public void SwipeGoForward()
         {
+            animatednavigation = true;
             GoForward(SwipeForwardBehaviour);
         }
 
@@ -1380,7 +1386,7 @@ namespace Ao3TrackReader
                     }
 
                     offsetCat = SwipeOffsetChanged(offset);
-                    if (offsetCat == 3)
+                        if (offsetCat == 3)
                     {
                         SwipeGoBack();
                         return false;
@@ -1429,6 +1435,7 @@ namespace Ao3TrackReader
         private bool OnNavigationStarting(Uri uri)
         {
             System.Diagnostics.Debug.WriteLine("{0}: OnNavigationStarting", System.Diagnostics.Stopwatch.GetTimestamp());
+            if (!animatednavigation) LeftOffset = 0;
 
             if (uri != null)
             {

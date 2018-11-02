@@ -55,6 +55,7 @@ namespace Ao3TrackReader.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
+            //System.Diagnostics.Debugger.Break();
             switch (Ao3TrackReader.App.Theme)
             {
                 case "light":
