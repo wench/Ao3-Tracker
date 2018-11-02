@@ -1,4 +1,4 @@
-﻿/*
+﻿/*`
 Copyright 2017 Alexis Ryan
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,21 +40,25 @@ namespace Ao3TrackReader
 {
     public partial class WebViewPage : IWebViewPage, IWebViewPageNative
     {
-        private CoreDispatcher Dispatcher { get; } = Window.Current.Dispatcher;
+        private static CoreDispatcher Dispatcher { get; set; }
+       
 
-        public bool IsMainThread => Dispatcher.HasThreadAccess;
+        public bool IsMainThread => (Dispatcher?? Window.Current.Dispatcher
+            ).HasThreadAccess;
 
         WebView webView;
 
         public Xamarin.Forms.View CreateWebView()
         {
+
 #if WINDOWS_UWP
-            webView = new WebView(WebViewExecutionMode.SameThread)
+            Dispatcher = Window.Current.Dispatcher;
+webView = new WebView(WebViewExecutionMode.SameThread)
 #else
             webView = new WebView()
 #endif
-            {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
+{
+    HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
 
