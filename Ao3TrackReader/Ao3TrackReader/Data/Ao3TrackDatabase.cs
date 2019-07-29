@@ -53,9 +53,9 @@ namespace Ao3TrackReader
             {
                 var sqliteFilename = "Ao3TrackSQLite.db3";
 #if __IOS__
-				string documentsPath = Environment.GetFolderPath (Environment.SpecialFolder.Personal); // Documents folder
-				string libraryPath = Path.Combine (documentsPath, "..", "Library"); // Library folder
-				var path = Path.Combine(libraryPath, sqliteFilename);
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
+                string libraryPath = Path.Combine(documentsPath, "..", "Library"); // Library folder
+                var path = Path.Combine(libraryPath, sqliteFilename);
 #elif __ANDROID__
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
                 var path = Path.Combine(documentsPath, sqliteFilename);
@@ -66,7 +66,7 @@ namespace Ao3TrackReader
                 return path;
             }
         }
-
+        public int olddatabaseversion { get; private set; } = 0;
         public Ao3TrackDatabase()
         {
             SQLitePCL.Batteries_V2.Init();
@@ -88,6 +88,7 @@ namespace Ao3TrackReader
 
             // Do any database upgrades if necessaey
             TryGetVariable("DatabaseVersion", int.TryParse, out var DatabaseVersion, 0);
+            olddatabaseversion = DatabaseVersion;
 
             if (DatabaseVersion < Version.Version.AsInteger(1, 0, 5, -1))
             {
@@ -303,6 +304,7 @@ namespace Ao3TrackReader
             { "ListFiltering.OnlyGeneralTeen", ListFilteringSettings.def_onlyGeneralTeen },
             { "ListFiltering.HideWorks", false },
             { "Theme", "light" },
+            {"override_site_theme", true },
             { "LogFontSizeUI", 0 },
             { "UnitConvOptions.temp", UnitConvSetting.None },
             { "UnitConvOptions.dist", UnitConvSetting.None },

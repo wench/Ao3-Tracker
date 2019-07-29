@@ -55,6 +55,8 @@ namespace Ao3Track {
         unitConv: IUnitConvSettings;
         tags: ITagSettings;
         listFiltering: IListFilteringSettings;
+        override_site_theme:boolean;
+        theme:string;
     }
 
     export interface IWorkDetails {

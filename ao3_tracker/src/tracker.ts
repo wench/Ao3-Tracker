@@ -491,16 +491,13 @@ namespace Ao3Track {
                 let unread = chapter_count - chapters_finished;
                 $blurb_heading.append(' ', '<span class="ao3-track-new">(<a href="' + chapter_path + '#ao3tjump">' + unread + "\xA0unread chapter" + (unread === 1 ? '' : 's') + '</a>)</span>');
                 $blurb_heading.prepend(unfinished_html);                
-                $work.addClass("ao3t-unread-chapters");
             }
             else if (chapter_total === chapters_finished) {
                 $blurb_heading.prepend(read_all_html);                
-                $work.addClass("ao3t-complete-read-all");
             }
 
             if (inreadinglist) {                
                 $blurb_heading.prepend(in_reading_list_html);
-                $work.addClass("ao3t-in-reading-list");
             }
         }
     }

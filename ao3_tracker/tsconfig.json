@@ -10,7 +10,13 @@
         "alwaysStrict": false,
         "sourceMap": false,
         "pretty": true,
-        "noUnusedLocals": false
+        "noUnusedLocals": false,
+        "diagnostics": true,
+        "listEmittedFiles":true,
+        "noEmitOnError": false
+
+
+
     },
     "includes": ["./*.ts"]
 }

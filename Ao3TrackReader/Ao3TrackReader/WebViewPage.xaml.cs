@@ -52,6 +52,7 @@ using Ao3TrackReader.Resources;
 
 using Xamarin.Forms.PlatformConfiguration;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 
 #if WINDOWS_UWP
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
@@ -102,8 +103,8 @@ namespace Ao3TrackReader
 #if NEED_INJECT_MESSAGING
                 "messaging.js",
 #endif
-                "loading.js",
-                new Injection("Ao3Track.Marshal.InjectJQuery", "jquery.js")
+                new Injection("Ao3Track.Marshal.InjectJQuery", "jquery.js"),
+
             };
 
             InjectionsLoaded = new Injection[] {
@@ -1113,8 +1114,8 @@ namespace Ao3TrackReader
                 UpdatePrevPageIndicator(ToolbarBackBehaviour);
                 ShowPrevPageIndicator = 2;
             }
-
-            this.Animate("ToolbarGoBackForward", new Animation((f) => LeftOffset = forward ? -f : f, 0, DeviceWidth, Easing.CubicIn), 16, 100, finished: (f, cancelled) =>
+            double prev = LeftOffset;
+            this.Animate("ToolbarGoBackForward", new Animation((f) => { LeftOffset = forward ? -f : f; }, 0, DeviceWidth, Easing.CubicIn), 16, 100, finished: (f, cancelled) =>
             {
 
                 if (forward)
@@ -1437,7 +1438,7 @@ namespace Ao3TrackReader
             System.Diagnostics.Debug.WriteLine("{0}: OnNavigationStarting", System.Diagnostics.Stopwatch.GetTimestamp());
             if (!animatednavigation) LeftOffset = 0;
 
-            if (uri != null)
+            if (uri != null &&uri.Host !="wenchy.net")
             {
                 var check = Ao3SiteDataLookup.CheckUri(uri);
                 if (check == null)
@@ -1487,7 +1488,7 @@ namespace Ao3TrackReader
             ForceSetLocationCommand.IsEnabled = false;
             SetUpToDateCommand.IsEnabled = uri == null?false:uri.TryGetWorkId(out var workid);
 
-            if (uri == null) {
+            if (uri == null || uri.Host != "archiveofourown.org") {
                 isErrorPage = true;
                 injectionSeq.Cancel();
             }
@@ -1510,7 +1511,7 @@ namespace Ao3TrackReader
 
             System.Diagnostics.Debug.WriteLine("{0}: OnContentLoading", System.Diagnostics.Stopwatch.GetTimestamp());
             helper?.Reset();
-
+            LeftOffset = 0;
             if (!isErrorPage) injectionSeq.StartPhase1();
         }
 
@@ -1522,7 +1523,7 @@ namespace Ao3TrackReader
 
             UpdateUrlBar(CurrentUri);
             ReadingList?.PageChange(CurrentUri);
-
+            LeftOffset = 0;
             nextPage = null;
             prevPage = null;
             GoBackUpdated();
@@ -1543,8 +1544,8 @@ namespace Ao3TrackReader
             if (injection.Content == null)
             {
                 injection.Content = await ReadFile(injection.Filename, ct);
-                if (injection.Type == ".js")
-                    injection.Content = injection.Content + "\n//# sourceURL=" + injection.Filename;
+                if (injection.Type == ".js")// /// <reference path="/scripts/<other>.js" />
+                    injection.Content = "{" + injection.Content + "\n//# sourceURL=" + injection.Filename +"\n}\n";
             }
 
             ct.ThrowIfCancellationRequested();
@@ -1622,101 +1623,143 @@ namespace Ao3TrackReader
             }
         }
 
+
+        Action<T> GetfieldSetter<T>(FieldInfo field, FieldInfo topfield)
+        {
+            Action<T> setter = (val) =>
+            {
+                object obj = topfield is null ? settings : topfield.GetValue(settings);
+                field.SetValue(obj, val);
+
+            };
+            return setter;
+        }
+        void setupDatabaseValueGeneric<T>(DatabaseVarAttribute dva,FieldInfo field, FieldInfo topfield, Ao3TrackDatabase.TryParseDelegate<T> tryparse)
+        {
+            var setteraction = GetfieldSetter<T>(field, topfield);
+            //App.Database.GetVariableEvents("UnitConvOptions.temp").Updated += SettingsVariable_Updated;
+            App.Database.TryGetVariable(dva.var, tryparse, out var value);
+            App.Database.GetVariableEvents(dva.var).Updated += (sender, e) =>
+            {
+                if (e.VarName == dva.var)
+                {
+
+                    if (!tryparse(e.NewValue, out var val)) val = default(T);
+                    setteraction(val);
+                }
+            };
+
+            setteraction(value);
+        }
+
+        static bool tryparsestring(string val, out string outval)
+        {
+            {
+                outval = val;
+                return true;
+            }
+        }
+        MethodInfo GetTryParse(Type type)
+        {
+            MethodInfo tryparsemi = null;
+            if (typeof(Enum).IsAssignableFrom(type))
+            {
+                tryparsemi = typeof(Enum).GetRuntimeMethods().Where(mi => mi.Name == "TryParse" && mi.GetParameters().Length == 2 && mi.GetParameters()[0].ParameterType == typeof(string)).Single();
+                tryparsemi = tryparsemi.MakeGenericMethod(type);
+            }
+            else
+            if (type == typeof (string))
+            {
+                tryparsemi = typeof(WebViewPage).GetRuntimeMethods().Where(mi => mi.Name == "tryparsestring" && mi.GetParameters().Length == 2 && mi.GetParameters()[0].ParameterType == typeof(string)).Single();
+
+            }
+
+            else{
+                var methods = type.GetRuntimeMethods().Where(mi => mi.Name == "TryParse");
+                tryparsemi = methods.Where(mi => mi.GetParameters().Length == 2 && mi.GetParameters()[0].ParameterType == typeof(string)).Single();
+            }
+            return tryparsemi;
+        }
+
+        void setupDatabaseValue(DatabaseVarAttribute dva, FieldInfo field, FieldInfo topfield)
+        {
+
+            var methods = typeof(WebViewPage).GetRuntimeMethods();
+            var setpmi = methods.Where(mi => mi.Name == "setupDatabaseValueGeneric").Single().MakeGenericMethod(field.FieldType);
+            MethodInfo gettpd;
+            if (typeof(Enum).IsAssignableFrom(field.FieldType))
+                    gettpd = methods.Where(mi => mi.Name == "GetTryParseDelegateE").Single().MakeGenericMethod(field.FieldType);
+            else
+                    gettpd = methods.Where(mi => mi.Name == "GetTryParseDelegate").Single().MakeGenericMethod(field.FieldType);
+            var tryparsemi = GetTryParse(field.FieldType);           
+            var deltype = typeof(Ao3TrackDatabase.TryParseDelegate<int>).GetGenericTypeDefinition().MakeGenericType(field.FieldType);
+            var del = gettpd.Invoke(null, new object[] { tryparsemi });
+
+            setpmi.Invoke(this, new object[] { dva, field, topfield, del });
+        }
+
+        static Ao3TrackDatabase.TryParseDelegate<T> GetTryParseDelegateE<T>(MethodInfo method) where T : struct
+        {
+            if (typeof(Enum).IsAssignableFrom(typeof(T)))
+            {
+                return (string s, out T result) =>
+                {
+                   return Enum.TryParse<T>(s, out result);
+                };
+            }
+            return null                ;
+         }
+        static Ao3TrackDatabase.TryParseDelegate<T> GetTryParseDelegate<T>(MethodInfo method) 
+        {
+            Ao3TrackDatabase.TryParseDelegate<T> del = (string s, out T result) =>
+            {
+                if (method != null)
+                {
+                    var args = new object[] { s, default(T) };
+                    if (method.Invoke(args[1], args) is bool b && b)
+                    {
+                        result = (T)args[1];
+                        return true;
+                    }
+                }
+                result = default(T); return false;
+            };
+
+            return del;
+        }
         void InitSettings()
         {
             bool b;
             UnitConvSetting uc = UnitConvSetting.None;
-
-            App.Database.GetVariableEvents("UnitConvOptions.temp").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.temp", Enum.TryParse, out uc);
-            settings.unitConv.temp = uc;
-
-            App.Database.GetVariableEvents("UnitConvOptions.dist").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.dist", Enum.TryParse, out uc);
-            settings.unitConv.dist = uc;
-
-            App.Database.GetVariableEvents("UnitConvOptions.volume").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.volume", Enum.TryParse, out uc);
-            settings.unitConv.volume = uc;
-
-            App.Database.GetVariableEvents("UnitConvOptions.weight").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("UnitConvOptions.weight", Enum.TryParse, out uc);
-            settings.unitConv.weight = uc;
-
-            App.Database.GetVariableEvents("TagOptions.showCatTags").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("TagOptions.showCatTags", bool.TryParse, out b);
-            settings.tags.showCatTags = b;
-
-            App.Database.GetVariableEvents("TagOptions.showWIPTags").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("TagOptions.showWIPTags", bool.TryParse, out b);
-            settings.tags.showWIPTags = b;
-
-            App.Database.GetVariableEvents("TagOptions.showRatingTags").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("TagOptions.showRatingTags", bool.TryParse, out b);
-            settings.tags.showRatingTags = b;
-
-            App.Database.GetVariableEvents("ListFiltering.HideWorks").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("ListFiltering.HideWorks", bool.TryParse, out b);
-            settings.listFiltering.hideFilteredWorks = b;
-
-            App.Database.GetVariableEvents("ListFiltering.OnlyGeneralTeen").Updated += SettingsVariable_Updated;
-            App.Database.TryGetVariable("ListFiltering.OnlyGeneralTeen", bool.TryParse, out b);
-            settings.listFiltering.onlyGeneralTeen = b;            
-        }
-
-        private void SettingsVariable_Updated(object sender, Ao3TrackDatabase.VariableUpdatedEventArgs e)
-        {
-            bool b = false;
-            UnitConvSetting uc = UnitConvSetting.None;
-
-            switch (e.VarName)
+            foreach (var field in settings.GetType().GetRuntimeFields())
             {
-                case "UnitConvOptions.temp":
-                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
-                    settings.unitConv.temp = uc;
-                    break;
+                DatabaseVarAttribute attrib=null;
 
-                case "UnitConvOptions.dist":
-                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
-                    settings.unitConv.dist = uc;
-                    break;
+                foreach (var a in field.GetCustomAttributes())
+                {
+                    if (a is DatabaseVarAttribute dva)
+                        attrib = dva;
+                }
+                if (attrib == null) continue;
+                if (attrib.nested) foreach (var subfield in field.FieldType.GetRuntimeFields())
+                    {
+                        DatabaseVarAttribute sfattrib = null;
 
-                case "UnitConvOptions.volume":
-                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
-                    settings.unitConv.volume = uc;
-                    break;
+                        foreach (var a in subfield.GetCustomAttributes())
+                        {
+                            if (a is DatabaseVarAttribute dva)
+                                sfattrib = dva;
+                        }
+                        if (sfattrib == null) continue;
+                        setupDatabaseValue(sfattrib, subfield, field);
+                    }
+                else
+                    setupDatabaseValue(attrib, field, null);
 
-                case "UnitConvOptions.weight":
-                    if (!Enum.TryParse(e.NewValue, out uc)) uc = UnitConvSetting.None;
-                    settings.unitConv.weight = uc;
-                    break;
-
-                case "TagOptions.showCatTags":
-                    bool.TryParse(e.NewValue, out b);
-                    settings.tags.showCatTags = b;
-                    break;
-
-                case "TagOptions.showWIPTags":
-                    bool.TryParse(e.NewValue, out b);
-                    settings.tags.showWIPTags = b;
-                    break;
-
-                case "TagOptions.showRatingTags":
-                    bool.TryParse(e.NewValue, out b);
-                    settings.tags.showRatingTags = b;
-                    break;
-
-                case "ListFiltering.HideWorks":
-                    bool.TryParse(e.NewValue, out b);
-                    settings.listFiltering.hideFilteredWorks = b;
-                    break;
-
-                case "ListFiltering.OnlyGeneralTeen":
-                    bool.TryParse(e.NewValue, out b);
-                    settings.listFiltering.onlyGeneralTeen = b;
-                    break;
             }
+            
         }
+        
 
         Settings settings = new Settings();
         public ISettings Settings => settings;

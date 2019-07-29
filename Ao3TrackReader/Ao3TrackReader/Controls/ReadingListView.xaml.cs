@@ -30,8 +30,8 @@ namespace Ao3TrackReader.Controls
 {
     public partial class ReadingListView : PaneView
     {
-        const int MaxRefreshTasks = 20;
-        const int RefreshDelay = 64;
+        public const int MaxRefreshTasks = 20;
+        const int RefreshDelay = 200;
 
         GroupList2<Ao3PageViewModel> readingListBacking;
 

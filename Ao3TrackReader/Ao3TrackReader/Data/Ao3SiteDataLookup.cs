@@ -130,11 +130,12 @@ namespace Ao3TrackReader.Data
                     try
                     {
                         HttpRequestMessage message = new HttpRequestMessage(method ?? HttpMethod.Get, uri);
-                        if (!string.IsNullOrEmpty(mediaType)) message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(mediaType));
+                        if (!string.IsNullOrEmpty(mediaType)) message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github.v3.raw+json"));
                         if (!string.IsNullOrWhiteSpace(cookies)) message.Headers.Add("Cookie", cookies);
 
                         await httpSemaphore.WaitAsync();
                         var task = HttpClient.SendAsync(message, completionOption);
+                        if (task.IsFaulted && task.Exception != null) throw task.Exception;
                         return await task;
                     }
                     catch (HttpRequestException e)
@@ -184,15 +185,16 @@ namespace Ao3TrackReader.Data
             SemaphoreSlim finished;
             HtmlDocument doc;
             List<long> works;
+            const int maxworks = Controls.ReadingListView.MaxRefreshTasks / 2;
 
             public WorkWorker()
             {
                 start = new SemaphoreSlim(0, 1);
-                finished = new SemaphoreSlim(0, 10);
+                finished = new SemaphoreSlim(0, maxworks);
                 works = new List<long>();
             }
 
-            bool Full { get { return works.Count >= 10; } }
+            bool Full { get { return works.Count >= maxworks; } }
             bool started = false;
             void Reset()
             {
@@ -276,7 +278,7 @@ namespace Ao3TrackReader.Data
                     }
                 }
 
-                var worknode = doc.GetElementbyId("work_" + workid.ToString());
+                var worknode = doc?.GetElementbyId("work_" + workid.ToString());
                 return worknode;
             }
         }
@@ -702,13 +704,13 @@ namespace Ao3TrackReader.Data
         {
             if (uri == null) return null;
 
-            if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org")
+            if (uri.Host == "archiveofourown.org" || uri.Host == "www.archiveofourown.org" || uri.Host == "wenchy.net")
             {
                 if (uri.Scheme == "http" || uri.Port != -1 || uri.Host == "www.archiveofourown.org")
                 {
                     var uribuilder = new UriBuilder(uri)
                     {
-                        Host = "archiveofourown.org",
+                        //Host = "archiveofourown.org",
                         Scheme = "https",
                         Port = -1
                     };

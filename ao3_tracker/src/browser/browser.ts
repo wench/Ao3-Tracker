@@ -148,6 +148,8 @@ namespace Ao3Track {
         listFiltering: {
             hideFilteredWorks: false,
             onlyGeneralTeen: false
-        }
+        },
+        override_site_theme: false,
+        theme:"light",
     };
 }

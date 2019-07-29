@@ -341,6 +341,14 @@ limitations under the License.
                                 </StackLayout>
                                 <Label Text="You must restart the app to apply a new theme" Style="{StaticResource Remark}" />
                             </StackLayout>
+
+                            <StackLayout Style="{StaticResource SettingVert}">
+                                <StackLayout Style="{StaticResource Setting}">
+                                    <Label Text="Override site theme" HorizontalOptions="StartAndExpand" />
+                                    <Switch local:SettingsView.DatabaseVariable="override_site_theme" HorizontalOptions="EndAndExpand"  />
+                                </StackLayout>
+                                <Label Text="Selects whether tags are displayed in the Reading List when the app starts" Style="{StaticResource Remark}" />
+                            </StackLayout>
                         </StackLayout>
 
                     </StackLayout>

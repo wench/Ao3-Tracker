@@ -38,7 +38,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
-    <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
@@ -46,7 +46,8 @@
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableMultiDex>false</AndroidEnableMultiDex>
     <EnableProguard>False</EnableProguard>
-    <AndroidSupportedAbis>armeabi;armeabi-v7a</AndroidSupportedAbis>
+    <AndroidSupportedAbis>
+    </AndroidSupportedAbis>
     <Debugger>Xamarin</Debugger>
     <JavaMaximumHeapSize>512M</JavaMaximumHeapSize>
   </PropertyGroup>
@@ -62,7 +63,8 @@
     <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
-    <AndroidSupportedAbis>armeabi;armeabi-v7a;x86</AndroidSupportedAbis>
+    <AndroidSupportedAbis>
+    </AndroidSupportedAbis>
     <Debugger>Xamarin</Debugger>
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
@@ -94,20 +96,20 @@
     <Reference Include="SQLite-net, Version=1.5.231.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\sqlite-net-pcl.1.5.231\lib\netstandard1.1\SQLite-net.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCLRaw.batteries_green, Version=1.1.11.121, Culture=neutral, PublicKeyToken=a84b7dcfb1391f7f, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLitePCLRaw.bundle_green.1.1.11\lib\MonoAndroid\SQLitePCLRaw.batteries_green.dll</HintPath>
+    <Reference Include="SQLitePCLRaw.batteries_green, Version=1.1.14.520, Culture=neutral, PublicKeyToken=a84b7dcfb1391f7f, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SQLitePCLRaw.bundle_green.1.1.14\lib\MonoAndroid\SQLitePCLRaw.batteries_green.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCLRaw.batteries_v2, Version=1.1.11.121, Culture=neutral, PublicKeyToken=8226ea5df37bcae9, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLitePCLRaw.bundle_green.1.1.11\lib\MonoAndroid\SQLitePCLRaw.batteries_v2.dll</HintPath>
+    <Reference Include="SQLitePCLRaw.batteries_v2, Version=1.1.14.520, Culture=neutral, PublicKeyToken=8226ea5df37bcae9, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SQLitePCLRaw.bundle_green.1.1.14\lib\MonoAndroid\SQLitePCLRaw.batteries_v2.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCLRaw.core, Version=1.1.11.121, Culture=neutral, PublicKeyToken=1488e028ca7ab535, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLitePCLRaw.core.1.1.11\lib\MonoAndroid\SQLitePCLRaw.core.dll</HintPath>
+    <Reference Include="SQLitePCLRaw.core, Version=1.1.14.520, Culture=neutral, PublicKeyToken=1488e028ca7ab535, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SQLitePCLRaw.core.1.1.14\lib\MonoAndroid\SQLitePCLRaw.core.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCLRaw.lib.e_sqlite3, Version=1.1.11.121, Culture=neutral, PublicKeyToken=e4ad490600e2234c, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLitePCLRaw.lib.e_sqlite3.android.1.1.11\lib\MonoAndroid\SQLitePCLRaw.lib.e_sqlite3.dll</HintPath>
+    <Reference Include="SQLitePCLRaw.lib.e_sqlite3, Version=1.1.14.520, Culture=neutral, PublicKeyToken=e4ad490600e2234c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SQLitePCLRaw.lib.e_sqlite3.android.1.1.14\lib\MonoAndroid\SQLitePCLRaw.lib.e_sqlite3.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCLRaw.provider.e_sqlite3, Version=1.1.11.121, Culture=neutral, PublicKeyToken=9c301db686d0bd12, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLitePCLRaw.provider.e_sqlite3.android.1.1.11\lib\MonoAndroid\SQLitePCLRaw.provider.e_sqlite3.dll</HintPath>
+    <Reference Include="SQLitePCLRaw.provider.e_sqlite3, Version=1.1.14.520, Culture=neutral, PublicKeyToken=9c301db686d0bd12, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SQLitePCLRaw.provider.e_sqlite3.android.1.1.14\lib\MonoAndroid\SQLitePCLRaw.provider.e_sqlite3.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -634,8 +636,8 @@
     <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\css.js">
       <Link>Assets\css.js</Link>
     </AndroidAsset>
-    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\loading.js">
-      <Link>Assets\loading.js</Link>
+    <AndroidAsset Include="..\..\ao3_tracker\build\reader\droid\hider.js">
+      <Link>Assets\hider.js</Link>
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>

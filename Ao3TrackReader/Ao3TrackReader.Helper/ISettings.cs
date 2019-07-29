@@ -46,6 +46,8 @@ namespace Ao3TrackReader.Helper
         IUnitConvSettings unitConv { get; }
         ITagSettings tags { get; }
         IListFilteringSettings listFiltering { get; }
+        bool override_site_theme { get; }
+    string theme { get; }
     }
 
 

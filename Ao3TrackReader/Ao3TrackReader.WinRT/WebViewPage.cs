@@ -43,8 +43,8 @@ namespace Ao3TrackReader
         private static CoreDispatcher Dispatcher { get; set; }
        
 
-        public bool IsMainThread => (Dispatcher?? Window.Current.Dispatcher
-            ).HasThreadAccess;
+        public bool IsMainThread => (Dispatcher?? Window.Current?.Dispatcher
+            )?.HasThreadAccess?? true;
 
         WebView webView;
 

@@ -47,5 +47,14 @@ namespace Ao3TrackReader.Version
             else
                 return major * 100000000 + minor * 100000 + build * 100 + revision;
         }
+        public static void FromInteger(out int major, out int minor, out int build, out int revision, int version)
+        {
+            major = version / 1000000;
+            version = version % 1000000;
+            minor = (version / 1000);
+            version = version % 1000;
+            build = version / 100;
+            revision = version % 100;
+        }
     }
 }

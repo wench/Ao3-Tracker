@@ -166,13 +166,23 @@ namespace Ao3Track {
             window.onerror =(messageOrEvent, source, lineno, colno, error) => {
                 old_onerror(messageOrEvent,source,lineno,colno,error);
                 if (!error) error = { message: messageOrEvent.toString(), name: "error", }
-                Ao3Track.Helper.logError(error.name, error.message, window.location.href, source||"", lineno||0, colno||0, error.stack || "");
+                Ao3Track.Helper.logError(error.name, error.message, window.location.href||source||"", lineno||0, colno||0, error.stack || "");
             };
 
             Ao3Track.Helper.init();
         }
 
-        export function InjectJQuery(code: string) {Ao3Track
+        export function InjectJS(code: string) {
+            eval(code);/*
+            let blob = new Blob([code], { type: 'text/javavscript', endings: "transparent" });
+            let link = document.createElement('script');
+            link.type = 'text/javavscript';
+            link.src = URL.createObjectURL(blob);
+            link.async = false;
+            if (document.head) document.head.appendChild(link);*/
+        }
+
+        export function InjectJQuery(code: string) {
             eval(code);
             Ao3Track.jQuery = (window.jQuery as JQueryStatic).noConflict(true);
             Ao3Track.$ = Ao3Track.jQuery;            
