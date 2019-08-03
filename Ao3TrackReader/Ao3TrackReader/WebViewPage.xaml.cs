@@ -734,8 +734,11 @@ namespace Ao3TrackReader
 
         public Task DoOnMainThreadAsync(MainThreadAction function)
         {
+            var mi = function.GetMethodInfo();
             if (IsMainThread)
             {
+                System.Diagnostics.Debug.WriteLine($"DoOnMainThreadAsync {mi.DeclaringType}.{mi} is main", "I");
+
                 function();
 
 #if WINDOWS_APP || WINDOWS_PHONE_APP
@@ -748,9 +751,13 @@ namespace Ao3TrackReader
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine($"DoOnMainThreadAsync {mi.DeclaringType}.{mi} not main", "I");
+
+
                 var complete = new TaskCompletionSource<object>();
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
+                    System.Diagnostics.Debug.WriteLine($"DoOnMainThreadAsync {mi.DeclaringType}.{mi} on main", "I");
                     function();
                     complete.SetResult(null);
                 });

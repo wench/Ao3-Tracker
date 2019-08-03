@@ -62,8 +62,20 @@ namespace Ao3TrackReader.Droid
         protected override void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var view = Element as TextView;
+            if (view == null) return;
 
-            if (view != null && (e.PropertyName == Label.TextColorProperty.PropertyName ||
+            if (e.PropertyName == TextView.TextExProperty.PropertyName)
+            {
+                if (view.TextEx != null)
+                {
+                    var tts = view.TextEx.ToString();
+                    view.FormattedText = tts;
+                }
+
+                UpdateControl(view);
+                base.OnElementPropertyChanged(sender, e);
+            }
+            else if( (e.PropertyName == Label.TextColorProperty.PropertyName ||
                 e.PropertyName == Label.FontProperty.PropertyName ||
                 e.PropertyName == Label.FontSizeProperty.PropertyName ||
                 e.PropertyName == Label.FontAttributesProperty.PropertyName ||
@@ -72,22 +84,12 @@ namespace Ao3TrackReader.Droid
             {
                 if (view.TextEx != null)
                 {
-                    base.OnElementPropertyChanged(sender, e);
                     UpdateControl(view);
+                    base.OnElementPropertyChanged(sender, e);
                     return;
                 }
             }
-            else if (e.PropertyName == TextView.TextExProperty.PropertyName)
-            {
-                if (view.TextEx != null)
-                {
-                    var tts = view.TextEx.ToString();
-                    view.FormattedText = tts;
-                }
-
-                base.OnElementPropertyChanged(sender, e);
-            }
-            else if (e.PropertyName == Xamarin.Forms.VisualElement.IsVisibleProperty.PropertyName)
+            else  if (e.PropertyName == Xamarin.Forms.VisualElement.IsVisibleProperty.PropertyName)
             {
                 var vec = Element as Xamarin.Forms.IVisualElementController;
                 vec.InvalidateMeasure(Xamarin.Forms.Internals.InvalidationTrigger.RendererReady);

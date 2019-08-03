@@ -31,7 +31,7 @@ namespace Ao3TrackReader.Controls
     public partial class ReadingListView : PaneView
     {
         public const int MaxRefreshTasks = 20;
-        const int RefreshDelay = 200;
+        const int RefreshDelay = 500;
 
         GroupList2<Ao3PageViewModel> readingListBacking;
 
@@ -94,8 +94,7 @@ namespace Ao3TrackReader.Controls
                 await App.Database.ReadingListCached.BeginDeferralAsync();
                 try
                 {
-
-                    // Restore the reading list contents!
+                        // Restore the reading list contents!
                     var items = new Dictionary<string, ReadingList>();
                     foreach (var i in await App.Database.ReadingListCached.SelectAsync())
                     {
@@ -142,6 +141,9 @@ namespace Ao3TrackReader.Controls
                                     tasks.Enqueue(wvp.DoOnMainThreadAsync(async () =>
                                     {
                                         await viewmodel.SetBaseDataAsync(model,false);
+                                        RefreshAsync(viewmodel);
+                                        await Task.Yield();
+                                        await Task.Delay(RefreshDelay);
                                         tasklimit.Release();
                                     }));
                                 }
@@ -176,33 +178,12 @@ namespace Ao3TrackReader.Controls
 
                     await SyncToServerAsync(false, true);
 
-                    using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
-                    {
-                        foreach (var viewmodel in readingListBacking.AllSafe)
-                        {
-                            await tasklimit.WaitAsync();
-
-                            tasks.Enqueue(Task.Run(async () =>
-                            {
-                                await RefreshAsync(viewmodel);
-                                await Task.Delay(RefreshDelay);
-                                tasklimit.Release();
-                            }));
-#pragma warning disable 4014
-                            while (tasks.Count > 0 && tasks.Peek().IsCompleted)
-                                tasks.Dequeue();
-#pragma warning restore 4014
-                        }
-                        await Task.WhenAll(tasks);
-                        tasks.Clear();
-                        GC.Collect();
-                    }
                 }
                 finally
                 {
                     await App.Database.ReadingListCached.EndDeferralAsync().ConfigureAwait(false);
                 }
-                
+
                 await wvp.DoOnMainThreadAsync(() =>
                 {
                     RefreshButton.IsEnabled = true;
@@ -385,7 +366,7 @@ namespace Ao3TrackReader.Controls
                 try
                 {
                     await SyncToServerAsync(false, true);
-
+                    /*
                     using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
                         List<Task> tasks = new List<Task>();
@@ -396,13 +377,14 @@ namespace Ao3TrackReader.Controls
                             tasks.Add(Task.Run(async () =>
                             {
                                 await RefreshAsync(viewmodel);
+                                await Task.Yield();
                                 await Task.Delay(RefreshDelay);
                                 tasklimit.Release();
                             }));
                         }
 
                         await Task.WhenAll(tasks);
-                    }
+                    }*/
                 }
                 finally
                 {
@@ -789,6 +771,9 @@ namespace Ao3TrackReader.Controls
                 await wvp.DoOnMainThreadAsync(async () =>
                 {
                     await viewmodel.SetBaseDataAsync(model, true);
+                    viewmodel.Loaded = true;
+                  //  readingListBacking.Remove(viewmodel);
+                    //readingListBacking.Add(viewmodel);
                 });
 
                 await WriteViewModelToDbAsync(viewmodel, new ReadingList(model, 0, viewmodel.Unread));

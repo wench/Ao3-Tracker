@@ -362,3 +362,5 @@ nppBackup/
 
 # No generated appx files please
 *.appx
+old
+*.apk

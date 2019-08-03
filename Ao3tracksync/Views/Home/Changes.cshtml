@@ -1,0 +1,19 @@
+﻿
+@model Ao3tracksync.Models.Changes
+
+
+<div class="jumbotron">
+    <h1>Archive Track Release History</h1>
+    <p class="lead">
+        Showing release notes for all releases @if (Model.from != null) { <text>from version</text> @Model.from;}
+        @if (Model.to != null) { <text>to version</text> @Model.to; }
+</div>
+@{
+         var pipeline = new Markdig.MarkdownPipelineBuilder().Build();
+    }
+    @foreach (var release in Model.releases) {
+
+        <h4>@release.Key</h4> 
+        @Html.Raw(Markdig.Markdown.ToHtml(release.Value, pipeline))
+    }
+        

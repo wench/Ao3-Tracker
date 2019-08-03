@@ -2,6 +2,8 @@ using Android.Content;
 using Android.Views;
 using Xamarin.Forms.Platform.Android;
 using Xamarin.Forms;
+using System;
+
 namespace Ao3TrackReader.Droid
 {
 	internal class ScrollViewContainer : ViewGroup
@@ -59,7 +61,14 @@ namespace Ao3TrackReader.Droid
 				return;
 
 			IVisualElementRenderer renderer = Platform.GetRenderer(_childView);
-			renderer.UpdateLayout();
+            try
+            {
+                renderer.UpdateLayout();
+            }
+            catch(Exception)
+            {
+
+            }
 		}
 
 		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)

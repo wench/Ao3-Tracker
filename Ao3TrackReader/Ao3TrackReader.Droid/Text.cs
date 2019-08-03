@@ -52,8 +52,7 @@ namespace Ao3TrackReader.Text
 
     internal class StringAnchor : Ao3TrackReader.Text.String
     {
-        public A Owner { get; set; }
-        public int Length { get; set; }
+        public A Owner { get; set; }      
     }
 
     public partial class A 
@@ -75,8 +74,7 @@ namespace Ao3TrackReader.Text
                 res.AddRange(node.Flatten(newstate));
                 donefirst = true;
             }
-            res.ForEach((str) => anchor.Length = anchor.Length + (str.Text?.Length ?? 0));
-
+            
             return res;
         }
     }
@@ -96,8 +94,8 @@ namespace Ao3TrackReader.Text
                 {
                     if (n is StringAnchor a)
                     {
-                        s.SetSpan(new ClickableSpan(a.Owner), start, start + a.Length, SpanTypes.InclusiveExclusive);
-                        s.SetSpan(new UnderlineSpan(), start, start + a.Length, SpanTypes.InclusiveExclusive);
+                        //s.SetSpan(new ClickableSpan(a.Owner), start, start + a.Length, SpanTypes.InclusiveExclusive);
+                        //s.SetSpan(new UnderlineSpan(), start, start + a.Length, SpanTypes.InclusiveExclusive);
                     }
                     continue;
                 }

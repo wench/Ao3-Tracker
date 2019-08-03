@@ -87,7 +87,8 @@ namespace Ao3TrackReader.Text
                 if (s.FontSize != null) xspan.FontSize = s.FontSize.Value;
                 if (s.Bold == true) xspan.FontAttributes |= Xamarin.Forms.FontAttributes.Bold;
                 if (s.Italic == true) xspan.FontAttributes |= Xamarin.Forms.FontAttributes.Italic;
-                //if (s.Strike != null) xspan.Strike = s.Strike.Value;
+                if (s.Strike != null) xspan.TextDecorations |= Xamarin.Forms.TextDecorations.Strikethrough;
+                if (s.Underline != null) xspan.TextDecorations |= Xamarin.Forms.TextDecorations.Underline;
                 //if (s.Sub != null) xspan.Sub = s.Sub.Value;
                 //if (s.Super != null) xspan.Super = s.Super.Value;
                 if (s.Foreground != null) xspan.ForegroundColor = s.Foreground.Value;

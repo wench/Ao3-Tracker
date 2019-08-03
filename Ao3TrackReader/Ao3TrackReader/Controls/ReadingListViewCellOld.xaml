@@ -10,10 +10,10 @@
             <ColumnDefinition Width="4" />
         </Grid.ColumnDefinitions>
 
-        <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8"
+        <Grid ColumnSpacing="3" RowSpacing="3" Margin="4,4,4,4" Padding="8" 
                                             local:BackgroundSwitch.Condition="{Binding IsSelected}" 
                                             local:BackgroundSwitch.ColorFalse="{StaticResource BaseTransVeryLowColor}" 
-                                            local:BackgroundSwitch.ColorTrue="{StaticResource BaseSolidVeryVeryLowColor}" >
+                                            local:BackgroundSwitch.ColorTrue="{StaticResource BaseSolidVeryVeryLowColor}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -53,7 +53,7 @@
             </Grid>
             <local:TextView TextEx="{Binding Tags}" IsVisible="{Binding TagsVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="1" Grid.Column="0" />
             <local:TextView TextEx="{Binding Summary}" IsVisible="{Binding SummaryVisible}" FontSize="{DynamicResource TinyFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="2" Grid.Column="0" />
-            <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0" />
+            <local:TextView TextEx="{Binding Details}" FontSize="{DynamicResource MicroFontSize}" LineBreakMode="WordWrap" Margin="0" Grid.Row="3" Grid.Column="0"/>
         </Grid>
 
         <Frame Grid.Column="1" WidthRequest="4" Padding="0" Margin="0"  BackgroundColor="{StaticResource AltMediumVHighColor}"/>

@@ -70,9 +70,14 @@ namespace Ao3TrackReader
 
         static bool _LoggedError = false;
 
-        public static void Log(Exception e)
+        public static void Log(object e)
         {
             // Anything we do here must be wrapped, cause the app might be in an impossible state
+            if (System.Diagnostics.Debugger.IsAttached)
+                {
+                System.Diagnostics.Debug.Write(e);
+                System.Diagnostics.Debugger.Break();
+            }
             try
             {
                 if (_LogErrors)
@@ -132,15 +137,21 @@ namespace Ao3TrackReader
 
             Task.Run(async () =>
             {
-                var report = await TextFileLoadAsync("ErrorReport.json");
-                TextFileDelete("ErrorReport.json");
-
-                if (_LogErrors)
+                try
                 {
-                    if (!string.IsNullOrWhiteSpace(report))
+                    var report = await TextFileLoadAsync("ErrorReport.json");
+                    TextFileDelete("ErrorReport.json");
+
+                    if (_LogErrors)
                     {
-                        await Storage.SubmitErrorReport(report);
+                        if (!string.IsNullOrWhiteSpace(report))
+                        {
+                            await Storage.SubmitErrorReport(report);
+                        }
                     }
+                }
+                catch (Exception)
+                {
                 }
             });
 

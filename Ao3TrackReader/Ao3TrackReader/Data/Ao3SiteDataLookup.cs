@@ -102,6 +102,7 @@ namespace Ao3TrackReader.Data
                 MaxRequestContentBufferSize = 1 << 20
             };
             HttpClient = new HttpClient(httpClientHandler);
+            HttpClient.Timeout = TimeSpan.FromSeconds(10);
 
             HtmlNode.ElementsFlags["option"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
             HtmlNode.ElementsFlags["dd"] = HtmlElementFlag.Empty | HtmlElementFlag.Closed;
@@ -185,7 +186,7 @@ namespace Ao3TrackReader.Data
             SemaphoreSlim finished;
             HtmlDocument doc;
             List<long> works;
-            const int maxworks = Controls.ReadingListView.MaxRefreshTasks / 2;
+            const int maxworks = 6;
 
             public WorkWorker()
             {

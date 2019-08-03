@@ -154,7 +154,7 @@ namespace Ao3TrackReader.Models
         public int? ChaptersRead { get; private set; }
         public int? Unread { get; private set; }
 
-        public bool favourite;
+        bool favourite;
         public bool Favourite {
             get => favourite;
             set
@@ -168,6 +168,20 @@ namespace Ao3TrackReader.Models
             }
         }
 
+         bool loaded;
+        public bool Loaded
+        {
+            get => loaded;
+            set
+            {
+                if (value == loaded) return;
+                OnPropertyChanging("");
+                OnPropertyChanging("Loaded");
+                loaded = value;
+                OnPropertyChanged("");
+                OnPropertyChanged("Loaded");
+            }
+        }
 
         private Uri imageRatingUri;
         public ImageSource ImageRating {
@@ -282,7 +296,7 @@ namespace Ao3TrackReader.Models
         {
             get
             {
-                if (BaseData.Type == Ao3PageType.Work && tags != null && !SummaryVisible)
+                if (BaseData?.Type == Ao3PageType.Work && tags != null && !SummaryVisible)
                     return true;
 
                 if (tags_visible && tags != null)

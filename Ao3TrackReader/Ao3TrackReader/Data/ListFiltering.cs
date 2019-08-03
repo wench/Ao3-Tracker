@@ -11,6 +11,9 @@ namespace Ao3TrackReader.Data
 {
     public class ListFiltering
     {
+        public const int MaxRefreshTasks = 3;
+        const int RefreshDelay = 1000;
+
         ReaderWriterLockSlim rwlock = new ReaderWriterLockSlim();
 
         HashSet<string> tags = new HashSet<string>();
@@ -436,15 +439,15 @@ namespace Ao3TrackReader.Data
                         await App.Database.ListFiltersCached.BeginDeferralAsync();
                         try
                         {
-                            using (var tasklimit = new SemaphoreSlim(6))
+                            using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                             {
-                                var tasks = new List<Task>();
+                                var tasks = new Queue<Task>();
 
                                 foreach (var item in slf.filters)
                                 {
                                     await tasklimit.WaitAsync();
 
-                                    tasks.Add(Task.Run(async () =>
+                                    tasks.Enqueue(Task.Run(async () =>
                                     {
                                         if (item.Value == -1)
                                         {
@@ -456,8 +459,12 @@ namespace Ao3TrackReader.Data
                                             var key = await AddToLookupAsync(item.Key);
                                             if (!(key is null)) await App.Database.ListFiltersCached.InsertOrUpdateAsync(new ListFilter { data = key, timestamp = item.Value });
                                         }
+                                        await Task.Yield();
+                                        await Task.Delay(RefreshDelay);
                                         tasklimit.Release();
                                     }));
+                                    while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                                        await tasks.Dequeue();
                                 }
 
                                 await Task.WhenAll(tasks);
@@ -495,9 +502,9 @@ namespace Ao3TrackReader.Data
             {
                 string[] tagarray;
 
-                using (var tasklimit = new SemaphoreSlim(6))
+                using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                 {
-                    List<Task<string>> tasks = new List<Task<string>>();
+                    var tasks = new Queue<Task<string>>();
 
                     // Do this parallel cause it's a pain in the ass
                     foreach (var tagstr in tags.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
@@ -505,12 +512,16 @@ namespace Ao3TrackReader.Data
                         if (string.IsNullOrWhiteSpace(tagstr)) continue;
 
                         await tasklimit.WaitAsync();
-                        tasks.Add(Task.Run(async () =>
+                        tasks.Enqueue(Task.Run(async () =>
                         {
                             var res = await Ao3SiteDataLookup.LookupTagAsync(tagstr.Trim());
+                            await Task.Yield();
+                            await Task.Delay(RefreshDelay);
                             tasklimit.Release();
                             return res.actual;
                         }));
+                        while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                            await tasks.Dequeue();
                     };
 
                     tagarray = await Task.WhenAll(tasks);
@@ -534,7 +545,8 @@ namespace Ao3TrackReader.Data
                         var newfilters = new List<ListFilter>();
                         var now = DateTime.UtcNow.ToUnixTime();
 
-                        foreach (var tag in tagarray)
+
+                            foreach (var tag in tagarray)
                         {
                             if (string.IsNullOrWhiteSpace(tag)) continue;
 
@@ -589,9 +601,25 @@ namespace Ao3TrackReader.Data
                             }
                         }
 
-                        foreach (var filter in existingfilters) await App.Database.ListFiltersCached.DeleteAsync(filter);
-                        foreach (var filter in newfilters) await App.Database.ListFiltersCached.InsertOrUpdateAsync(filter);
-
+                        var tasks = new Queue<Task>();
+                        using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
+                        {
+                            foreach (var filter in existingfilters) await App.Database.ListFiltersCached.DeleteAsync(filter);
+                            foreach (var filter in newfilters)
+                            {
+                                await tasklimit.WaitAsync();
+                                tasks.Enqueue(Task.Run(async () =>
+                                {
+                                    await App.Database.ListFiltersCached.InsertOrUpdateAsync(filter);
+                                    await Task.Yield();
+                                    await Task.Delay(RefreshDelay);
+                                    tasklimit.Release();                                    
+                                }));
+                                while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                                    await tasks.Dequeue();
+                            }
+                        }
+                        await Task.WhenAll(tasks);
                         if (App.Current.HaveNetwork) await Task.Run(() => SyncWithServerAsync(false).ConfigureAwait(false));
                     }
                     finally

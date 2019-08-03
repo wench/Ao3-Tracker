@@ -66,9 +66,13 @@ namespace Ao3TrackReader.Droid
                     SetTheme(Ao3TrackReader.Droid.Resource.Style.DarkTheme);
                     break;
             }
-            Java.Lang.Thread.DefaultUncaughtExceptionHandler = this;
             base.OnCreate(bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
+            AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+            Java.Lang.Thread.DefaultUncaughtExceptionHandler = this;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            //System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
             Instance = this;
 
             var cm = (ConnectivityManager) GetSystemService(ConnectivityService);
@@ -86,6 +90,21 @@ namespace Ao3TrackReader.Droid
             var x = typeof(Xamarin.Forms.Themes.DarkThemeResources);
             x = typeof(Xamarin.Forms.Themes.LightThemeResources);
             x = typeof(Xamarin.Forms.Themes.Android.UnderlineEffect);
+        }
+
+        private void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
+        {
+            App.Log(e.Exception);
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            App.Log(e.ExceptionObject);
+        }
+
+        private void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
+        {
+            App.Log(e.Exception);
         }
 
         protected override void OnDestroy()
@@ -237,6 +256,8 @@ namespace Ao3TrackReader.Droid
 
             return res;
         }
+
+
 
         void Thread.IUncaughtExceptionHandler.UncaughtException(Thread t, Throwable e)
         {

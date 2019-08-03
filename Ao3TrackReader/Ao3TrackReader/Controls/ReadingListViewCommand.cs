@@ -46,7 +46,7 @@ namespace Ao3TrackReader.Controls
 
         protected override bool CanExecute()
         {
-            return Target != null && (Target.BaseData.Type == Models.Ao3PageType.Work || Target.BaseData.Type == Models.Ao3PageType.Series);
+            return Target != null && (Target.BaseData?.Type == Models.Ao3PageType.Work || Target.BaseData?.Type == Models.Ao3PageType.Series);
         }
 
         protected override void Execute()
@@ -64,7 +64,7 @@ namespace Ao3TrackReader.Controls
 
         protected override bool CanExecute()
         {
-            return Target != null && (Target.BaseData.Type == Models.Ao3PageType.Work) && Target.BaseData.Details?.Chapters?.Available > 1;
+            return Target != null && (Target.BaseData?.Type == Models.Ao3PageType.Work) && Target.BaseData?.Details?.Chapters?.Available > 1;
         }
 
         protected override void Execute()
@@ -81,7 +81,7 @@ namespace Ao3TrackReader.Controls
 
         protected override bool CanExecute()
         {
-            return Target != null && (Target.BaseData.Type == Models.Ao3PageType.Work) && Target.BaseData.Details?.Chapters?.Available > 1;
+            return Target != null && (Target.BaseData?.Type == Models.Ao3PageType.Work) && Target.BaseData.Details?.Chapters?.Available > 1;
         }
 
         protected override void Execute()
