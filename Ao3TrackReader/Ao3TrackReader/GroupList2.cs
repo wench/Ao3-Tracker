@@ -178,6 +178,14 @@ namespace Ao3TrackReader
             }
             return default(T);
         }
+        public bool Contains(T obj)
+        {
+            foreach (var g in this)
+            {
+                if (g.Contains(obj)) return true;
+            }
+            return false;
+        }
         public T FindInAll(Predicate<T> pred)
         {
             foreach (var e in allItems.Keys)
@@ -445,7 +453,14 @@ namespace Ao3TrackReader
                 return RemoveFromGroup(item);
             }
         }
-
+        public bool Contains(T obj)
+        {
+            foreach (var g in this)
+            {
+                if (g.Contains(obj)) return true;
+            }
+            return false;
+        }
         public T Find(Predicate<T> pred)
         {
             lock (locker)

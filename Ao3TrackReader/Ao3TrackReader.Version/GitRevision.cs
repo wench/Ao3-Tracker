@@ -2,7 +2,7 @@ namespace Ao3TrackReader.Version
 {
     static partial class Version
     {
-        public const string GitRevision = "75228bb6f4dfbfa4a6189ce2142cff74c48dcea6";
-        public const string GitTag = "";
+        public const string GitRevision = "f225649009f63bf162c02ece20ce58b82841e766";
+        public const string GitTag = "v1.1.3.1";
     }
 }

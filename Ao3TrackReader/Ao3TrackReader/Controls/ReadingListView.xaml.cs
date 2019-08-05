@@ -105,7 +105,8 @@ namespace Ao3TrackReader.Controls
 
                     using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
-                        if (items.Count == 0)
+                        await wvp.DoOnMainThreadAsync(() =>ListView.ItemsSource = readingListBacking);
+                            if (items.Count == 0)
                         {
                             tasks.Enqueue(AddAsyncImpl("http://archiveofourown.org/", DateTime.UtcNow.ToUnixTime()));
                         }
@@ -131,18 +132,19 @@ namespace Ao3TrackReader.Controls
                                         Favourite = item.Favourite
                                     };
 
-                                    await wvp.DoOnMainThreadAsync(() =>
-                                    {
-                                        viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
-                                        readingListBacking.Add(viewmodel);
-                                    });
-
                                     await tasklimit.WaitAsync();
-                                    tasks.Enqueue(wvp.DoOnMainThreadAsync(async () =>
+                                    tasks.Enqueue(Task.Run(async () =>
                                     {
-                                        await viewmodel.SetBaseDataAsync(model,false);
-                                        RefreshAsync(viewmodel);
-                                        await Task.Yield();
+                                        await viewmodel.SetBaseDataAsync(model, false);
+                                        if (!readingListBacking.Contains(viewmodel)){
+                                            await wvp.DoOnMainThreadAsync(() =>
+                                            {
+                                                viewmodel.PropertyChanged += Viewmodel_PropertyChanged;
+                                                readingListBacking.Add(viewmodel);
+                                            });
+                                        }
+
+                                        await RefreshAsync(viewmodel);
                                         await Task.Delay(RefreshDelay);
                                         tasklimit.Release();
                                     }));
@@ -154,13 +156,11 @@ namespace Ao3TrackReader.Controls
 #pragma warning restore 4014
                             }
                         }
-                        await Task.WhenAll(tasks);
-                        tasks.Clear();
                     }
 
                     await wvp.DoOnMainThreadAsync(() =>
                     {
-                        ListView.ItemsSource = readingListBacking;
+                        
                         restored.SetResult(true);
                         SyncIndicator.Content = new ActivityIndicator() { IsVisible = IsOnScreen, IsRunning = IsOnScreen, IsEnabled = IsOnScreen };
                         App.Database.GetVariableEvents("LogFontSizeUI").Updated += LogFontSizeUI_Updated;
@@ -176,7 +176,13 @@ namespace Ao3TrackReader.Controls
                         await tcsNetworkAvailable.Task;
                     }
 
-                    await SyncToServerAsync(false, true);
+#pragma warning disable 4014
+                    while (tasks.Count > 0 && tasks.Peek().IsCompleted)
+                        tasks.Dequeue();
+#pragma warning restore 4014
+                        await Task.WhenAll(tasks);
+
+                        await SyncToServerAsync(false, true);
 
                 }
                 finally
@@ -366,7 +372,7 @@ namespace Ao3TrackReader.Controls
                 try
                 {
                     await SyncToServerAsync(false, true);
-                    /*
+                    
                     using (var tasklimit = new SemaphoreSlim(MaxRefreshTasks))
                     {
                         List<Task> tasks = new List<Task>();
@@ -384,7 +390,7 @@ namespace Ao3TrackReader.Controls
                         }
 
                         await Task.WhenAll(tasks);
-                    }*/
+                    }
                 }
                 finally
                 {
@@ -772,8 +778,8 @@ namespace Ao3TrackReader.Controls
                 {
                     await viewmodel.SetBaseDataAsync(model, true);
                     viewmodel.Loaded = true;
-                  //  readingListBacking.Remove(viewmodel);
-                    //readingListBacking.Add(viewmodel);
+                    readingListBacking.Remove(viewmodel);
+                    readingListBacking.Add(viewmodel);
                 });
 
                 await WriteViewModelToDbAsync(viewmodel, new ReadingList(model, 0, viewmodel.Unread));
